@@ -8,7 +8,7 @@
  * Author: Gratora
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: gratora
+ * Text Domain: gratora-donation-platform
  * Domain Path: /languages
  */
 
@@ -49,7 +49,7 @@ require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.ph
 WordPressSchema::register();
 
 define('GRATORA_VERSION', '1.0.0');
-define('GRATORA_DB_VERSION', '1.1.4');
+define('GRATORA_DB_VERSION', '1.0.1');
 define('GRATORA_FILE', __FILE__);
 define('GRATORA_DIR', plugin_dir_path(__FILE__));
 define('GRATORA_URL', plugin_dir_url(__FILE__));

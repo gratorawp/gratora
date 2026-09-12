@@ -225,7 +225,7 @@ final class DonorsController
     {
         $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('gratora_edit_donors'));
         if (! $payload) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         return new WP_REST_Response($payload, 200);
     }
@@ -235,7 +235,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $perPage = (int) $request['per_page'];
@@ -257,14 +257,14 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         // This handler writes name/company/country via a direct UPDATE and
         // phone/address via setEncryptedField, neither of which passes through
         // DonorService::editProfile's guard, so the whole edit is blocked here
         // or those writes would re-populate an erased row.
         if ($donor->redacted_at !== null) {
-            return new WP_Error('gratora_donor_redacted', __('This donor has been erased and can no longer be edited.', 'gratora'), ['status' => 422]);
+            return new WP_Error('gratora_donor_redacted', __('This donor has been erased and can no longer be edited.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
         // Present keys set the value, empty string clears to NULL. Direct
@@ -374,7 +374,7 @@ final class DonorsController
             return new WP_Error(
                 'gratora_email_collision',
                 /* translators: %d: donor id that already owns the requested email */
-                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'gratora'), $e->existingDonorId),
+                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'gratora-donation-platform'), $e->existingDonorId),
                 ['status' => 409, 'existing_donor_id' => $e->existingDonorId]
             );
         } catch (InvalidArgumentException $e) {
@@ -435,7 +435,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('gratora_donor_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_donor_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         // Asked here rather than read off a null, because issuePortalLink also
@@ -445,7 +445,7 @@ final class DonorsController
         if ($donor->redacted_at !== null) {
             return new WP_Error(
                 'gratora_portal_link_unavailable',
-                __('A sign-in link cannot be issued for an erased donor.', 'gratora'),
+                __('A sign-in link cannot be issued for an erased donor.', 'gratora-donation-platform'),
                 ['status' => 409]
             );
         }
@@ -454,7 +454,7 @@ final class DonorsController
         if ($link === null) {
             return new WP_Error(
                 'gratora_portal_link_failed',
-                __('The sign-in link could not be created. Please try again.', 'gratora'),
+                __('The sign-in link could not be created. Please try again.', 'gratora-donation-platform'),
                 ['status' => 500]
             );
         }
@@ -471,7 +471,7 @@ final class DonorsController
         $donorId = (int) $request['id'];
         $donor   = $this->donors->findById($donorId);
         if (! $donor) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         // redact() early-returns on an already-redacted row, so free text
@@ -481,7 +481,7 @@ final class DonorsController
         if ($donor->redacted_at !== null) {
             return new WP_Error(
                 'gratora_donor_redacted',
-                __('This donor has been erased, so nothing further can be recorded against them.', 'gratora'),
+                __('This donor has been erased, so nothing further can be recorded against them.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -489,7 +489,7 @@ final class DonorsController
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('gratora_invalid', __('Note body is required.', 'gratora'), ['status' => 400]);
+            return new WP_Error('gratora_invalid', __('Note body is required.', 'gratora-donation-platform'), ['status' => 400]);
         }
         $note = $this->notes->create($donorId, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -501,10 +501,10 @@ final class DonorsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('gratora_not_found', __('Note not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Note not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         if (! DonorNoteRepository::deletableBy($note, get_current_user_id())) {
-            return new WP_Error('gratora_forbidden', __('You cannot delete this note.', 'gratora'), ['status' => 403]);
+            return new WP_Error('gratora_forbidden', __('You cannot delete this note.', 'gratora-donation-platform'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -515,12 +515,12 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $data = $this->metrics->exportData($donor->id);
         if ($data === null) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         $bundle = [
             'exported_at' => gmdate('c'),
@@ -591,7 +591,11 @@ final class DonorsController
     }
 
     /**
-     * Deletion refuses donors with donations; no erasure confirmation is needed.
+     * Deletion refuses a donor whose donations could still take money, and
+     * removes the spent attempts along with the donor when it goes ahead.
+     *
+     * A donor can be held here by a row the admin cannot see on any list: a
+     * trashed attempt still belongs to them until it is deleted from the bin.
      *
      * @since 1.0.0
      */
@@ -599,7 +603,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $reason = $this->donorService->undeletableReason($donor);
@@ -619,7 +623,7 @@ final class DonorsController
 
             return new WP_Error(
                 'gratora_delete_failed',
-                __('The donor was not deleted. The reason is in the log under Tools.', 'gratora'),
+                __('The donor was not deleted. The reason is in the log under Tools.', 'gratora-donation-platform'),
                 ['status' => 500]
             );
         }
@@ -637,10 +641,10 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         if ($donor->redacted_at !== null) {
-            return new WP_Error('gratora_already_redacted', __('This donor is already redacted.', 'gratora'), ['status' => 409]);
+            return new WP_Error('gratora_already_redacted', __('This donor is already redacted.', 'gratora-donation-platform'), ['status' => 409]);
         }
 
         $params = $request->get_json_params() ?: $request->get_body_params() ?: [];
@@ -650,7 +654,7 @@ final class DonorsController
         if ($confirmation === '' || strcasecmp($confirmation, $expected) !== 0) {
             return new WP_Error(
                 'gratora_confirmation_mismatch',
-                __('Confirmation does not match the donor email. Redact cancelled.', 'gratora'),
+                __('Confirmation does not match the donor email. Redact cancelled.', 'gratora-donation-platform'),
                 ['status' => 422],
             );
         }
@@ -670,7 +674,7 @@ final class DonorsController
             if ($liveBefore === []) {
                 return new WP_Error(
                     'gratora_redact_failed',
-                    __('The donor was not erased. The reason is in the log under Tools.', 'gratora'),
+                    __('The donor was not erased. The reason is in the log under Tools.', 'gratora-donation-platform'),
                     ['status' => 500],
                 );
             }
@@ -684,12 +688,12 @@ final class DonorsController
                             'The donor was not erased. %1$d recurring plan was stopped first, and %2$d is still billing: cancel it at the gateway, then try again.',
                             'The donor was not erased. %1$d recurring plans were stopped first, and %2$d are still billing: cancel them at the gateway, then try again.',
                             $stopped,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         $stopped,
                         count($stillLive)
                     )
-                    : __('The donor was not erased: their recurring plans could not be stopped. Cancel them at the gateway, then try again.', 'gratora'),
+                    : __('The donor was not erased: their recurring plans could not be stopped. Cancel them at the gateway, then try again.', 'gratora-donation-platform'),
                 [
                     'status'           => 502,
                     'stopped'          => $stopped,
@@ -815,7 +819,7 @@ final class DonorsController
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'gratora');
+            return __('[redacted]', 'gratora-donation-platform');
         }
 
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));

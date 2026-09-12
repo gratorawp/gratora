@@ -11,13 +11,13 @@ import { notify } from '../../../_shared/notify';
 import { formatAmount, formatDateTime, timeAgo, donationStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
-    { value: 'paid',           label: __( 'Paid', 'gratora' ) },
-    { value: 'pending',        label: __( 'Pending', 'gratora' ) },
-    { value: 'processing',     label: __( 'Processing', 'gratora' ) },
-    { value: 'failed',         label: __( 'Failed', 'gratora' ) },
-    { value: 'refunded',       label: __( 'Refunded', 'gratora' ) },
-    { value: 'partial_refund', label: __( 'Partial refund', 'gratora' ) },
-    { value: 'disputed',       label: __( 'Disputed', 'gratora' ) },
+    { value: 'paid',           label: __( 'Paid', 'gratora-donation-platform' ) },
+    { value: 'pending',        label: __( 'Pending', 'gratora-donation-platform' ) },
+    { value: 'processing',     label: __( 'Processing', 'gratora-donation-platform' ) },
+    { value: 'failed',         label: __( 'Failed', 'gratora-donation-platform' ) },
+    { value: 'refunded',       label: __( 'Refunded', 'gratora-donation-platform' ) },
+    { value: 'partial_refund', label: __( 'Partial refund', 'gratora-donation-platform' ) },
+    { value: 'disputed',       label: __( 'Disputed', 'gratora-donation-platform' ) },
 ];
 
 function donationHref( reference ) {
@@ -44,6 +44,10 @@ export default function DonationsTab( { donorId, redacted } ) {
     const [ loading, setLoading ] = useState( false );
     const [ error, setError ]     = useState( '' );
     const [ confirm, setConfirm ] = useState( null );
+    // Counted for this donor rather than read from the list header, which is
+    // deliberately the whole bin: under copy about "their" attempts, a
+    // site-wide number would be a different claim than the one being made.
+    const [ trashedCount, setTrashedCount ] = useState( 0 );
 
     const statusFilter = view.filters?.find( ( f ) => f.field === 'status' );
 
@@ -72,15 +76,33 @@ export default function DonationsTab( { donorId, redacted } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'gratora' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'gratora-donation-platform' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ apiParams ] );
 
+    // One row asked for, because only the total is wanted. Refetched with the
+    // list so the badge and this note cannot drift after a restore.
+    useEffect( () => {
+        let aborted = false;
+        apiFetch( {
+            path: addQueryArgs( '/gratora/v1/admin/donations', {
+                donor_id:     donorId,
+                trashed:      'only',
+                include_test: true,
+                per_page:     1,
+            } ),
+            parse: false,
+        } )
+            .then( ( res ) => { if ( ! aborted ) setTrashedCount( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) ); } )
+            .catch( () => { if ( ! aborted ) setTrashedCount( 0 ); } );
+        return () => { aborted = true; };
+    }, [ donorId, apiParams ] );
+
     const fields = useMemo( () => [
         {
             id:    'reference',
-            label: __( 'Reference', 'gratora' ),
+            label: __( 'Reference', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 <span className="gratora-ref-cell">
                     <a
@@ -90,14 +112,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
+                        <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora-donation-platform' ) }</span>
                     ) }
                 </span>
             ),
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'gratora' ),
+            label: __( 'Amount', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontWeight: 500 } }>
@@ -107,7 +129,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'status',
-            label: __( 'Status', 'gratora' ),
+            label: __( 'Status', 'gratora-donation-platform' ),
             elements: STATUS_OPTIONS,
             enableSorting: false,
             filterBy: { operators: [ 'is' ] },
@@ -118,19 +140,19 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'gratora' ),
+            label: __( 'Frequency', 'gratora-donation-platform' ),
             render: ( { item } ) => item.frequency === 'one_time'
-                ? __( 'One-time', 'gratora' )
+                ? __( 'One-time', 'gratora-donation-platform' )
                 : <span style={ { textTransform: 'capitalize' } }>{ item.frequency }</span>,
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'gratora' ),
+            label: __( 'Campaign', 'gratora-donation-platform' ),
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'created_at',
-            label: __( 'When', 'gratora' ),
+            label: __( 'When', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const iso = item.paid_at || item.created_at;
@@ -156,7 +178,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'gratora' ),
+            label:        __( 'Mark as paid', 'gratora-donation-platform' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
@@ -165,21 +187,21 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'gratora' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent.',
                             'Mark %d donations as paid? Receipts will be sent.',
                             n,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'gratora' ),
+                    title:        __( 'Mark donations as paid', 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'gratora' ),
+                    confirmLabel: __( 'Mark as paid', 'gratora-donation-platform' ),
                     onConfirm: async () => {
                         // allSettled and a finally: a partial failure still
                         // confirmed some of them and emailed those donors a
@@ -196,14 +218,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'gratora' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'gratora-donation-platform' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'gratora' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'gratora-donation-platform' ),
                                 failed
                             ) );
                         }
@@ -215,7 +237,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'gratora' ),
+            label:        __( 'Resend receipt', 'gratora-donation-platform' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // An erased donor has no address left to send a receipt to.
@@ -229,16 +251,16 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'gratora' )
+                    ? __( 'Resend the receipt for this donation?', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'gratora' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'gratora-donation-platform' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'gratora' ),
+                    title:        __( 'Resend receipts', 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Resend', 'gratora' ),
+                    confirmLabel: __( 'Resend', 'gratora-donation-platform' ),
                     onConfirm: async () => {
                         // Silence read as nothing happening, so admins pressed
                         // it again and donors got the receipt twice.
@@ -253,14 +275,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora-donation-platform' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora-donation-platform' ),
                                 failed
                             ) );
                         }
@@ -275,6 +297,27 @@ export default function DonationsTab( { donorId, redacted } ) {
             { error && (
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
             ) }
+            { /* The tab and its badge both leave these out, so the count above
+                 agrees with the rows below. Saying how many are missing is what
+                 keeps that from being a silent omission. */ }
+            { trashedCount > 0 && (
+                <Notice status="info" isDismissible={ false }>
+                    { sprintf(
+                        /* translators: %d: number of trashed attempts. */
+                        _n(
+                            '%d attempt from this donor is in the trash and is not shown here.',
+                            '%d attempts from this donor are in the trash and are not shown here.',
+                            trashedCount,
+                            'gratora-donation-platform'
+                        ),
+                        trashedCount
+                    ) }
+                    { ' ' }
+                    <a href={ addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'trash' } ) }>
+                        { __( 'Open the trash', 'gratora-donation-platform' ) }
+                    </a>
+                </Notice>
+            ) }
             <DataViews
                 data={ data }
                 isLoading={ loading }
@@ -285,7 +328,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by reference', 'gratora' ) }
+                searchLabel={ __( 'Search by reference', 'gratora-donation-platform' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

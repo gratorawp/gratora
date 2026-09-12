@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Donations;
 
 use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
 use Gratora\Analytics\EventRecorder;
 use Gratora\Currency\FxRates;
 use Gratora\Donors\Donor;
@@ -291,7 +292,11 @@ final class DonationService
             $donation->gateway_metadata = $metadata;
         }
         $donation->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
-        $donation->save();
+        $donation->updateColumns([
+            'gateway_intent_id' => $donation->gateway_intent_id,
+            'gateway_metadata'  => $donation->gateway_metadata,
+            'updated_at'        => $donation->updated_at,
+        ]);
 
         return $donation;
     }
@@ -351,10 +356,20 @@ final class DonationService
         // Conditional transition, for the same reason confirm() uses one: a
         // redelivered webhook and a redirect return can both hold this row as
         // pending, and only one of them may fire the side effects.
+        $trashedAt = $donation->trashed_at;
+        $trashedBy = $donation->trashed_by;
+
         $applied = Donation::query()
             ->where('id', $donation->id)
             ->where('status', 'pending')
-            ->update(['status' => 'processing', 'updated_at' => $now])
+            ->update([
+                'status'     => 'processing',
+                'updated_at' => $now,
+                // Same rule confirm() applies: a debit on its way is money
+                // arriving, and it must not settle into a hidden row.
+                'trashed_at' => null,
+                'trashed_by' => null,
+            ])
             ->affectedRows;
 
         if ($applied < 1) {
@@ -362,11 +377,24 @@ final class DonationService
         }
 
         $donation->status           = 'processing';
+
+        if ($trashedAt !== null) {
+            $donation->trashed_at = null;
+            $donation->trashed_by = null;
+            $this->recordUntrashedBySettlement($donation, $trashedAt, $trashedBy);
+        }
         $donation->gateway_metadata = ['processing_reason' => $reason]
             + $metadata
             + (array) ($donation->gateway_metadata ?? []);
         $donation->updated_at       = $now;
-        $donation->save();
+        // The capture id the caller recorded on the row it handed over travels
+        // with the transition, the way the whole-row write carried it.
+        $donation->updateColumns([
+            'status'           => $donation->status,
+            'gateway_txn_id'   => $donation->gateway_txn_id,
+            'gateway_metadata' => $donation->gateway_metadata,
+            'updated_at'       => $donation->updated_at,
+        ]);
 
         $this->events->record('donation.processing', [
             'donor_id'     => $donation->donor_id,
@@ -424,6 +452,41 @@ final class DonationService
         return $stamp;
     }
 
+    /**
+     * The record of a trash that settlement undid.
+     *
+     * Written directly rather than through EventRecorder, which swallows write
+     * failures and runs a rewritable filter. A row reappearing in the list with
+     * nothing saying why is the one outcome this has to rule out.
+     *
+     * donor_id stays null on purpose: this is something the gateway did, and on
+     * the donor's own timeline it would read as their activity.
+     *
+     * @since 1.0.0
+     */
+    private function recordUntrashedBySettlement(Donation $donation, string $trashedAt, ?int $trashedBy): void
+    {
+        $e               = Event::make();
+        $e->type         = 'donation.untrashed_by_settlement';
+        $e->donation_id  = (int) $donation->id;
+        $e->campaign_id  = $donation->campaign_id !== null ? (int) $donation->campaign_id : null;
+        $e->form_id      = $donation->form_id !== null ? (int) $donation->form_id : null;
+        $e->amount_cents = (int) $donation->amount_cents;
+        $e->currency     = (string) $donation->currency;
+        $e->occurred_at  = $this->clock->now()->format('Y-m-d H:i:s');
+        $e->payload      = [
+            'reference'  => (string) $donation->reference,
+            'status'     => (string) $donation->status,
+            'kind'       => (string) $donation->kind,
+            'gateway'    => (string) $donation->gateway,
+            'fund_id'    => $donation->fund_id !== null ? (int) $donation->fund_id : null,
+            'created_at' => (string) $donation->created_at,
+            'trashed_at' => $trashedAt,
+            'trashed_by' => $trashedBy,
+        ];
+        $e->save();
+    }
+
     /** @since 1.0.0 */
     public function confirm(Donation $donation, array $result): Donation
     {
@@ -442,8 +505,14 @@ final class DonationService
         // Everything else leaves this unset and gets the clock.
         $paidAt = $this->paidAtFrom($result['paid_at'] ?? null, $now);
 
+        // Read before the write clears them. Money that lands has to land
+        // somewhere visible, and what it cleared is the only thing that
+        // explains the row coming back.
+        $trashedAt = $donation->trashed_at;
+        $trashedBy = $donation->trashed_by;
+
         $affected = 0;
-        DB::transaction(function () use ($donation, $result, $now, $paidAt, &$affected) {
+        DB::transaction(function () use ($donation, $result, $now, $paidAt, $trashedAt, $trashedBy, &$affected) {
             // Single-winner transition. The sync redirect-return auto_confirm
             // and the payment_intent.succeeded webhook can both load the same
             // pending row; the conditional UPDATE lets exactly one flip it to
@@ -452,7 +521,14 @@ final class DonationService
             $affected = Donation::query()
                 ->where('id', $donation->id)
                 ->whereIn('status', ['pending', 'processing', 'failed'])
-                ->update(['status' => 'paid', 'updated_at' => $now])
+                ->update([
+                    'status'     => 'paid',
+                    'updated_at' => $now,
+                    // Cleared in the same statement that settles it: a
+                    // donation that took money must not be in the bin.
+                    'trashed_at' => null,
+                    'trashed_by' => null,
+                ])
                 ->affectedRows;
 
             if ($affected < 1) {
@@ -460,6 +536,12 @@ final class DonationService
             }
 
             $donation->status               = 'paid';
+
+            if ($trashedAt !== null) {
+                $donation->trashed_at = null;
+                $donation->trashed_by = null;
+                $this->recordUntrashedBySettlement($donation, $trashedAt, $trashedBy);
+            }
             $donation->gateway_txn_id       = $result['gateway_txn_id'] ?? $donation->gateway_txn_id;
             $donation->payment_method       = $result['payment_method'] ?? $donation->payment_method;
             $donation->payment_method_brand = $result['payment_method_brand'] ?? null;
@@ -494,7 +576,19 @@ final class DonationService
                 $donation->pending_reactivation_email = null;
             }
 
-            $donation->save();
+            $donation->updateColumns([
+                'status'                     => $donation->status,
+                'gateway_txn_id'             => $donation->gateway_txn_id,
+                'payment_method'             => $donation->payment_method,
+                'payment_method_brand'       => $donation->payment_method_brand,
+                'payment_method_last4'       => $donation->payment_method_last4,
+                'fee_cents'                  => $donation->fee_cents,
+                'net_cents'                  => $donation->net_cents,
+                'gateway_metadata'           => $donation->gateway_metadata,
+                'paid_at'                    => $donation->paid_at,
+                'pending_reactivation_email' => $donation->pending_reactivation_email,
+                'updated_at'                 => $donation->updated_at,
+            ]);
 
             $this->events->record('donation.completed', [
                 'donor_id'     => $donation->donor_id,
@@ -698,7 +792,10 @@ final class DonationService
             ]
         );
         $donation->updated_at = $now;
-        $donation->save();
+        $donation->updateColumns([
+            'flags'      => $donation->flags,
+            'updated_at' => $donation->updated_at,
+        ]);
 
         // Also to the log, because that is the screen someone opens when a
         // recurring donation did not behave, and a donor left on a schedule
@@ -707,7 +804,7 @@ final class DonationService
             'recurring.' . $donation->gateway,
             sprintf(
                 /* translators: 1: donation reference, 2: the gateway's own message */
-                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'gratora'),
+                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'gratora-donation-platform'),
                 (string) $donation->reference,
                 $e->getMessage()
             ),
@@ -741,7 +838,10 @@ final class DonationService
         );
         $donation->flags      = $flags === [] ? null : $flags;
         $donation->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
-        $donation->save();
+        $donation->updateColumns([
+            'flags'      => $donation->flags,
+            'updated_at' => $donation->updated_at,
+        ]);
     }
 
     /**
@@ -1141,7 +1241,11 @@ final class DonationService
             $donation->status      = $isFullRefund ? 'refunded' : 'partial_refund';
             $donation->refunded_at = $now;
             $donation->updated_at  = $now;
-            $donation->save();
+            $donation->updateColumns([
+                'status'      => $donation->status,
+                'refunded_at' => $donation->refunded_at,
+                'updated_at'  => $donation->updated_at,
+            ]);
 
             if ($isFullRefund) {
                 $this->voidReceiptsFor($donation, $now);
@@ -1320,7 +1424,12 @@ final class DonationService
             $donation->status         = $newTotal > 0 ? 'partial_refund' : 'paid';
             $donation->refunded_at    = $newTotal > 0 ? $donation->refunded_at : null;
             $donation->updated_at     = $now;
-            $donation->save();
+            $donation->updateColumns([
+                'refunded_cents' => $donation->refunded_cents,
+                'status'         => $donation->status,
+                'refunded_at'    => $donation->refunded_at,
+                'updated_at'     => $donation->updated_at,
+            ]);
 
             // A receipt is void only while the donation retains nothing, so a
             // reversal that leaves any money with the org puts it back. The
@@ -1506,7 +1615,11 @@ final class DonationService
             $donation->status      = $isFullRefund ? 'refunded' : 'partial_refund';
             $donation->refunded_at = $now;
             $donation->updated_at  = $now;
-            $donation->save();
+            $donation->updateColumns([
+                'status'      => $donation->status,
+                'refunded_at' => $donation->refunded_at,
+                'updated_at'  => $donation->updated_at,
+            ]);
 
             if ($isFullRefund) {
                 $this->voidReceiptsFor($donation, $now);

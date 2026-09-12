@@ -72,7 +72,7 @@ function applyVisibleSequence( order, visible ) {
 	return order.map( ( id ) => ( visible.includes( id ) ? queue.shift() : id ) );
 }
 
-function merge( saved, defaults, known, canon ) {
+function merge( saved, defaults, known, canon, filterable ) {
 	if ( ! isPlainObject( saved ) ) {
 		return { view: defaults, order: canon };
 	}
@@ -112,7 +112,7 @@ function merge( saved, defaults, known, canon ) {
 		// A filter on a column the screen no longer has cannot be seen or
 		// cleared: dataviews draws chips only for fields it still knows, while
 		// the list goes on counting itself as filtered.
-		next.filters = saved.filters.filter( ( f ) => known.includes( f?.field ) );
+		next.filters = saved.filters.filter( ( f ) => filterable.includes( f?.field ) );
 	}
 
 	return { view: next, order };
@@ -130,20 +130,25 @@ function toPayload( view, order ) {
 }
 
 /**
- * @param {string}            scope    Namespaces the saved view; one per list screen.
- * @param {Object}            defaults The view the screen uses before anything is saved.
- * @param {string[]|Function} known    Every column id the screen defines, in its own
- *                                     order. Takes a getter too, so a screen can pass
- *                                     its own field definitions even though they are
- *                                     declared after this hook runs.
+ * @param {string}            scope      Namespaces the saved view; one per list screen.
+ * @param {Object}            defaults   The view the screen uses before anything is saved.
+ * @param {string[]|Function} known      Every field id the screen defines, in its own
+ *                                       order. Takes a getter too, so a screen can pass
+ *                                       its own field definitions even though they are
+ *                                       declared after this hook runs.
+ * @param {string[]}          filterOnly Ids among `known` that carry a filter but are
+ *                                       never a column. A saved filter on one survives;
+ *                                       a saved view naming one as a column does not.
  */
-export function useTableView( scope, defaults, known ) {
+export function useTableView( scope, defaults, known, filterOnly = [] ) {
 	const [ view, setView ] = useState( defaults );
 	const [ loaded, setLoaded ] = useState( false );
 	const timer = useRef( null );
 	// Held in a ref so the debounced save never closes over a stale column set.
 	const knownRef = useRef( known );
 	knownRef.current = known;
+	const filterOnlyRef = useRef( filterOnly );
+	filterOnlyRef.current = Array.isArray( filterOnly ) ? filterOnly : [];
 
 	// The reader's arrangement of every column, visible or not. A ref because it
 	// is read while deciding an update rather than during a render.
@@ -157,10 +162,15 @@ export function useTableView( scope, defaults, known ) {
 
 	// Only ever read once the screen has rendered, which is what lets a caller
 	// pass a getter over field definitions declared below this hook.
-	const columns = () => {
+	const fieldIds = () => {
 		const k = typeof knownRef.current === 'function' ? knownRef.current() : knownRef.current;
 		return Array.isArray( k ) ? k : [];
 	};
+
+	// Arrangement and visibility are about columns; a filter-only field is
+	// neither, and letting one into `fields` leaves the view disagreeing with
+	// what dataviews was handed by exactly one member.
+	const columns = () => fieldIds().filter( ( id ) => ! filterOnlyRef.current.includes( id ) );
 
 	const arrangement = () => order.current ?? canonicalOrder( defaults.fields, columns() );
 
@@ -177,7 +187,7 @@ export function useTableView( scope, defaults, known ) {
 				if ( aborted ) return;
 				setView( ( current ) => {
 					const cols = columns();
-					const merged = merge( saved, current, cols, canonicalOrder( defaults.fields, cols ) );
+					const merged = merge( saved, current, cols, canonicalOrder( defaults.fields, cols ), fieldIds() );
 					order.current = merged.order;
 					const decided = same( merged.view, current ) ? current : merged.view;
 					latest.current = decided;

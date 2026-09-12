@@ -29,6 +29,7 @@ import NotesCard            from './detail/cards/NotesCard';
 import RelatedDonationsCard from './detail/cards/RelatedDonationsCard';
 import QuickStatsCard       from './detail/rail/QuickStatsCard';
 import ActionsCard          from './detail/rail/ActionsCard';
+import { postBatch }        from './trashActions';
 import MetadataCard         from './detail/rail/MetadataCard';
 
 import './donations.scss';
@@ -64,7 +65,7 @@ export default function Detail( { reference } ) {
         setError( null );
         return apiFetch( { path: `/gratora/v1/admin/donations/${ reference }` } )
             .then( ( d ) => { setPayload( d ); setError( null ); } )
-            .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'gratora' ) ) )
+            .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'gratora-donation-platform' ) ) )
             .finally( () => setLoading( false ) );
     }, [ reference ] );
 
@@ -72,7 +73,7 @@ export default function Detail( { reference } ) {
 
     const back = () => { window.location.href = listHref(); };
 
-    if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'gratora' ) }</p>;
+    if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'gratora-donation-platform' ) }</p>;
 
     // Only when there is nothing to fall back to: a reload that fails after a
     // refund must not replace the screen the refund is on with one sentence.
@@ -81,9 +82,9 @@ export default function Detail( { reference } ) {
             <div className="dd-shell">
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 <p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'gratora' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'gratora-donation-platform' ) }</Btn>
                     { ' ' }
-                    <Btn onClick={ back }>{ __( 'Back to donations', 'gratora' ) }</Btn>
+                    <Btn onClick={ back }>{ __( 'Back to donations', 'gratora-donation-platform' ) }</Btn>
                 </p>
             </div>
         );
@@ -99,28 +100,71 @@ export default function Detail( { reference } ) {
                 path:   `/gratora/v1/admin/donations/${ donation.reference }/resend-receipt`,
                 method: 'POST',
             } );
-            notify.success( __( 'Receipt re-queued.', 'gratora' ) );
+            notify.success( __( 'Receipt re-queued.', 'gratora-donation-platform' ) );
             load();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not resend receipt.', 'gratora' ) );
+            notify.error( err?.message || __( 'Could not resend receipt.', 'gratora-donation-platform' ) );
+        }
+    };
+
+    const trashDonation = () => {
+        setConfirm( {
+            title:       __( 'Move to trash', 'gratora-donation-platform' ),
+            destructive: true,
+            message:     __( 'Take this attempt off the list? Nothing is deleted, and no money total changes.', 'gratora-donation-platform' ),
+            // The row cannot know the outcome in advance, so this says what
+            // will be attempted and the result says what happened.
+            body: (
+                <p className="gratora-list-note" style={ { marginBottom: 0 } }>
+                    { donation.stops_payment
+                        ? __( 'Gratora will ask the gateway to stop the payment behind it.', 'gratora-donation-platform' )
+                        : __( 'There is nothing to close at the gateway, so a reference already emailed to the donor could still be paid by hand.', 'gratora-donation-platform' ) }
+                </p>
+            ),
+            confirmLabel: __( 'Move to trash', 'gratora-donation-platform' ),
+            onConfirm: async () => {
+                try {
+                    const result = await postBatch( 'trash', [ donation.reference ] );
+                    if ( result.refused.length > 0 ) {
+                        notify.error( result.refused[ 0 ].reason );
+                    } else {
+                        notify.success( __( 'Moved to the trash.', 'gratora-donation-platform' ) );
+                    }
+                    load();
+                } catch ( err ) {
+                    notify.error( err?.message || __( 'Could not move this donation to the trash.', 'gratora-donation-platform' ) );
+                }
+            },
+        } );
+    };
+
+    // No dialog: putting a record back is not the destructive half, and the
+    // message says the thing the admin might otherwise assume it undid.
+    const restoreDonation = async () => {
+        try {
+            await postBatch( 'restore', [ donation.reference ] );
+            notify.success( __( 'Restored. Its payment is still stopped.', 'gratora-donation-platform' ) );
+            load();
+        } catch ( err ) {
+            notify.error( err?.message || __( 'Could not restore this donation.', 'gratora-donation-platform' ) );
         }
     };
 
     const markPaid = () => {
         setConfirm( {
-            title:        __( 'Mark donation as paid', 'gratora' ),
-            message:      __( 'Mark this donation as paid? This issues the receipt and updates donor totals.', 'gratora' ),
-            confirmLabel: __( 'Mark as paid', 'gratora' ),
+            title:        __( 'Mark donation as paid', 'gratora-donation-platform' ),
+            message:      __( 'Mark this donation as paid? This issues the receipt and updates donor totals.', 'gratora-donation-platform' ),
+            confirmLabel: __( 'Mark as paid', 'gratora-donation-platform' ),
             onConfirm: async () => {
                 try {
                     await apiFetch( {
                         path:   `/gratora/v1/admin/donations/${ donation.reference }/mark-paid`,
                         method: 'POST',
                     } );
-                    notify.success( __( 'Donation marked as paid.', 'gratora' ) );
+                    notify.success( __( 'Donation marked as paid.', 'gratora-donation-platform' ) );
                     load();
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not mark donation as paid.', 'gratora' ) );
+                    notify.error( err?.message || __( 'Could not mark donation as paid.', 'gratora-donation-platform' ) );
                 }
             },
         } );
@@ -130,9 +174,9 @@ export default function Detail( { reference } ) {
     // held balance would stand for good, so the operator says so by hand.
     const releaseRefund = ( refund ) => {
         setConfirm( {
-            title:        __( 'Release the held amount', 'gratora' ),
-            message:      __( 'Say this refund never reached the donor? The amount goes back to what can be refunded. Do this only once the gateway shows it did not go through, or the donor could be repaid twice.', 'gratora' ),
-            confirmLabel: __( 'It never arrived', 'gratora' ),
+            title:        __( 'Release the held amount', 'gratora-donation-platform' ),
+            message:      __( 'Say this refund never reached the donor? The amount goes back to what can be refunded. Do this only once the gateway shows it did not go through, or the donor could be repaid twice.', 'gratora-donation-platform' ),
+            confirmLabel: __( 'It never arrived', 'gratora-donation-platform' ),
             onConfirm: async () => {
                 try {
                     await apiFetch( {
@@ -140,10 +184,10 @@ export default function Detail( { reference } ) {
                         method: 'POST',
                         data:   { gateway_refund_id: refund.gateway_refund_id },
                     } );
-                    notify.success( __( 'The held amount is refundable again.', 'gratora' ) );
+                    notify.success( __( 'The held amount is refundable again.', 'gratora-donation-platform' ) );
                     load();
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not release the held amount.', 'gratora' ) );
+                    notify.error( err?.message || __( 'Could not release the held amount.', 'gratora-donation-platform' ) );
                 }
             },
         } );
@@ -151,9 +195,9 @@ export default function Detail( { reference } ) {
 
     const retrySubscription = () => {
         setConfirm( {
-            title:        __( 'Create the recurring plan', 'gratora' ),
-            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'gratora' ),
-            confirmLabel: __( 'Create plan', 'gratora' ),
+            title:        __( 'Create the recurring plan', 'gratora-donation-platform' ),
+            message:      __( 'Create the recurring plan at the gateway from this donation? The donor is not charged again today. The schedule restarts from now, so any renewal that fell due since this donation was made is not collected.', 'gratora-donation-platform' ),
+            confirmLabel: __( 'Create plan', 'gratora-donation-platform' ),
             onConfirm: async () => {
                 setRetryBusy( true );
                 setRetryError( null );
@@ -162,11 +206,11 @@ export default function Detail( { reference } ) {
                         path:   `/gratora/v1/admin/donations/${ donation.reference }/retry-subscription`,
                         method: 'POST',
                     } );
-                    notify.success( __( 'Recurring plan created.', 'gratora' ) );
+                    notify.success( __( 'Recurring plan created.', 'gratora-donation-platform' ) );
                     await load();
                 } catch ( err ) {
                     // The gateway message is the diagnostic, so it goes through unedited.
-                    const reason = err?.message || __( 'Could not create the recurring plan.', 'gratora' );
+                    const reason = err?.message || __( 'Could not create the recurring plan.', 'gratora-donation-platform' );
                     setRetryError( reason );
                     notify.error( reason );
                 } finally {
@@ -191,10 +235,10 @@ export default function Detail( { reference } ) {
                 data:   reason ? { reason } : {},
             } );
             setFailOpen( false );
-            notify.success( __( 'Donation marked as failed.', 'gratora' ) );
+            notify.success( __( 'Donation marked as failed.', 'gratora-donation-platform' ) );
             load();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update donation.', 'gratora' ) );
+            notify.error( err?.message || __( 'Could not update donation.', 'gratora-donation-platform' ) );
         } finally {
             setFailBusy( false );
         }
@@ -211,15 +255,15 @@ export default function Detail( { reference } ) {
         notify.success(
                 result?.plan?.stopped
                     ? ( settled
-                        ? __( 'Refund issued, and the recurring schedule is stopped.', 'gratora' )
-                        : __( 'Refund accepted by the gateway, and the recurring schedule is stopped.', 'gratora' ) )
+                        ? __( 'Refund issued, and the recurring schedule is stopped.', 'gratora-donation-platform' )
+                        : __( 'Refund accepted by the gateway, and the recurring schedule is stopped.', 'gratora-donation-platform' ) )
                     : ( settled
-                        ? __( 'Refund issued.', 'gratora' )
-                        : __( 'Refund accepted by the gateway.', 'gratora' ) )
+                        ? __( 'Refund issued.', 'gratora-donation-platform' )
+                        : __( 'Refund accepted by the gateway.', 'gratora-donation-platform' ) )
             );
         if ( ! settled ) {
             notify.info(
-                __( 'It has not settled yet, so the donor does not have the money back and the donation stays paid. This amount is already off the refundable balance.', 'gratora' ),
+                __( 'It has not settled yet, so the donor does not have the money back and the donation stays paid. This amount is already off the refundable balance.', 'gratora-donation-platform' ),
                 { duration: 0 }
             );
         }
@@ -230,10 +274,10 @@ export default function Detail( { reference } ) {
                 result.plan.error
                     ? sprintf(
                         /* translators: %s: why the schedule could not be cancelled */
-                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'gratora' ),
+                        __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen. Reason: %s', 'gratora-donation-platform' ),
                         result.plan.error
                     )
-                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'gratora' ),
+                    : __( 'The refund went through, but the recurring schedule was not cancelled. Cancel it from the Subscriptions screen.', 'gratora-donation-platform' ),
                 { duration: 0 }
             );
         }
@@ -305,6 +349,8 @@ export default function Detail( { reference } ) {
                         onAddNote={ scrollToNotes }
                         onMarkPaid={ markPaid }
                         onMarkFailed={ markFailed }
+                        onTrash={ trashDonation }
+                        onRestore={ restoreDonation }
                     />
                     <MetadataCard donation={ donation } />
                 </aside>
@@ -321,27 +367,27 @@ export default function Detail( { reference } ) {
 
             { failOpen && (
                 <Dialog
-                    title={ __( 'Mark donation as failed', 'gratora' ) }
+                    title={ __( 'Mark donation as failed', 'gratora-donation-platform' ) }
                     onClose={ () => setFailOpen( false ) }
                     foot={
                         <>
                             <Btn variant="secondary" onClick={ () => setFailOpen( false ) } disabled={ failBusy }>
-                                { __( 'Cancel', 'gratora' ) }
+                                { __( 'Cancel', 'gratora-donation-platform' ) }
                             </Btn>
                             <Btn variant="danger" onClick={ submitFailed } isBusy={ failBusy }>
-                                { __( 'Mark as failed', 'gratora' ) }
+                                { __( 'Mark as failed', 'gratora-donation-platform' ) }
                             </Btn>
                         </>
                     }
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Mark this donation as failed? Optionally add a reason (shown in the donation timeline). It will be excluded from totals.', 'gratora' ) }
+                        { __( 'Mark this donation as failed? Optionally add a reason (shown in the donation timeline). It will be excluded from totals.', 'gratora-donation-platform' ) }
                     </p>
                     <textarea
                         className="gratora-textarea"
                         value={ failReason }
                         onChange={ ( e ) => setFailReason( e.target.value ) }
-                        placeholder={ __( 'Reason (optional)', 'gratora' ) }
+                        placeholder={ __( 'Reason (optional)', 'gratora-donation-platform' ) }
                         rows={ 3 }
                         style={ { width: '100%' } }
                     />

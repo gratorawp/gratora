@@ -4,6 +4,7 @@ import { createRoot } from '@wordpress/element';
 
 import List from './List';
 import Detail from './Detail';
+import Trash from './Trash';
 import Toaster from '../_shared/components/Toaster';
 import '../campaigns/campaigns.scss';
 
@@ -14,6 +15,9 @@ function App() {
 
     if ( view === 'detail' && reference ) {
         return <Detail reference={ reference } />;
+    }
+    if ( view === 'trash' ) {
+        return <Trash />;
     }
     return <List />;
 }

@@ -64,7 +64,17 @@ final class CoreDonorDataHandler implements ErasureHandler
             // instead, and that attempt must not undo it.
             $donation->pending_reactivation_email = null;
             $donation->updated_at            = $request->at;
-            $donation->save();
+            $donation->updateColumns([
+                'custom_data_encrypted'      => $donation->custom_data_encrypted,
+                'donor_first_name'           => $donation->donor_first_name,
+                'donor_last_name'            => $donation->donor_last_name,
+                'note_to_org'                => $donation->note_to_org,
+                'gateway_metadata'           => $donation->gateway_metadata,
+                'source_attribution'         => $donation->source_attribution,
+                'failure_reason'             => $donation->failure_reason,
+                'pending_reactivation_email' => $donation->pending_reactivation_email,
+                'updated_at'                 => $donation->updated_at,
+            ]);
         }
 
         if ($request->donationIds !== []) {

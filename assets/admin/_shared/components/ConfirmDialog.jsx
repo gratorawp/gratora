@@ -26,7 +26,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose }>
-                        { __( 'Cancel', 'gratora' ) }
+                        { __( 'Cancel', 'gratora-donation-platform' ) }
                     </Btn>
                     <Btn
                         variant={ confirm.destructive ? 'danger' : 'primary' }
@@ -37,15 +37,20 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                             if ( action ) await action();
                         } }
                     >
-                        { confirm.confirmLabel || __( 'Confirm', 'gratora' ) }
+                        { confirm.confirmLabel || __( 'Confirm', 'gratora-donation-platform' ) }
                     </Btn>
                 </>
             }
         >
             <p style={ { margin: 0 } }>{ confirm.message }</p>
+            { /* Anything the message cannot be: the notice about what will be
+                 attempted at the gateway, and the checkbox that decides whether
+                 the donor goes too. Rendered above the confirmation word, so
+                 the last thing before typing it is what is about to happen. */ }
+            { confirm.body }
             { required !== '' && (
                 <label className="gratora-fld" style={ { marginTop: 16, display: 'block' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'gratora' ), required ) }
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'gratora-donation-platform' ), required ) }
                     <input
                         className="gratora-input"
                         type="text"

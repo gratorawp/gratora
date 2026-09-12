@@ -58,11 +58,13 @@ use Gratora\Dashboard\DashboardMetricsService;
 use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\AntiSpamGuard;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationDeleter;
 use Gratora\Donations\DonationEmails;
 use Gratora\Donations\DonationNote;
 use Gratora\Donations\DonationNoteRepository;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
+use Gratora\Donations\DonationTrasher;
 use Gratora\Donations\Refund;
 use Gratora\Donors\Consent;
 use Gratora\Donors\ConsentService;
@@ -89,6 +91,7 @@ use Gratora\Donors\Portal\AnnualStatementBuilder;
 use Gratora\Donors\Portal\PortalPage;
 use Gratora\Donors\Portal\PortalSession;
 use Gratora\Donors\Portal\PortalShortcode;
+use Gratora\Donors\Privacy\WordPressPrivacy;
 use Gratora\Donors\SignupRedemption;
 use Gratora\Exports\DonorExporter;
 use Gratora\Exports\RevenueExporter;
@@ -138,6 +141,7 @@ use Gratora\Forms\FormService;
 use Gratora\Forms\FormTypeRegistry;
 use Gratora\Forms\Shortcode\DonationFormShortcode;
 use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Commands\AbilitiesBridge;
 use Gratora\Foundation\Commands\CommandRegistry;
 use Gratora\Foundation\Config\SystemSetting;
 use Gratora\Foundation\Container\Container;
@@ -247,7 +251,7 @@ final class CoreModule implements GratoraModule
     /** @since 1.0.0 */
     public function name(): string
     {
-        return __('Gratora Core', 'gratora');
+        return __('Gratora Core', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
@@ -643,7 +647,7 @@ final class CoreModule implements GratoraModule
             $c->get(PendingSignupRepository::class),
             $c->get(DonorAvatarUploader::class),
             $c->get(DonorAvatars::class),
-            $c->get(\Gratora\Foundation\Crypto\Crypto::class),
+            $c->get( Crypto::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -834,6 +838,8 @@ final class CoreModule implements GratoraModule
             $c->get(DonationNoteRepository::class),
             $c->get( GenericReceiptRenderer::class),
             $c->get(GatewayManager::class),
+            $c->get(DonationTrasher::class),
+            $c->get(DonationDeleter::class),
         ));
 
         $c->bind(AdminDonorsController::class, fn (Container $c) => new AdminDonorsController(
@@ -931,6 +937,16 @@ final class CoreModule implements GratoraModule
         $c->bind(AdminFundsController::class, fn (Container $c) => new AdminFundsController(
             $c->get(FundRepository::class),
             $c->get(FundService::class)
+        ));
+
+        $c->bind(DonationTrasher::class, fn (Container $c) => new DonationTrasher(
+            $c->get(GatewayManager::class),
+            $c->get(Clock::class)
+        ));
+
+        $c->bind(DonationDeleter::class, fn (Container $c) => new DonationDeleter(
+            $c->get(DonationTrasher::class),
+            $c->get(Clock::class)
         ));
 
         // Bound after domain services and before RestProvider so the command endpoint shares this instance.
@@ -1150,12 +1166,12 @@ final class CoreModule implements GratoraModule
         // WordPress's own Tools, Export and Erase Personal Data. They answered
         // nothing for donors until this, which is the screen a site owner is
         // told to use when a request arrives.
-        (new \Gratora\Donors\Privacy\WordPressPrivacy(
+        (new WordPressPrivacy(
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(IdentityHasher::class),
-            $c->get(\Gratora\Donors\DonorMetricsService::class),
-            $c->get(\Gratora\Donors\ConsentService::class),
+            $c->get( DonorMetricsService::class),
+            $c->get( ConsentService::class),
         ))->register();
 
         (new CampaignBlockEditorIntegration())->register();
@@ -1164,7 +1180,7 @@ final class CoreModule implements GratoraModule
         // what an MCP server reads. Add-on packs are included because the
         // bridge reads the registry when the abilities hook fires, after the
         // command broadcast on init:5.
-        (new \Gratora\Foundation\Commands\AbilitiesBridge(
+        (new AbilitiesBridge(
             $c->get(CommandRegistry::class)
         ))->register();
         $campaignBindings = new CampaignBindings($c->get(CampaignRepository::class));
@@ -1248,7 +1264,7 @@ final class CoreModule implements GratoraModule
                     . '<strong>Gratora:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore gratora_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'gratora'),
+                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore gratora_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'gratora-donation-platform'),
                         $lostAt
                     ))
                     . '</div>';

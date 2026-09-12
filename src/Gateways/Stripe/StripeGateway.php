@@ -16,8 +16,11 @@ use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Gateways\AccountFingerprint;
+use Gratora\Gateways\CloseUnsettledResult;
+use Gratora\Gateways\ClosesUnsettledPayment;
 use Gratora\Gateways\GatewayConfirmResult;
 use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayTransportException;
 use Gratora\Gateways\ModeCredentialed;
 use Gratora\Gateways\PaymentGateway;
 use Gratora\Gateways\PaymentMethodUpdate;
@@ -44,7 +47,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange, ModeCredentialed
+final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange, ModeCredentialed, ClosesUnsettledPayment
 {
     /**
      * Dispute statuses for which the money is on the org's balance: settled in
@@ -104,7 +107,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Stripe', 'gratora');
+        return __('Stripe', 'gratora-donation-platform');
     }
 
     /**
@@ -116,7 +119,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function description(): string
     {
-        return __('Pay securely by card, or another method offered at checkout.', 'gratora');
+        return __('Pay securely by card, or another method offered at checkout.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
@@ -247,6 +250,78 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $intent = $this->api->get('/payment_intents/' . $donation->gateway_intent_id);
         return $this->buildConfirmResultFromIntent($intent);
+    }
+
+    /**
+     * Stripe's cancel is authoritative, so this takes no charge lock: an intent
+     * it has cancelled cannot be confirmed again by anything.
+     *
+     * @since 1.0.0
+     */
+    public function closeUnsettled(Donation $donation): CloseUnsettledResult
+    {
+        $intentId = trim((string) ($donation->gateway_intent_id ?? ''));
+
+        // Nothing payable was ever created, so nothing is open to close.
+        if ($intentId === '') {
+            return CloseUnsettledResult::closed();
+        }
+
+        $this->account->useTestMode((bool) $donation->is_test);
+
+        try {
+            $decided = $this->closeAnswerFor($this->intentStatus($intentId));
+            if ($decided !== null) {
+                return $decided;
+            }
+
+            try {
+                $this->api->post(
+                    '/payment_intents/' . rawurlencode($intentId) . '/cancel',
+                    ['cancellation_reason' => 'abandoned']
+                );
+
+                return CloseUnsettledResult::closed();
+            } catch (GatewayTransportException $e) {
+                return CloseUnsettledResult::unreachable($e->getMessage());
+            } catch (Throwable $e) {
+                // Stripe refuses a cancel on an intent that moved on while this
+                // was deciding, so where it stands now is the answer and the
+                // refusal is not.
+                return $this->closeAnswerFor($this->intentStatus($intentId))
+                    ?? CloseUnsettledResult::refused($e->getMessage());
+            }
+        } catch (GatewayTransportException $e) {
+            return CloseUnsettledResult::unreachable($e->getMessage());
+        } catch (Throwable $e) {
+            return CloseUnsettledResult::refused($e->getMessage());
+        }
+    }
+
+    /** The states that settle the question without a cancel; null means try one. */
+    private function closeAnswerFor(string $status): ?CloseUnsettledResult
+    {
+        if ($status === 'canceled') {
+            return CloseUnsettledResult::closed();
+        }
+
+        if (in_array($status, ['succeeded', 'processing'], true)) {
+            return CloseUnsettledResult::moneyMayArrive(sprintf(
+                /* translators: %s: the payment's state at Stripe, for example "succeeded". */
+                __('Stripe reports this payment as %s.', 'gratora-donation-platform'),
+                $status
+            ));
+        }
+
+        return null;
+    }
+
+    /** @since 1.0.0 */
+    private function intentStatus(string $intentId): string
+    {
+        $intent = $this->api->get('/payment_intents/' . rawurlencode($intentId));
+
+        return strtolower(trim((string) ($intent['status'] ?? '')));
     }
 
     /** @since 1.0.0 */
@@ -403,7 +478,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // it with the live key.
         if ($healable) {
             $donation->gateway_intent_id = $intentId;
-            $donation->save();
+            $donation->updateColumns(['gateway_intent_id' => $donation->gateway_intent_id]);
         }
 
         $confirm = $this->buildConfirmResultFromIntent($intent);
@@ -571,7 +646,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'gratora');
+        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'gratora-donation-platform');
 
         // Counted before the row is judged. markFailed refuses to re-run once
         // the row reads failed, so declines after the first apply no row and
@@ -1383,7 +1458,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'stripe.webhook',
             sprintf(
                 /* translators: 1: Stripe event type, 2: Stripe subscription id. */
-                __('Stripe sent %1$s for subscription %2$s, which this site has no plan for. It is live at Stripe and nothing here is recording it.', 'gratora'),
+                __('Stripe sent %1$s for subscription %2$s, which this site has no plan for. It is live at Stripe and nothing here is recording it.', 'gratora-donation-platform'),
                 $type,
                 $subscriptionId
             ),
@@ -1479,7 +1554,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // was charged and never recorded.
             ErrorLog::record('stripe.webhook', sprintf(
                 /* translators: 1: Stripe invoice id, 2: error message. */
-                __('Could not re-read invoice %1$s while handling its webhook: %2$s', 'gratora'),
+                __('Could not re-read invoice %1$s while handling its webhook: %2$s', 'gratora-donation-platform'),
                 $invoiceId,
                 $e->getMessage()
             ));
@@ -1551,7 +1626,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
             ErrorLog::record('stripe.webhook', sprintf(
                 /* translators: %s: Stripe subscription id. */
-                __('A renewal on subscription %s named no charge, so nothing was recorded for it.', 'gratora'),
+                __('A renewal on subscription %s named no charge, so nothing was recorded for it.', 'gratora-donation-platform'),
                 $subscriptionId
             ), ['recurring_plan_id' => (int) $plan->id, 'donor_id' => (int) $plan->donor_id]);
 
@@ -1801,13 +1876,13 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         if (! $donation->gateway_intent_id) {
-            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'gratora'));
+            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'gratora-donation-platform'));
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
 
         if (! $this->api->isConfigured()) {
-            return RefundResult::failure(__('Stripe is not configured.', 'gratora'));
+            return RefundResult::failure(__('Stripe is not configured.', 'gratora-donation-platform'));
         }
 
         $params = [
@@ -2062,7 +2137,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         if ($customerId === '') {
-            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'gratora'));
+            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'gratora-donation-platform'));
         }
 
         $intent = $this->api->post('/setup_intents', [
@@ -2073,7 +2148,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $secret = (string) ($intent['client_secret'] ?? '');
         if ($secret === '') {
-            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'gratora'));
+            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'gratora-donation-platform'));
         }
 
         return PaymentMethodUpdate::inline(
@@ -2094,12 +2169,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $token = trim($token);
         if ($token === '') {
-            throw new RuntimeException(esc_html__('No payment method was supplied.', 'gratora'));
+            throw new RuntimeException(esc_html__('No payment method was supplied.', 'gratora-donation-platform'));
         }
 
         $subId = (string) $plan->gateway_subscription_id;
         if (! self::couldBeStripeSubscription($subId)) {
-            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'gratora'));
+            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'gratora-donation-platform'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -2131,7 +2206,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if (! self::couldBeStripeSubscription($subId)) {
-            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'gratora'));
+            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'gratora-donation-platform'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -2141,7 +2216,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? (string) ($sub['latest_invoice']['id'] ?? '')
             : (string) ($sub['latest_invoice'] ?? '');
         if ($invoiceId === '') {
-            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'gratora'));
+            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'gratora-donation-platform'));
         }
 
         $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
@@ -2153,8 +2228,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($status !== 'open') {
             throw new PaymentRetryUnavailable(esc_html(sprintf(
                 /* translators: %s: the Stripe invoice status, e.g. paid. */
-                __('Nothing to collect: the latest invoice is %s.', 'gratora'),
-                $status !== '' ? $status : __('unavailable', 'gratora')
+                __('Nothing to collect: the latest invoice is %s.', 'gratora-donation-platform'),
+                $status !== '' ? $status : __('unavailable', 'gratora-donation-platform')
             )));
         }
 

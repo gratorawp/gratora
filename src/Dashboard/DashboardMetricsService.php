@@ -185,7 +185,7 @@ final class DashboardMetricsService
 
             $out[] = [
                 'id'             => (int) $d->id,
-                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'gratora'),
+                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'gratora-donation-platform'),
                 'amount_cents'   => (int) $d->amount_cents,
                 'currency'       => (string) $d->currency,
                 'paid_at'        => $d->paid_at,
@@ -303,7 +303,9 @@ final class DashboardMetricsService
         $since7d  = $this->clock->now()->modify('-7 days')->format('Y-m-d H:i:s');
 
         // 1. Failed donations in last 24h.
-        $failed = (int) DonationQueries::donationRows(Donation::query(), false)
+        $failed = (int) DonationQueries::notTrashed(
+            DonationQueries::donationRows(Donation::query(), false)
+        )
             ->where('status', 'failed')
             ->where('updated_at', $since24h, '>=')
             ->count();
@@ -313,10 +315,10 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed donations count */
-                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'gratora'),
+                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'gratora-donation-platform'),
                     $failed
                 ),
-                'action_label' => __('Review', 'gratora'),
+                'action_label' => __('Review', 'gratora-donation-platform'),
                 'action_href'  => admin_url('admin.php?page=gratora-donations&status=failed'),
                 'count'        => $failed,
             ];
@@ -331,6 +333,7 @@ final class DashboardMetricsService
             ->where('is_test', 1)
             ->where('kind', 'donation')
             ->where('status', 'failed')
+            ->whereIsNull('trashed_at')
             ->where('updated_at', $since24h, '>=')
             ->count();
         if ($failedTest > 0) {
@@ -339,10 +342,10 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed test donations count */
-                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'gratora'),
+                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'gratora-donation-platform'),
                     $failedTest
                 ),
-                'action_label' => __('Review', 'gratora'),
+                'action_label' => __('Review', 'gratora-donation-platform'),
                 // The live link hides test rows, so it would land on an empty
                 // screen.
                 'action_href'  => admin_url('admin.php?page=gratora-donations&status=failed&include_test=1'),
@@ -393,11 +396,11 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: 1: campaign title, 2: days remaining */
-                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'gratora'),
+                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'gratora-donation-platform'),
                     $c->title,
                     $daysLeft
                 ),
-                'action_label' => __('Open', 'gratora'),
+                'action_label' => __('Open', 'gratora-donation-platform'),
                 'action_href'  => admin_url('admin.php?page=gratora-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
             ];
         }
@@ -426,10 +429,10 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: %s: campaign title */
-                    __('"%s" has no default form. The donate button on its page does nothing.', 'gratora'),
+                    __('"%s" has no default form. The donate button on its page does nothing.', 'gratora-donation-platform'),
                     $c->title
                 ),
-                'action_label' => __('Set form', 'gratora'),
+                'action_label' => __('Set form', 'gratora-donation-platform'),
                 'action_href'  => admin_url('admin.php?page=gratora-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
             ];
         }
@@ -479,11 +482,11 @@ final class DashboardMetricsService
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
                         $donorCount,
-                        'gratora'
+                        'gratora-donation-platform'
                     ),
                     $donorCount
                 ),
-                'action_label' => __('Read', 'gratora'),
+                'action_label' => __('Read', 'gratora-donation-platform'),
                 'action_href'  => $href,
                 'count'        => $noteCount,
             ];
@@ -495,8 +498,8 @@ final class DashboardMetricsService
             $items[] = [
                 'key'          => 'no-campaigns',
                 'tone'         => 'info',
-                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'gratora'),
-                'action_label' => __('Create campaign', 'gratora'),
+                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'gratora-donation-platform'),
+                'action_label' => __('Create campaign', 'gratora-donation-platform'),
                 'action_href'  => admin_url('admin.php?page=gratora-campaigns'),
             ];
         }

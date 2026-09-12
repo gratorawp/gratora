@@ -48,20 +48,20 @@ final class PayPalPlanRecorder
     {
         $subId = trim((string) ($sub['id'] ?? ''));
         if ($subId === '') {
-            throw new PayPalPlanRefused('gratora_paypal_bad_subscription', esc_html__('Missing subscription id.', 'gratora'));
+            throw new PayPalPlanRefused('gratora_paypal_bad_subscription', esc_html__('Missing subscription id.', 'gratora-donation-platform'));
         }
 
         $reference = trim((string) ($sub['custom_id'] ?? ''));
         $donation  = $reference !== '' ? $this->donations->findByReference($reference) : null;
         if (! $donation instanceof Donation) {
             throw new PayPalPlanRefused('gratora_paypal_subscription_mismatch',
-                esc_html__('That subscription does not belong to this donation.', 'gratora'),
+                esc_html__('That subscription does not belong to this donation.', 'gratora-donation-platform'),
                 403
             );
         }
 
         if ((string) $donation->gateway !== 'paypal' || ! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            throw new PayPalPlanRefused('gratora_paypal_not_recurring', esc_html__('That donation is not recurring.', 'gratora'));
+            throw new PayPalPlanRefused('gratora_paypal_not_recurring', esc_html__('That donation is not recurring.', 'gratora-donation-platform'));
         }
 
         // Already recorded. Same subscription is the ordinary double delivery;
@@ -75,7 +75,7 @@ final class PayPalPlanRecorder
                     return $existing;
                 }
                 throw new PayPalPlanRefused('gratora_paypal_subscription_conflict',
-                    esc_html__('This donation already has a different PayPal subscription.', 'gratora'),
+                    esc_html__('This donation already has a different PayPal subscription.', 'gratora-donation-platform'),
                     409
                 );
             }
@@ -89,7 +89,7 @@ final class PayPalPlanRecorder
         $expectedPlan = (string) ($meta['paypal_plan_id'] ?? '');
         if ($expectedPlan === '' || (string) ($sub['plan_id'] ?? '') !== $expectedPlan) {
             throw new PayPalPlanRefused('gratora_paypal_subscription_plan_mismatch',
-                esc_html__('That subscription is not for this donation amount.', 'gratora'),
+                esc_html__('That subscription is not for this donation amount.', 'gratora-donation-platform'),
                 403
             );
         }
@@ -99,7 +99,7 @@ final class PayPalPlanRecorder
             throw new PayPalPlanRefused('gratora_paypal_subscription_status',
                 esc_html(sprintf(
                     /* translators: %s: PayPal subscription status */
-                    __('PayPal reports this subscription as %s.', 'gratora'),
+                    __('PayPal reports this subscription as %s.', 'gratora-donation-platform'),
                     $status
                 ))
             );
@@ -146,7 +146,10 @@ final class PayPalPlanRecorder
 
         $donation->recurring_plan_id = (int) $plan->id;
         $donation->gateway_intent_id = $subId;
-        $donation->save();
+        $donation->updateColumns([
+            'recurring_plan_id' => $donation->recurring_plan_id,
+            'gateway_intent_id' => $donation->gateway_intent_id,
+        ]);
 
         return $plan;
     }

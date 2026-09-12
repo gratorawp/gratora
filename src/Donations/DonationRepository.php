@@ -115,6 +115,19 @@ final class DonationRepository
     }
 
     /**
+     * How many rows the Trash view holds under the same filters, so the list
+     * can offer the bin without the admin opening it to find out.
+     *
+     * @since 1.0.0
+     */
+    public function countTrashed(array $args = []): int
+    {
+        $args['trashed'] = 'only';
+
+        return (int) $this->applyAdminFilters(Donation::query(), $args)->count();
+    }
+
+    /**
      * `matching_donor_ids` lets the caller pre-resolve a search term to donor
      * ids so the search covers donor name and exact email as well as
      * `reference`.
@@ -129,7 +142,7 @@ final class DonationRepository
         $perPage = max(1, min(100, (int) ($args['per_page'] ?? 25)));
         $offset  = ($page - 1) * $perPage;
 
-        $allowedSort = ['created_at', 'paid_at', 'amount_cents', 'reference', 'status'];
+        $allowedSort = ['created_at', 'paid_at', 'amount_cents', 'reference', 'status', 'trashed_at'];
         $orderBy = in_array($args['orderby'] ?? '', $allowedSort, true)
             ? $args['orderby']
             : 'created_at';
@@ -1036,6 +1049,15 @@ final class DonationRepository
         // and the KPI strip were the one place it still read as a donation,
         // for the full charge rather than the top-up inside it.
         $q = $q->where('kind', 'donation');
+
+        // An explicit filter with no widen flag and no search exemption. The
+        // stats route and the CSV take the same `search` argument the list
+        // does, so an exemption for a targeted lookup would put the trash back
+        // into the KPI strip and the export. Somebody walking in from a bank
+        // statement is served by the detail route, which takes no scope.
+        $q = ($args['trashed'] ?? '') === 'only'
+            ? $q->whereIsNotNull('trashed_at')
+            : DonationQueries::notTrashed($q);
 
         $term         = trim((string) ($args['search'] ?? ''));
         $donorIds     = array_values(array_unique(array_map('intval', (array) ($args['matching_donor_ids'] ?? []))));

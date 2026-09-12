@@ -7,6 +7,7 @@ namespace Gratora\Donors;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Analytics\EventRecorder;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationDeleter;
 use Gratora\Donors\Erasure\ErasureRegistry;
 use Gratora\Donors\Erasure\ErasureRequest;
 use Gratora\Foundation\Crypto\Crypto;
@@ -20,6 +21,7 @@ use Gratora\Recurring\RecurringPlanRepository;
 use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use Throwable;
+use Gratora\Analytics\DonationAudit;
 
 /** @since 1.0.0 */
 final class DonorService
@@ -150,19 +152,19 @@ final class DonorService
     public function editProfile(Donor $donor, array $patch): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora-donation-platform'));
         }
         // A value of the wrong type is not an edit to that field, and coercing
         // one overwrites what the site holds. For phone and address the
         // encrypted column is the only copy, so the coercion destroys it.
         foreach (['first_name', 'last_name', 'company', 'locale', 'country', 'phone'] as $f) {
             if (array_key_exists($f, $patch) && $patch[$f] !== null && ! is_string($patch[$f])) {
-                throw new InvalidArgumentException(esc_html__('Give every profile field as text.', 'gratora'));
+                throw new InvalidArgumentException(esc_html__('Give every profile field as text.', 'gratora-donation-platform'));
             }
         }
 
         if (array_key_exists('address', $patch) && $patch['address'] !== null && ! is_array($patch['address'])) {
-            throw new InvalidArgumentException(esc_html__('Give the address as a set of fields.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Give the address as a set of fields.', 'gratora-donation-platform'));
         }
 
         $dirty = [];
@@ -228,7 +230,7 @@ final class DonorService
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora-donation-platform'));
         }
 
         $changed = false;
@@ -273,11 +275,11 @@ final class DonorService
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora-donation-platform'));
         }
         $normalized = $this->hasher->normalizeEmail($newEmail);
         if ($normalized === '') {
-            throw new InvalidArgumentException(esc_html__('Email is required.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Email is required.', 'gratora-donation-platform'));
         }
 
         $newHash = $this->hasher->emailHash($normalized);
@@ -353,6 +355,17 @@ final class DonorService
                         ->orWhereIsNotNull('gateway_txn_id')
                         ->orWhere('created_at', $before, '>=');
                 })
+                // A payment an admin stopped cannot become money, whatever the
+                // status and the age say. Narrower than it looks: both marks
+                // money leaves behind still disqualify the row, so this admits
+                // only rows that were closed at the gateway and stayed empty.
+                // Without it a stopped spam attempt blocks its donor for the
+                // full abandon window, which is exactly the case this is for.
+                ->where(static function ($q): void {
+                    $q->whereIsNull('payment_stopped_at')
+                        ->orWhereIsNotNull('paid_at')
+                        ->orWhereIsNotNull('gateway_txn_id');
+                })
                 ->distinct()
                 ->pluck('donor_id'),
         ));
@@ -370,12 +383,12 @@ final class DonorService
             $id = (int) $donor->id;
 
             if (isset($withDonations[$id])) {
-                $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'gratora');
+                $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'gratora-donation-platform');
                 continue;
             }
 
             if (isset($withPlans[$id])) {
-                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'gratora');
+                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'gratora-donation-platform');
                 continue;
             }
 
@@ -412,16 +425,30 @@ final class DonorService
         // nothing else in the site knows it belonged to them.
         $avatarAttachmentId = (int) ($donor->avatar_attachment_id ?? 0);
 
-        DB::transaction(function () use ($donor, $id, $hash, $dids, $request): void {
+        // Out here, before anything is locked: closing a payment can mean a
+        // call to the gateway, and a request that times out would otherwise
+        // hold this donor's rows for as long as it takes to give up. A row
+        // that refuses to close refuses the whole delete, which is the answer
+        // either way.
+        //
+        // Resolved from the container rather than held, because the gateway
+        // registry it reaches is built from services that reach back here.
+        $deleter   = Plugin::instance()->container->get(DonationDeleter::class);
+        $donations = $dids === [] ? [] : Donation::query()->whereIn('id', $dids)->getAll();
+        foreach ($donations as $donation) {
+            $deleter->closeFor($donation);
+        }
+
+        DB::transaction(function () use ($donor, $id, $hash, $dids, $request, $deleter, $donations): void {
             if ($dids !== []) {
                 // A receipt is an issued document and a settled refund is money
                 // that moved. The gate makes both unreachable; these are the
                 // belt, and they run before anything is destroyed.
                 if (DB::table('gratora_receipts')->whereIn('donation_id', $dids)->count() > 0) {
-                    throw new InvalidArgumentException(esc_html__('This donor has a receipt on record, which has to be kept. Erase them instead.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('This donor has a receipt on record, which has to be kept. Erase them instead.', 'gratora-donation-platform'));
                 }
                 if (DB::table('gratora_refunds')->whereIn('donation_id', $dids)->where('status', 'succeeded')->count() > 0) {
-                    throw new InvalidArgumentException(esc_html__('This donor has a refund on record, which has to be kept. Erase them instead.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('This donor has a refund on record, which has to be kept. Erase them instead.', 'gratora-donation-platform'));
                 }
 
                 // Before anything is destroyed, so an add-on clears what it
@@ -438,12 +465,14 @@ final class DonorService
             // the compiler wraps a bare value in its own.
             DB::table('gratora_events')
                 ->where('type', 'donor.%', 'NOT LIKE')
+                ->whereNotIn('type', DonationAudit::TYPES)
                 ->where('donor_id', $id)
                 ->delete();
 
             if ($dids !== []) {
                 DB::table('gratora_events')
                     ->where('type', 'donor.%', 'NOT LIKE')
+                    ->whereNotIn('type', DonationAudit::TYPES)
                     ->whereIn('donation_id', $dids)
                     ->delete();
 
@@ -465,8 +494,12 @@ final class DonorService
                 PendingSignup::query()->where('email_hash', $hash)->delete();
             }
 
-            if ($dids !== []) {
-                DB::table('gratora_donations')->whereIn('id', $dids)->delete();
+            // Per row, through the one service that knows what a donation drags
+            // with it: its consents, its notes, its non-audit events and the
+            // retry marker on any parent it superseded. The payment is already
+            // closed and the batch already announced, so neither happens again.
+            foreach ($donations as $donation) {
+                $deleter->delete($donation, null, false, true);
             }
 
             $this->events()->record('donor.deleted', [
@@ -587,7 +620,7 @@ final class DonorService
 
         foreach ($plans as $plan) {
             try {
-                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'gratora'));
+                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'gratora-donation-platform'));
                 $cancelled[] = (int) $plan->id;
             } catch (Throwable $e) {
                 // The erasure stops here, so the caller has to be told which
@@ -910,7 +943,7 @@ final class DonorService
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora-donation-platform'));
         }
         if (! in_array($field, ['phone_encrypted', 'address_encrypted', 'notes_encrypted', 'tax_id_encrypted'], true)) {
             throw new InvalidArgumentException(esc_html("Unsupported encrypted field: {$field}"));

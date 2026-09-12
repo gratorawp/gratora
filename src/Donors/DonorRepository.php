@@ -69,7 +69,10 @@ final class DonorRepository
     public static function testOnlyDonorPredicate(): string
     {
         $prefix = DB::getPrefix();
-        $any    = "SELECT 1 FROM {$prefix}gratora_donations d WHERE d.donor_id = {$prefix}gratora_donors.id";
+        // Trashed rows are excluded from both halves at once, so a donor whose
+        // only live attempt is in the bin is not badged as a rehearsal.
+        $any    = "SELECT 1 FROM {$prefix}gratora_donations d WHERE d.donor_id = {$prefix}gratora_donors.id"
+            . ' AND d.trashed_at IS NULL';
 
         return "(EXISTS ({$any}) AND NOT EXISTS ({$any} AND d.is_test = 0))";
     }
@@ -132,7 +135,7 @@ final class DonorRepository
         // it cannot replace the subquery: a live donation the counter does not
         // count, a ticket order, still has to satisfy this.
         return "({$prefix}gratora_donors.donations_count > 0 OR EXISTS (SELECT 1 FROM {$prefix}gratora_donations d "
-            . "WHERE d.donor_id = {$prefix}gratora_donors.id AND d.is_test = 0))";
+            . "WHERE d.donor_id = {$prefix}gratora_donors.id AND d.is_test = 0 AND d.trashed_at IS NULL))";
     }
 
     /**

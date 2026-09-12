@@ -15,6 +15,7 @@ use Gratora\Currency\SupportedCurrencies;
 use Gratora\Dashboard\DashboardMetricsService;
 use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationQueries;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
 use Gratora\Donors\ConsentService;
@@ -113,14 +114,14 @@ final class CoreCommandProvider
                 if (! SupportedCurrencies::accepts($currency)) {
                     throw new CommandError(esc_html(sprintf(
                         /* translators: 1: currency code, 2: the accepted codes. */
-                        __('%1$s is not one of your accepted currencies (%2$s).', 'gratora'),
+                        __('%1$s is not one of your accepted currencies (%2$s).', 'gratora-donation-platform'),
                         $currency,
                         implode(', ', SupportedCurrencies::all())
                     )));
                 }
                 if (Currency::minorUnits($currency) === 0 && ((int) $in['amount_cents']) % 100 !== 0) {
                     throw new CommandError(
-                        esc_html__('This currency does not support fractional amounts.', 'gratora')
+                        esc_html__('This currency does not support fractional amounts.', 'gratora-donation-platform')
                     );
                 }
 
@@ -163,6 +164,9 @@ final class CoreCommandProvider
                 $donation = $c->get(DonationRepository::class)->findByReference((string) $in['donation_reference']);
                 if (! $donation) {
                     throw new CommandError(esc_html('Donation not found.'));
+                }
+                if (DonationQueries::isTrashed($donation)) {
+                    throw new CommandError(esc_html__('This donation is in the trash. Restore it first.', 'gratora-donation-platform'));
                 }
                 $svc  = $c->get(DonationService::class);
                 $done = $svc->confirm($donation, is_array($in['result'] ?? null) ? $in['result'] : []);
@@ -1841,7 +1845,7 @@ final class CoreCommandProvider
         $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
         return sprintf(
             /* translators: %s: human-readable duration, e.g. "1 day". */
-            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'gratora'),
+            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'gratora-donation-platform'),
             human_time_diff(0, $life),
         );
     }

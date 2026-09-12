@@ -219,6 +219,78 @@ final class DonationQueries
             && $flags['retried_by'] !== null;
     }
 
+    /** Ids of the rows an admin has taken off the working list. */
+    private static function trashedIds(): string
+    {
+        $donations = DB::getPrefix() . 'gratora_donations';
+
+        return "SELECT tr.id FROM {$donations} tr WHERE tr.trashed_at IS NOT NULL";
+    }
+
+    /**
+     * Guarded the same way notSupersededPredicate is, and for the same reason:
+     * `NULL NOT IN (...)` evaluates to NULL rather than true, so an unguarded
+     * negation drops every row whose column is NULL.
+     *
+     * @since 1.0.0
+     */
+    public static function notTrashedPredicate(?string $donationIdColumn = null): string
+    {
+        $column = $donationIdColumn ?? DB::getPrefix() . 'gratora_donations.id';
+
+        return "({$column} IS NULL OR {$column} NOT IN (" . self::trashedIds() . '))';
+    }
+
+    /**
+     * Keep trashed rows out of a query on the donations table.
+     *
+     * A plain column test rather than the predicate above, because on this
+     * table the column is present and idx_trashed_at_created_at serves it.
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function notTrashed($q)
+    {
+        return $q->whereIsNull('trashed_at');
+    }
+
+    /**
+     * The same rule for a table that points at a donation rather than being
+     * one, gratora_events.donation_id among them. Pass the column qualified
+     * with its table. A row pointing at nothing is left alone.
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function notTrashedDonation($q, string $donationIdColumn)
+    {
+        return $q->where(static function ($g) use ($donationIdColumn): void {
+            $g->whereRaw(self::notTrashedPredicate($donationIdColumn));
+        });
+    }
+
+    /**
+     * Whether an admin has taken this row off the working list.
+     *
+     * Read off a hydrated row for the gates that have one, so a donor-facing
+     * charge route can treat a trashed donation exactly as it treats a settled
+     * one. The charge lock only closes the site's own in-flight window, so the
+     * durable stop has to be a predicate on the row.
+     *
+     * @since 1.0.0
+     */
+    public static function isTrashed(Donation $donation): bool
+    {
+        return ($donation->trashed_at ?? null) !== null;
+    }
+
     /**
      * How many real-looking donations the live figures are leaving out.
      *

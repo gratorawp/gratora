@@ -21,6 +21,7 @@ use Gratora\Funds\FundService;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
 use Gratora\Vendor\Queryable\DB;
+use Gratora\Analytics\DonationAudit;
 
 /**
  * Builds a year of plausible fundraising history so admin screenshots show an
@@ -216,7 +217,10 @@ final class DemoSeeder
             DB::table('gratora_receipts')->whereIn('donation_id', $chunk)->delete();
             DB::table('gratora_refunds')->whereIn('donation_id', $chunk)->delete();
             DB::table('gratora_donation_notes')->whereIn('donation_id', $chunk)->delete();
-            DB::table('gratora_events')->whereIn('donation_id', $chunk)->delete();
+            DB::table('gratora_events')
+                ->whereIn('donation_id', $chunk)
+                ->whereNotIn('type', DonationAudit::TYPES)
+                ->delete();
 
             $removed['donations'] += (int) Donation::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
@@ -841,7 +845,7 @@ final class DemoSeeder
             $refund->occurred_at = $refundedAt;
             $refund->save();
             $donation->refunded_at = $refundedAt;
-            $donation->save();
+            $donation->updateColumns(['refunded_at' => $donation->refunded_at]);
 
             return;
         }
@@ -1034,7 +1038,10 @@ final class DemoSeeder
     {
         $donation->created_at = $this->shiftMinutes($when, -3);
         $donation->updated_at = $when;
-        $donation->save();
+        $donation->updateColumns([
+            'created_at' => $donation->created_at,
+            'updated_at' => $donation->updated_at,
+        ]);
     }
 
     /**

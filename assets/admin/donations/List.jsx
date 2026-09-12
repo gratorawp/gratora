@@ -5,7 +5,7 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX } from 'lucide-react';
+import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX, Trash2 } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import { useTableView } from '../_shared/useTableView';
@@ -15,53 +15,15 @@ import DateField from '../_shared/components/DateField';
 import EmptyState from '../_shared/components/EmptyState';
 import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
-import { rowLinkProps } from '../_shared/rowLink';
 import { dashboardHref } from '../_shared/adminPages';
 import notify from '../_shared/notify';
 import { userCan } from '../_shared/caps';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { Switch } from '../_shared/components/Switch';
-import StatusBadge from '../_shared/components/StatusBadge';
-import { formatAmount, formatDate, STATUS_LABEL } from './format';
-import { timeAgo, detailHref as campaignDetailHref, formEditorHref } from '../_shared/format';
-
-const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) => ( {
-    value,
-    label,
-} ) );
-
-/**
- * The stored frequency as a short badge. Values come from the column, so an
- * unknown one is shown rather than swallowed.
- */
-function frequencyLabel( frequency ) {
-    switch ( frequency ) {
-        case 'monthly':   return __( 'Monthly', 'gratora' );
-        case 'yearly':    return __( 'Yearly', 'gratora' );
-        case 'weekly':    return __( 'Weekly', 'gratora' );
-        case 'quarterly': return __( 'Quarterly', 'gratora' );
-        default:          return __( 'Recurring', 'gratora' );
-    }
-}
-
-// 'recurring' is the useful default question ("which of these repeat?");
-// the individual cadences are there for orgs that run more than one.
-const FREQUENCY_OPTIONS = [
-    { value: 'recurring', label: __( 'Recurring (any)', 'gratora' ) },
-    { value: 'one_time',  label: __( 'One time', 'gratora' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'gratora' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'gratora' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'gratora' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'gratora' ) },
-];
-
-function detailHref( reference ) {
-    return addQueryArgs( window.location.pathname, {
-        page:      'gratora-donations',
-        view:      'detail',
-        reference,
-    } );
-}
+import { formatAmount, STATUS_LABEL } from './format';
+import { donationFields } from './fields';
+import { postBatch } from './trashActions';
+import ViewSwitch from './ViewSwitch';
 
 // The dashboard deep-links here with ?status=failed, so seed the view from the
 // URL instead of dropping the param. Unknown values are ignored rather than
@@ -135,6 +97,12 @@ export default function List() {
     // out turns a silent exclusion into a visible one: an admin who donates
     // while the org is in test mode otherwise watches it vanish.
     const [ testHidden, setTestHidden ]   = useState( 0 );
+    // The bin's own size, so the switch can carry it without this screen
+    // fetching the trash it is not showing.
+    const [ trashedCount, setTrashedCount ] = useState( 0 );
+    // Per-row reasons go in a persistent notice, not a toast: a list of six
+    // references auto-dismisses before anyone can read it.
+    const [ refusals, setRefusals ]       = useState( [] );
     const [ createdFrom, setCreatedFrom ] = useState( '' );
     const [ createdTo,   setCreatedTo ]   = useState( '' );
 
@@ -159,7 +127,7 @@ export default function List() {
             .catch( ( err ) => {
                 if ( aborted ) return;
                 setCampaigns( [] );
-                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'gratora' ) );
+                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'gratora-donation-platform' ) );
             } );
         return () => { aborted = true; };
     }, [] );
@@ -229,10 +197,11 @@ export default function List() {
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setTestHidden( parseInt( res.headers.get( 'X-Gratora-Test-Hidden' ) || '0', 10 ) );
+                setTrashedCount( parseInt( res.headers.get( 'X-Gratora-Trashed' ) || '0', 10 ) );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setFetchError( err?.message || __( 'Failed to load donations.', 'gratora' ) );
+                setFetchError( err?.message || __( 'Failed to load donations.', 'gratora-donation-platform' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -254,154 +223,14 @@ export default function List() {
         };
     }, [ apiParams, viewReady ] );
 
-    const fields = useMemo( () => [
-        {
-            id:            'reference',
-            label:         __( 'Reference', 'gratora' ),
-            enableSorting: true,
-            // The badge rides the reference rather than occupying a column of
-            // its own: on a live-only list that column is the same value on
-            // every row, and the thing worth knowing is that this particular
-            // donation took no money.
-            render: ( { item } ) => (
-                <span className="gratora-ref-cell">
-                    <a className="gratora-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
-                        { item.reference }
-                    </a>
-                    { item.is_test && (
-                        <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
-                    ) }
-                    { item.superseded && (
-                        <span className="gratora-pill gratora-pill--gray" title={ __( 'The donor started again on another gateway. Nothing they do now can collect this attempt.', 'gratora' ) }>
-                            { __( 'Replaced', 'gratora' ) }
-                        </span>
-                    ) }
-                </span>
-            ),
-        },
-        {
-            id:    'frequency',
-            label: __( 'Frequency', 'gratora' ),
-            // Nothing on the row said whether the money came from a standing
-            // recurring or a one-off, which is the first thing asked of it.
-            elements: FREQUENCY_OPTIONS,
-            filterBy: { operators: [ 'is' ] },
-            // Not StatusBadge: "monthly" is a cadence, not a lifecycle status,
-            // so it has no entry in that map and would come out grey.
-            render: ( { item } ) => (
-                item.frequency && item.frequency !== 'one_time'
-                    ? <span className="gratora-pill gratora-pill--blue">{ frequencyLabel( item.frequency ) }</span>
-                    : <span className="gratora-pill gratora-pill--gray">{ __( 'One time', 'gratora' ) }</span>
-            ),
-        },
-        {
-            id:    'donor',
-            label: __( 'Donor', 'gratora' ),
-            render: ( { item } ) => {
-                const d = item.donor;
-                if ( ! d ) return <span className="gratora-row__sub">-</span>;
-                const name = d.name || __( '(no name)', 'gratora' );
-                return (
-                    <div className="gratora-row">
-                        <div className="gratora-row__body">
-                            <div className="gratora-row__name">{ name }</div>
-                            { d.email && <div className="gratora-row__sub gratora-row__sub--mono">{ d.email }</div> }
-                        </div>
-                    </div>
-                );
-            },
-        },
-        {
-            id:            'amount',
-            label:         __( 'Amount', 'gratora' ),
-            enableSorting: true,
-            render: ( { item } ) => {
-                const showBase =
-                    item.base_amount_cents != null &&
-                    item.base_currency &&
-                    item.base_currency !== item.currency;
-                return (
-                    <span className={ `gratora-amount${ item.status === 'refunded' ? ' gratora-amount--strike' : '' }` }>
-                        { formatAmount( item.amount_cents, item.currency ) }
-                        { showBase && (
-                            <span className="gratora-amount__base">
-                                { '≈ ' }{ formatAmount( item.base_amount_cents, item.base_currency ) }
-                            </span>
-                        ) }
-                    </span>
-                );
-            },
-        },
-        {
-            id:            'status',
-            label:         __( 'Status', 'gratora' ),
-            elements:      STATUS_OPTIONS,
-            filterBy:      { operators: [ 'is' ] },
-            enableSorting: true,
-            render:        ( { item } ) => <StatusBadge status={ item.status } />,
-        },
-        {
-            id:       'gateway',
-            label:    __( 'Gateway', 'gratora' ),
-            elements: gatewayOptions,
-            filterBy: { operators: [ 'is' ] },
-            render: ( { item } ) => {
-                if ( ! item.gateway ) return <span>-</span>;
-                const named = gatewayOptions.find( ( g ) => g.value === item.gateway );
-                return named
-                    ? <span>{ named.label }</span>
-                    : <span style={ { textTransform: 'capitalize' } }>{ item.gateway }</span>;
-            },
-        },
-        {
-            id:       'campaign',
-            label:    __( 'Campaign', 'gratora' ),
-            elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
-            filterBy: { operators: [ 'is' ] },
-            render: ( { item } ) => {
-                if ( ! item.campaign?.title ) {
-                    return <span className="gratora-row__sub">-</span>;
-                }
+    const fields = useMemo( () => {
+        const all = donationFields( { campaigns, gatewayOptions } );
+        // Everything but the bin's own columns, which say nothing on a list
+        // that never shows a trashed row.
+        const show = [ 'reference', 'frequency', 'donor', 'amount', 'status', 'gateway', 'campaign', 'form', 'created_at' ];
 
-                return (
-                    <div className="gratora-row">
-                        <div className="gratora-row__body">
-                            <a className="gratora-row__link" href={ campaignDetailHref( item.campaign.id ) } { ...rowLinkProps }>
-                                { item.campaign.title }
-                            </a>
-                            { /* Who inside the campaign it came through, when
-                                 something owns that idea. The campaign alone
-                                 does not say whether a donation arrived
-                                 through somebody raising for it. */ }
-                            { item.attributed_to?.label && (
-                                <div className="gratora-row__sub">{ item.attributed_to.label }</div>
-                            ) }
-                        </div>
-                    </div>
-                );
-            },
-        },
-        {
-            id:     'form',
-            label:  __( 'Form', 'gratora' ),
-            render: ( { item } ) => (
-                item.form?.title
-                    ? <a className="gratora-row__link" href={ formEditorHref( item.form.id ) } { ...rowLinkProps }>{ item.form.title }</a>
-                    : <span className="gratora-row__sub">-</span>
-            ),
-        },
-        {
-            id:            'created_at',
-            label:         __( 'Created', 'gratora' ),
-            enableSorting: true,
-            render: ( { item } ) => (
-                <span className="gratora-time" title={ formatDate( item.created_at ) }>
-                    <span className="gratora-time__rel">{ timeAgo( item.created_at ) }</span>
-                    <span className="gratora-time__abs">{ formatDate( item.created_at ) }</span>
-                </span>
-            ),
-        },
-    ], [ campaigns, gatewayOptions ] );
+        return show.map( ( id ) => all.find( ( f ) => f.id === id ) ).filter( Boolean );
+    }, [ campaigns, gatewayOptions ] );
 
     const paginationInfo = useMemo(
         () => ( {
@@ -416,7 +245,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'gratora' ),
+            label:        __( 'Mark as paid', 'gratora-donation-platform' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Pending and still-settling donations can be flipped to paid;
@@ -430,21 +259,21 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'gratora' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent to each donor.',
                             'Mark %d donations as paid? Receipts will be sent to each donor.',
                             n,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'gratora' ),
+                    title:        __( 'Mark donations as paid', 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'gratora' ),
+                    confirmLabel: __( 'Mark as paid', 'gratora-donation-platform' ),
                     onConfirm: async () => {
                         // allSettled, and the refetch outside the counts: a
                         // partial failure still paid some of them and emailed
@@ -461,14 +290,14 @@ export default function List() {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'gratora' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'gratora-donation-platform' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'gratora' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'gratora-donation-platform' ),
                                 failed
                             ) );
                         }
@@ -480,7 +309,7 @@ export default function List() {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'gratora' ),
+            label:        __( 'Resend receipt', 'gratora-donation-platform' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Only paid donations have a receipt to resend, and an erased donor
@@ -492,16 +321,16 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'gratora' )
+                    ? __( 'Resend the receipt for this donation?', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'gratora' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'gratora-donation-platform' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'gratora' ),
+                    title:        __( 'Resend receipts', 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Resend', 'gratora' ),
+                    confirmLabel: __( 'Resend', 'gratora-donation-platform' ),
                     onConfirm: async () => {
                         // Counted separately: a batch reported as a single
                         // failure reads as nothing having happened, so admins
@@ -518,17 +347,123 @@ export default function List() {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora-donation-platform' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora-donation-platform' ),
                                 failed
                             ) );
                         }
+                    },
+                } );
+            },
+        },
+        {
+            id:            'trash',
+            label:         __( 'Move to trash', 'gratora-donation-platform' ),
+            icon:          () => <Trash2 size={ 16 } strokeWidth={ 1.75 } />,
+            isDestructive: true,
+            supportsBulk:  true,
+            isEligible:    ( item ) => userCan( 'refund_donations' ) && !! item.trashable,
+            callback: ( items ) => {
+                // DataViews hands the callback the whole selection rather than
+                // the eligible part of it, so the filter is repeated here.
+                const targets = items.filter( ( i ) => i.trashable );
+                if ( ! targets.length ) return;
+                const n        = targets.length;
+                const stopping = targets.filter( ( i ) => i.stops_payment ).length;
+
+                setConfirm( {
+                    title:       __( 'Move to trash', 'gratora-donation-platform' ),
+                    destructive: true,
+                    message: n === 1
+                        ? __( 'Take this attempt off the list? Nothing is deleted, and no money total changes.', 'gratora-donation-platform' )
+                        : sprintf(
+                            /* translators: %d: number of donations */
+                            _n(
+                                'Take %d attempt off the list? Nothing is deleted, and no money total changes.',
+                                'Take %d attempts off the list? Nothing is deleted, and no money totals change.',
+                                n,
+                                'gratora-donation-platform'
+                            ),
+                            n
+                        ),
+                    // The row cannot know the outcome in advance, so the dialog
+                    // says what will be attempted and the result says what
+                    // happened.
+                    body: (
+                        <p className="gratora-list-note" style={ { marginBottom: 0 } }>
+                            { stopping > 0
+                                ? sprintf(
+                                    /* translators: %d: number of donations whose payment will be stopped */
+                                    _n(
+                                        'Gratora will ask the gateway to stop %d payment that is still open.',
+                                        'Gratora will ask the gateway to stop %d payments that are still open.',
+                                        stopping,
+                                        'gratora-donation-platform'
+                                    ),
+                                    stopping
+                                )
+                                : __( 'There is nothing to close at the gateway for these, so a reference already emailed to a donor could still be paid by hand.', 'gratora-donation-platform' ) }
+                        </p>
+                    ),
+                    confirmLabel: __( 'Move to trash', 'gratora-donation-platform' ),
+                    onConfirm: async () => {
+                        let result;
+                        try {
+                            result = await postBatch( 'trash', targets.map( ( i ) => i.reference ) );
+                        } catch ( err ) {
+                            // Sent in chunks, so earlier ones may have trashed
+                            // rows this list is still showing.
+                            notify.error( err?.message || __( 'Could not move to the trash. Refresh and try again.', 'gratora-donation-platform' ) );
+                            refetch();
+                            return;
+                        }
+
+                        const done = result.done.length + result.already.length;
+
+                        if ( done > 0 ) {
+                            // Restore, not Undo: the payment stays stopped, and
+                            // Undo promises otherwise. The duration is explicit
+                            // because the success default is far shorter.
+                            notify.success(
+                                sprintf(
+                                    /* translators: %d: number of donations */
+                                    _n( '%d donation moved to the trash.', '%d donations moved to the trash.', done, 'gratora-donation-platform' ),
+                                    done
+                                ),
+                                {
+                                    duration: 9000,
+                                    action:   {
+                                        label:   __( 'Restore', 'gratora-donation-platform' ),
+                                        onClick: async () => {
+                                            try {
+                                                await postBatch( 'restore', result.done.map( ( d ) => d.reference ) );
+                                                notify.success( __( 'Restored. The payment stays stopped.', 'gratora-donation-platform' ) );
+                                            } catch ( err ) {
+                                                notify.error( err?.message || __( 'Could not restore. Refresh and try again.', 'gratora-donation-platform' ) );
+                                            }
+                                            refetch();
+                                        },
+                                    },
+                                }
+                            );
+                        }
+
+                        setRefusals( result.refused );
+                        if ( result.refused.length > 0 ) {
+                            notify.error( sprintf(
+                                /* translators: %d: number of donations */
+                                _n( '%d donation could not be moved.', '%d donations could not be moved.', result.refused.length, 'gratora-donation-platform' ),
+                                result.refused.length
+                            ) );
+                        }
+
+                        refetch();
                     },
                 } );
             },
@@ -538,29 +473,30 @@ export default function List() {
     return (
         <div>
             <div className="gratora-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donations', 'gratora' ) }</span>
+                <span>{ __( 'Donations', 'gratora-donation-platform' ) }</span>
             </div>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Donations', 'gratora' ) }</h1>
+                    <h1>{ __( 'Donations', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
+                    <ViewSwitch active="list" trashedCount={ trashedCount } />
                     <div className="gratora-page-head__date-filters">
-                        <span className="gratora-page-head__date-filters-label">{ __( 'From', 'gratora' ) }</span>
+                        <span className="gratora-page-head__date-filters-label">{ __( 'From', 'gratora-donation-platform' ) }</span>
                         <DateField
                             value={ createdFrom }
                             onChange={ ( v ) => setDateFilter( setCreatedFrom, v ) }
-                            ariaLabel={ __( 'Filter donations from', 'gratora' ) }
-                            placeholder={ __( 'Any', 'gratora' ) }
+                            ariaLabel={ __( 'Filter donations from', 'gratora-donation-platform' ) }
+                            placeholder={ __( 'Any', 'gratora-donation-platform' ) }
                         />
-                        <span className="gratora-page-head__date-filters-label">{ __( 'To', 'gratora' ) }</span>
+                        <span className="gratora-page-head__date-filters-label">{ __( 'To', 'gratora-donation-platform' ) }</span>
                         <DateField
                             value={ createdTo }
                             onChange={ ( v ) => setDateFilter( setCreatedTo, v ) }
-                            ariaLabel={ __( 'Filter donations to', 'gratora' ) }
-                            placeholder={ __( 'Any', 'gratora' ) }
+                            ariaLabel={ __( 'Filter donations to', 'gratora-donation-platform' ) }
+                            placeholder={ __( 'Any', 'gratora-donation-platform' ) }
                         />
                         { ( createdFrom || createdTo ) && (
                             <button
@@ -568,12 +504,12 @@ export default function List() {
                                 className="gratora-page-head__date-filters-clear"
                                 onClick={ () => { setCreatedFrom( '' ); setCreatedTo( '' ); } }
                             >
-                                { __( 'Clear', 'gratora' ) }
+                                { __( 'Clear', 'gratora-donation-platform' ) }
                             </button>
                         ) }
                     </div>
                     <span className="gratora-page-head__meta">
-                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'gratora' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'gratora-donation-platform' ), total.toLocaleString() ) }
                     </span>
                     { /* Nothing to reveal on a site that has never taken a test
                          donation, so the control is only offered once some
@@ -583,15 +519,15 @@ export default function List() {
                             <Switch
                                 checked={ includeTest }
                                 onChange={ toggleTest }
-                                label={ __( 'Show test donations', 'gratora' ) }
+                                label={ __( 'Show test donations', 'gratora-donation-platform' ) }
                             />
-                            <span>{ __( 'Show test donations', 'gratora' ) }</span>
+                            <span>{ __( 'Show test donations', 'gratora-donation-platform' ) }</span>
                         </label>
                     ) }
                     { userCan( 'refund_donations' ) && (
                         <Btn variant="primary" onClick={ () => setRecording( true ) }>
                             <Plus size={ 16 } strokeWidth={ 1.75 } />
-                            { __( 'Record a donation', 'gratora' ) }
+                            { __( 'Record a donation', 'gratora-donation-platform' ) }
                         </Btn>
                     ) }
                 </div>
@@ -610,7 +546,7 @@ export default function List() {
                         // they get, so it names the row.
                         notify.success( sprintf(
                             /* translators: %s: the new donation's reference. */
-                            __( 'Recorded as %s.', 'gratora' ),
+                            __( 'Recorded as %s.', 'gratora-donation-platform' ),
                             created?.reference || ''
                         ) );
                     } }
@@ -622,6 +558,18 @@ export default function List() {
                 </Notice>
             ) }
 
+            { refusals.length > 0 && (
+                <Notice status="warning" onRemove={ () => setRefusals( [] ) }>
+                    <ul style={ { margin: 0, paddingLeft: 18 } }>
+                        { refusals.map( ( r ) => (
+                            <li key={ r.reference }>
+                                <code>{ r.reference }</code>{ ': ' }{ r.reason }
+                            </li>
+                        ) ) }
+                    </ul>
+                </Notice>
+            ) }
+
             { testHidden > 0 && ! includeTest && (
                 <Notice status="info" isDismissible={ false }>
                     { sprintf(
@@ -630,13 +578,13 @@ export default function List() {
                             '%d test donation is hidden.',
                             '%d test donations are hidden.',
                             testHidden,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'gratora' ) }
+                        { __( 'Show them', 'gratora-donation-platform' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -649,15 +597,15 @@ export default function List() {
                  test donations. */ }
             { stats?.includes_test && (
                 <p className="gratora-list-note">
-                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'gratora' ) }
+                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'gratora-donation-platform' ) }
                 </p>
             ) }
 
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donations yet', 'gratora' ) }
-                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'gratora' ) }
+                    title={ __( 'No donations yet', 'gratora-donation-platform' ) }
+                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'gratora-donation-platform' ) }
                 />
             ) : (
                 <div className={ `gratora-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
@@ -677,11 +625,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'gratora' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora-donation-platform' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora-donation-platform' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'gratora' ) }
+                                    { __( 'Clear filters', 'gratora-donation-platform' ) }
                                 </Btn>
                             }
                         />
@@ -698,39 +646,39 @@ export function donationKpis( stats ) {
     // Per card, not once above the strip: a single figure gets read out, quoted
     // and screenshotted on its own, and it has to carry its own disclaimer.
     const includesTest = !! stats?.includes_test;
-    const testSub = includesTest ? __( 'Includes test donations', 'gratora' ) : null;
+    const testSub = includesTest ? __( 'Includes test donations', 'gratora-donation-platform' ) : null;
 
     let raisedSub = testSub;
     if ( stats?.currency ) {
         raisedSub = includesTest
             ? sprintf(
                 /* translators: %s: currency code */
-                __( 'in %s, includes test donations', 'gratora' ),
+                __( 'in %s, includes test donations', 'gratora-donation-platform' ),
                 stats.currency
             )
-            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'gratora' ), stats.currency );
+            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'gratora-donation-platform' ), stats.currency );
     }
 
     return [
         {
-            label: __( 'Total donations', 'gratora' ),
+            label: __( 'Total donations', 'gratora-donation-platform' ),
             value: stats ? String( stats.total_count ) : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Paid', 'gratora' ),
+            label: __( 'Paid', 'gratora-donation-platform' ),
             value: stats ? String( stats.paid_count ) : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Raised', 'gratora' ),
+            label: __( 'Raised', 'gratora-donation-platform' ),
             value: stats
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: raisedSub,
         },
         {
-            label: __( 'Unique donors', 'gratora' ),
+            label: __( 'Unique donors', 'gratora-donation-platform' ),
             value: stats ? String( stats.donors_count ) : '-',
             sub:   testSub,
         },

@@ -111,6 +111,11 @@ final class Donation extends Model
     public ?string $refunded_at = null;
     /** Cumulative refunded minor units; mirrors SUM(succeeded refunds), the concurrency guard for over-refund. */
     public int $refunded_cents = 0;
+    public ?string $trashed_at = null;
+    public ?int $trashed_by = null;
+    /** Set when the payment behind this row was closed, and never cleared by a restore. */
+    public ?string $payment_stopped_at = null;
+    public ?string $payment_stopped_reason = null;
     public string $created_at;
     public string $updated_at;
 }
@@ -162,6 +167,10 @@ Donation::schema(function (Table $t): void {
     $t->datetime('paid_at')->nullable();
     $t->datetime('refunded_at')->nullable();
     $t->bigInteger('refunded_cents')->unsigned()->default(0);
+    $t->datetime('trashed_at')->nullable();
+    $t->bigInteger('trashed_by')->unsigned()->nullable();
+    $t->datetime('payment_stopped_at')->nullable();
+    $t->string('payment_stopped_reason', 191)->nullable();
     $t->datetime('created_at');
     $t->datetime('updated_at');
 
@@ -189,6 +198,10 @@ Donation::schema(function (Table $t): void {
     // unfiltered list, which is the sort a user reaches for first. Measured,
     // (is_test, status, amount_cents) still filesorts that view.
     $t->index(['is_test', 'amount_cents']);
+
+    // The Trash view selects on trashed_at and sorts newest first, and no
+    // index above starts with the column that selects it.
+    $t->index(['trashed_at', 'created_at']);
 
     // FxBackfill reads "base_amount_cents IS NULL" on every Tools screen load
     // and on the daily rate job, and no composite above starts with it, so the

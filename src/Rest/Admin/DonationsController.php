@@ -10,12 +10,15 @@ use Gratora\Currency\Currency;
 use Gratora\Currency\SupportedCurrencies;
 use Gratora\Donations\ChannelClassifier;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationDeleter;
 use Gratora\Donations\DonationIntent;
 use Gratora\Donations\DonationNoteRepository;
 use Gratora\Donations\DonationQueries;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
+use Gratora\Donations\DonationTrasher;
 use Gratora\Donations\Refund;
+use Gratora\Donations\TrashOutcome;
 use Gratora\Donors\Donor;
 use Gratora\Donors\DonorRepository;
 use Gratora\Donors\DonorService;
@@ -26,6 +29,7 @@ use Gratora\Foundation\Helpers\Csv;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Funds\Fund;
 use Gratora\Funds\FundRepository;
+use Gratora\Gateways\ClosesUnsettledPayment;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\PayPal\PayPalHoldReason;
 use Gratora\Receipts\OrgProfile;
@@ -37,6 +41,7 @@ use Gratora\Receipts\Renderers\GenericReceiptRenderer;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Rest\Paging;
 use Gratora\Settings\SettingsService;
+use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
 use WP_Error;
@@ -73,6 +78,8 @@ final class DonationsController
         private DonationNoteRepository $notes,
         private GenericReceiptRenderer $genericRenderer,
         private GatewayManager $gateways,
+        private DonationTrasher $trasher,
+        private DonationDeleter $deleter,
     ) {
     }
 
@@ -156,6 +163,43 @@ final class DonationsController
             'callback'            => [$this, 'stats'],
             'permission_callback' => [$this, 'canAccess'],
             'args'                => $this->indexArgs(),
+        ]);
+
+        // All three before the (?P<reference>...) route, which would otherwise
+        // swallow them: "trash" is a valid reference as far as that regex goes.
+        //
+        // Collection routes rather than per-reference, because every row gets
+        // its own answer and the screens act on a selection.
+        register_rest_route(self::NAMESPACE, '/admin/donations/trash', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            // Stopping a live payment is charge-tier work, not note-editing.
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
+            'callback'            => [$this, 'trashMany'],
+            'args'                => self::batchArgs() + [
+                'note' => ['type' => 'string'],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/donations/restore', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            // Whoever can trash has to be able to undo it.
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
+            'callback'            => [$this, 'restoreMany'],
+            'args'                => self::batchArgs(),
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/donations/delete', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_delete_donations'),
+            'callback'            => [$this, 'deleteMany'],
+            'args'                => self::batchArgs() + [
+                'confirmation'  => ['type' => 'string', 'required' => true],
+                'note'          => ['type' => 'string'],
+                // Decision 5 is on by default, and the server still refuses any
+                // donor its own gate refuses, so the default can never remove
+                // somebody the checkbox would not have offered.
+                'delete_donors' => ['type' => 'boolean', 'default' => true],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)', [
@@ -253,12 +297,12 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('gratora_invalid', __('Note body is required.', 'gratora'), ['status' => 400]);
+            return new WP_Error('gratora_invalid', __('Note body is required.', 'gratora-donation-platform'), ['status' => 400]);
         }
         $note = $this->notes->create($donation->id, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -270,10 +314,10 @@ final class DonationsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('gratora_not_found', __('Note not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Note not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
-            return new WP_Error('gratora_forbidden', __('You cannot delete this note.', 'gratora'), ['status' => 403]);
+            return new WP_Error('gratora_forbidden', __('You cannot delete this note.', 'gratora-donation-platform'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -297,7 +341,7 @@ final class DonationsController
 
         $donation = $this->donations->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         return new WP_REST_Response([
@@ -462,14 +506,14 @@ final class DonationsController
     {
         $offline = $this->gateways->get('offline');
         if (! $offline) {
-            return new WP_Error('gratora_offline_unavailable', __('The offline gateway is not available.', 'gratora'), ['status' => 500]);
+            return new WP_Error('gratora_offline_unavailable', __('The offline gateway is not available.', 'gratora-donation-platform'), ['status' => 500]);
         }
 
         $method = (string) $request['payment_method'];
         if (! in_array($method, $offline->paymentMethods(), true)) {
             return new WP_Error(
                 'gratora_invalid_payment_method',
-                __('That is not a way money can arrive offline.', 'gratora'),
+                __('That is not a way money can arrive offline.', 'gratora-donation-platform'),
                 ['status' => 400]
             );
         }
@@ -478,7 +522,7 @@ final class DonationsController
         if ($receivedAt === null) {
             return new WP_Error(
                 'gratora_invalid_received_at',
-                __('Give the date the money arrived, and it cannot be in the future.', 'gratora'),
+                __('Give the date the money arrived, and it cannot be in the future.', 'gratora-donation-platform'),
                 ['status' => 400]
             );
         }
@@ -493,7 +537,7 @@ final class DonationsController
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
                 'gratora_invalid_amount',
-                __('This currency does not support fractional amounts.', 'gratora'),
+                __('This currency does not support fractional amounts.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -503,7 +547,7 @@ final class DonationsController
                 'gratora_unsupported_currency',
                 sprintf(
                     /* translators: 1: the currency code entered, 2: the accepted codes. */
-                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'gratora'),
+                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'gratora-donation-platform'),
                     $currency,
                     implode(', ', SupportedCurrencies::all())
                 ),
@@ -521,7 +565,7 @@ final class DonationsController
             if ($existing !== null) {
                 return new WP_Error(
                     'gratora_duplicate_donation',
-                    __('This donor is already down for the same amount on that date.', 'gratora'),
+                    __('This donor is already down for the same amount on that date.', 'gratora-donation-platform'),
                     ['status' => 409, 'reference' => (string) $existing->reference]
                 );
             }
@@ -534,7 +578,7 @@ final class DonationsController
         if ($campaignId !== null && Campaign::query()->find('id', $campaignId) === null) {
             return new WP_Error(
                 'gratora_invalid_campaign',
-                __('That campaign does not exist. Pick one from the list.', 'gratora'),
+                __('That campaign does not exist. Pick one from the list.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -554,7 +598,7 @@ final class DonationsController
             if ($extra === []) {
                 return new WP_Error(
                     'gratora_invalid_attribution',
-                    __('That is not somebody this campaign can credit a donation to.', 'gratora'),
+                    __('That is not somebody this campaign can credit a donation to.', 'gratora-donation-platform'),
                     ['status' => 422]
                 );
             }
@@ -570,7 +614,7 @@ final class DonationsController
             if (! in_array($fundId, $offered, true)) {
                 return new WP_Error(
                     'gratora_invalid_fund',
-                    __('That fund is not open for donations right now. Pick another.', 'gratora'),
+                    __('That fund is not open for donations right now. Pick another.', 'gratora-donation-platform'),
                     ['status' => 422]
                 );
             }
@@ -641,7 +685,7 @@ final class DonationsController
                 (int) $donation->id,
                 sprintf(
                     /* translators: %s: how the money arrived, e.g. check. */
-                    __('Recorded by hand. Received as %s.', 'gratora'),
+                    __('Recorded by hand. Received as %s.', 'gratora-donation-platform'),
                     $method
                 ),
                 get_current_user_id() ?: null
@@ -678,7 +722,7 @@ final class DonationsController
             if ($recorded !== null && (string) $recorded->status === 'pending') {
                 $this->donationService->markFailed(
                     $recorded,
-                    __('Recording this donation by hand did not finish.', 'gratora')
+                    __('Recording this donation by hand did not finish.', 'gratora-donation-platform')
                 );
             }
 
@@ -837,6 +881,10 @@ final class DonationsController
             : ($search !== '' ? $this->donorService->findIdsBySearch($search) : []);
 
         $result = $this->donations->listAdmin([
+            // Forwarded here and deliberately nowhere else: stats() and the CSV
+            // take the same arguments, and the bin must not be mixable into the
+            // figures or the export.
+            'trashed'            => (string) ($request['trashed'] ?? 'exclude'),
             'page'               => Paging::page($request['page'] ?? null),
             'per_page'           => (int) ($request['per_page'] ?? 25),
             'orderby'            => (string) ($request['orderby'] ?? 'created_at'),
@@ -886,6 +934,12 @@ final class DonationsController
 
         $attribution = $this->attributionLabels($result['items']);
 
+        // Batched for the whole page: one receipts question and one refunds
+        // question, rather than the per-row pair that would be exactly the N+1
+        // the loads above go out of their way to avoid.
+        $untrashable = $this->trasher->untrashableReasons($result['items']);
+        $undeletable = $this->deleter->undeletableReasons($result['items']);
+
         $shaped = [];
         foreach ($result['items'] as $d) {
             /** @var Donation $d */
@@ -896,6 +950,10 @@ final class DonationsController
                 $d->form_id     ? ($formsById[$d->form_id]         ?? null) : null,
                 $d->fund_id     ? ($fundsById[$d->fund_id]         ?? null) : null,
                 $attribution[(int) $d->id] ?? null,
+                [
+                    'untrashable' => $untrashable[(int) $d->id] ?? null,
+                    'undeletable' => $undeletable[(int) $d->id] ?? null,
+                ],
             );
         }
 
@@ -903,6 +961,14 @@ final class DonationsController
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total',      (string) $result['total']);
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
+
+        // Deliberately unnarrowed by search, status or campaign: the Trash
+        // segment names the whole bin, so the count must not move while
+        // somebody types. include_test applies, because both screens are
+        // showing the same ledger.
+        $response->header('X-Gratora-Trashed', (string) $this->donations->countTrashed([
+            'include_test' => (bool) $request['include_test'],
+        ]));
 
         // Only when the caller did not ask about test rows: otherwise they are
         // already looking at exactly what they chose. Nothing is hidden once
@@ -972,7 +1038,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $donor = $this->donors->findById($donation->donor_id);
@@ -1052,7 +1118,14 @@ final class DonationsController
                         // donation again, and at five rows it crowds out the
                         // giving history this rail exists to show. The row being
                         // looked at stays in its own list either way.
-                        $g->whereRaw(DonationQueries::notSupersededPredicate())
+                        // Both raw predicates joined into the one fragment,
+                        // because a second whereRaw would splice in with no
+                        // connector. A trashed attempt is not context either,
+                        // and the row being looked at still stays by id.
+                        $g->whereRaw(
+                            DonationQueries::notSupersededPredicate()
+                            . ' AND ' . DonationQueries::notTrashedPredicate()
+                        )
                           ->orWhere('id', (int) $donation->id);
                     })
                     ->orderBy('created_at', 'DESC')
@@ -1160,14 +1233,14 @@ final class DonationsController
     {
         $donation = $this->donations->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $released = $this->donationService->failAwaitedRefund($donation, (string) $request['gateway_refund_id']);
         if (! $released) {
             return new WP_Error(
                 'gratora_refund_not_awaiting',
-                __('That refund is not waiting to settle, so there is nothing to release.', 'gratora'),
+                __('That refund is not waiting to settle, so there is nothing to release.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -1175,15 +1248,223 @@ final class DonationsController
         return $this->actionResult($request);
     }
 
+    /**
+     * The selection every one of the three verbs takes.
+     *
+     * Bounded at fifty because the screens send a visible page selection and an
+     * unbounded list is a request that runs until something times out
+     * half-done. The UI splits a larger selection and merges the answers.
+     *
+     * @return array<string,mixed>
+     */
+    private static function batchArgs(): array
+    {
+        return [
+            'references' => [
+                'type'     => 'array',
+                'required' => true,
+                'items'    => ['type' => 'string'],
+                'minItems' => 1,
+                'maxItems' => 50,
+            ],
+        ];
+    }
+
+    /** @return list<string> */
+    private static function referencesFrom(WP_REST_Request $request): array
+    {
+        return array_values(array_filter(array_map(
+            static fn ($r): string => trim((string) $r),
+            (array) $request['references']
+        )));
+    }
+
+    /**
+     * Rows are worked one after another and reported one at a time: a mixed
+     * batch is the normal case, and one refusal must not roll back the rows
+     * that succeeded.
+     *
+     * @since 1.0.0
+     */
+    public function trashMany(WP_REST_Request $request): WP_REST_Response
+    {
+        $note    = $request['note'] !== null ? (string) $request['note'] : null;
+        $done    = [];
+        $already = [];
+        $refused = [];
+
+        foreach (self::referencesFrom($request) as $reference) {
+            $donation = $this->donations->findByReference($reference);
+            if (! $donation) {
+                $refused[] = ['reference' => $reference, 'reason' => __('Donation not found.', 'gratora-donation-platform')];
+                continue;
+            }
+
+            $outcome = $this->trasher->trash($donation, $note);
+
+            if ($outcome->outcome === TrashOutcome::ALREADY) {
+                $already[] = $reference;
+                continue;
+            }
+
+            if ($outcome->outcome === TrashOutcome::TRASHED) {
+                // The dialog said what would be attempted; this says what
+                // happened, per row, because the row could not know in advance.
+                $done[] = ['reference' => $reference, 'payment_stopped' => $outcome->paymentStopped];
+                continue;
+            }
+
+            $refused[] = ['reference' => $reference, 'reason' => (string) $outcome->reason];
+        }
+
+        return new WP_REST_Response(['done' => $done, 'already' => $already, 'refused' => $refused], 200);
+    }
+
+    /** @since 1.0.0 */
+    public function restoreMany(WP_REST_Request $request): WP_REST_Response
+    {
+        $done    = [];
+        $already = [];
+        $refused = [];
+
+        foreach (self::referencesFrom($request) as $reference) {
+            $donation = $this->donations->findByReference($reference);
+            if (! $donation) {
+                $refused[] = ['reference' => $reference, 'reason' => __('Donation not found.', 'gratora-donation-platform')];
+                continue;
+            }
+
+            if ($donation->trashed_at === null) {
+                $already[] = $reference;
+                continue;
+            }
+
+            $this->trasher->restore($donation);
+
+            // The payment stays stopped, and the screen says so rather than
+            // implying the row is collectable again.
+            $done[] = ['reference' => $reference, 'payment_stopped' => $donation->payment_stopped_at !== null];
+        }
+
+        return new WP_REST_Response(['done' => $done, 'already' => $already, 'refused' => $refused], 200);
+    }
+
+    /** @since 1.0.0 */
+    public function deleteMany(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        // Compared the way the other irreversible control compares it. Anything
+        // else returns 400 and removes nothing at all.
+        if (strtoupper(trim((string) $request['confirmation'])) !== 'DELETE') {
+            return new WP_Error(
+                'gratora_confirmation_required',
+                __('Type DELETE to confirm.', 'gratora-donation-platform'),
+                ['status' => 400]
+            );
+        }
+
+        $note    = $request['note'] !== null ? (string) $request['note'] : null;
+        $done    = [];
+        $already = [];
+        $refused = [];
+        $donorIds = [];
+
+        foreach (self::referencesFrom($request) as $reference) {
+            $donation = $this->donations->findByReference($reference);
+            if (! $donation) {
+                // Already gone is the outcome the caller asked for, not a fault:
+                // two admins working the same page both get a clean answer.
+                $already[] = $reference;
+                continue;
+            }
+
+            $donorId = (int) $donation->donor_id;
+
+            try {
+                $this->deleter->delete($donation, $note);
+                $done[]          = ['reference' => $reference];
+                $donorIds[$donorId] = true;
+            } catch (InvalidArgumentException $e) {
+                $refused[] = ['reference' => $reference, 'reason' => $e->getMessage()];
+            }
+        }
+
+        return new WP_REST_Response([
+            'done'           => $done,
+            'already'        => $already,
+            'refused'        => $refused,
+            'donors_deleted' => $this->cascadeDonors($request, array_keys($donorIds)),
+        ], 200);
+    }
+
+    /**
+     * Remove the donors those attempts were the whole of, where the donor gate
+     * agrees. Silently skips the ones it refuses, so the default can never
+     * remove somebody the checkbox would not have offered.
+     *
+     * Deleting a donor record is donor-tier work, so a role that can clear
+     * donations but not erase people deletes the attempts and leaves the donor.
+     *
+     * @param list<int> $donorIds
+     * @return list<int>
+     */
+    private function cascadeDonors(WP_REST_Request $request, array $donorIds): array
+    {
+        if ($donorIds === [] || ! $request['delete_donors']) {
+            return [];
+        }
+        if (! Capabilities::userCan('gratora_redact_donors')) {
+            return [];
+        }
+
+        $donors = array_values(array_filter(array_map(
+            static fn (int $id): ?Donor => Donor::query()->find('id', $id),
+            $donorIds
+        )));
+        if ($donors === []) {
+            return [];
+        }
+
+        $reasons = $this->donorService->undeletableReasons($donors);
+        $deleted = [];
+
+        foreach ($donors as $donor) {
+            $id = (int) $donor->id;
+            if (($reasons[$id] ?? null) !== null) {
+                continue;
+            }
+
+            try {
+                $this->donorService->delete($donor);
+                $deleted[] = $id;
+            } catch (InvalidArgumentException $e) {
+                // The gate changed under us, which is the same answer as a
+                // refusal: the donor stays and the donations are still gone.
+                continue;
+            }
+        }
+
+        return $deleted;
+    }
+
     public function markPaid(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         if ($donation->status === 'paid') {
             return $this->actionResult($request);
+        }
+        // Settling a row that is in no list would issue a receipt and move a
+        // campaign total for a donation nobody can see. The gateway-driven
+        // path untrashes instead; an admin is asked to do it deliberately.
+        if (DonationQueries::isTrashed($donation)) {
+            return new WP_Error(
+                'gratora_donation_trashed',
+                __('This donation is in the trash. Restore it first.', 'gratora-donation-platform'),
+                ['status' => 422]
+            );
         }
         // `processing` is here because a bank debit settles days after it was
         // authorised, and an admin reconciling a bank statement is often the
@@ -1193,7 +1474,7 @@ final class DonationsController
                 'gratora_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as paid.', 'gratora'),
+                    __('Cannot mark a %s donation as paid.', 'gratora-donation-platform'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1233,7 +1514,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         if ($donation->status === 'failed') {
             return $this->actionResult($request);
@@ -1241,7 +1522,7 @@ final class DonationsController
         if ($donation->status === 'paid') {
             return new WP_Error(
                 'gratora_invalid_transition',
-                __('A paid donation cannot be marked as failed. Use refund instead.', 'gratora'),
+                __('A paid donation cannot be marked as failed. Use refund instead.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -1252,7 +1533,7 @@ final class DonationsController
                 'gratora_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as failed.', 'gratora'),
+                    __('Cannot mark a %s donation as failed.', 'gratora-donation-platform'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1278,7 +1559,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
@@ -1295,7 +1576,7 @@ final class DonationsController
         if ($cancelPlan && $planId === 0) {
             return new WP_Error(
                 'gratora_no_plan',
-                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'gratora'),
+                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -1359,7 +1640,7 @@ final class DonationsController
                 'id'      => $planId,
                 'status'  => null,
                 'stopped' => false,
-                'error'   => __('The recurring schedule could not be found, so it is still running.', 'gratora'),
+                'error'   => __('The recurring schedule could not be found, so it is still running.', 'gratora-donation-platform'),
             ];
         }
 
@@ -1392,7 +1673,7 @@ final class DonationsController
             'stopped' => $stopped,
             'error'   => $stopped ? null : ($response->is_error()
                 ? $response->as_error()->get_error_message()
-                : __('The recurring schedule is still running.', 'gratora')),
+                : __('The recurring schedule is still running.', 'gratora-donation-platform')),
         ];
     }
 
@@ -1402,7 +1683,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         // Erasure wiped the address, so the issuer would find nothing to send to
@@ -1413,7 +1694,7 @@ final class DonationsController
         if ($donor && $donor->redacted_at !== null) {
             return new WP_Error(
                 'gratora_donor_redacted',
-                __('This donor has been erased, so there is no address to send a receipt to.', 'gratora'),
+                __('This donor has been erased, so there is no address to send a receipt to.', 'gratora-donation-platform'),
                 ['status' => 422],
             );
         }
@@ -1422,7 +1703,7 @@ final class DonationsController
         if (! $ok) {
             return new WP_Error(
                 'gratora_resend_unavailable',
-                __('Receipts can only be resent for paid donations.', 'gratora'),
+                __('Receipts can only be resent for paid donations.', 'gratora-donation-platform'),
                 ['status' => 422],
             );
         }
@@ -1446,14 +1727,14 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation  = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $flags = (array) ($donation->flags ?? []);
         if (empty($flags['subscription_creation_failed'])) {
             return new WP_Error(
                 'gratora_no_retry_needed',
-                __('No subscription-creation failure is recorded for this donation.', 'gratora'),
+                __('No subscription-creation failure is recorded for this donation.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -1464,7 +1745,7 @@ final class DonationsController
         if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
             return new WP_Error(
                 'gratora_retry_not_allowed',
-                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'gratora'),
+                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -1473,7 +1754,7 @@ final class DonationsController
         if (! $gateway instanceof \Gratora\Gateways\Stripe\StripeGateway) {
             return new WP_Error(
                 'gratora_unsupported_gateway',
-                __('Only Stripe subscriptions can be retried.', 'gratora'),
+                __('Only Stripe subscriptions can be retried.', 'gratora-donation-platform'),
                 ['status' => 422]
             );
         }
@@ -1503,14 +1784,14 @@ final class DonationsController
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('gratora_not_found', __('Receipt not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Receipt not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $pdf = $this->receiptIssuer->renderReceiptPdf($receiptId);
         if ($pdf === null || $pdf === '') {
             return new WP_Error(
                 'gratora_render_failed',
-                __('Could not regenerate the receipt PDF. The reason is recorded under Tools > Logs.', 'gratora'),
+                __('Could not regenerate the receipt PDF. The reason is recorded under Tools > Logs.', 'gratora-donation-platform'),
                 ['status' => 500],
             );
         }
@@ -1733,29 +2014,29 @@ final class DonationsController
         fwrite($out, "\xEF\xBB\xBF");
 
         Csv::writeRow($out, array_merge([
-            __('Reference', 'gratora'),
-            __('Status', 'gratora'),
-            __('Amount', 'gratora'),
-            __('Currency', 'gratora'),
-            __('Base amount', 'gratora'),
-            __('Base currency', 'gratora'),
-            __('Fee', 'gratora'),
-            __('Net', 'gratora'),
+            __('Reference', 'gratora-donation-platform'),
+            __('Status', 'gratora-donation-platform'),
+            __('Amount', 'gratora-donation-platform'),
+            __('Currency', 'gratora-donation-platform'),
+            __('Base amount', 'gratora-donation-platform'),
+            __('Base currency', 'gratora-donation-platform'),
+            __('Fee', 'gratora-donation-platform'),
+            __('Net', 'gratora-donation-platform'),
             // Its own column rather than netted off Net: Net is the amount less
             // the processing fee, which is what the gateway settled, so a row
             // refunded afterwards has to carry both figures to reconcile.
-            __('Refunded', 'gratora'),
-            __('Gateway', 'gratora'),
-            __('Frequency', 'gratora'),
-            __('Fund', 'gratora'),
-            __('Country', 'gratora'),
+            __('Refunded', 'gratora-donation-platform'),
+            __('Gateway', 'gratora-donation-platform'),
+            __('Frequency', 'gratora-donation-platform'),
+            __('Fund', 'gratora-donation-platform'),
+            __('Country', 'gratora-donation-platform'),
         ], $withDonorPii ? [
-            __('Donor name', 'gratora'),
-            __('Donor email', 'gratora'),
+            __('Donor name', 'gratora-donation-platform'),
+            __('Donor email', 'gratora-donation-platform'),
         ] : [], [
-            __('Created at', 'gratora'),
-            __('Paid at', 'gratora'),
-            __('Refunded at', 'gratora'),
+            __('Created at', 'gratora-donation-platform'),
+            __('Paid at', 'gratora-donation-platform'),
+            __('Refunded at', 'gratora-donation-platform'),
         ]));
 
         foreach (array_chunk($ids, self::EXPORT_PAGE) as $idChunk) {
@@ -1821,8 +2102,20 @@ final class DonationsController
 
     /** @since 1.0.0 */
     /** @param array<string, mixed>|null $attribution */
-    private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null, ?Fund $fund = null, ?array $attribution = null): array
+    private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null, ?Fund $fund = null, ?array $attribution = null, ?array $removal = null): array
     {
+        // Resolved here when the caller did not batch them, so a screen that
+        // forgets cannot quietly offer a button the server would refuse. The
+        // list batches instead, one receipts and one refunds question per page.
+        $removal ??= [
+            'untrashable' => $this->trasher->untrashableReasons([$d])[(int) $d->id] ?? null,
+            'undeletable' => $this->deleter->undeletableReasons([$d])[(int) $d->id] ?? null,
+        ];
+
+        $untrashable = $removal['untrashable'] ?? null;
+        $undeletable = $removal['undeletable'] ?? null;
+        $trashedBy   = $d->trashed_by !== null ? get_userdata((int) $d->trashed_by) : null;
+
         return [
             'id'           => $d->id,
             'reference'    => $d->reference,
@@ -1869,6 +2162,25 @@ final class DonationsController
             // Whoever inside the campaign this was credited to, when something
             // owns that idea. Null on every donation that is the campaign's own.
             'attributed_to' => $attribution,
+
+            'trashed_at'             => $d->trashed_at,
+            'trashed_by_name'        => $trashedBy ? (string) $trashedBy->display_name : null,
+            // Never cleared by a restore, which is what lets a restored row say
+            // its payment is still stopped without a field of its own.
+            'payment_stopped_at'     => $d->payment_stopped_at,
+            'payment_stopped_reason' => $d->payment_stopped_reason,
+
+            'trashable'          => $d->trashed_at === null && $untrashable === null,
+            'untrashable_reason' => $untrashable,
+            // Permanent delete is offered only from the Trash view, so a row
+            // that has left the bin has left the ceremony that authorised it.
+            'deletable'          => $d->trashed_at !== null && $undeletable === null,
+            'delete_blocked'     => $undeletable,
+
+            // Whether trashing this would actually close something. False where
+            // the gateway settles out of band, so the dialog can say that an
+            // emailed reference can still be paid by hand.
+            'stops_payment'      => $this->gateways->get((string) $d->gateway) instanceof ClosesUnsettledPayment,
         ];
     }
 
@@ -1921,7 +2233,7 @@ final class DonationsController
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'gratora');
+            return __('[redacted]', 'gratora-donation-platform');
         }
 
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
@@ -1955,6 +2267,9 @@ final class DonationsController
     {
         // gateway is NOT NULL varchar(32); '' is the only empty case.
         $q = Donation::query()->distinct()->whereRaw("gateway <> ''");
+        // A gateway present only on trashed rows is not a filter anyone
+        // browsing the list can use, and offering it returns nothing.
+        $q = DonationQueries::notTrashed($q);
         if (! $request['include_test']) {
             $q = DonationQueries::live($q);
         }
@@ -1984,11 +2299,11 @@ final class DonationsController
     public static function gatewayLabel(string $slug): string
     {
         $known = [
-            'stripe'  => __('Stripe', 'gratora'),
-            'paypal'  => __('PayPal', 'gratora'),
-            'offline' => __('Offline', 'gratora'),
-            'sandbox' => __('Test donation', 'gratora'),
-            'manual'  => __('Manually entered', 'gratora'),
+            'stripe'  => __('Stripe', 'gratora-donation-platform'),
+            'paypal'  => __('PayPal', 'gratora-donation-platform'),
+            'offline' => __('Offline', 'gratora-donation-platform'),
+            'sandbox' => __('Test donation', 'gratora-donation-platform'),
+            'manual'  => __('Manually entered', 'gratora-donation-platform'),
         ];
 
         if (isset($known[$slug])) {
@@ -2028,6 +2343,11 @@ final class DonationsController
             // shows one kind only, the scope widens to both.
             'superseded'         => ['type' => 'boolean'],
             'include_superseded' => ['type' => 'boolean', 'default' => false],
+            // No include_trashed twin. The test and superseded pairs widen
+            // because both kinds are the same ledger; the trash is a separate
+            // screen, and mixing it into a list that also feeds the KPI
+            // aggregate and the CSV would put it back into both.
+            'trashed'      => ['type' => 'string', 'enum' => ['exclude', 'only'], 'default' => 'exclude'],
             'created_from' => ['type' => 'string'],
             'created_to'   => ['type' => 'string'],
         ];

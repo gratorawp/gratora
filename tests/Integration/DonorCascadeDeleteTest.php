@@ -1,0 +1,131 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Gratora\Tests\Integration;
+
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donations\DonationTrasher;
+use Gratora\Donations\TrashOutcome;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use InvalidArgumentException;
+
+/**
+ * Deleting a spam donor, and what goes with their attempts.
+ *
+ * The cascade runs each donation through the one service that knows what a
+ * donation drags behind it, rather than deleting the rows and leaving the rest.
+ * A bulk delete is indistinguishable from this until you look at what it leaves
+ * on the floor: the consent the attempt recorded, and no record of the removal
+ * at all.
+ */
+final class DonorCascadeDeleteTest extends IntegrationTestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+    }
+
+    /** A stopped spam attempt: what the donor gate lets through. */
+    private function stoppedAttempt(): Donation
+    {
+        $donation = Plugin::instance()->container->get(DonationService::class)->createPending(new DonationIntent(
+            email:        'cascade-' . uniqid() . '@example.test',
+            amount_cents: 2500,
+            currency:     'USD',
+            gateway:      'offline',
+            frequency:    'one_time',
+        ))['donation'];
+
+        $outcome = Plugin::instance()->container->get(DonationTrasher::class)->trash($donation);
+        $this->assertSame(TrashOutcome::TRASHED, $outcome->outcome, (string) $outcome->reason);
+
+        return $donation;
+    }
+
+    private function donors(): DonorService
+    {
+        return Plugin::instance()->container->get(DonorService::class);
+    }
+
+    private function donorFor(Donation $donation): Donor
+    {
+        return Donor::query()->find('id', (int) $donation->donor_id);
+    }
+
+    public function test_the_cascade_records_each_removal_and_the_record_outlives_the_donor(): void
+    {
+        $donation  = $this->stoppedAttempt();
+        $reference = (string) $donation->reference;
+        $donorId   = (int) $donation->donor_id;
+
+        $this->donors()->delete($this->donorFor($donation));
+
+        $this->assertNull(Donor::query()->find('id', $donorId));
+        $this->assertNull(Donation::query()->find('id', (int) $donation->id));
+
+        $rows = Event::query()->where('type', 'donation.deleted')->getAll();
+        $this->assertCount(1, $rows, 'the cascade says what it removed');
+
+        // It survives the donor sweep that runs in the same transaction, which
+        // is the only thing left that can explain the gap in the numbering.
+        $this->assertSame($reference, (string) ((array) $rows[0]->payload)['reference']);
+        $this->assertNull($rows[0]->donor_id, 'and it is not filed as something the donor did');
+    }
+
+    /**
+     * A bulk row delete leaves this behind. The consent is append-only, so a
+     * spam attempt's tick would stand as the donor's answer for a donor who no
+     * longer exists, and be restored by any later import of that address.
+     */
+    public function test_the_cascade_takes_the_consent_the_attempt_recorded(): void
+    {
+        $donation = $this->stoppedAttempt();
+
+        $consent                     = Consent::make();
+        $consent->donor_id           = (int) $donation->donor_id;
+        $consent->purpose            = 'marketing';
+        $consent->granted            = true;
+        $consent->source             = 'donation_form';
+        $consent->source_donation_id = (int) $donation->id;
+        $consent->occurred_at        = gmdate('Y-m-d H:i:s');
+        $consent->save();
+
+        $this->donors()->delete($this->donorFor($donation));
+
+        $this->assertNull(Consent::query()->where('id', (int) $consent->id)->get());
+    }
+
+    /**
+     * New reach, and worth stating: each row now goes through the deleter, so
+     * an add-on that refuses one refuses the whole donor delete. The refusal
+     * has to leave everything standing rather than half of it.
+     */
+    public function test_an_add_on_refusing_one_donation_leaves_the_donor_intact(): void
+    {
+        $donation = $this->stoppedAttempt();
+        $donorId  = (int) $donation->donor_id;
+
+        add_filter('gratora.donation.undeletable_reason', static fn () => 'An add-on still needs this.');
+
+        try {
+            $this->donors()->delete($this->donorFor($donation));
+            $this->fail('the veto should have refused the donor delete');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('add-on', $e->getMessage());
+        } finally {
+            remove_all_filters('gratora.donation.undeletable_reason');
+        }
+
+        $this->assertNotNull(Donor::query()->find('id', $donorId), 'nothing is half deleted');
+        $this->assertNotNull(Donation::query()->find('id', (int) $donation->id));
+        $this->assertSame([], Event::query()->where('type', 'donation.deleted')->getAll());
+    }
+}

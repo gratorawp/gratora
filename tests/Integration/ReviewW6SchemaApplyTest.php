@@ -74,10 +74,10 @@ final class ReviewW6SchemaApplyTest extends IntegrationTestCase
         self::$wpdb->query('ALTER TABLE ' . $this->table() . ' DROP COLUMN first_name, DROP COLUMN last_name');
 
         $cols = $this->columns();
-        $this->assertArrayNotHasKey('first_name', $cols, 'the 1.0.1 table shape');
+        $this->assertArrayNotHasKey('first_name', $cols, 'the table shape without the token columns');
         $this->assertArrayNotHasKey('last_name', $cols);
 
-        update_option('gratora_db_version', '1.0.1', false);
+        update_option('gratora_db_version', '0.9.0', false);
         $this->fireProductWpLoaded();
 
         $cols = $this->columns();

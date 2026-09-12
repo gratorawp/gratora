@@ -136,7 +136,7 @@ final class DonorMetricsService
             $reason = AtRiskReason::classify($r, $plans[(int) $r['id']] ?? null, $today);
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'gratora-donation-platform') . ' #' . $r['id'],
                 'email'               => $email,
                 'country'             => $r['country'],
                 'donations_count'     => $r['donations_count'],
@@ -209,9 +209,9 @@ final class DonorMetricsService
         // notSuperseded, and it matters more here than on the list: this slice
         // is 25 rows newest-first, so replaced attempts push a donor's real
         // giving off their own profile card.
-        $donations = DonationQueries::notSuperseded(
+        $donations = DonationQueries::notTrashed(DonationQueries::notSuperseded(
             Donation::query()->where('donor_id', $donorId)
-        )
+        ))
             ->orderBy('created_at', 'DESC')
             ->limit(25)
             ->getAll();
@@ -240,9 +240,9 @@ final class DonorMetricsService
         // Same reason, and the tab badge reads it. donations_count cannot: it
         // is synced live-only, so a donor who has only rehearsed reads zero
         // while the tab beside it lists their donations.
-        $donationsTotal = DonationQueries::notSuperseded(
+        $donationsTotal = DonationQueries::notTrashed(DonationQueries::notSuperseded(
             Donation::query()->where('donor_id', $donorId)
-        )->count();
+        ))->count();
 
         // Same reason again: the list above is capped at 25, so its length is
         // not how many receipts this donor has. The Donations and Activity tabs
@@ -396,7 +396,7 @@ final class DonorMetricsService
         // Contextual banners.
         $banners = [];
         if ($donor->redacted_at !== null) {
-            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'gratora')];
+            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'gratora-donation-platform')];
         }
         $pastDuePlan = null;
         foreach ($recurringPlans as $p) {
@@ -411,17 +411,17 @@ final class DonorMetricsService
             $name     = ucfirst((string) $pastDuePlan->gateway);
 
             if ($gateway instanceof \Gratora\Gateways\SupportsPaymentRetry) {
-                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'gratora');
+                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'gratora-donation-platform');
             } elseif ($gateway === null) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'gratora'),
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'gratora-donation-platform'),
                     $name
                 );
             } elseif ($gateway instanceof \Gratora\Gateways\SupportsPaymentMethodUpdate) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. PayPal. */
-                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'gratora'),
+                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'gratora-donation-platform'),
                     $name
                 );
             } else {
@@ -433,7 +433,7 @@ final class DonorMetricsService
                 // gateways, and the route answers 422.
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. GoCardless. */
-                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'gratora'),
+                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'gratora-donation-platform'),
                     $name
                 );
             }
@@ -668,11 +668,11 @@ final class DonorMetricsService
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'gratora');
+            return __('[redacted]', 'gratora-donation-platform');
         }
 
         $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
-        return $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $d->id;
+        return $name !== '' ? $name : __('Donor', 'gratora-donation-platform') . ' #' . $d->id;
     }
 
     /**
@@ -713,7 +713,7 @@ final class DonorMetricsService
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'gratora-donation-platform') . ' #' . $r['id'],
                 'email'               => $this->donorService->decryptEmail($donor),
                 'country'             => $r['country'],
                 'total_donated_cents' => $r['total_donated_cents'],
@@ -845,10 +845,13 @@ final class DonorMetricsService
      */
     private function donorEvents(int $donorId)
     {
-        return DonationQueries::notSupersededDonation(
-            Event::query()->where('donor_id', $donorId),
-            DB::getPrefix() . 'gratora_events.donation_id',
-            $donorId
+        return DonationQueries::notTrashedDonation(
+            DonationQueries::notSupersededDonation(
+                Event::query()->where('donor_id', $donorId),
+                DB::getPrefix() . 'gratora_events.donation_id',
+                $donorId
+            ),
+            DB::getPrefix() . 'gratora_events.donation_id'
         );
     }
 

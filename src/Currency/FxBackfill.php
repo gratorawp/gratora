@@ -81,7 +81,11 @@ final class FxBackfill
                 $donation->base_currency     = $base;
                 $donation->fx_rate           = sprintf('%.8F', $rate);
                 $donation->base_amount_cents = (int) round((int) $donation->amount_cents * $rate);
-                $donation->save();
+                $donation->updateColumns([
+                    'base_currency'     => $donation->base_currency,
+                    'fx_rate'           => $donation->fx_rate,
+                    'base_amount_cents' => $donation->base_amount_cents,
+                ]);
                 $converted++;
             }
 

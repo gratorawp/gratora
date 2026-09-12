@@ -13,14 +13,14 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
 
     // Anonymity is about public displays, not about hiding a donor from the
     // org that has to receipt them.
-    const name = donor?.name || donation.donor?.name || __( 'Donor', 'gratora' );
+    const name = donor?.name || donation.donor?.name || __( 'Donor', 'gratora-donation-platform' );
 
     return (
         <header className="dd-head">
             <div className="dd-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'gratora' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</button>
                 <span className="sep">›</span>
-                <button type="button" onClick={ onBack }>{ __( 'Donations', 'gratora' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Donations', 'gratora-donation-platform' ) }</button>
                 <span className="sep">›</span>
                 <span className="mono">{ donation.reference }</span>
             </div>
@@ -29,13 +29,24 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                 <div className="dd-page-head__left">
                     <h1>{ name }</h1>
                     <div className="dd-page-head__meta">
+                        { !! donation.trashed_at && (
+                            <>
+                                <span
+                                    className="dd-pill is-warn"
+                                    title={ __( 'Left out of the donations list, its counts and the CSV export. Nothing has been deleted.', 'gratora-donation-platform' ) }
+                                >
+                                    { __( 'Trashed', 'gratora-donation-platform' ) }
+                                </span>
+                                <span className="dot-sep">·</span>
+                            </>
+                        ) }
                         { !! donation.is_anonymous && (
                             <>
                                 <span
                                     className="dd-pill is-muted"
-                                    title={ __( 'Their name is hidden from public donor lists. It still appears here and on their receipt.', 'gratora' ) }
+                                    title={ __( 'Their name is hidden from public donor lists. It still appears here and on their receipt.', 'gratora-donation-platform' ) }
                                 >
-                                    { __( 'Anonymous publicly', 'gratora' ) }
+                                    { __( 'Anonymous publicly', 'gratora-donation-platform' ) }
                                 </span>
                                 <span className="dot-sep">·</span>
                             </>
@@ -44,7 +55,7 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                         { donation.campaign && (
                             <>
                                 <span className="dot-sep">·</span>
-                                <span>{ __( 'Donated to', 'gratora' ) } <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a></span>
+                                <span>{ __( 'Donated to', 'gratora-donation-platform' ) } <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a></span>
                             </>
                         ) }
                         <span className="dot-sep">·</span>
@@ -64,8 +75,8 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                     </div>
                     { isPartialRefund && (
                         <div className="dd-page-head__amount-sub">
-                            { __( 'Refunded', 'gratora' ) } <strong>{ formatAmount( donation.refunded_cents, donation.currency ) }</strong>
-                            <span> · { __( 'net', 'gratora' ) } </span>
+                            { __( 'Refunded', 'gratora-donation-platform' ) } <strong>{ formatAmount( donation.refunded_cents, donation.currency ) }</strong>
+                            <span> · { __( 'net', 'gratora-donation-platform' ) } </span>
                             <strong className="num">{ formatAmount( donation.amount_cents - donation.refunded_cents, donation.currency ) }</strong>
                         </div>
                     ) }
@@ -75,15 +86,15 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                         { canResend && (
                             <button type="button" className="btn" onClick={ onResendReceipt }>
                                 <IconMail className="ic" />
-                                { __( 'Resend receipt', 'gratora' ) }
+                                { __( 'Resend receipt', 'gratora-donation-platform' ) }
                             </button>
                         ) }
                         { isRefundable && (
                             <button type="button" className="btn btn--danger" onClick={ onRefund }>
                                 <IconRefund className="ic" />
                                 { isPartialRefund
-                                    ? __( 'Refund remaining', 'gratora' )
-                                    : __( 'Refund', 'gratora' ) }
+                                    ? __( 'Refund remaining', 'gratora-donation-platform' )
+                                    : __( 'Refund', 'gratora-donation-platform' ) }
                             </button>
                         ) }
                     </div>

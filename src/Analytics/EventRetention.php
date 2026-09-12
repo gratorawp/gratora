@@ -7,6 +7,7 @@ namespace Gratora\Analytics;
 use Gratora\Async\AsyncDispatcher;
 use Gratora\Foundation\Batch\BatchProcessor;
 use Gratora\Vendor\Queryable\DB;
+use Gratora\Analytics\DonationAudit;
 
 /**
  * Caps gratora_events growth by deleting rows older than the retention window.
@@ -46,6 +47,8 @@ final class EventRetention
         // Delete in bounded batches, re-enqueuing while a full batch came back,
         // so the first prune of a large backlog can't hold locks or hit
         // max_execution_time mid-statement (mirrors DonorRetention/TransientGc).
+        $kept = DonationAudit::placeholders();
+
         $more = BatchProcessor::step(
             fn (int $n) => array_map(
                 static fn ($r) => (int) ($r->id ?? 0),
@@ -53,9 +56,10 @@ final class EventRetention
                     "SELECT id FROM {$prefix}gratora_events
                      WHERE occurred_at < %s
                        AND type NOT LIKE 'donor.%%'
+                       AND type NOT IN ({$kept})
                      ORDER BY id ASC
                      LIMIT %d",
-                    [$cutoff, $n]
+                    array_merge([$cutoff], DonationAudit::TYPES, [$n])
                 )['rows'] ?? []
             ),
             function (array $ids): void {

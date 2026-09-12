@@ -24,6 +24,7 @@ use Gratora\Vendor\Queryable\DB;
 use Gratora\Vendor\Queryable\ModelQueryBuilder;
 use WP_REST_Response;
 use WP_REST_Server;
+use Gratora\Analytics\DonationAudit;
 
 /** @since 1.0.0 */
 final class ToolsController
@@ -262,7 +263,9 @@ final class ToolsController
     /** @since 1.0.0 */
     private static function isReadable(string $source): bool
     {
-        return self::isDiagnostic($source) || str_starts_with($source, self::AUDIT_PREFIX);
+        return self::isDiagnostic($source)
+            || str_starts_with($source, self::AUDIT_PREFIX)
+            || DonationAudit::is($source);
     }
 
     /** @since 1.0.0 */
@@ -298,7 +301,8 @@ final class ToolsController
             $query->where(static function ($q): void {
                 $q->whereLike('type', ErrorLog::PREFIX . '%')
                     ->orWhereLike('type', self::WEBHOOK_PREFIX . '%')
-                    ->orWhereLike('type', self::AUDIT_PREFIX . '%');
+                    ->orWhereLike('type', self::AUDIT_PREFIX . '%')
+                    ->orWhereIn('type', DonationAudit::TYPES);
             });
         }
 
@@ -329,7 +333,7 @@ final class ToolsController
             return self::deliveryRow($e);
         }
 
-        if (str_starts_with((string) $e->type, self::AUDIT_PREFIX)) {
+        if (str_starts_with((string) $e->type, self::AUDIT_PREFIX) || DonationAudit::is((string) $e->type)) {
             return self::auditRow($e);
         }
 
@@ -365,8 +369,8 @@ final class ToolsController
             'source'  => (string) $e->type,
             'message' => $who !== ''
                 /* translators: %s: who performed the action, a staff name or "donor". */
-                ? sprintf(__('Recorded by %s.', 'gratora'), $who)
-                : __('No detail recorded.', 'gratora'),
+                ? sprintf(__('Recorded by %s.', 'gratora-donation-platform'), $who)
+                : __('No detail recorded.', 'gratora-donation-platform'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -396,7 +400,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'error',
             'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            'message'     => $message !== '' ? $message : __('No detail recorded.', 'gratora'),
+            'message'     => $message !== '' ? $message : __('No detail recorded.', 'gratora-donation-platform'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -420,7 +424,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'webhook',
             'source'      => substr((string) $e->type, strlen(self::WEBHOOK_PREFIX)),
-            'message'     => $event !== '' ? $event : __('Unnamed event.', 'gratora'),
+            'message'     => $event !== '' ? $event : __('Unnamed event.', 'gratora-donation-platform'),
             'verified'    => (bool) ($payload['verified'] ?? false),
             'processed'   => (bool) ($payload['processed'] ?? false),
             'error'       => $error !== '' ? $error : null,
@@ -447,7 +451,8 @@ final class ToolsController
             ->where(static function ($q): void {
                 $q->whereLike('type', ErrorLog::PREFIX . '%')
                     ->orWhereLike('type', self::WEBHOOK_PREFIX . '%')
-                    ->orWhereLike('type', self::AUDIT_PREFIX . '%');
+                    ->orWhereLike('type', self::AUDIT_PREFIX . '%')
+                    ->orWhereIn('type', DonationAudit::TYPES);
             })
             ->orderBy('type', 'ASC')
             ->getAll();
@@ -489,16 +494,16 @@ final class ToolsController
             $to = (string) ($user->user_email ?? '');
         }
         if (! is_email($to)) {
-            return new \WP_Error('gratora_invalid_email', __('Provide a valid recipient email.', 'gratora'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_email', __('Provide a valid recipient email.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
-        $subject = __('Gratora test email', 'gratora');
-        $body    = '<p>' . esc_html__('This is a test email from Gratora.', 'gratora') . '</p>'
-                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'gratora') . '</p>'
+        $subject = __('Gratora test email', 'gratora-donation-platform');
+        $body    = '<p>' . esc_html__('This is a test email from Gratora.', 'gratora-donation-platform') . '</p>'
+                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'gratora-donation-platform') . '</p>'
                  . '<p style="color:#6b7280;font-size:12px">'
                  . esc_html(sprintf(
                      /* translators: %s: site URL */
-                     __('Sent at %1$s from %2$s', 'gratora'),
+                     __('Sent at %1$s from %2$s', 'gratora-donation-platform'),
                      gmdate('c'),
                      site_url()
                  ))
@@ -541,10 +546,10 @@ final class ToolsController
                 $reason !== ''
                     ? sprintf(
                         /* translators: %s: the mail server's own error message. */
-                        __('The mail server refused it: %s', 'gratora'),
+                        __('The mail server refused it: %s', 'gratora-donation-platform'),
                         $reason
                     )
-                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'gratora'),
+                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'gratora-donation-platform'),
                 ['status' => 500]
             );
         }
@@ -908,7 +913,7 @@ final class ToolsController
     {
         $csv = (string) ($request->get_json_params()['csv'] ?? '');
         if (trim($csv) === '') {
-            return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
         return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
@@ -923,7 +928,7 @@ final class ToolsController
         $dryRun  = (bool) ($body['dry_run'] ?? true);
 
         if (trim($csv) === '') {
-            return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
         $result = $this->csv->import($csv, $mapping, $dryRun);
@@ -959,7 +964,7 @@ final class ToolsController
                 return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
             }
 
-            return new \WP_Error('gratora_invalid_import', __('No settings payload found.', 'gratora'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_import', __('No settings payload found.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
         // Settings first, so every guard on the write reads the site as it
@@ -991,7 +996,7 @@ final class ToolsController
             // over the group defaults, so the option reads as the defaults, and
             // for the currency group that means the base silently becomes USD.
             if (! is_array($incoming)) {
-                $refused[$opt] = __('That entry is not a settings group.', 'gratora');
+                $refused[$opt] = __('That entry is not a settings group.', 'gratora-donation-platform');
                 continue;
             }
 
@@ -1001,7 +1006,7 @@ final class ToolsController
             // it against and nothing that would read it back. Writing the option
             // anyway would restore a setting nobody honours, past every guard.
             if ($group === null) {
-                $refused[$opt] = __('This site has no settings group by that name.', 'gratora');
+                $refused[$opt] = __('This site has no settings group by that name.', 'gratora-donation-platform');
                 continue;
             }
 
@@ -1051,7 +1056,7 @@ final class ToolsController
                 $locked ? 'gratora_base_currency_locked' : 'gratora_invalid_import',
                 sprintf(
                     /* translators: %s: one or more refusal messages, already sentences. */
-                    __('Part of that file was not restored. %s', 'gratora'),
+                    __('Part of that file was not restored. %s', 'gratora-donation-platform'),
                     implode(' ', $refused)
                 ),
                 [
@@ -1124,7 +1129,7 @@ final class ToolsController
                 'gratora_confirmation_required',
                 sprintf(
                     /* translators: %s: the literal confirmation keyword to type (DELETE) */
-                    __('Type %s to confirm.', 'gratora'),
+                    __('Type %s to confirm.', 'gratora-donation-platform'),
                     'DELETE'
                 ),
                 ['status' => 400]
@@ -1161,12 +1166,12 @@ final class ToolsController
     public static function scopes(): array
     {
         $core = [
-            'all'       => __('Everything', 'gratora'),
-            'currency'  => __('Currency conversions', 'gratora'),
-            'donors'    => __('Donors', 'gratora'),
-            'funds'     => __('Funds', 'gratora'),
-            'campaigns' => __('Campaigns', 'gratora'),
-            'forms'     => __('Forms', 'gratora'),
+            'all'       => __('Everything', 'gratora-donation-platform'),
+            'currency'  => __('Currency conversions', 'gratora-donation-platform'),
+            'donors'    => __('Donors', 'gratora-donation-platform'),
+            'funds'     => __('Funds', 'gratora-donation-platform'),
+            'campaigns' => __('Campaigns', 'gratora-donation-platform'),
+            'forms'     => __('Forms', 'gratora-donation-platform'),
         ];
 
         $added = (array) apply_filters('gratora.recalculate.scopes', []);

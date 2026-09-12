@@ -38,21 +38,21 @@ function initials( name ) {
 export function donorKpis( stats ) {
     return [
         {
-            label: __( 'Total donors', 'gratora' ),
+            label: __( 'Total donors', 'gratora-donation-platform' ),
             value: stats ? String( stats.total_count ) : '-',
         },
         {
-            label: __( 'With donations', 'gratora' ),
+            label: __( 'With donations', 'gratora-donation-platform' ),
             value: stats ? String( stats.with_donations ) : '-',
         },
         {
-            label: __( 'Lifetime given', 'gratora' ),
+            label: __( 'Lifetime given', 'gratora-donation-platform' ),
             value: stats && stats.total_donated_cents > 0
                 ? formatAmount( stats.total_donated_cents )
                 : '-',
         },
         {
-            label: __( 'Avg lifetime value', 'gratora' ),
+            label: __( 'Avg lifetime value', 'gratora-donation-platform' ),
             value: stats && stats.avg_ltv_cents > 0
                 ? formatAmount( stats.avg_ltv_cents )
                 : '-',
@@ -142,7 +142,7 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( aborted ) return;
                 setData( [] );
                 setTotal( 0 );
-                setError( err?.message || __( 'Failed to load donors.', 'gratora' ) );
+                setError( err?.message || __( 'Failed to load donors.', 'gratora-donation-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -166,7 +166,7 @@ export function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'id',
-            label: __( 'ID', 'gratora' ),
+            label: __( 'ID', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 <span className="gratora-ref-cell">
                     <a className="gratora-mono-link" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
@@ -177,9 +177,9 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'name',
-            label: __( 'Name', 'gratora' ),
+            label: __( 'Name', 'gratora-donation-platform' ),
             render: ( { item } ) => {
-                const name = item.name || __( '(no name)', 'gratora' );
+                const name = item.name || __( '(no name)', 'gratora-donation-platform' );
                 return (
                     <div className="gratora-row">
                         { ! item.redacted && (
@@ -196,7 +196,7 @@ export function DonorsApp( { toggleSlot } ) {
                                     { name }
                                 </a>
                                 { item.is_test_only && (
-                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
+                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora-donation-platform' ) }</span>
                                 ) }
                             </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
@@ -211,7 +211,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
-            label: __( 'Email', 'gratora' ),
+            label: __( 'Email', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 item.email
                     ? <span className="gratora-mono">{ item.email }</span>
@@ -220,7 +220,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'country',
-            label: __( 'Country', 'gratora' ),
+            label: __( 'Country', 'gratora-donation-platform' ),
             elements: localizedCountries().map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.label }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -235,11 +235,11 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'donor_type',
-            label: __( 'Donor type', 'gratora' ),
+            label: __( 'Donor type', 'gratora-donation-platform' ),
             elements: [
-                { value: 'individual',   label: __( 'Individual', 'gratora' ) },
-                { value: 'organization', label: __( 'Organization', 'gratora' ) },
-                { value: 'household',    label: __( 'Household', 'gratora' ) },
+                { value: 'individual',   label: __( 'Individual', 'gratora-donation-platform' ) },
+                { value: 'organization', label: __( 'Organization', 'gratora-donation-platform' ) },
+                { value: 'household',    label: __( 'Household', 'gratora-donation-platform' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
@@ -251,7 +251,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'gratora' ),
+            label:         __( 'Donations', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="gratora-amount gratora-amount--num">{ item.donations_count }</span>
@@ -259,7 +259,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'total_donated',
-            label:         __( 'Total donated', 'gratora' ),
+            label:         __( 'Total donated', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="gratora-amount">
@@ -269,7 +269,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'last_donation_at',
-            label:         __( 'Last donation', 'gratora' ),
+            label:         __( 'Last donation', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.last_donation_at
@@ -295,7 +295,7 @@ export function DonorsApp( { toggleSlot } ) {
     const actions = useMemo( () => [
         {
             id:            'delete',
-            label:         __( 'Delete', 'gratora' ),
+            label:         __( 'Delete', 'gratora-donation-platform' ),
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -314,20 +314,20 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
-                    title:        _n( 'Delete donor', 'Delete donors', n, 'gratora' ),
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'gratora-donation-platform' ),
                     message: n === 1
-                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'gratora' )
+                        ? __( 'Delete this donor? Their record, and any attempt that never took money, go for good.', 'gratora-donation-platform' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
-                                'Delete %d donor? They have no donations, so nothing is kept.',
-                                'Delete %d donors? They have no donations, so nothing is kept.',
+                                'Delete %d donor? Their record, and any attempt that never took money, go for good.',
+                                'Delete %d donors? Their records, and any attempts that never took money, go for good.',
                                 n,
-                                'gratora'
+                                'gratora-donation-platform'
                             ),
                             n
                         ),
-                    confirmLabel: __( 'Delete', 'gratora' ),
+                    confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: the first rejection abandoned
@@ -342,12 +342,12 @@ export function DonorsApp( { toggleSlot } ) {
                             results,
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors were deleted. */
-                                _n( '%d donor deleted.', '%d donors deleted.', count, 'gratora' ),
+                                _n( '%d donor deleted.', '%d donors deleted.', count, 'gratora-donation-platform' ),
                                 count
                             ),
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors could not be deleted. */
-                                _n( '%d donor could not be deleted.', '%d donors could not be deleted.', count, 'gratora' ),
+                                _n( '%d donor could not be deleted.', '%d donors could not be deleted.', count, 'gratora-donation-platform' ),
                                 count
                             )
                         );
@@ -358,7 +358,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'redact',
-            label:         __( 'Redact (anonymize)', 'gratora' ),
+            label:         __( 'Redact (anonymize)', 'gratora-donation-platform' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -368,26 +368,26 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'gratora' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
                             'Redact %d donor? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             'Redact %d donors? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             n,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Redact donor', 'Redact donors', n, 'gratora' ),
+                    title:        _n( 'Redact donor', 'Redact donors', n, 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Redact', 'gratora' ),
+                    confirmLabel: __( 'Redact', 'gratora-donation-platform' ),
                     destructive:  true,
                     // The callback fills the server's confirmation from each
                     // row, so nothing else stands between one click and erased
                     // PII here.
-                    requireText:  __( 'REDACT', 'gratora' ),
+                    requireText:  __( 'REDACT', 'gratora-donation-platform' ),
                     onConfirm: async () => {
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
                             path:   `/gratora/v1/admin/donors/${ i.id }/redact`,
@@ -399,12 +399,12 @@ export function DonorsApp( { toggleSlot } ) {
                             results,
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors were redacted. */
-                                _n( '%d donor redacted.', '%d donors redacted.', count, 'gratora' ),
+                                _n( '%d donor redacted.', '%d donors redacted.', count, 'gratora-donation-platform' ),
                                 count
                             ),
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors could not be redacted. */
-                                _n( '%d donor could not be redacted.', '%d donors could not be redacted.', count, 'gratora' ),
+                                _n( '%d donor could not be redacted.', '%d donors could not be redacted.', count, 'gratora-donation-platform' ),
                                 count
                             )
                         );
@@ -418,17 +418,17 @@ export function DonorsApp( { toggleSlot } ) {
     return (
         <div>
             <div className="gratora-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donors', 'gratora' ) }</span>
+                <span>{ __( 'Donors', 'gratora-donation-platform' ) }</span>
             </div>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Donors', 'gratora' ) }</h1>
+                    <h1>{ __( 'Donors', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     <span className="gratora-page-head__meta">
-                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'gratora' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'gratora-donation-platform' ), total.toLocaleString() ) }
                     </span>
                     { toggleSlot }
                 </div>
@@ -443,8 +443,8 @@ export function DonorsApp( { toggleSlot } ) {
             { ! loading && ! error && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors yet', 'gratora' ) }
-                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'gratora' ) }
+                    title={ __( 'No donors yet', 'gratora-donation-platform' ) }
+                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'gratora-donation-platform' ) }
                 />
             ) : (
                 <div className={ `gratora-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
@@ -464,11 +464,11 @@ export function DonorsApp( { toggleSlot } ) {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'gratora' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora-donation-platform' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora-donation-platform' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'gratora' ) }
+                                    { __( 'Clear filters', 'gratora-donation-platform' ) }
                                 </Btn>
                             }
                         />
@@ -511,7 +511,7 @@ function ViewToggle( { active, onChange } ) {
             className="gratora-view-toggle"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'gratora' ) }
+            aria-label={ __( 'Donor sections', 'gratora-donation-platform' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >
             <button
@@ -523,7 +523,7 @@ function ViewToggle( { active, onChange } ) {
                 onClick={ () => onChange( 'list' ) }
             >
                 <IconList />
-                { __( 'List', 'gratora' ) }
+                { __( 'List', 'gratora-donation-platform' ) }
             </button>
             <button
                 type="button"
@@ -534,7 +534,7 @@ function ViewToggle( { active, onChange } ) {
                 onClick={ () => onChange( 'insights' ) }
             >
                 <IconInsights />
-                { __( 'Insights', 'gratora' ) }
+                { __( 'Insights', 'gratora-donation-platform' ) }
             </button>
         </div>
     );

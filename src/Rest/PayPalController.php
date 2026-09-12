@@ -7,8 +7,10 @@ namespace Gratora\Rest;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Donations\AntiSpamGuard;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
+use Gratora\Gateways\ChargeLock;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\PayPal\PayPalAccount;
 use Gratora\Gateways\PayPal\PayPalApi;
@@ -55,6 +57,8 @@ final class PayPalController
      */
     private const SETTLED = ['paid', 'refunded', 'partial_refund'];
 
+    private ChargeLock $lock;
+
     public function __construct(
         private DonationRepository $donations,
         private DonationService $donationService,
@@ -64,6 +68,7 @@ final class PayPalController
         private PayPalPlanRecorder $planRecorder,
         private AntiSpamGuard $spam,
     ) {
+        $this->lock = new ChargeLock('paypal');
     }
 
     /** @since 1.0.0 */
@@ -111,7 +116,11 @@ final class PayPalController
         // Answered as the successful capture answered, not as an error: a double
         // submit and a retried request both land here, and telling a donor whose
         // money moved that their donation failed sends them to give again.
-        if (in_array($donation->status, self::SETTLED, true)) {
+        // A trashed row is answered the same way, and deliberately before the
+        // gateway is resolved or the lock is claimed: the lock closes only this
+        // site's in-flight window, so what makes the stop durable is refusing
+        // to call out about a row an admin has stopped.
+        if (in_array($donation->status, self::SETTLED, true) || DonationQueries::isTrashed($donation)) {
             return new WP_REST_Response([
                 'status'    => $donation->status,
                 'reference' => $donation->reference,
@@ -120,61 +129,78 @@ final class PayPalController
 
         $gateway = $this->gateways->get('paypal');
         if (! $gateway instanceof PayPalGateway) {
-            return $this->error('gratora_paypal_unavailable', __('PayPal is not available.', 'gratora'), 400);
+            return $this->error('gratora_paypal_unavailable', __('PayPal is not available.', 'gratora-donation-platform'), 400);
         }
 
-        // confirm() reads the stored gateway_intent_id: the client cannot
-        // redirect this at another order.
-        $result = $gateway->confirm($donation);
-
-        // A held capture is money PayPal has taken and will settle by webhook.
-        // Reporting it as a failure would send the donor back to give again and
-        // throw away the capture id that the refund path and the settling
-        // webhook both need.
-        if (! $result->success && $result->pending) {
-            $donation->gateway_txn_id = (string) $result->gateway_txn_id;
-            $this->donationService->markProcessing(
-                $donation,
-                'paypal_capture_pending',
-                // Only genuinely absent values are dropped. A bare array_filter
-                // also discards '0' and false, and the key that survives this
-                // is the one an admin reads to find out why PayPal is holding
-                // the money.
-                array_filter((array) $result->metadata, static fn ($v) => $v !== null && $v !== '')
-            );
-
+        // Claimed before PayPal is called, not after. Reading the status and
+        // then spending the capture chain on the network leaves a window where
+        // a second request reads pending too and captures the same order.
+        //
+        // Answered as the settled case is answered, for the same reason: the
+        // donor whose second tab lost the race has not failed at anything.
+        if (! $this->lock->claim($donation)) {
             return new WP_REST_Response([
-                'status'    => 'processing',
+                'status'    => $donation->status,
                 'reference' => $donation->reference,
             ], 200);
         }
 
-        if (! $result->success) {
-            // The reason is PayPal's own wording about an API call, written for
-            // whoever integrated it. The donor needs the one thing it never
-            // says: whether their money moved. A failed capture usually means
-            // it did not, but a capture PayPal took and we failed to read looks
-            // the same from here, so the copy points at the receipt instead of
-            // promising either way.
-            ErrorLog::record('gateway.paypal.capture', (string) $result->error, [
-                'donation_id' => (int) $donation->id,
-                'reference'   => (string) $donation->reference,
-            ]);
+        try {
+            // confirm() reads the stored gateway_intent_id: the client cannot
+            // redirect this at another order.
+            $result = $gateway->confirm($donation);
 
-            return $this->error(
-                'gratora_paypal_capture_failed',
-                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'gratora'),
-                400
-            );
+            // A held capture is money PayPal has taken and will settle by webhook.
+            // Reporting it as a failure would send the donor back to give again and
+            // throw away the capture id that the refund path and the settling
+            // webhook both need.
+            if (! $result->success && $result->pending) {
+                $donation->gateway_txn_id = (string) $result->gateway_txn_id;
+                $this->donationService->markProcessing(
+                    $donation,
+                    'paypal_capture_pending',
+                    // Only genuinely absent values are dropped. A bare array_filter
+                    // also discards '0' and false, and the key that survives this
+                    // is the one an admin reads to find out why PayPal is holding
+                    // the money.
+                    array_filter((array) $result->metadata, static fn ($v) => $v !== null && $v !== '')
+                );
+
+                return new WP_REST_Response([
+                    'status'    => 'processing',
+                    'reference' => $donation->reference,
+                ], 200);
+            }
+
+            if (! $result->success) {
+                // The reason is PayPal's own wording about an API call, written for
+                // whoever integrated it. The donor needs the one thing it never
+                // says: whether their money moved. A failed capture usually means
+                // it did not, but a capture PayPal took and we failed to read looks
+                // the same from here, so the copy points at the receipt instead of
+                // promising either way.
+                ErrorLog::record('gateway.paypal.capture', (string) $result->error, [
+                    'donation_id' => (int) $donation->id,
+                    'reference'   => (string) $donation->reference,
+                ]);
+
+                return $this->error(
+                    'gratora_paypal_capture_failed',
+                    __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'gratora-donation-platform'),
+                    400
+                );
+            }
+
+            $this->donationService->confirm($donation, $result->toArray());
+            $fresh = $this->donations->findByReference((string) $donation->reference);
+
+            return new WP_REST_Response([
+                'status'    => $fresh?->status ?? 'paid',
+                'reference' => $donation->reference,
+            ], 200);
+        } finally {
+            $this->lock->release($donation);
         }
-
-        $this->donationService->confirm($donation, $result->toArray());
-        $fresh = $this->donations->findByReference((string) $donation->reference);
-
-        return new WP_REST_Response([
-            'status'    => $fresh?->status ?? 'paid',
-            'reference' => $donation->reference,
-        ], 200);
     }
 
     /**
@@ -196,11 +222,11 @@ final class PayPalController
         }
 
         if (! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            return $this->error('gratora_paypal_not_recurring', __('That donation is not recurring.', 'gratora'), 400);
+            return $this->error('gratora_paypal_not_recurring', __('That donation is not recurring.', 'gratora-donation-platform'), 400);
         }
         $subId = trim((string) $request->get_param('subscription_id'));
         if ($subId === '') {
-            return $this->error('gratora_paypal_bad_subscription', __('Missing subscription id.', 'gratora'), 400);
+            return $this->error('gratora_paypal_bad_subscription', __('Missing subscription id.', 'gratora-donation-platform'), 400);
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
@@ -220,7 +246,7 @@ final class PayPalController
 
             return $this->error(
                 'gratora_paypal_subscription_lookup',
-                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'gratora'),
+                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'gratora-donation-platform'),
                 400
             );
         }
@@ -257,7 +283,7 @@ final class PayPalController
     {
         $notFound = $this->error(
             'gratora_paypal_no_donation',
-            __('We could not find that donation.', 'gratora'),
+            __('We could not find that donation.', 'gratora-donation-platform'),
             404
         );
 

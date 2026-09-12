@@ -102,7 +102,12 @@ final class AbandonedPendingReaper
                     // behind even when the row never reached paid, and a row
                     // carrying either is a reconciliation question, not litter.
                     ->whereIsNull('paid_at')
-                    ->whereIsNull('gateway_txn_id');
+                    ->whereIsNull('gateway_txn_id')
+                    // A row an admin stopped on purpose is not an abandoned
+                    // checkout. Sweeping it would relabel it under a reason
+                    // that is untrue of it, and overwrite the status a restore
+                    // has to put back.
+                    ->whereIsNull('trashed_at');
 
                 if ($skip !== []) {
                     $query = $query->whereNotIn('gateway', $skip);

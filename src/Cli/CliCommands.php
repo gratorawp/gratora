@@ -195,7 +195,10 @@ final class CliCommands
             $when = gmdate('Y-m-d H:i:s', $stamp - random_int(0, 90 * 86400));
             $donation->created_at = $when;
             $donation->paid_at    = $when;
-            $donation->save();
+            $donation->updateColumns([
+                'created_at' => $donation->created_at,
+                'paid_at'    => $donation->paid_at,
+            ]);
 
             $donorIds[$donation->donor_id] = true;
             $bar->tick();

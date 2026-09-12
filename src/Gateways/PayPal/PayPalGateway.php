@@ -9,6 +9,9 @@ use Gratora\Donations\Donation;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
 use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\ChargeLock;
+use Gratora\Gateways\CloseUnsettledResult;
+use Gratora\Gateways\ClosesUnsettledPayment;
 use Gratora\Gateways\GatewayConfirmResult;
 use Gratora\Gateways\GatewayIntentResult;
 use Gratora\Gateways\GatewayTransportException;
@@ -29,6 +32,7 @@ use Gratora\Recurring\FrequencyMap;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
 use RuntimeException;
+use Throwable;
 use WP_REST_Request;
 
 /**
@@ -45,7 +49,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange, ModeCredentialed
+final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange, ModeCredentialed, ClosesUnsettledPayment
 {
     /**
      * Mode of the credentials that verified the current webhook. Set once per
@@ -75,19 +79,78 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('PayPal', 'gratora');
+        return __('PayPal', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'gratora');
+        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
     public function frequencies(): array
     {
         return $this->frequenciesInMode(TestMode::siteWide());
+    }
+
+    /**
+     * Read under this donation's charge lock. PayPal's Orders API has no cancel,
+     * so closing here is establishing that nothing capturable is left rather
+     * than making it so, and a capture already in flight would otherwise be
+     * read as an order with nothing on it yet.
+     *
+     * @since 1.0.0
+     */
+    public function closeUnsettled(Donation $donation): CloseUnsettledResult
+    {
+        $orderId = trim((string) ($donation->gateway_intent_id ?? ''));
+
+        // A recurring signup carries a placeholder rather than an order, and an
+        // order that was never created can take nothing.
+        if ($orderId === '' || str_starts_with($orderId, 'pending_subscription_')) {
+            return CloseUnsettledResult::closed();
+        }
+
+        $test = (bool) $donation->is_test;
+
+        // Sandbox and live are separate PayPal accounts, so a mode with nothing
+        // stored cannot be asked at all, and answering closed would be a guess
+        // about money.
+        if (! $this->account->hasKeysFor($test)) {
+            return CloseUnsettledResult::refused(
+                __('This donation was taken with PayPal credentials this site no longer holds.', 'gratora-donation-platform')
+            );
+        }
+
+        $lock = new ChargeLock($this->id());
+        if (! $lock->claim($donation)) {
+            return CloseUnsettledResult::locked();
+        }
+
+        try {
+            $this->account->useTestMode($test);
+
+            $order   = $this->api->get('/v2/checkout/orders/' . rawurlencode($orderId));
+            $capture = $order['purchase_units'][0]['payments']['captures'][0] ?? null;
+            $status  = is_array($capture) ? strtoupper(trim((string) ($capture['status'] ?? ''))) : '';
+
+            if (in_array($status, ['COMPLETED', 'PENDING'], true)) {
+                return CloseUnsettledResult::moneyMayArrive(sprintf(
+                    /* translators: %s: the capture's state at PayPal, for example "COMPLETED". */
+                    __('PayPal reports a capture on this order as %s.', 'gratora-donation-platform'),
+                    $status
+                ));
+            }
+
+            return CloseUnsettledResult::closed();
+        } catch (GatewayTransportException $e) {
+            return CloseUnsettledResult::unreachable($e->getMessage());
+        } catch (Throwable $e) {
+            return CloseUnsettledResult::refused($e->getMessage());
+        } finally {
+            $lock->release($donation);
+        }
     }
 
     /**
@@ -745,7 +808,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 'recurring.paypal',
                 sprintf(
                     /* translators: 1: PayPal subscription id, 2: the reason it was refused */
-                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'gratora'),
+                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'gratora-donation-platform'),
                     $subId,
                     $e->getMessage()
                 ),
@@ -1388,7 +1451,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'gratora'));
+            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'gratora-donation-platform'));
         }
 
         // The subscription's own current plan, read back from PayPal, so this
@@ -1403,7 +1466,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         )['plan_id'] ?? '');
 
         if ($planId === '') {
-            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'gratora'));
+            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'gratora-donation-platform'));
         }
 
         $revised = $this->api->post(
@@ -1420,7 +1483,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'gratora'));
+        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'gratora-donation-platform'));
     }
 
     /**

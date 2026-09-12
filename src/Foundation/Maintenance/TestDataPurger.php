@@ -9,6 +9,7 @@ use Gratora\Donors\Donor;
 use Gratora\Donors\DonorService;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Vendor\Queryable\DB;
+use Gratora\Analytics\DonationAudit;
 
 /**
  * Removes everything a test-mode gateway left behind, so a site can go live on
@@ -73,7 +74,10 @@ final class TestDataPurger
             DB::table('gratora_receipts')->whereIn('donation_id', $chunk)->delete();
             DB::table('gratora_refunds')->whereIn('donation_id', $chunk)->delete();
             DB::table('gratora_donation_notes')->whereIn('donation_id', $chunk)->delete();
-            DB::table('gratora_events')->whereIn('donation_id', $chunk)->delete();
+            DB::table('gratora_events')
+                ->whereIn('donation_id', $chunk)
+                ->whereNotIn('type', DonationAudit::TYPES)
+                ->delete();
 
             $removed['donations'] += (int) Donation::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
