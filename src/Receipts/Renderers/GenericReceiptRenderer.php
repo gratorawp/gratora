@@ -39,7 +39,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Generic Receipt', 'gratora');
+        return __('Generic Receipt', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
@@ -113,9 +113,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: human-readable donation reference. */
-            'title'  => sprintf(__('Donation receipt %s', 'gratora'), $ctx->donation->reference),
+            'title'  => sprintf(__('Donation receipt %s', 'gratora-donation-platform'), $ctx->donation->reference),
             'author' => $ctx->org['name'] ?? 'Gratora',
-            'subject' => __('Donation receipt', 'gratora'),
+            'subject' => __('Donation receipt', 'gratora-donation-platform'),
         ]);
     }
 
@@ -133,14 +133,14 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         if (! is_array($stored)) $stored = [];
 
         $defaults = [
-            'header_title'       => __('Donation receipt', 'gratora'),
+            'header_title'       => __('Donation receipt', 'gratora-donation-platform'),
             'intro'              => '',
             // The wording the Receipts panel shows and the admin believes is in
             // effect. Two default sets for one field disagreed about it.
-            'signoff'            => __('Thank you for your support, {donor_name}.', 'gratora'),
+            'signoff'            => __('Thank you for your support, {donor_name}.', 'gratora-donation-platform'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'gratora'
+                'gratora-donation-platform'
             ),
             'show_tax_id'        => true,
             'show_donor_address' => false,
@@ -181,7 +181,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $donation = $ctx->donation;
         $donorName = trim((string) ($ctx->donor_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'gratora');
+        if ($donorName === '') $donorName = __('Friend', 'gratora-donation-platform');
 
         $replacements = [
             '{donor_name}'        => $donorName,

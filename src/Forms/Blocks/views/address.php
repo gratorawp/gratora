@@ -20,13 +20,13 @@ defined('ABSPATH') || exit;
  * @var string $postalLabel
  * @var string $countryLabel
  */
-$labelText   = $label !== ''        ? $label        : __('Mailing address', 'gratora');
-$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'gratora');
-$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'gratora');
-$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'gratora');
-$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'gratora');
-$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'gratora');
-$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'gratora');
+$labelText   = $label !== ''        ? $label        : __('Mailing address', 'gratora-donation-platform');
+$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'gratora-donation-platform');
+$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'gratora-donation-platform');
+$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'gratora-donation-platform');
+$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'gratora-donation-platform');
+$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'gratora-donation-platform');
+$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'gratora-donation-platform');
 ?>
 <fieldset class="gratora-block gratora-block--address gratora-address">
     <legend class="gratora-address__legend"><?php echo esc_html($labelText); ?></legend>

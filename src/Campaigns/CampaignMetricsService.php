@@ -94,7 +94,7 @@ final class CampaignMetricsService
             $form = $forms[(int) $row['form_id']] ?? null;
             $out[] = [
                 'form_id'         => $row['form_id'],
-                'form_title'      => $form ? $form->title : __('Removed form', 'gratora'),
+                'form_title'      => $form ? $form->title : __('Removed form', 'gratora-donation-platform'),
                 'amount_cents'    => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -264,7 +264,7 @@ final class CampaignMetricsService
 
             $out[] = [
                 'id'           => $d->id,
-                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'gratora'),
+                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'gratora-donation-platform'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,
@@ -301,7 +301,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'donor_id'        => $row['donor_id'],
-                'name'            => $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $row['donor_id'],
+                'name'            => $name !== '' ? $name : __('Donor', 'gratora-donation-platform') . ' #' . $row['donor_id'],
                 'total_cents'     => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -421,7 +421,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'id'           => (int) $d->id,
-                'donor_name'   => $name !== '' ? $name : __('A donor', 'gratora'),
+                'donor_name'   => $name !== '' ? $name : __('A donor', 'gratora-donation-platform'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,

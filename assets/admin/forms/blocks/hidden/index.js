@@ -12,15 +12,15 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 const NAME = 'gratora/hidden';
 
 const SOURCES = [
-    { value: 'fixed',        label: __( 'Fixed value',                    'gratora' ) },
-    { value: 'query',        label: __( 'URL query string',               'gratora' ) },
-    { value: 'utm_source',   label: __( 'UTM: Source',                    'gratora' ) },
-    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'gratora' ) },
-    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'gratora' ) },
-    { value: 'utm_term',     label: __( 'UTM: Term',                      'gratora' ) },
-    { value: 'utm_content',  label: __( 'UTM: Content',                   'gratora' ) },
-    { value: 'referrer',     label: __( 'Referrer URL',                   'gratora' ) },
-    { value: 'landing',      label: __( 'Landing page URL',               'gratora' ) },
+    { value: 'fixed',        label: __( 'Fixed value',                    'gratora-donation-platform' ) },
+    { value: 'query',        label: __( 'URL query string',               'gratora-donation-platform' ) },
+    { value: 'utm_source',   label: __( 'UTM: Source',                    'gratora-donation-platform' ) },
+    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'gratora-donation-platform' ) },
+    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'gratora-donation-platform' ) },
+    { value: 'utm_term',     label: __( 'UTM: Term',                      'gratora-donation-platform' ) },
+    { value: 'utm_content',  label: __( 'UTM: Content',                   'gratora-donation-platform' ) },
+    { value: 'referrer',     label: __( 'Referrer URL',                   'gratora-donation-platform' ) },
+    { value: 'landing',      label: __( 'Landing page URL',               'gratora-donation-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -30,16 +30,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Hidden field', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Hidden field', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Field key', 'gratora' ) }
+                        label={ __( 'Field key', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v.replace( /[^a-z0-9_]/gi, '_' ).toLowerCase() } ) }
-                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'gratora' ) }
+                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Source', 'gratora' ) }
+                        label={ __( 'Source', 'gratora-donation-platform' ) }
                         value={ source }
                         options={ SOURCES }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
@@ -47,7 +47,7 @@ function Edit( { attributes, setAttributes } ) {
                     />
                     { source === 'query' && (
                         <TextControl
-                            label={ __( 'Query parameter name', 'gratora' ) }
+                            label={ __( 'Query parameter name', 'gratora-donation-platform' ) }
                             value={ queryParam }
                             onChange={ ( v ) => setAttributes( { queryParam: v } ) }
                             placeholder="appeal_code"
@@ -55,10 +55,10 @@ function Edit( { attributes, setAttributes } ) {
                         />
                     ) }
                     <TextControl
-                        label={ __( 'Fallback value', 'gratora' ) }
+                        label={ __( 'Fallback value', 'gratora-donation-platform' ) }
                         value={ defaultValue }
                         onChange={ ( v ) => setAttributes( { defaultValue: v } ) }
-                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'gratora' ) }
+                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -68,9 +68,9 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="gratora-block-preview__hidden-tag">{ __( 'Hidden', 'gratora' ) }</span>
+                <span className="gratora-block-preview__hidden-tag">{ __( 'Hidden', 'gratora-donation-platform' ) }</span>
                 <span className="gratora-block-preview__hidden-meta">
-                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'gratora' ) }
+                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'gratora-donation-platform' ) }
                 </span>
             </div>
         </>
@@ -80,8 +80,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Hidden field', 'gratora' ),
-        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'gratora' ),
+        title:       __( 'Hidden field', 'gratora-donation-platform' ),
+        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'gratora-donation-platform' ),
         category:    'gratora-fields',
         icon:        BlockIcons[ 'hidden' ],
         supports:    { html: false, anchor: false, inserter: true },

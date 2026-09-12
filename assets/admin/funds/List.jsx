@@ -30,9 +30,9 @@ const ORDERBY_COLUMN = { type: 'is_restricted' };
 export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'sort_order';
 
 const STATUS_OPTIONS = [
-    { value: 'active',     label: __( 'Active', 'gratora' ) },
-    { value: 'inactive',   label: __( 'Inactive', 'gratora' ) },
-    { value: 'restricted', label: __( 'Restricted', 'gratora' ) },
+    { value: 'active',     label: __( 'Active', 'gratora-donation-platform' ) },
+    { value: 'inactive',   label: __( 'Inactive', 'gratora-donation-platform' ) },
+    { value: 'restricted', label: __( 'Restricted', 'gratora-donation-platform' ) },
 ];
 
 /**
@@ -75,45 +75,45 @@ export function fundWindowLabel( item ) {
 
     if ( from && to ) {
         /* translators: 1: start date, 2: end date */
-        return sprintf( __( 'from %1$s to %2$s', 'gratora' ), from, to );
+        return sprintf( __( 'from %1$s to %2$s', 'gratora-donation-platform' ), from, to );
     }
     if ( to ) {
         /* translators: %s: end date */
-        return sprintf( __( 'until %s', 'gratora' ), to );
+        return sprintf( __( 'until %s', 'gratora-donation-platform' ), to );
     }
 
     /* translators: %s: start date */
-    return sprintf( __( 'from %s', 'gratora' ), from );
+    return sprintf( __( 'from %s', 'gratora-donation-platform' ), from );
 }
 
 /** @since 1.0.0 */
 export function fundStatusLabel( item ) {
-    if ( ! item.is_active ) return __( 'Inactive', 'gratora' );
-    if ( item.schedule_state === 'scheduled' ) return __( 'Scheduled', 'gratora' );
-    if ( item.schedule_state === 'ended' ) return __( 'Ended', 'gratora' );
-    return __( 'Active', 'gratora' );
+    if ( ! item.is_active ) return __( 'Inactive', 'gratora-donation-platform' );
+    if ( item.schedule_state === 'scheduled' ) return __( 'Scheduled', 'gratora-donation-platform' );
+    if ( item.schedule_state === 'ended' ) return __( 'Ended', 'gratora-donation-platform' );
+    return __( 'Active', 'gratora-donation-platform' );
 }
 
 function fundKpis( stats ) {
     return [
         {
-            label: __( 'Total raised', 'gratora' ),
+            label: __( 'Total raised', 'gratora-donation-platform' ),
             value: stats ? formatAmount( stats.raised_cents ) : '-',
-            sub:   __( 'all funds', 'gratora' ),
+            sub:   __( 'all funds', 'gratora-donation-platform' ),
         },
         {
-            label: __( 'Active funds', 'gratora' ),
+            label: __( 'Active funds', 'gratora-donation-platform' ),
             value: stats ? String( stats.active ) : '-',
-            sub:   stats ? `${ __( 'of', 'gratora' ) } ${ stats.total }` : null,
+            sub:   stats ? `${ __( 'of', 'gratora-donation-platform' ) } ${ stats.total }` : null,
         },
         {
-            label: __( 'Restricted', 'gratora' ),
+            label: __( 'Restricted', 'gratora-donation-platform' ),
             value: stats ? String( stats.restricted ) : '-',
-            sub:   __( 'donor-restricted', 'gratora' ),
+            sub:   __( 'donor-restricted', 'gratora-donation-platform' ),
         },
         {
-            label: __( 'Default fund', 'gratora' ),
-            value: stats ? ( stats.default ? stats.default.name : __( 'None', 'gratora' ) ) : '-',
+            label: __( 'Default fund', 'gratora-donation-platform' ),
+            value: stats ? ( stats.default ? stats.default.name : __( 'None', 'gratora-donation-platform' ) ) : '-',
         },
     ];
 }
@@ -185,7 +185,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load funds.', 'gratora' ) );
+                setError( err?.message || __( 'Failed to load funds.', 'gratora-donation-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -247,7 +247,7 @@ export default function List() {
             if ( done ) notify.success( done );
             afterChange();
         } catch ( err ) {
-            setError( err?.message || __( 'Action failed.', 'gratora' ) );
+            setError( err?.message || __( 'Action failed.', 'gratora-donation-platform' ) );
         }
     }, [ afterChange ] );
 
@@ -267,7 +267,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'name',
-            label:         __( 'Fund', 'gratora' ),
+            label:         __( 'Fund', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div
@@ -285,7 +285,7 @@ export default function List() {
                         </button>
                         { item.is_default && (
                             <span className="gratora-fund-badge gratora-fund-badge--default">
-                                { __( 'Default', 'gratora' ) }
+                                { __( 'Default', 'gratora-donation-platform' ) }
                             </span>
                         ) }
                         <div className="gratora-fund-code">{ item.code }</div>
@@ -295,19 +295,19 @@ export default function List() {
         },
         {
             id:            'type',
-            label:         __( 'Type', 'gratora' ),
+            label:         __( 'Type', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className={ 'gratora-fund-badge ' + ( item.is_restricted
                     ? 'gratora-fund-badge--restricted'
                     : 'gratora-fund-badge--unrestricted' ) }>
-                    { item.is_restricted ? __( 'Restricted', 'gratora' ) : __( 'Unrestricted', 'gratora' ) }
+                    { item.is_restricted ? __( 'Restricted', 'gratora-donation-platform' ) : __( 'Unrestricted', 'gratora-donation-platform' ) }
                 </span>
             ),
         },
         {
             id:    'raised',
-            label: __( 'Raised', 'gratora' ),
+            label: __( 'Raised', 'gratora-donation-platform' ),
             // Same reason the goal column is not sortable: a parent's raised is
             // rolled up in PHP after the query.
             enableSorting: false,
@@ -317,7 +317,7 @@ export default function List() {
         },
         {
             id:            'goal',
-            label:         __( 'Goal progress', 'gratora' ),
+            label:         __( 'Goal progress', 'gratora-donation-platform' ),
             // Not sortable: the column shows raised-vs-goal percentage, but a
             // parent's raised is rolled up in PHP after the query, so no DB
             // sort key reflects what's displayed.
@@ -325,14 +325,14 @@ export default function List() {
             render: ( { item } ) => {
                 if ( ! item.goal_cents ) {
                     return (
-                        <GoalBar left={ __( 'No goal set', 'gratora' ) } pct={ 0 } muted />
+                        <GoalBar left={ __( 'No goal set', 'gratora-donation-platform' ) } pct={ 0 } muted />
                     );
                 }
                 const pct = Math.min( 100, Math.round( ( item.raised_cents / item.goal_cents ) * 100 ) );
                 return (
                     <GoalBar
                         left={ formatAmount( item.raised_cents ) }
-                        right={ `${ __( 'of', 'gratora' ) } ${ formatAmount( item.goal_cents ) }` }
+                        right={ `${ __( 'of', 'gratora-donation-platform' ) } ${ formatAmount( item.goal_cents ) }` }
                         pct={ pct }
                     />
                 );
@@ -340,7 +340,7 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'gratora' ),
+            label:    __( 'Status', 'gratora-donation-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             // The cell reads Active / Scheduled / Ended / Inactive, and three
@@ -351,7 +351,7 @@ export default function List() {
                 if ( item.reassign_pending ) {
                     return (
                         <span className="gratora-fund-badge gratora-fund-badge--pending">
-                            { __( 'Reassigning…', 'gratora' ) }
+                            { __( 'Reassigning…', 'gratora-donation-platform' ) }
                         </span>
                     );
                 }
@@ -375,14 +375,14 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:         'edit',
-            label:      __( 'Edit', 'gratora' ),
+            label:      __( 'Edit', 'gratora-donation-platform' ),
             icon:       () => <Pencil size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.reassign_pending,
             callback:   ( [ item ] ) => setEditing( item ),
         },
         {
             id:         'set-default',
-            label:      __( 'Set as default', 'gratora' ),
+            label:      __( 'Set as default', 'gratora-donation-platform' ),
             icon:       () => <Star size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
             // The default cannot carry a window, and the server refuses the
@@ -393,20 +393,20 @@ export default function List() {
                     return mutate( item.id, { is_default: true } );
                 }
                 setConfirm( {
-                    title:   __( 'Clear the schedule?', 'gratora' ),
+                    title:   __( 'Clear the schedule?', 'gratora-donation-platform' ),
                     message: sprintf(
                         /* translators: 1: fund name, 2: the dates that will be cleared */
-                        __( '%1$s runs %2$s. The default fund takes every donation with no fund chosen, so it has to stay open: making this one the default clears those dates.', 'gratora' ),
+                        __( '%1$s runs %2$s. The default fund takes every donation with no fund chosen, so it has to stay open: making this one the default clears those dates.', 'gratora-donation-platform' ),
                         item.name,
                         fundWindowLabel( item )
                     ),
-                    confirmLabel: __( 'Clear and set as default', 'gratora' ),
+                    confirmLabel: __( 'Clear and set as default', 'gratora-donation-platform' ),
                     onConfirm: () => mutate(
                         item.id,
                         { is_default: true, starts_at: null, ends_at: null },
                         sprintf(
                             /* translators: %s: fund name */
-                            __( '%s is now the default fund, and its schedule was cleared.', 'gratora' ),
+                            __( '%s is now the default fund, and its schedule was cleared.', 'gratora-donation-platform' ),
                             item.name
                         )
                     ),
@@ -415,21 +415,21 @@ export default function List() {
         },
         {
             id:         'deactivate',
-            label:      __( 'Deactivate', 'gratora' ),
+            label:      __( 'Deactivate', 'gratora-donation-platform' ),
             icon:       () => <PowerOff size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_active: false } ),
         },
         {
             id:         'activate',
-            label:      __( 'Activate', 'gratora' ),
+            label:      __( 'Activate', 'gratora-donation-platform' ),
             icon:       () => <Power size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && ! item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_active: true } ),
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'gratora' ),
+            label:         __( 'Delete', 'gratora-donation-platform' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             isEligible:    ( item ) => ! item.is_default && ! item.reassign_pending,
@@ -440,27 +440,27 @@ export default function List() {
     return (
         <div>
             <div className="gratora-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Funds', 'gratora' ) }</span>
+                <span>{ __( 'Funds', 'gratora-donation-platform' ) }</span>
             </div>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Funds', 'gratora' ) }</h1>
+                    <h1>{ __( 'Funds', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     <span className="gratora-page-head__meta">
-                        { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'gratora' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'gratora-donation-platform' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ onCreate }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'New fund', 'gratora' ) }
+                        { __( 'New fund', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
             </div>
 
             <p className="gratora-funds-intro">
-                { __( 'Organization-wide designations donations are allocated to.', 'gratora' ) }
+                { __( 'Organization-wide designations donations are allocated to.', 'gratora-donation-platform' ) }
             </p>
 
             <KpiStrip items={ fundKpis( stats ) } loading={ statsLoading } />
@@ -476,7 +476,7 @@ export default function List() {
                             '%d test donation is not counted in these figures.',
                             '%d test donations are not counted in these figures.',
                             testHidden,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         testHidden
                     ) }
@@ -491,11 +491,11 @@ export default function List() {
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Wallet size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No funds yet', 'gratora' ) }
-                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'gratora' ) }
+                    title={ __( 'No funds yet', 'gratora-donation-platform' ) }
+                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'gratora-donation-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ onCreate }>
-                            { __( 'Create your first fund', 'gratora' ) }
+                            { __( 'Create your first fund', 'gratora-donation-platform' ) }
                         </Btn>
                     }
                 />
@@ -517,11 +517,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'gratora' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora-donation-platform' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora-donation-platform' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'gratora' ) }
+                                    { __( 'Clear filters', 'gratora-donation-platform' ) }
                                 </Btn>
                             }
                         />
@@ -613,7 +613,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
             } );
             onSaved();
         } catch ( err ) {
-            setSaveError( err?.message || __( 'Failed to save fund.', 'gratora' ) );
+            setSaveError( err?.message || __( 'Failed to save fund.', 'gratora-donation-platform' ) );
             setSaving( false );
         }
     };
@@ -626,16 +626,16 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
     return (
         <Dialog
             title={ fund.id
-                ? __( 'Edit fund', 'gratora' )
-                : __( 'New fund', 'gratora' ) }
+                ? __( 'Edit fund', 'gratora-donation-platform' )
+                : __( 'New fund', 'gratora-donation-platform' ) }
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'gratora' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'gratora-donation-platform' ) }</Btn>
                     <Btn variant="primary" onClick={ save } isBusy={ saving } disabled={ saving }>
                         { fund.id
-                            ? __( 'Save fund', 'gratora' )
-                            : __( 'Create fund', 'gratora' ) }
+                            ? __( 'Save fund', 'gratora-donation-platform' )
+                            : __( 'Create fund', 'gratora-donation-platform' ) }
                     </Btn>
                 </>
             ) }
@@ -644,46 +644,46 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                         <Notice status="error" onRemove={ () => setSaveError( null ) }>{ saveError }</Notice>
                     ) }
                     <fieldset className="gratora-fset">
-                        <legend>{ __( 'Identity', 'gratora' ) }</legend>
+                        <legend>{ __( 'Identity', 'gratora-donation-platform' ) }</legend>
                         <div className="gratora-fld">
-                            <label htmlFor="gratora-fund-name">{ __( 'Name', 'gratora' ) }</label>
+                            <label htmlFor="gratora-fund-name">{ __( 'Name', 'gratora-donation-platform' ) }</label>
                             <input id="gratora-fund-name" className="gratora-input" value={ form.name } onChange={ ( e ) => set( 'name', e.target.value ) } />
                         </div>
                         <div className="gratora-fld">
-                            <label htmlFor="gratora-fund-code">{ __( 'Code', 'gratora' ) }</label>
+                            <label htmlFor="gratora-fund-code">{ __( 'Code', 'gratora-donation-platform' ) }</label>
                             <input id="gratora-fund-code" aria-describedby="gratora-fund-code-help" className="gratora-input gratora-input--mono" value={ form.code } onChange={ ( e ) => set( 'code', e.target.value ) } />
-                            <p id="gratora-fund-code-help" className="gratora-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'gratora' ) }</p>
+                            <p id="gratora-fund-code-help" className="gratora-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'gratora-donation-platform' ) }</p>
                         </div>
                         <div className="gratora-fld">
-                            <label htmlFor="gratora-fund-description">{ __( 'Description', 'gratora' ) }</label>
+                            <label htmlFor="gratora-fund-description">{ __( 'Description', 'gratora-donation-platform' ) }</label>
                             <textarea id="gratora-fund-description" className="gratora-textarea" rows="3" value={ form.description } onChange={ ( e ) => set( 'description', e.target.value ) } />
                         </div>
                     </fieldset>
 
                     <fieldset className="gratora-fset">
-                        <legend>{ __( 'Classification', 'gratora' ) }</legend>
+                        <legend>{ __( 'Classification', 'gratora-donation-platform' ) }</legend>
                         <div className="gratora-fld">
-                            <span id="gratora-fund-type-label" className="gratora-fld__label">{ __( 'Type', 'gratora' ) }</span>
+                            <span id="gratora-fund-type-label" className="gratora-fld__label">{ __( 'Type', 'gratora-donation-platform' ) }</span>
                             <div className="gratora-seg2" role="group" aria-labelledby="gratora-fund-type-label">
                                 <button type="button" className={ ! form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', false ) }>
-                                    { __( 'Unrestricted', 'gratora' ) }
+                                    { __( 'Unrestricted', 'gratora-donation-platform' ) }
                                 </button>
                                 <button type="button" className={ form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', true ) }>
-                                    { __( 'Restricted', 'gratora' ) }
+                                    { __( 'Restricted', 'gratora-donation-platform' ) }
                                 </button>
                             </div>
-                            <p className="gratora-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'gratora' ) }</p>
+                            <p className="gratora-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'gratora-donation-platform' ) }</p>
                         </div>
                         <div className="gratora-fld">
                             { /* SearchableSelect takes no id, so the group carries the name instead. */ }
-                            <span id="gratora-fund-parent-label" className="gratora-fld__label">{ __( 'Parent fund', 'gratora' ) }</span>
+                            <span id="gratora-fund-parent-label" className="gratora-fld__label">{ __( 'Parent fund', 'gratora-donation-platform' ) }</span>
                             <div role="group" aria-labelledby="gratora-fund-parent-label">
                             <SearchableSelect
                                 value={ form.parent_fund_id ? String( form.parent_fund_id ) : '' }
                                 onChange={ ( v ) => set( 'parent_fund_id', v ) }
-                                placeholder={ __( 'None (top-level fund)', 'gratora' ) }
+                                placeholder={ __( 'None (top-level fund)', 'gratora-donation-platform' ) }
                                 options={ [
-                                    { value: '', label: __( 'None (top-level fund)', 'gratora' ) },
+                                    { value: '', label: __( 'None (top-level fund)', 'gratora-donation-platform' ) },
                                     ...parents.map( ( p ) => ( { value: String( p.id ), label: p.name } ) ),
                                 ] }
                             />
@@ -692,10 +692,10 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     </fieldset>
 
                     <fieldset className="gratora-fset">
-                        <legend>{ __( 'Targets', 'gratora' ) }</legend>
+                        <legend>{ __( 'Targets', 'gratora-donation-platform' ) }</legend>
                         <div className="gratora-fld">
-                            <label htmlFor="gratora-fund-goal">{ __( 'Goal amount', 'gratora' ) } <span className="gratora-fld__opt">{ __( 'optional', 'gratora' ) }</span></label>
-                            <input id="gratora-fund-goal" className="gratora-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'gratora' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
+                            <label htmlFor="gratora-fund-goal">{ __( 'Goal amount', 'gratora-donation-platform' ) } <span className="gratora-fld__opt">{ __( 'optional', 'gratora-donation-platform' ) }</span></label>
+                            <input id="gratora-fund-goal" className="gratora-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'gratora-donation-platform' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
                         </div>
                         <ScheduleFields
                             enabled={ scheduleOn }
@@ -705,36 +705,36 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                             endsAt={ form.ends_at ? form.ends_at.slice( 0, 10 ) : '' }
                             onEndsAt={ ( v ) => set( 'ends_at', v || '' ) }
                             disabled={ form.is_default }
-                            disabledNote={ __( 'The default fund takes every donation with no fund chosen, so it stays open. Make another fund the default to schedule this one.', 'gratora' ) }
+                            disabledNote={ __( 'The default fund takes every donation with no fund chosen, so it stays open. Make another fund the default to schedule this one.', 'gratora-donation-platform' ) }
                         />
                     </fieldset>
 
                     <fieldset className="gratora-fset">
-                        <legend>{ __( 'Accounting', 'gratora' ) }</legend>
+                        <legend>{ __( 'Accounting', 'gratora-donation-platform' ) }</legend>
                         <div className="gratora-fld">
-                            <label htmlFor="gratora-fund-accounting">{ __( 'Accounting code', 'gratora' ) } <span className="gratora-fld__opt">{ __( 'optional', 'gratora' ) }</span></label>
-                            <input id="gratora-fund-accounting" aria-describedby="gratora-fund-accounting-help" className="gratora-input gratora-input--mono" placeholder={ __( 'Enter accounting code', 'gratora' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
-                            <p id="gratora-fund-accounting-help" className="gratora-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'gratora' ) }</p>
+                            <label htmlFor="gratora-fund-accounting">{ __( 'Accounting code', 'gratora-donation-platform' ) } <span className="gratora-fld__opt">{ __( 'optional', 'gratora-donation-platform' ) }</span></label>
+                            <input id="gratora-fund-accounting" aria-describedby="gratora-fund-accounting-help" className="gratora-input gratora-input--mono" placeholder={ __( 'Enter accounting code', 'gratora-donation-platform' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
+                            <p id="gratora-fund-accounting-help" className="gratora-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'gratora-donation-platform' ) }</p>
                         </div>
                     </fieldset>
 
                     <fieldset className="gratora-fset">
-                        <legend>{ __( 'Behaviour', 'gratora' ) }</legend>
+                        <legend>{ __( 'Behaviour', 'gratora-donation-platform' ) }</legend>
                         <ToggleRow
-                            title={ __( 'Default fund', 'gratora' ) }
+                            title={ __( 'Default fund', 'gratora-donation-platform' ) }
                             // Off is not a move the server accepts: a site always
                             // has a default, and it changes by promoting another
                             // fund rather than by clearing this one.
                             sub={ fund.is_default
-                                ? __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. Promote another fund to move it.', 'gratora' )
-                                : __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. The default has no schedule.', 'gratora' ) }
+                                ? __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. Promote another fund to move it.', 'gratora-donation-platform' )
+                                : __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. The default has no schedule.', 'gratora-donation-platform' ) }
                             checked={ form.is_default }
                             onChange={ setIsDefault }
                             disabled={ !! fund.is_default }
                         />
                         <ToggleRow
-                            title={ __( 'Active', 'gratora' ) }
-                            sub={ __( 'Inactive funds stay in reports but cannot receive new donations.', 'gratora' ) }
+                            title={ __( 'Active', 'gratora-donation-platform' ) }
+                            sub={ __( 'Inactive funds stay in reports but cannot receive new donations.', 'gratora-donation-platform' ) }
                             checked={ form.is_active }
                             onChange={ ( v ) => set( 'is_active', v ) }
                         />
@@ -770,19 +770,19 @@ function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onC
             const res = await apiFetch( { path, method: 'DELETE' } );
             let msg;
             if ( res.action === 'deleted' ) {
-                msg = sprintf( /* translators: %s: fund name */ __( 'Fund “%s” was deleted.', 'gratora' ), fund.name );
+                msg = sprintf( /* translators: %s: fund name */ __( 'Fund “%s” was deleted.', 'gratora-donation-platform' ), fund.name );
             } else if ( res.action === 'reassign_queued' ) {
-                msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'gratora' ), fund.name );
+                msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'gratora-donation-platform' ), fund.name );
             } else {
                 msg = sprintf(
                     /* translators: %s: fund name */
-                    __( 'Fund “%s” was deactivated and kept for reporting.', 'gratora' ),
+                    __( 'Fund “%s” was deactivated and kept for reporting.', 'gratora-donation-platform' ),
                     fund.name
                 );
             }
             onDone( msg );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not delete the fund.', 'gratora' ) );
+            setError( err?.message || __( 'Could not delete the fund.', 'gratora-donation-platform' ) );
             setBusy( false );
         }
     };
@@ -794,16 +794,16 @@ function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onC
     const deletable = fund.deletable === true;
     const reassignBlocked = choice === 'reassign' && ! targetId;
     const primaryLabel = deletable
-        ? __( 'Delete fund', 'gratora' )
-        : ( choice === 'reassign' ? __( 'Reassign and delete', 'gratora' ) : __( 'Deactivate fund', 'gratora' ) );
+        ? __( 'Delete fund', 'gratora-donation-platform' )
+        : ( choice === 'reassign' ? __( 'Reassign and delete', 'gratora-donation-platform' ) : __( 'Deactivate fund', 'gratora-donation-platform' ) );
 
     return (
         <Dialog
-            title={ sprintf( /* translators: %s: fund name */ __( 'Delete fund: %s', 'gratora' ), fund.name ) }
+            title={ sprintf( /* translators: %s: fund name */ __( 'Delete fund: %s', 'gratora-donation-platform' ), fund.name ) }
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose } disabled={ busy }>{ __( 'Cancel', 'gratora' ) }</Btn>
+                    <Btn onClick={ onClose } disabled={ busy }>{ __( 'Cancel', 'gratora-donation-platform' ) }</Btn>
                     <Btn
                         variant="primary"
                         isBusy={ busy }
@@ -821,12 +821,12 @@ function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onC
 
             { deletable ? (
                 <p className="gratora-dialog__help">
-                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'gratora' ) }
+                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'gratora-donation-platform' ) }
                 </p>
             ) : (
                 <>
                     <p className="gratora-dialog__help">
-                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'gratora' ) }
+                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'gratora-donation-platform' ) }
                     </p>
 
                     <label className="gratora-choice" htmlFor="gratora-fund-delete-deactivate">
@@ -838,8 +838,8 @@ function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onC
                             onChange={ () => setChoice( 'deactivate' ) }
                         />
                         <span>
-                            <strong>{ __( 'Deactivate', 'gratora' ) }</strong>
-                            <span>{ __( 'Keep all donation records. Recommended.', 'gratora' ) }</span>
+                            <strong>{ __( 'Deactivate', 'gratora-donation-platform' ) }</strong>
+                            <span>{ __( 'Keep all donation records. Recommended.', 'gratora-donation-platform' ) }</span>
                         </span>
                     </label>
 
@@ -854,22 +854,22 @@ function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onC
                                 onChange={ () => setChoice( 'reassign' ) }
                             />
                             <span>
-                                <strong>{ __( 'Reassign to another fund, then delete', 'gratora' ) }</strong>
-                                <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'gratora' ) }</span>
+                                <strong>{ __( 'Reassign to another fund, then delete', 'gratora-donation-platform' ) }</strong>
+                                <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'gratora-donation-platform' ) }</span>
                             </span>
                         </label>
                     ) : (
                         <p className="gratora-dialog__help">
                             { hasChildren
-                                ? __( 'This fund has sub-funds under it, so it cannot be removed. Deactivating keeps them; they move up to the top level. To remove it outright, move or delete the sub-funds first.', 'gratora' )
+                                ? __( 'This fund has sub-funds under it, so it cannot be removed. Deactivating keeps them; they move up to the top level. To remove it outright, move or delete the sub-funds first.', 'gratora-donation-platform' )
                                 : fundsState === 'loading'
-                                    ? __( 'Still loading the other funds, so reassigning is not offered yet.', 'gratora' )
+                                    ? __( 'Still loading the other funds, so reassigning is not offered yet.', 'gratora-donation-platform' )
                                     : fundsState === 'failed'
-                                        ? __( 'The list of other funds could not be loaded, so reassigning is not offered. Deactivating is safe either way.', 'gratora' )
-                                        : __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'gratora' ) }
+                                        ? __( 'The list of other funds could not be loaded, so reassigning is not offered. Deactivating is safe either way.', 'gratora-donation-platform' )
+                                        : __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'gratora-donation-platform' ) }
                             { fundsState === 'failed' && typeof onRetryFunds === 'function' && (
                                 <button type="button" className="gratora-linkbtn" onClick={ onRetryFunds }>
-                                    { __( 'Try again', 'gratora' ) }
+                                    { __( 'Try again', 'gratora-donation-platform' ) }
                                 </button>
                             ) }
                         </p>
@@ -877,11 +877,11 @@ function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onC
 
                     { choice === 'reassign' && candidates.length > 0 && (
                         <div className="gratora-fld" style={ { marginTop: 12 } }>
-                            <label className="gratora-fld__label">{ __( 'Reassign donations to', 'gratora' ) }</label>
+                            <label className="gratora-fld__label">{ __( 'Reassign donations to', 'gratora-donation-platform' ) }</label>
                             <SearchableSelect
                                 value={ targetId }
                                 onChange={ ( v ) => setTargetId( v ) }
-                                placeholder={ __( 'Select a fund', 'gratora' ) }
+                                placeholder={ __( 'Select a fund', 'gratora-donation-platform' ) }
                                 options={ candidates.map( ( f ) => ( { value: String( f.id ), label: f.name } ) ) }
                             />
                         </div>

@@ -3,16 +3,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Gratora - Donation Platform 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/gratora\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/gratora-donation-platform\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-09T03:20:24+00:00\n"
+"POT-Creation-Date: 2026-09-11T07:36:51+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: gratora\n"
+"X-Domain: gratora-donation-platform\n"
 
 #. translators: %d: number of edited fields in this card
 #: components/Card.js:57
@@ -74,7 +74,7 @@ msgid "Replace"
 msgstr ""
 
 #: components/CoverImagePicker.js:71
-#: assets/admin/campaign-blocks/index.jsx:181
+#: assets/admin/campaign-blocks/index.jsx:180
 #: assets/admin/campaigns/CoverImageCard.jsx:33
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:327
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:110
@@ -187,11 +187,11 @@ msgstr ""
 #: assets/admin/donors/Insights.jsx:40
 #: assets/admin/donors/profile/helpers.js:60
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:220
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:18
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:24
 #: assets/admin/funds/List.jsx:33
 #: assets/admin/funds/List.jsx:94
 #: assets/admin/funds/List.jsx:736
-#: assets/admin/subscriptions/List.jsx:28
+#: assets/admin/subscriptions/List.jsx:27
 #: assets/admin/_shared/components/StatusBadge.jsx:14
 #: assets/admin/_shared/components/StatusBadge.jsx:34
 #: assets/admin/_shared/format.js:71
@@ -497,7 +497,7 @@ msgstr ""
 #. Author of the plugin
 #: gratora.php
 #: src/Admin/AdminFooter.php:43
-#: src/Admin/AdminMenu.php:30
+#: src/Admin/AdminMenu.php:50
 #: src/Admin/SystemReport.php:53
 #: src/Campaigns/Blocks/BlockEditorIntegration.php:205
 #: src/Foundation/Commands/AbilitiesBridge.php:48
@@ -521,7 +521,7 @@ msgstr ""
 msgid "Standard"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:31
+#: src/Admin/AdminMenu.php:51
 #: assets/admin/campaigns/List.jsx:348
 #: assets/admin/donations/detail/Header.jsx:21
 #: assets/admin/donations/List.jsx:541
@@ -529,13 +529,13 @@ msgstr ""
 #: assets/admin/donors/profile/Header.jsx:46
 #: assets/admin/funds/List.jsx:443
 #: assets/admin/settings/Settings.jsx:301
-#: assets/admin/subscriptions/List.jsx:822
+#: assets/admin/subscriptions/List.jsx:792
 #: assets/admin/tools/Tools.jsx:62
 msgid "Fundraising"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:47
-#: src/Admin/AdminMenu.php:48
+#: src/Admin/AdminMenu.php:67
+#: src/Admin/AdminMenu.php:68
 #: assets/admin/dashboard/Dashboard.jsx:176
 msgid "Dashboard"
 msgstr ""
@@ -567,7 +567,7 @@ msgstr ""
 #: src/Reports/CampaignReportBuilder.php:54
 #: src/Reports/RevenueReportBuilder.php:66
 #: src/Rest/Admin/RolesController.php:84
-#: assets/admin/campaign-blocks/index.jsx:272
+#: assets/admin/campaign-blocks/index.jsx:271
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:21
 #: assets/admin/campaigns/Detail.jsx:769
 #: assets/admin/campaigns/List.jsx:210
@@ -593,7 +593,7 @@ msgstr ""
 #: src/Campaigns/CampaignStatMetrics.php:39
 #: src/Rest/Admin/RolesController.php:83
 #: src/Rest/Admin/ToolsController.php:1166
-#: assets/admin/campaign-blocks/index.jsx:273
+#: assets/admin/campaign-blocks/index.jsx:272
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:22
 #: assets/admin/campaigns/Detail.jsx:773
 #: assets/admin/campaigns/List.jsx:220
@@ -639,8 +639,8 @@ msgid "Settings"
 msgstr ""
 
 #: src/Admin/Pages/SubscriptionsPage.php:27
-#: assets/admin/subscriptions/List.jsx:824
-#: assets/admin/subscriptions/List.jsx:828
+#: assets/admin/subscriptions/List.jsx:794
+#: assets/admin/subscriptions/List.jsx:798
 msgid "Subscriptions"
 msgstr ""
 
@@ -983,7 +983,7 @@ msgstr ""
 #: assets/admin/donations/RecordDonationDrawer.jsx:184
 #: assets/admin/donors/DonorProfile.jsx:130
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:65
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:205
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:225
 #: assets/admin/forms/Editor.jsx:693
 #: assets/admin/funds/List.jsx:634
 #: assets/admin/funds/List.jsx:806
@@ -992,7 +992,7 @@ msgstr ""
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:223
 #: assets/admin/settings/panels/StripeKeysCard.jsx:134
 #: assets/admin/settings/panels/StripeKeysCard.jsx:252
-#: assets/admin/subscriptions/List.jsx:807
+#: assets/admin/subscriptions/List.jsx:777
 #: assets/admin/tools/tabs/CsvImportCard.jsx:168
 #: assets/admin/_shared/components/ConfirmDialog.jsx:29
 #: assets/donor-portal/index.jsx:1753
@@ -1011,9 +1011,9 @@ msgid "Delete everything and deactivate"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:47
-#: assets/admin/campaign-blocks/index.jsx:575
-#: assets/admin/campaign-blocks/index.jsx:684
-#: assets/admin/campaign-blocks/index.jsx:792
+#: assets/admin/campaign-blocks/index.jsx:574
+#: assets/admin/campaign-blocks/index.jsx:683
+#: assets/admin/campaign-blocks/index.jsx:791
 #: assets/admin/campaigns/Detail.jsx:1299
 #: assets/admin/campaigns/List.jsx:160
 #: assets/admin/forms/Editor.jsx:1278
@@ -1070,7 +1070,7 @@ msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:57
 #: src/Campaigns/CampaignStatMetrics.php:42
-#: assets/admin/campaign-blocks/index.jsx:276
+#: assets/admin/campaign-blocks/index.jsx:275
 msgid "Days left"
 msgstr ""
 
@@ -1156,7 +1156,7 @@ msgstr ""
 #: src/Campaigns/Blocks/DonateButtonBlock.php:79
 #: src/Campaigns/Blocks/DonationFormBlock.php:54
 #: src/Campaigns/Blocks/DonationFormBlock.php:94
-#: assets/admin/campaign-blocks/index.jsx:1008
+#: assets/admin/campaign-blocks/index.jsx:1007
 msgid "Donations are not open for this campaign yet."
 msgstr ""
 
@@ -1169,7 +1169,7 @@ msgstr ""
 #: src/Forms/Shortcode/DonationFormShortcode.php:714
 #: src/Forms/Shortcode/DonationFormShortcode.php:1328
 #: src/Forms/Shortcode/DonationFormShortcode.php:1485
-#: assets/admin/campaign-blocks/index.jsx:497
+#: assets/admin/campaign-blocks/index.jsx:496
 #: assets/admin/forms/blocks/submit-button/index.js:56
 msgid "Donate now"
 msgstr ""
@@ -1194,7 +1194,7 @@ msgid "%s ago"
 msgstr ""
 
 #: src/Campaigns/Blocks/RecentDonationsBlock.php:118
-#: assets/admin/campaign-blocks/index.jsx:694
+#: assets/admin/campaign-blocks/index.jsx:693
 msgid "No donations to show yet."
 msgstr ""
 
@@ -1204,7 +1204,7 @@ msgstr ""
 
 #: src/Campaigns/Blocks/SupporterWallBlock.php:137
 #: src/Campaigns/Blocks/SupporterWallBlock.php:182
-#: assets/admin/campaign-blocks/index.jsx:802
+#: assets/admin/campaign-blocks/index.jsx:801
 msgid "The supporter wall is empty."
 msgstr ""
 
@@ -1214,7 +1214,7 @@ msgid "Add the first name to it."
 msgstr ""
 
 #: src/Campaigns/Blocks/TopDonorsBlock.php:109
-#: assets/admin/campaign-blocks/index.jsx:585
+#: assets/admin/campaign-blocks/index.jsx:584
 msgid "No donors to rank yet."
 msgstr ""
 
@@ -1234,8 +1234,8 @@ msgstr ""
 
 #: src/Campaigns/Blocks/views/donation-form.php:32
 #: src/Forms/Shortcode/DonationFormShortcode.php:766
-#: assets/admin/campaign-blocks/index.jsx:976
-#: assets/admin/campaign-blocks/index.jsx:998
+#: assets/admin/campaign-blocks/index.jsx:975
+#: assets/admin/campaign-blocks/index.jsx:997
 #: assets/admin/_shared/entities.js:25
 msgid "Donation form"
 msgstr ""
@@ -1268,7 +1268,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:299
 #: assets/admin/donors/Insights.jsx:195
 #: assets/admin/forms/blocks/donation-summary/index.js:20
-#: assets/admin/subscriptions/List.jsx:593
+#: assets/admin/subscriptions/List.jsx:564
 #: assets/admin/_shared/emailTemplates.js:67
 #: assets/admin/_shared/emailTemplates.js:74
 #: assets/admin/_shared/emailTemplates.js:81
@@ -1364,18 +1364,18 @@ msgid "What this campaign is raising for."
 msgstr ""
 
 #: src/Campaigns/CampaignService.php:652
-#: assets/admin/campaign-blocks/index.jsx:654
-#: assets/admin/campaign-blocks/index.jsx:676
-#: assets/admin/campaign-blocks/index.jsx:687
-#: assets/admin/campaign-blocks/index.jsx:747
+#: assets/admin/campaign-blocks/index.jsx:653
+#: assets/admin/campaign-blocks/index.jsx:675
+#: assets/admin/campaign-blocks/index.jsx:686
+#: assets/admin/campaign-blocks/index.jsx:746
 #: assets/admin/campaigns/Detail.jsx:818
 #: assets/admin/dashboard/Dashboard.jsx:163
 msgid "Recent donations"
 msgstr ""
 
 #: src/Campaigns/CampaignService.php:653
-#: assets/admin/campaign-blocks/index.jsx:545
-#: assets/admin/campaign-blocks/index.jsx:567
+#: assets/admin/campaign-blocks/index.jsx:544
+#: assets/admin/campaign-blocks/index.jsx:566
 #: assets/admin/campaigns/Detail.jsx:822
 msgid "Top donors"
 msgstr ""
@@ -1399,7 +1399,7 @@ msgid "%s donation form"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:34
-#: assets/admin/campaign-blocks/index.jsx:268
+#: assets/admin/campaign-blocks/index.jsx:267
 #: assets/admin/campaigns/Detail.jsx:765
 #: assets/admin/campaigns/Detail.jsx:1532
 #: assets/admin/dashboard/widgets/KpiRow.jsx:31
@@ -1407,31 +1407,31 @@ msgid "Amount raised"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:35
-#: assets/admin/campaign-blocks/index.jsx:269
+#: assets/admin/campaign-blocks/index.jsx:268
 msgid "Our goal"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:36
-#: assets/admin/campaign-blocks/index.jsx:270
+#: assets/admin/campaign-blocks/index.jsx:269
 msgid "Still needed"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:37
-#: assets/admin/campaign-blocks/index.jsx:271
+#: assets/admin/campaign-blocks/index.jsx:270
 msgid "Of goal reached"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:40
 #: src/Reports/CampaignReportBuilder.php:56
 #: src/Reports/RevenueReportBuilder.php:67
-#: assets/admin/campaign-blocks/index.jsx:274
+#: assets/admin/campaign-blocks/index.jsx:273
 #: assets/admin/campaigns/Detail.jsx:777
 #: assets/admin/dashboard/widgets/KpiRow.jsx:55
 msgid "Average donation"
 msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:41
-#: assets/admin/campaign-blocks/index.jsx:275
+#: assets/admin/campaign-blocks/index.jsx:274
 msgid "Top donation"
 msgstr ""
 
@@ -1547,8 +1547,8 @@ msgid "A match or a challenge, where how many have joined in matters as much as 
 msgstr ""
 
 #: src/Campaigns/CampaignTemplates.php:113
-#: assets/admin/campaign-blocks/index.jsx:758
-#: assets/admin/campaign-blocks/index.jsx:784
+#: assets/admin/campaign-blocks/index.jsx:757
+#: assets/admin/campaign-blocks/index.jsx:783
 msgid "Supporter wall"
 msgstr ""
 
@@ -1728,8 +1728,8 @@ msgstr ""
 #: src/Campaigns/Styling/Tokens.php:129
 #: src/Campaigns/Styling/Tokens.php:141
 #: src/Campaigns/Styling/Tokens.php:217
-#: assets/admin/campaign-blocks/index.jsx:361
-#: assets/admin/campaign-blocks/index.jsx:516
+#: assets/admin/campaign-blocks/index.jsx:360
+#: assets/admin/campaign-blocks/index.jsx:515
 #: assets/admin/forms/blocks/section/index.js:31
 msgid "Medium"
 msgstr ""
@@ -2443,10 +2443,10 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:117
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:110
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:163
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:82
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:103
 #: assets/admin/forms/Editor.jsx:1293
 #: assets/admin/funds/List.jsx:343
-#: assets/admin/subscriptions/List.jsx:638
+#: assets/admin/subscriptions/List.jsx:609
 msgid "Status"
 msgstr ""
 
@@ -2483,7 +2483,7 @@ msgid "Test donation"
 msgstr ""
 
 #: src/Donors/Privacy/WordPressPrivacy.php:244
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:129
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:149
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:107
 msgid "Started"
 msgstr ""
@@ -2500,8 +2500,8 @@ msgstr ""
 
 #: src/Donors/Privacy/WordPressPrivacy.php:247
 #: assets/admin/donors/profile/helpers.js:63
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:21
-#: assets/admin/subscriptions/List.jsx:31
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:27
+#: assets/admin/subscriptions/List.jsx:30
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:109
 #: assets/admin/_shared/components/StatusBadge.jsx:31
 #: assets/donor-portal/statusLabels.js:12
@@ -3635,7 +3635,7 @@ msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:744
 #: assets/admin/settings/panels/StripeKeysCard.jsx:269
-#: assets/admin/subscriptions/List.jsx:254
+#: assets/admin/subscriptions/List.jsx:225
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:146
 msgid "Check again"
 msgstr ""
@@ -3687,17 +3687,15 @@ msgstr ""
 #: assets/admin/donations/List.jsx:41
 #: assets/admin/donations/List.jsx:54
 #: assets/admin/forms/blocks/recurring-toggle/index.js:13
-#: assets/admin/subscriptions/List.jsx:38
-#: assets/admin/subscriptions/List.jsx:48
+#: assets/admin/_shared/recurring/planColumns.jsx:19
 msgid "Weekly"
 msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:771
 #: src/Receipts/resources/views/generic.php:46
 #: assets/admin/forms/blocks/recurring-toggle/index.js:14
-#: assets/admin/subscriptions/List.jsx:39
-#: assets/admin/subscriptions/List.jsx:49
 #: assets/admin/_shared/recurring/PlanActions.jsx:89
+#: assets/admin/_shared/recurring/planColumns.jsx:20
 #: assets/donor-portal/index.jsx:2083
 msgid "Every 2 weeks"
 msgstr ""
@@ -3707,8 +3705,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:39
 #: assets/admin/donations/List.jsx:52
 #: assets/admin/forms/blocks/recurring-toggle/index.js:15
-#: assets/admin/subscriptions/List.jsx:40
-#: assets/admin/subscriptions/List.jsx:50
+#: assets/admin/_shared/recurring/planColumns.jsx:21
 msgid "Monthly"
 msgstr ""
 
@@ -3717,8 +3714,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:42
 #: assets/admin/donations/List.jsx:55
 #: assets/admin/forms/blocks/recurring-toggle/index.js:16
-#: assets/admin/subscriptions/List.jsx:41
-#: assets/admin/subscriptions/List.jsx:51
+#: assets/admin/_shared/recurring/planColumns.jsx:22
 msgid "Quarterly"
 msgstr ""
 
@@ -3727,8 +3723,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:40
 #: assets/admin/donations/List.jsx:53
 #: assets/admin/forms/blocks/recurring-toggle/index.js:17
-#: assets/admin/subscriptions/List.jsx:42
-#: assets/admin/subscriptions/List.jsx:52
+#: assets/admin/_shared/recurring/planColumns.jsx:23
 msgid "Yearly"
 msgstr ""
 
@@ -3890,7 +3885,7 @@ msgid "Manage campaigns"
 msgstr ""
 
 #: src/Foundation/Auth/Capabilities.php:57
-#: assets/admin/campaign-blocks/index.jsx:1022
+#: assets/admin/campaign-blocks/index.jsx:1021
 msgid "Manage donation forms"
 msgstr ""
 
@@ -4923,8 +4918,8 @@ msgstr ""
 #: src/Rest/Admin/DonationsController.php:1748
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:35
 #: assets/admin/donations/List.jsx:345
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:115
-#: assets/admin/subscriptions/List.jsx:715
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:139
+#: assets/admin/subscriptions/List.jsx:686
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:141
 msgid "Gateway"
 msgstr ""
@@ -6099,7 +6094,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:106
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:128
 #: assets/admin/forms/Editor.jsx:1319
-#: assets/admin/subscriptions/List.jsx:704
+#: assets/admin/subscriptions/List.jsx:675
 #: assets/admin/tools/tabs/ExportTab.jsx:293
 #: assets/admin/_shared/entities.js:19
 #: assets/donor-portal/index.jsx:827
@@ -6115,108 +6110,108 @@ msgstr ""
 msgid "You do not have permission to list campaigns, so this block can only use the one the page is already for."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:85
+#: assets/admin/campaign-blocks/index.jsx:84
 msgid "Gratora campaign block"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:86
+#: assets/admin/campaign-blocks/index.jsx:85
 msgid "Choose which campaign this block should display."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:150
+#: assets/admin/campaign-blocks/index.jsx:149
 msgid "That image could not be saved to the campaign."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:176
+#: assets/admin/campaign-blocks/index.jsx:175
 msgid "Replace image"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:177
+#: assets/admin/campaign-blocks/index.jsx:176
 msgid "Choose image"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:190
+#: assets/admin/campaign-blocks/index.jsx:189
 msgid "Saved to the campaign as soon as you choose, and used everywhere the campaign appears."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:200
+#: assets/admin/campaign-blocks/index.jsx:199
 msgid "Campaign image"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:201
+#: assets/admin/campaign-blocks/index.jsx:200
 msgid "The campaign's cover photo. Follows the campaign, not the page it sits on."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:216
+#: assets/admin/campaign-blocks/index.jsx:215
 msgid "Image"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:225
+#: assets/admin/campaign-blocks/index.jsx:224
 msgid "Aspect ratio"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:228
+#: assets/admin/campaign-blocks/index.jsx:227
 msgid "Wide (16:9)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:229
+#: assets/admin/campaign-blocks/index.jsx:228
 msgid "Photo (3:2)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:230
+#: assets/admin/campaign-blocks/index.jsx:229
 msgid "Classic (4:3)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:231
+#: assets/admin/campaign-blocks/index.jsx:230
 msgid "Square (1:1)"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:232
+#: assets/admin/campaign-blocks/index.jsx:231
 msgid "The image's own"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:238
+#: assets/admin/campaign-blocks/index.jsx:237
 msgid "Rounded corners"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:244
+#: assets/admin/campaign-blocks/index.jsx:243
 msgid "Load with priority"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:245
+#: assets/admin/campaign-blocks/index.jsx:244
 msgid "Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:286
+#: assets/admin/campaign-blocks/index.jsx:285
 msgid "This campaign has no goal, so this stat will not render."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:289
+#: assets/admin/campaign-blocks/index.jsx:288
 msgid "This campaign has no end date, so this stat will not render."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:292
+#: assets/admin/campaign-blocks/index.jsx:291
 msgid "No donations yet, so this stat will not render until the first one arrives."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:317
+#: assets/admin/campaign-blocks/index.jsx:316
 msgid "Campaign stat"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:318
+#: assets/admin/campaign-blocks/index.jsx:317
 msgid "A single campaign figure. Add one per number you want to show."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:335
+#: assets/admin/campaign-blocks/index.jsx:334
 msgid "Stat"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:343
+#: assets/admin/campaign-blocks/index.jsx:342
 msgid "Figure"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:350
-#: assets/admin/campaign-blocks/index.jsx:494
+#: assets/admin/campaign-blocks/index.jsx:349
+#: assets/admin/campaign-blocks/index.jsx:493
 #: assets/admin/forms/blocks/checkbox/index.js:27
 #: assets/admin/forms/blocks/comment/index.js:29
 #: assets/admin/forms/blocks/country/index.js:22
@@ -6238,24 +6233,24 @@ msgstr ""
 msgid "Label"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:357
+#: assets/admin/campaign-blocks/index.jsx:356
 #: assets/admin/donors/Insights.jsx:270
 msgid "Size"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:360
-#: assets/admin/campaign-blocks/index.jsx:515
+#: assets/admin/campaign-blocks/index.jsx:359
+#: assets/admin/campaign-blocks/index.jsx:514
 msgid "Small"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:362
-#: assets/admin/campaign-blocks/index.jsx:517
+#: assets/admin/campaign-blocks/index.jsx:361
+#: assets/admin/campaign-blocks/index.jsx:516
 msgid "Large"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:368
-#: assets/admin/campaign-blocks/index.jsx:438
-#: assets/admin/campaign-blocks/index.jsx:501
+#: assets/admin/campaign-blocks/index.jsx:367
+#: assets/admin/campaign-blocks/index.jsx:437
+#: assets/admin/campaign-blocks/index.jsx:500
 #: assets/admin/forms/blocks/currency-switcher/index.js:180
 #: assets/admin/forms/blocks/heading/index.js:43
 #: assets/admin/forms/blocks/paragraph/index.js:30
@@ -6264,9 +6259,9 @@ msgstr ""
 msgid "Alignment"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:371
-#: assets/admin/campaign-blocks/index.jsx:441
-#: assets/admin/campaign-blocks/index.jsx:504
+#: assets/admin/campaign-blocks/index.jsx:370
+#: assets/admin/campaign-blocks/index.jsx:440
+#: assets/admin/campaign-blocks/index.jsx:503
 #: assets/admin/forms/blocks/currency-switcher/index.js:184
 #: assets/admin/forms/blocks/heading/index.js:18
 #: assets/admin/forms/blocks/paragraph/index.js:11
@@ -6275,9 +6270,9 @@ msgstr ""
 msgid "Left"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:372
-#: assets/admin/campaign-blocks/index.jsx:442
-#: assets/admin/campaign-blocks/index.jsx:505
+#: assets/admin/campaign-blocks/index.jsx:371
+#: assets/admin/campaign-blocks/index.jsx:441
+#: assets/admin/campaign-blocks/index.jsx:504
 #: assets/admin/forms/blocks/heading/index.js:19
 #: assets/admin/forms/blocks/paragraph/index.js:12
 #: assets/admin/forms/blocks/privacy-notice/index.js:12
@@ -6285,8 +6280,8 @@ msgstr ""
 msgid "Center"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:373
-#: assets/admin/campaign-blocks/index.jsx:506
+#: assets/admin/campaign-blocks/index.jsx:372
+#: assets/admin/campaign-blocks/index.jsx:505
 #: assets/admin/forms/blocks/currency-switcher/index.js:185
 #: assets/admin/forms/blocks/heading/index.js:20
 #: assets/admin/forms/blocks/paragraph/index.js:13
@@ -6295,186 +6290,186 @@ msgstr ""
 msgid "Right"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:403
+#: assets/admin/campaign-blocks/index.jsx:402
 msgid "Campaign progress"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:404
+#: assets/admin/campaign-blocks/index.jsx:403
 msgid "Progress bar toward the campaign goal."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:419
+#: assets/admin/campaign-blocks/index.jsx:418
 msgid "No goal set on this campaign. Until you set one, the bar will sit at 0%."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:424
+#: assets/admin/campaign-blocks/index.jsx:423
 msgid "Progress"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:432
+#: assets/admin/campaign-blocks/index.jsx:431
 msgid "Show labels"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:464
-#: assets/admin/campaign-blocks/index.jsx:486
+#: assets/admin/campaign-blocks/index.jsx:463
+#: assets/admin/campaign-blocks/index.jsx:485
 #: assets/admin/forms/blocks/submit-button/index.js:78
 msgid "Donate button"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:465
+#: assets/admin/campaign-blocks/index.jsx:464
 msgid "Button that opens the campaign's default donation form."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:479
+#: assets/admin/campaign-blocks/index.jsx:478
 msgid "This campaign has no default form. The button will appear but clicking it won't open anything until a form is set."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:482
+#: assets/admin/campaign-blocks/index.jsx:481
 msgid "This campaign is archived. The button will render but submissions will be rejected."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:512
+#: assets/admin/campaign-blocks/index.jsx:511
 msgid "Button size"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:523
+#: assets/admin/campaign-blocks/index.jsx:522
 #: assets/admin/forms/blocks/submit-button/index.js:15
 msgid "Full width"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:546
+#: assets/admin/campaign-blocks/index.jsx:545
 msgid "Leaderboard of the donors who gave the most to this campaign."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:563
+#: assets/admin/campaign-blocks/index.jsx:562
 msgid "No donations yet, so the leaderboard will be empty on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:578
-#: assets/admin/campaign-blocks/index.jsx:643
+#: assets/admin/campaign-blocks/index.jsx:577
+#: assets/admin/campaign-blocks/index.jsx:642
 msgid "Top supporters"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:582
-#: assets/admin/campaign-blocks/index.jsx:691
-#: assets/admin/campaign-blocks/index.jsx:799
-#: assets/admin/campaign-blocks/index.jsx:918
-#: assets/admin/campaign-blocks/index.jsx:1005
+#: assets/admin/campaign-blocks/index.jsx:581
+#: assets/admin/campaign-blocks/index.jsx:690
+#: assets/admin/campaign-blocks/index.jsx:798
+#: assets/admin/campaign-blocks/index.jsx:917
+#: assets/admin/campaign-blocks/index.jsx:1004
 msgid "Empty state text"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:586
-#: assets/admin/campaign-blocks/index.jsx:695
-#: assets/admin/campaign-blocks/index.jsx:803
+#: assets/admin/campaign-blocks/index.jsx:585
+#: assets/admin/campaign-blocks/index.jsx:694
+#: assets/admin/campaign-blocks/index.jsx:802
 msgid "Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:590
+#: assets/admin/campaign-blocks/index.jsx:589
 #: assets/admin/forms/blocks/radio/index.js:63
 #: assets/admin/forms/Editor.jsx:1369
 msgid "Layout"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:593
+#: assets/admin/campaign-blocks/index.jsx:592
 #: assets/admin/donors/index.jsx:526
 msgid "List"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:594
+#: assets/admin/campaign-blocks/index.jsx:593
 msgid "Podium"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:600
+#: assets/admin/campaign-blocks/index.jsx:599
 #: assets/admin/campaigns/Detail.jsx:1534
 msgid "Number of donors"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:608
-#: assets/admin/campaign-blocks/index.jsx:848
+#: assets/admin/campaign-blocks/index.jsx:607
+#: assets/admin/campaign-blocks/index.jsx:847
 msgid "Show donation amount"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:614
+#: assets/admin/campaign-blocks/index.jsx:613
 msgid "Show donation count per donor"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:620
+#: assets/admin/campaign-blocks/index.jsx:619
 msgid "Hide anonymous donors"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:623
+#: assets/admin/campaign-blocks/index.jsx:622
 msgid "When off, anonymous donors appear as \"Anonymous\"."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:655
+#: assets/admin/campaign-blocks/index.jsx:654
 msgid "Live feed of the most recent paid donations for this campaign."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:672
+#: assets/admin/campaign-blocks/index.jsx:671
 msgid "No donations yet, so the feed will be empty on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:699
+#: assets/admin/campaign-blocks/index.jsx:698
 #: assets/admin/campaigns/Detail.jsx:1533
 msgid "Number of donations"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:707
+#: assets/admin/campaign-blocks/index.jsx:706
 msgid "Show amount"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:713
+#: assets/admin/campaign-blocks/index.jsx:712
 msgid "Show time ago"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:719
-#: assets/admin/campaign-blocks/index.jsx:842
+#: assets/admin/campaign-blocks/index.jsx:718
+#: assets/admin/campaign-blocks/index.jsx:841
 msgid "Show donor message"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:725
+#: assets/admin/campaign-blocks/index.jsx:724
 msgid "Include anonymous donations"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:759
+#: assets/admin/campaign-blocks/index.jsx:758
 msgid "A wall of campaign supporters with optional messages."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:777
+#: assets/admin/campaign-blocks/index.jsx:776
 msgid "No donations yet, so the wall will be empty on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:795
-#: assets/admin/campaign-blocks/index.jsx:882
+#: assets/admin/campaign-blocks/index.jsx:794
+#: assets/admin/campaign-blocks/index.jsx:881
 msgid "Thank you to our supporters"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:807
+#: assets/admin/campaign-blocks/index.jsx:806
 msgid "Sort by"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:810
-#: assets/admin/campaign-blocks/index.jsx:936
+#: assets/admin/campaign-blocks/index.jsx:809
+#: assets/admin/campaign-blocks/index.jsx:935
 msgid "Most recent"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:811
+#: assets/admin/campaign-blocks/index.jsx:810
 msgid "Alphabetical"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:817
+#: assets/admin/campaign-blocks/index.jsx:816
 msgid "Number of supporters"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:826
+#: assets/admin/campaign-blocks/index.jsx:825
 msgid "Minimum donation amount"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:838
+#: assets/admin/campaign-blocks/index.jsx:837
 msgid "Only show donors who gave at least this amount. 0 = no minimum."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:854
+#: assets/admin/campaign-blocks/index.jsx:853
 #: assets/admin/forms/blocks/columns/index.js:51
 #: assets/admin/forms/blocks/columns/index.js:53
 #: assets/admin/forms/blocks/columns/index.js:88
@@ -6483,33 +6478,33 @@ msgstr ""
 msgid "Columns"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:857
+#: assets/admin/campaign-blocks/index.jsx:856
 #: assets/admin/settings/panels/CurrencyPanel.jsx:209
 msgid "Auto"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:858
+#: assets/admin/campaign-blocks/index.jsx:857
 msgid "2"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:859
+#: assets/admin/campaign-blocks/index.jsx:858
 msgid "3"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:860
+#: assets/admin/campaign-blocks/index.jsx:859
 msgid "4"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:893
-#: assets/admin/campaign-blocks/index.jsx:909
+#: assets/admin/campaign-blocks/index.jsx:892
+#: assets/admin/campaign-blocks/index.jsx:908
 msgid "Campaigns grid"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:894
+#: assets/admin/campaign-blocks/index.jsx:893
 msgid "A responsive grid of other published campaigns as cards."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:911
+#: assets/admin/campaign-blocks/index.jsx:910
 #: assets/admin/forms/blocks/address/index.js:59
 #: assets/admin/forms/blocks/consent/index.js:51
 #: assets/admin/forms/blocks/heading/index.js:35
@@ -6517,47 +6512,47 @@ msgstr ""
 msgid "Heading"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:914
+#: assets/admin/campaign-blocks/index.jsx:913
 msgid "Leave empty when a Heading block above this one already names the section, as the seeded layout does."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:921
+#: assets/admin/campaign-blocks/index.jsx:920
 msgid "Shown when there is nothing to list. Left empty, the block says whether this is the only campaign running or that none are, whichever fits the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:925
+#: assets/admin/campaign-blocks/index.jsx:924
 msgid "How many"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:933
+#: assets/admin/campaign-blocks/index.jsx:932
 msgid "Order by"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:937
+#: assets/admin/campaign-blocks/index.jsx:936
 msgid "Most funded"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:938
+#: assets/admin/campaign-blocks/index.jsx:937
 msgid "Ending soon"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:948
+#: assets/admin/campaign-blocks/index.jsx:947
 msgid "Exclude none"
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:951
+#: assets/admin/campaign-blocks/index.jsx:950
 msgid "The selected campaign (or this page's campaign) is excluded from the grid."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:977
+#: assets/admin/campaign-blocks/index.jsx:976
 msgid "Renders the campaign donation form inline on the page."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:1009
+#: assets/admin/campaign-blocks/index.jsx:1008
 msgid "Shown when the campaign is not taking donations, so the heading above this block never captions an empty space."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:1021
+#: assets/admin/campaign-blocks/index.jsx:1020
 msgid "Edit donation form"
 msgstr ""
 
@@ -6932,7 +6927,7 @@ msgstr ""
 #: assets/admin/forms/Editor.jsx:512
 #: assets/admin/funds/List.jsx:872
 #: assets/admin/settings/panels/SetupPanel.jsx:45
-#: assets/admin/subscriptions/List.jsx:884
+#: assets/admin/subscriptions/List.jsx:854
 #: assets/admin/_shared/components/CampaignTemplatePicker.jsx:270
 #: assets/admin/_shared/components/FormTemplatePicker.jsx:74
 #: assets/donor-portal/index.jsx:431
@@ -7180,7 +7175,7 @@ msgstr ""
 #: assets/admin/campaigns/widgets/DowHourHeatmap.jsx:119
 #: assets/admin/dashboard/widgets/TodayStrip.jsx:14
 #: assets/admin/dashboard/widgets/TopCampaigns.jsx:63
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:146
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:166
 #, js-format
 msgid "%d donation"
 msgid_plural "%d donations"
@@ -7724,7 +7719,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:680
 #: assets/admin/donors/index.jsx:467
 #: assets/admin/funds/List.jsx:520
-#: assets/admin/subscriptions/List.jsx:923
+#: assets/admin/subscriptions/List.jsx:893
 msgid "Nothing matches these filters"
 msgstr ""
 
@@ -7732,7 +7727,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:681
 #: assets/admin/donors/index.jsx:468
 #: assets/admin/funds/List.jsx:521
-#: assets/admin/subscriptions/List.jsx:924
+#: assets/admin/subscriptions/List.jsx:894
 msgid "Try a different search, or clear the filters to see everything again."
 msgstr ""
 
@@ -7740,7 +7735,7 @@ msgstr ""
 #: assets/admin/donations/List.jsx:684
 #: assets/admin/donors/index.jsx:471
 #: assets/admin/funds/List.jsx:524
-#: assets/admin/subscriptions/List.jsx:927
+#: assets/admin/subscriptions/List.jsx:897
 msgid "Clear filters"
 msgstr ""
 
@@ -7932,7 +7927,7 @@ msgid "Activity (last 24h)"
 msgstr ""
 
 #: assets/admin/dashboard/Dashboard.jsx:131
-#: assets/admin/subscriptions/List.jsx:218
+#: assets/admin/subscriptions/List.jsx:189
 msgid "Needs attention"
 msgstr ""
 
@@ -7967,7 +7962,7 @@ msgstr[1] ""
 
 #: assets/admin/dashboard/Dashboard.jsx:212
 #: assets/admin/donations/List.jsx:639
-#: assets/admin/subscriptions/List.jsx:869
+#: assets/admin/subscriptions/List.jsx:839
 msgid "Show them"
 msgstr ""
 
@@ -8073,7 +8068,7 @@ msgstr ""
 #: assets/admin/donors/index.jsx:199
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:178
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:93
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:59
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:74
 #: assets/admin/settings/panels/StripeKeysCard.jsx:263
 msgid "Test"
 msgstr ""
@@ -8836,7 +8831,7 @@ msgstr ""
 
 #: assets/admin/donations/List.jsx:303
 #: assets/admin/donors/index.jsx:182
-#: assets/admin/subscriptions/List.jsx:602
+#: assets/admin/subscriptions/List.jsx:573
 msgid "(no name)"
 msgstr ""
 
@@ -9223,7 +9218,8 @@ msgid "Failed to load donors."
 msgstr ""
 
 #: assets/admin/donors/index.jsx:169
-#: assets/admin/subscriptions/List.jsx:578
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:52
+#: assets/admin/subscriptions/List.jsx:549
 msgid "ID"
 msgstr ""
 
@@ -9499,7 +9495,7 @@ msgid "plans started"
 msgstr ""
 
 #: assets/admin/donors/Insights.jsx:324
-#: assets/admin/subscriptions/List.jsx:224
+#: assets/admin/subscriptions/List.jsx:195
 msgid "Churn this month"
 msgstr ""
 
@@ -9623,24 +9619,24 @@ msgstr ""
 
 #: assets/admin/donors/profile/helpers.js:61
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:219
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:19
-#: assets/admin/subscriptions/List.jsx:29
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:25
+#: assets/admin/subscriptions/List.jsx:28
 #: assets/admin/_shared/components/StatusBadge.jsx:35
 #: assets/donor-portal/statusLabels.js:11
 msgid "Past due"
 msgstr ""
 
 #: assets/admin/donors/profile/helpers.js:62
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:20
-#: assets/admin/subscriptions/List.jsx:30
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:26
+#: assets/admin/subscriptions/List.jsx:29
 #: assets/admin/_shared/components/StatusBadge.jsx:36
 #: assets/donor-portal/statusLabels.js:10
 msgid "Paused"
 msgstr ""
 
 #: assets/admin/donors/profile/helpers.js:64
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:22
-#: assets/admin/subscriptions/List.jsx:32
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:28
+#: assets/admin/subscriptions/List.jsx:31
 #: assets/admin/_shared/components/StatusBadge.jsx:37
 #: assets/donor-portal/statusLabels.js:13
 msgid "Expired"
@@ -10126,81 +10122,81 @@ msgstr ""
 msgid "Search receipts"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:46
-msgid "Plan"
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:81
+msgid "Gateway subscription ID"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:70
-#: assets/admin/subscriptions/List.jsx:625
-msgid "Amount / interval"
-msgstr ""
-
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:93
-#: assets/admin/subscriptions/List.jsx:659
-#: assets/donor-portal/index.jsx:998
-msgid "Next charge"
-msgstr ""
-
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:108
-#: assets/admin/subscriptions/List.jsx:729
-msgid "Health"
-msgstr ""
-
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:122
-#: assets/admin/subscriptions/List.jsx:723
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:87
+#: assets/admin/subscriptions/List.jsx:694
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:146
 msgid "Not linked"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:136
-#: assets/admin/subscriptions/List.jsx:748
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:91
+#: assets/admin/subscriptions/List.jsx:596
+msgid "Amount / interval"
+msgstr ""
+
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:114
+#: assets/admin/subscriptions/List.jsx:630
+#: assets/donor-portal/index.jsx:998
+msgid "Next charge"
+msgstr ""
+
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:132
+#: assets/admin/subscriptions/List.jsx:700
+msgid "Health"
+msgstr ""
+
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:156
+#: assets/admin/subscriptions/List.jsx:718
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:118
 msgid "Lifetime"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:168
-#: assets/admin/subscriptions/List.jsx:772
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:188
+#: assets/admin/subscriptions/List.jsx:742
 #: assets/admin/_shared/recurring/PlanActions.jsx:61
 msgid "Retry payment"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:181
-#: assets/admin/subscriptions/List.jsx:783
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:201
+#: assets/admin/subscriptions/List.jsx:753
 #: assets/admin/_shared/recurring/PlanActions.jsx:72
 #: assets/donor-portal/index.jsx:1029
 msgid "Pause"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:187
-#: assets/admin/subscriptions/List.jsx:789
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:207
+#: assets/admin/subscriptions/List.jsx:759
 #: assets/admin/_shared/recurring/PlanActions.jsx:70
 #: assets/donor-portal/index.jsx:1017
 msgid "Resume"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:193
-#: assets/admin/subscriptions/List.jsx:795
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:213
+#: assets/admin/subscriptions/List.jsx:765
 #: assets/admin/_shared/recurring/PlanActions.jsx:73
 msgid "Skip next"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:199
-#: assets/admin/subscriptions/List.jsx:801
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:219
+#: assets/admin/subscriptions/List.jsx:771
 #: assets/admin/_shared/recurring/PlanActions.jsx:75
 #: assets/donor-portal/index.jsx:1033
 #: assets/donor-portal/index.jsx:1216
 msgid "Change amount"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:217
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:237
 msgid "No subscriptions on file"
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:218
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:238
 msgid "Recurring plans appear here once this donor sets one up on a form that offers it."
 msgstr ""
 
-#: assets/admin/donors/profile/tabs/RecurringTab.jsx:236
+#: assets/admin/donors/profile/tabs/RecurringTab.jsx:256
 msgid "Search by subscription ID"
 msgstr ""
 
@@ -11949,7 +11945,7 @@ msgid "Scheduled"
 msgstr ""
 
 #: assets/admin/funds/List.jsx:93
-#: assets/admin/subscriptions/List.jsx:671
+#: assets/admin/subscriptions/List.jsx:642
 #: assets/admin/_shared/components/StatusBadge.jsx:20
 #: assets/admin/_shared/format.js:77
 msgid "Ended"
@@ -12943,14 +12939,26 @@ msgstr ""
 msgid "Click a placeholder to drop it in. They expand when the donor is shown their transfer details."
 msgstr ""
 
-#. translators: sample bank transfer details. Keep {reference} and {amount} exactly as written: they are expanded when the donor is shown their transfer details.
+#: assets/admin/settings/panels/GatewaysPanel.jsx:139
+msgid "Account holder: …"
+msgstr ""
+
 #: assets/admin/settings/panels/GatewaysPanel.jsx:140
-msgid ""
-"Account holder: …\n"
-"IBAN: …\n"
-"BIC: …\n"
-"Reference: {reference}\n"
-"Amount: {amount}"
+msgid "IBAN: …"
+msgstr ""
+
+#: assets/admin/settings/panels/GatewaysPanel.jsx:141
+msgid "BIC: …"
+msgstr ""
+
+#. translators: sample bank transfer line. Keep {reference} exactly as written: it is expanded when the donor is shown their transfer details.
+#: assets/admin/settings/panels/GatewaysPanel.jsx:143
+msgid "Reference: {reference}"
+msgstr ""
+
+#. translators: sample bank transfer line. Keep {amount} exactly as written: it is expanded when the donor is shown their transfer details.
+#: assets/admin/settings/panels/GatewaysPanel.jsx:145
+msgid "Amount: {amount}"
 msgstr ""
 
 #: assets/admin/settings/panels/NumberingPanel.jsx:61
@@ -13490,7 +13498,7 @@ msgid "Generic receipt template"
 msgstr ""
 
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:97
-msgid "The default receipt every donor gets, unless their country has its own format."
+msgid "The receipt every donor gets."
 msgstr ""
 
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:102
@@ -13972,38 +13980,8 @@ msgid_plural "Unsaved changes across %d sections"
 msgstr[0] ""
 msgstr[1] ""
 
-#. translators: %d: number of weeks between charges.
-#: assets/admin/subscriptions/List.jsx:86
-#: assets/admin/_shared/recurring/planColumns.jsx:28
-#, js-format
-msgid "%d week"
-msgid_plural "%d weeks"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d: number of years between charges.
-#: assets/admin/subscriptions/List.jsx:89
-#: assets/admin/_shared/recurring/planColumns.jsx:34
-#, js-format
-msgid "%d year"
-msgid_plural "%d years"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d: number of months
-#. translators: %d: number of months between charges.
-#: assets/admin/subscriptions/List.jsx:92
-#: assets/admin/_shared/recurring/PlanActions.jsx:246
-#: assets/admin/_shared/recurring/planColumns.jsx:31
-#: assets/donor-portal/index.jsx:1051
-#, js-format
-msgid "%d month"
-msgid_plural "%d months"
-msgstr[0] ""
-msgstr[1] ""
-
 #. translators: %d: number of plans still running that carry a failed renewal.
-#: assets/admin/subscriptions/List.jsx:116
+#: assets/admin/subscriptions/List.jsx:87
 #, js-format
 msgid "%d plan still running that the gateway could not collect from"
 msgid_plural "%d plans still running that the gateway could not collect from"
@@ -14011,7 +13989,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of plans that have ever failed a renewal, including ended ones.
-#: assets/admin/subscriptions/List.jsx:128
+#: assets/admin/subscriptions/List.jsx:99
 #, js-format
 msgid "%d plan has ever failed a renewal, including ended ones"
 msgid_plural "%d plans have ever failed a renewal, including ended ones"
@@ -14019,59 +13997,59 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of paid recurring donations with no plan.
-#: assets/admin/subscriptions/List.jsx:140
+#: assets/admin/subscriptions/List.jsx:111
 #, js-format
 msgid "%d paid recurring donation has no plan and is listed above"
 msgid_plural "%d paid recurring donations have no plan and are listed above"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:153
+#: assets/admin/subscriptions/List.jsx:124
 msgid "Donations charged with no plan could not be checked"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:164
+#: assets/admin/subscriptions/List.jsx:135
 msgid "Nothing to chase"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:175
+#: assets/admin/subscriptions/List.jsx:146
 msgid "Includes test subscriptions"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:192
+#: assets/admin/subscriptions/List.jsx:163
 msgid "Monthly recurring revenue"
 msgstr ""
 
 #. translators: %d: number of plans with no converted amount.
-#: assets/admin/subscriptions/List.jsx:198
+#: assets/admin/subscriptions/List.jsx:169
 #, js-format
 msgid "%d plan could not be converted and is not counted"
 msgid_plural "%d plans could not be converted and are not counted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:206
+#: assets/admin/subscriptions/List.jsx:177
 msgid "Active plans, normalised"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:212
+#: assets/admin/subscriptions/List.jsx:183
 msgid "Active plans"
 msgstr ""
 
 #. translators: %d: number of plans cancelled this month.
-#: assets/admin/subscriptions/List.jsx:229
+#: assets/admin/subscriptions/List.jsx:200
 #, js-format
 msgid "%d cancelled"
 msgid_plural "%d cancelled"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:247
+#: assets/admin/subscriptions/List.jsx:218
 msgid "Recurring donations charged with no plan behind them could not be checked, so nothing on this screen rules them out."
 msgstr ""
 
 #. translators: %d: number of paid recurring donations with no plan.
-#: assets/admin/subscriptions/List.jsx:273
+#: assets/admin/subscriptions/List.jsx:244
 #, js-format
 msgid "%d recurring donation was charged, but no plan was created for it. Nothing will collect the next payment."
 msgid_plural "%d recurring donations were charged, but no plans were created for them. Nothing will collect their next payments."
@@ -14079,23 +14057,23 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of days the check looks back over.
-#: assets/admin/subscriptions/List.jsx:286
+#: assets/admin/subscriptions/List.jsx:257
 #, js-format
 msgid "Covers donations paid in the last %d day."
 msgid_plural "Covers donations paid in the last %d days."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:306
+#: assets/admin/subscriptions/List.jsx:277
 msgid "failure recorded"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:307
+#: assets/admin/subscriptions/List.jsx:278
 msgid "no failure recorded"
 msgstr ""
 
 #. translators: %d: number of donations not yet listed.
-#: assets/admin/subscriptions/List.jsx:315
+#: assets/admin/subscriptions/List.jsx:286
 #, js-format
 msgid "Show %d more"
 msgid_plural "Show %d more"
@@ -14103,87 +14081,87 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: donations beyond the ones listed.
-#: assets/admin/subscriptions/List.jsx:324
+#: assets/admin/subscriptions/List.jsx:295
 #, js-format
 msgid "%d more is not listed here."
 msgid_plural "%d more are not listed here."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:335
+#: assets/admin/subscriptions/List.jsx:306
 msgid "Open a donation with a recorded failure to create its plan."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:339
+#: assets/admin/subscriptions/List.jsx:310
 msgid "Creating a plan needs permission to issue refunds, so pass these references to someone who has it."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:347
+#: assets/admin/subscriptions/List.jsx:318
 msgid "Where no failure was recorded, check the payment provider for a subscription before asking the donor to set one up again."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:363
+#: assets/admin/subscriptions/List.jsx:334
 msgid "No live subscriptions"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:366
+#: assets/admin/subscriptions/List.jsx:337
 msgid "Nothing here is charging real money yet."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:372
+#: assets/admin/subscriptions/List.jsx:343
 msgid "No subscriptions to show"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:373
+#: assets/admin/subscriptions/List.jsx:344
 msgid "Whether a recurring donation was charged with no plan behind it is unknown, so this is not the whole picture."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:382
+#: assets/admin/subscriptions/List.jsx:353
 msgid "No subscriptions were created"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:384
+#: assets/admin/subscriptions/List.jsx:355
 msgid "The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:385
+#: assets/admin/subscriptions/List.jsx:356
 msgid "The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:390
+#: assets/admin/subscriptions/List.jsx:361
 msgid "No subscriptions yet"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:391
+#: assets/admin/subscriptions/List.jsx:362
 msgid "Recurring plans appear here once a donor sets one up on a form that offers it."
 msgstr ""
 
+#: assets/admin/subscriptions/List.jsx:458
 #: assets/admin/subscriptions/List.jsx:487
-#: assets/admin/subscriptions/List.jsx:516
 msgid "Failed to load subscriptions."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:533
+#: assets/admin/subscriptions/List.jsx:504
 msgid "The recurring totals could not be loaded."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:560
+#: assets/admin/subscriptions/List.jsx:531
 msgid "The check could not be run."
 msgstr ""
 
 #. translators: %d: minutes between simulated renewals.
-#: assets/admin/subscriptions/List.jsx:609
+#: assets/admin/subscriptions/List.jsx:580
 #, js-format
 msgid "Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:613
+#: assets/admin/subscriptions/List.jsx:584
 msgid "Simulated"
 msgstr ""
 
 #. translators: %d: consecutive failed renewals.
-#: assets/admin/subscriptions/List.jsx:649
-#: assets/admin/_shared/recurring/planColumns.jsx:51
+#: assets/admin/subscriptions/List.jsx:620
+#: assets/admin/_shared/recurring/planColumns.jsx:78
 #, js-format
 msgid "%d failure"
 msgid_plural "%d failures"
@@ -14191,43 +14169,43 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: date the plan ended.
-#: assets/admin/subscriptions/List.jsx:668
+#: assets/admin/subscriptions/List.jsx:639
 #, js-format
 msgid "Ended %s"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:679
+#: assets/admin/subscriptions/List.jsx:650
 msgid "when it resumes"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:695
+#: assets/admin/subscriptions/List.jsx:666
 #: assets/donor-portal/index.jsx:1001
 msgid "Giving since"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:731
+#: assets/admin/subscriptions/List.jsx:702
 msgid "Has ever failed a renewal"
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:738
+#: assets/admin/subscriptions/List.jsx:709
 msgid "Interval"
 msgstr ""
 
 #. translators: %d: number of payments taken so far.
-#: assets/admin/subscriptions/List.jsx:757
+#: assets/admin/subscriptions/List.jsx:727
 #, js-format
 msgid "%d payment"
 msgid_plural "%d payments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:840
-#: assets/admin/subscriptions/List.jsx:842
+#: assets/admin/subscriptions/List.jsx:810
+#: assets/admin/subscriptions/List.jsx:812
 msgid "Show test subscriptions"
 msgstr ""
 
 #. translators: %s: number of recurring plans.
-#: assets/admin/subscriptions/List.jsx:848
+#: assets/admin/subscriptions/List.jsx:818
 #, js-format
 msgid "%s plan"
 msgid_plural "%s plans"
@@ -14235,18 +14213,18 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of test subscriptions hidden.
-#: assets/admin/subscriptions/List.jsx:859
+#: assets/admin/subscriptions/List.jsx:829
 #, js-format
 msgid "%d test subscription is hidden."
 msgid_plural "%d test subscriptions are hidden."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/subscriptions/List.jsx:882
+#: assets/admin/subscriptions/List.jsx:852
 msgid "The recurring totals could not be loaded, so nothing on this screen totals the book."
 msgstr ""
 
-#: assets/admin/subscriptions/List.jsx:890
+#: assets/admin/subscriptions/List.jsx:860
 msgid "These totals are from before your last change. They could not be refreshed."
 msgstr ""
 
@@ -15342,6 +15320,17 @@ msgstr ""
 msgid "Pause for"
 msgstr ""
 
+#. translators: %d: number of months
+#. translators: %d: number of months between charges.
+#: assets/admin/_shared/recurring/PlanActions.jsx:246
+#: assets/admin/_shared/recurring/planColumns.jsx:58
+#: assets/donor-portal/index.jsx:1051
+#, js-format
+msgid "%d month"
+msgid_plural "%d months"
+msgstr[0] ""
+msgstr[1] ""
+
 #: assets/admin/_shared/recurring/PlanActions.jsx:272
 msgid "The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it."
 msgstr ""
@@ -15370,35 +15359,57 @@ msgstr ""
 msgid "The donor has to approve it while signed in to their own account."
 msgstr ""
 
+#. translators: %s: the gap between charges, for example "6 months".
+#: assets/admin/_shared/recurring/planColumns.jsx:36
+#, js-format
+msgid "Every %s"
+msgstr ""
+
 #. translators: %d: number of days between charges.
-#: assets/admin/_shared/recurring/planColumns.jsx:25
+#: assets/admin/_shared/recurring/planColumns.jsx:52
 #, js-format
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] ""
 msgstr[1] ""
 
+#. translators: %d: number of weeks between charges.
+#: assets/admin/_shared/recurring/planColumns.jsx:55
+#, js-format
+msgid "%d week"
+msgid_plural "%d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of years between charges.
+#: assets/admin/_shared/recurring/planColumns.jsx:61
+#, js-format
+msgid "%d year"
+msgid_plural "%d years"
+msgstr[0] ""
+msgstr[1] ""
+
 #. translators: %d: recorded problems on this subscription.
-#: assets/admin/_shared/recurring/planColumns.jsx:64
+#: assets/admin/_shared/recurring/planColumns.jsx:91
 #, js-format
 msgid "%d problem"
 msgid_plural "%d problems"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/_shared/recurring/planColumns.jsx:71
+#: assets/admin/_shared/recurring/planColumns.jsx:98
 msgid "OK"
 msgstr ""
 
-#: assets/admin/_shared/recurring/planColumns.jsx:83
+#: assets/admin/_shared/recurring/planColumns.jsx:110
 msgid "View details"
 msgstr ""
 
-#: assets/admin/_shared/recurring/planColumns.jsx:92
+#: assets/admin/_shared/recurring/planColumns.jsx:119
 msgid "Copy subscription id"
 msgstr ""
 
-#: assets/admin/_shared/recurring/planColumns.jsx:101
+#: assets/admin/_shared/recurring/planColumns.jsx:128
 msgid "Subscription id copied."
 msgstr ""
 

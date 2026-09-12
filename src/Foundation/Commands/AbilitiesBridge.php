@@ -45,8 +45,8 @@ final class AbilitiesBridge
     public function registerCategory(): void
     {
         wp_register_ability_category(self::CATEGORY, [
-            'label'       => __('Gratora', 'gratora'),
-            'description' => __('Campaigns, donations, donors and everything the installed add-ons add.', 'gratora'),
+            'label'       => __('Gratora', 'gratora-donation-platform'),
+            'description' => __('Campaigns, donations, donors and everything the installed add-ons add.', 'gratora-donation-platform'),
         ]);
     }
 
@@ -99,7 +99,7 @@ final class AbilitiesBridge
         if (! $result->ok) {
             return new \WP_Error(
                 (string) ($result->error_code ?? 'gratora_command_failed'),
-                (string) ($result->error ?? __('The command did not run.', 'gratora')),
+                (string) ($result->error ?? __('The command did not run.', 'gratora-donation-platform')),
                 $result->data
             );
         }

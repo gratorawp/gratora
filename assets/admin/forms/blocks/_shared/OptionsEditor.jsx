@@ -90,23 +90,23 @@ export function OptionsEditor( {
                     } }
                 >
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ o.label }
                         onChange={ ( v ) => updateLabel( i, v ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Value', 'gratora' ) }
+                        label={ __( 'Value', 'gratora-donation-platform' ) }
                         value={ o.value }
                         separator="-"
                         fallback={ `option-${ i + 1 }` }
                         onChange={ ( v ) => update( i, { value: v } ) }
-                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'gratora' ) }
+                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     { allowDefault && (
                         <ToggleControl
-                            label={ __( 'Default', 'gratora' ) }
+                            label={ __( 'Default', 'gratora-donation-platform' ) }
                             checked={ !! o.isDefault }
                             onChange={ ( v ) => update( i, { isDefault: v } ) }
                             __nextHasNoMarginBottom
@@ -119,12 +119,12 @@ export function OptionsEditor( {
                         disabled={ rows.length <= 1 }
                         style={ { marginTop: 4 } }
                     >
-                        { __( 'Remove option', 'gratora' ) }
+                        { __( 'Remove option', 'gratora-donation-platform' ) }
                     </Button>
                 </div>
             ) ) }
             <Button variant="secondary" onClick={ add }>
-                { addLabel || __( 'Add option', 'gratora' ) }
+                { addLabel || __( 'Add option', 'gratora-donation-platform' ) }
             </Button>
         </div>
     );

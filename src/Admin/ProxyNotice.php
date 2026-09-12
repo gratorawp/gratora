@@ -49,14 +49,14 @@ final class ProxyNotice
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s</p><p>%s</p></div>',
-            esc_html__('Gratora: every visitor looks like one address.', 'gratora'),
+            esc_html__('Gratora: every visitor looks like one address.', 'gratora-donation-platform'),
             esc_html__(
                 'This site is being reached through a CDN, load balancer or reverse proxy, and no trusted proxy has been declared. Spam limits count visitors by address, so they are counting the whole site as one visitor: donors can be refused because of somebody else, and one caller can close the donation form for everyone.',
-                'gratora'
+                'gratora-donation-platform'
             ),
             esc_html__(
                 'Add your proxy\'s address ranges under Settings, Data & privacy. Until then the limits still hold, they are just shared.',
-                'gratora'
+                'gratora-donation-platform'
             )
         );
     }

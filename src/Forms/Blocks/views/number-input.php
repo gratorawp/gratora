@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
  * @var float      $step
  * @var string     $field
  */
-$labelText = $label !== '' ? $label : __('Number', 'gratora');
+$labelText = $label !== '' ? $label : __('Number', 'gratora-donation-platform');
 $fieldName = $field !== '' ? $field : 'number';
 ?>
 <label class="gratora-block gratora-block--number-input gratora-donor__field">

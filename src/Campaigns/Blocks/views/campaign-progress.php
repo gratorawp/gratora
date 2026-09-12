@@ -32,9 +32,9 @@ echo get_block_wrapper_attributes(array_filter([
 ?></span>
                 <span class="gratora-progress__caption">
                     <?php echo esc_html(match ($goalType) {
-                        'donations' => __('donations', 'gratora'),
-                        'donors'    => __('donors', 'gratora'),
-                        default     => __('raised', 'gratora'),
+                        'donations' => __('donations', 'gratora-donation-platform'),
+                        'donors'    => __('donors', 'gratora-donation-platform'),
+                        default     => __('raised', 'gratora-donation-platform'),
                     });
 ?>
                 </span>
@@ -43,7 +43,7 @@ echo get_block_wrapper_attributes(array_filter([
                 <div class="gratora-progress__target">
                     <?php echo esc_html(sprintf(
                         /* translators: %1$s: percent, %2$s: target value */
-                        __('%1$d%% of %2$s goal', 'gratora'),
+                        __('%1$d%% of %2$s goal', 'gratora-donation-platform'),
                         $pct,
                         $formatValue($target, $goalType, $currency)
                     ));

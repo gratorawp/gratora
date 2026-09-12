@@ -18,7 +18,7 @@ function CopyButton( { value, label } ) {
         } catch ( _ ) {}
     };
     return (
-        <button type="button" className="dp-id-row__copy" aria-label={ label } onClick={ copy } title={ ok ? __( 'Copied', 'gratora' ) : label }>
+        <button type="button" className="dp-id-row__copy" aria-label={ label } onClick={ copy } title={ ok ? __( 'Copied', 'gratora-donation-platform' ) : label }>
             <IconCopy width="12" height="12" />
         </button>
     );
@@ -33,7 +33,7 @@ function IdentityRow( { icon, value, copyable, sub, valClass = '' } ) {
                 { sub && <span className="dp-id-row__sub">{ sub }</span> }
             </span>
             { copyable
-                ? <CopyButton value={ copyable } label={ __( 'Copy', 'gratora' ) } />
+                ? <CopyButton value={ copyable } label={ __( 'Copy', 'gratora-donation-platform' ) } />
                 : <span /> }
         </div>
     );
@@ -57,17 +57,17 @@ export default function IdentityCard( { donor } ) {
 
     const segment = donor.segment || 'other';
     const statusLabel = isRedacted
-        ? __( 'Redacted', 'gratora' )
+        ? __( 'Redacted', 'gratora-donation-platform' )
         : isAnon
-            ? __( 'Anonymous', 'gratora' )
+            ? __( 'Anonymous', 'gratora-donation-platform' )
             : SEGMENT_LABELS[ segment ] || segment;
     const statusClass = isRedacted ? 'is-redact' : isAnon ? 'is-anon' : '';
 
     const typeLabel = donor.donor_type === 'organization'
-        ? __( 'Organization', 'gratora' )
+        ? __( 'Organization', 'gratora-donation-platform' )
         : donor.donor_type === 'household'
-            ? __( 'Household', 'gratora' )
-            : __( 'Individual', 'gratora' );
+            ? __( 'Household', 'gratora-donation-platform' )
+            : __( 'Individual', 'gratora-donation-platform' );
 
     const issueMagic = async () => {
         setIssuing( true );
@@ -80,7 +80,7 @@ export default function IdentityCard( { donor } ) {
             setMagicLinkUrl( res.magic_link_url || '' );
             setMagicLinkExpires( res.expires_at || '' );
         } catch ( e ) {
-            setIssueError( e?.message || __( 'The link could not be created.', 'gratora' ) );
+            setIssueError( e?.message || __( 'The link could not be created.', 'gratora-donation-platform' ) );
         } finally {
             setIssuing( false );
         }
@@ -136,7 +136,7 @@ export default function IdentityCard( { donor } ) {
                     { isRedacted && (
                         <IdentityRow
                             icon={ <IconMail width="14" height="14" /> }
-                            value={ __( 'Redacted', 'gratora' ) }
+                            value={ __( 'Redacted', 'gratora-donation-platform' ) }
                             valClass="is-redacted"
                         />
                     ) }
@@ -164,8 +164,8 @@ export default function IdentityCard( { donor } ) {
                     { donor.first_donation_at && (
                         <IdentityRow
                             icon={ <IconCalendar width="14" height="14" /> }
-                            value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'gratora' ), formatMonth( donor.first_donation_at ) ) }
-                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'gratora' ), formatDate( donor.last_donation_at ) ) : null }
+                            value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'gratora-donation-platform' ), formatMonth( donor.first_donation_at ) ) }
+                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'gratora-donation-platform' ), formatDate( donor.last_donation_at ) ) : null }
                         />
                     ) }
                 </div>
@@ -178,10 +178,10 @@ export default function IdentityCard( { donor } ) {
                             onClick={ issueMagic }
                             disabled={ issuing }
                         >
-                            { issuing ? __( 'Creating…', 'gratora' ) : __( 'Create a sign-in link', 'gratora' ) }
+                            { issuing ? __( 'Creating…', 'gratora-donation-platform' ) : __( 'Create a sign-in link', 'gratora-donation-platform' ) }
                         </button>
                         <div className="dp-id-magic__help">
-                            { issueError || __( 'Signs whoever opens it in as this donor, once. Create one only when they have asked.', 'gratora' ) }
+                            { issueError || __( 'Signs whoever opens it in as this donor, once. Create one only when they have asked.', 'gratora-donation-platform' ) }
                         </div>
                     </div>
                 ) }
@@ -191,17 +191,17 @@ export default function IdentityCard( { donor } ) {
                         <div className="dp-magic-link" title={ magicLinkUrl }>
                             <span className="dp-magic-link__url">{ magicLinkUrl }</span>
                             <button type="button" className="dp-magic-link__copy" onClick={ copyMagic }>
-                                { copiedMagic ? __( 'Copied', 'gratora' ) : __( 'Copy', 'gratora' ) }
+                                { copiedMagic ? __( 'Copied', 'gratora-donation-platform' ) : __( 'Copy', 'gratora-donation-platform' ) }
                             </button>
                         </div>
                         <div className="dp-id-magic__help">
                             { magicLinkExpires
                                 ? sprintf(
                                     /* translators: %s: date and time the link stops working */
-                                    __( 'Works once, until %s. The donor can revoke it by signing out of the portal.', 'gratora' ),
+                                    __( 'Works once, until %s. The donor can revoke it by signing out of the portal.', 'gratora-donation-platform' ),
                                     formatDateTime( magicLinkExpires )
                                 )
-                                : __( 'Works once. The donor can revoke it by signing out of the portal.', 'gratora' ) }
+                                : __( 'Works once. The donor can revoke it by signing out of the portal.', 'gratora-donation-platform' ) }
                         </div>
                     </div>
                 ) }

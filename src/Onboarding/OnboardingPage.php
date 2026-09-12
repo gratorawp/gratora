@@ -27,7 +27,7 @@ final class OnboardingPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Onboarding', 'gratora'),
+            'title'      => __('Onboarding', 'gratora-donation-platform'),
             'capability' => 'manage_options',
             'position'   => 999,
             'hidden'     => true,
@@ -75,7 +75,7 @@ final class OnboardingPage extends HookProvider
             $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

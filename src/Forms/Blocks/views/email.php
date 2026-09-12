@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Email', 'gratora');
+$labelText = $label !== '' ? $label : __('Email', 'gratora-donation-platform');
 ?>
 <label class="gratora-block gratora-block--email gratora-donor__field">
     <span class="gratora-donor__label"><?php echo esc_html($labelText); ?></span>

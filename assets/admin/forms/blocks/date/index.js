@@ -23,42 +23,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Date', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Date', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'gratora' ) }
+                        label={ __( 'Help text', 'gratora-donation-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'gratora' ) }
+                        label={ __( 'Field name', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum date', 'gratora' ) }
+                        label={ __( 'Minimum date', 'gratora-donation-platform' ) }
                         value={ minDate }
                         onChange={ ( v ) => setAttributes( { minDate: v } ) }
                         placeholder="YYYY-MM-DD"
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Maximum date', 'gratora' ) }
+                        label={ __( 'Maximum date', 'gratora-donation-platform' ) }
                         value={ maxDate }
                         onChange={ ( v ) => setAttributes( { maxDate: v } ) }
                         placeholder="YYYY-MM-DD"
@@ -76,7 +76,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Date', 'gratora' ) }
+                    placeholder={ __( 'Date', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
@@ -85,7 +85,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'gratora' ) }
+                        placeholder={ __( 'Help text', 'gratora-donation-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
@@ -99,8 +99,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Date', 'gratora' ),
-        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'gratora' ),
+        title:      __( 'Date', 'gratora-donation-platform' ),
+        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'gratora-donation-platform' ),
         category:   'gratora-fields',
         icon:       BlockIcons[ 'date' ],
         supports: { html: false, anchor: false, inserter: true },

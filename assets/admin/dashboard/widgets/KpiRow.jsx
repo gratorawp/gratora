@@ -15,20 +15,20 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
     const currency = kpi.currency || 'USD';
     // The page banner explains the toggle, but these four cards are what gets
     // screenshotted, and a figure that leaves the page loses the caveat with it.
-    const testSub  = includesTest ? __( 'incl. test', 'gratora' ) : '';
+    const testSub  = includesTest ? __( 'incl. test', 'gratora-donation-platform' ) : '';
     const withTest = ( base ) => [ base, testSub ].filter( Boolean ).join( ' · ' );
 
     const periodSub = withTest( rangeLabel( range ) );
     const donationsSub = withTest(
         rangeLabel( range )
-            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'gratora' ) }`
-            : __( 'paid only', 'gratora' )
+            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'gratora-donation-platform' ) }`
+            : __( 'paid only', 'gratora-donation-platform' )
     );
 
     return (
         <div className="gratora-overview__metrics">
             <MetricCard
-                label={ __( 'Amount raised', 'gratora' ) }
+                label={ __( 'Amount raised', 'gratora-donation-platform' ) }
                 value={ formatAmount( kpi.amount_raised_cents, currency ) }
                 changePct={ cmp?.amount_raised_cents }
                 sub={ periodSub }
@@ -36,7 +36,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donations', 'gratora' ) }
+                label={ __( 'Donations', 'gratora-donation-platform' ) }
                 value={ String( kpi.donations_count ) }
                 changePct={ cmp?.donations_count }
                 sub={ donationsSub }
@@ -44,7 +44,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donors', 'gratora' ) }
+                label={ __( 'Donors', 'gratora-donation-platform' ) }
                 value={ String( kpi.donors_count ) }
                 changePct={ cmp?.donors_count }
                 sub={ periodSub }
@@ -52,7 +52,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Average donation', 'gratora' ) }
+                label={ __( 'Average donation', 'gratora-donation-platform' ) }
                 value={ formatAmount( kpi.avg_donation_cents, currency ) }
                 changePct={ cmp?.avg_donation_cents }
                 sub={ periodSub }

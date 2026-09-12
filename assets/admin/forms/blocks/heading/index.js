@@ -15,9 +15,9 @@ const LEVEL_OPTIONS = [
 ];
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'gratora' ) },
-    { value: 'center', label: __( 'Center', 'gratora' ) },
-    { value: 'right',  label: __( 'Right',  'gratora' ) },
+    { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+    { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
+    { value: 'right',  label: __( 'Right',  'gratora-donation-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -32,15 +32,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Heading', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Heading', 'gratora-donation-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Level', 'gratora' ) }
+                        label={ __( 'Level', 'gratora-donation-platform' ) }
                         value={ level }
                         onChange={ ( v ) => setAttributes( { level: Number( v ) } ) }
                         options={ LEVEL_OPTIONS }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -56,7 +56,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName={ `h${ level }` }
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Section heading', 'gratora' ) }
+                    placeholder={ __( 'Section heading', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ { margin: 0, fontWeight: 600 } }
                 />
@@ -68,8 +68,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Heading', 'gratora' ),
-        description: __( 'Section heading shown above the next field step.', 'gratora' ),
+        title:      __( 'Heading', 'gratora-donation-platform' ),
+        description: __( 'Section heading shown above the next field step.', 'gratora-donation-platform' ),
         category:   'gratora-content',
         icon:       BlockIcons[ 'heading' ],
         supports: { html: false, anchor: false, inserter: true },

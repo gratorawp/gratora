@@ -125,10 +125,10 @@ abstract class CampaignBlock implements Block
 
         $bound = $id > 0 ? $this->campaigns->findById($id) : null;
         $message = $bound === null
-            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'gratora')
+            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'gratora-donation-platform')
             : sprintf(
                 /* translators: %s: the campaign's status, e.g. "draft". */
-                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'gratora'),
+                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'gratora-donation-platform'),
                 (string) $bound->status
             );
 

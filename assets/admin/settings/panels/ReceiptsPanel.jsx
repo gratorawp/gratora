@@ -51,7 +51,7 @@ export default function ReceiptsPanel( { s } ) {
 
     const pickLogo = () => {
         const frame = window.wp.media( {
-            title:    __( 'Choose receipt logo', 'gratora' ),
+            title:    __( 'Choose receipt logo', 'gratora-donation-platform' ),
             multiple: false,
             library:  { type: 'image' },
         } );
@@ -77,9 +77,9 @@ export default function ReceiptsPanel( { s } ) {
         // confusing them with a stale PDF.
         if ( s.isDirty ) {
             setConfirm( {
-                title:        __( 'Unsaved changes', 'gratora' ),
-                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'gratora' ),
-                confirmLabel: __( 'Continue', 'gratora' ),
+                title:        __( 'Unsaved changes', 'gratora-donation-platform' ),
+                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'gratora-donation-platform' ),
+                confirmLabel: __( 'Continue', 'gratora-donation-platform' ),
                 destructive:  false,
                 onConfirm: async () => {
                     openPreview();
@@ -93,18 +93,18 @@ export default function ReceiptsPanel( { s } ) {
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Generic receipt template', 'gratora' ) }
-                sub={ __( 'The default receipt every donor gets, unless their country has its own format.', 'gratora' ) }
+                title={ __( 'Generic receipt template', 'gratora-donation-platform' ) }
+                sub={ __( 'The receipt every donor gets.', 'gratora-donation-platform' ) }
                 edited={ s.isDirty }
             >
                 <div style={ { marginBottom: 16, display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ previewReceipt }>
-                        { __( 'Preview receipt', 'gratora' ) }
+                        { __( 'Preview receipt', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
                 <FormRow
-                    label={ __( 'Logo', 'gratora' ) }
-                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'gratora' ) }
+                    label={ __( 'Logo', 'gratora-donation-platform' ) }
+                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'gratora-donation-platform' ) }
                 >
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12 } }>
                         { logoId > 0 && logoUrl && (
@@ -115,33 +115,33 @@ export default function ReceiptsPanel( { s } ) {
                             />
                         ) }
                         <Btn variant="secondary" onClick={ pickLogo }>
-                            { logoId > 0 ? __( 'Replace logo', 'gratora' ) : __( 'Select logo', 'gratora' ) }
+                            { logoId > 0 ? __( 'Replace logo', 'gratora-donation-platform' ) : __( 'Select logo', 'gratora-donation-platform' ) }
                         </Btn>
                         { logoId > 0 && (
                             <Btn variant="ghost" onClick={ () => setLogoId( 0 ) }>
-                                { __( 'Remove', 'gratora' ) }
+                                { __( 'Remove', 'gratora-donation-platform' ) }
                             </Btn>
                         ) }
                     </div>
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Header title', 'gratora' ) }
-                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'gratora' ) }
+                    label={ __( 'Header title', 'gratora-donation-platform' ) }
+                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'gratora-donation-platform' ) }
                 >
                     <input
                         type="text"
                         className="gratora-input"
                         value={ headerTitle }
                         onChange={ ( e ) => setHeader( e.target.value ) }
-                        placeholder={ __( 'Donation receipt', 'gratora' ) }
+                        placeholder={ __( 'Donation receipt', 'gratora-donation-platform' ) }
                         maxLength={ 80 }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Intro paragraph', 'gratora' ) }
-                    help={ __( 'Optional paragraph between the header and the donation details.', 'gratora' ) }
+                    label={ __( 'Intro paragraph', 'gratora-donation-platform' ) }
+                    help={ __( 'Optional paragraph between the header and the donation details.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setIntro( `${ intro }${ t }` ) } />
@@ -150,13 +150,13 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 3 }
                         value={ intro }
                         onChange={ ( e ) => setIntro( e.target.value ) }
-                        placeholder={ __( 'Enter an opening paragraph', 'gratora' ) }
+                        placeholder={ __( 'Enter an opening paragraph', 'gratora-donation-platform' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Signoff', 'gratora' ) }
-                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'gratora' ) }
+                    label={ __( 'Signoff', 'gratora-donation-platform' ) }
+                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setSignoff( `${ signoff }${ t }` ) } />
@@ -165,13 +165,13 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 2 }
                         value={ signoff }
                         onChange={ ( e ) => setSignoff( e.target.value ) }
-                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'gratora' ) }
+                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'gratora-donation-platform' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Footer note', 'gratora' ) }
-                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'gratora' ) }
+                    label={ __( 'Footer note', 'gratora-donation-platform' ) }
+                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setFooter( `${ footerNote }${ t }` ) } />
@@ -184,15 +184,15 @@ export default function ReceiptsPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show organization tax ID', 'gratora' ) }
-                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'gratora' ) }
+                    title={ __( 'Show organization tax ID', 'gratora-donation-platform' ) }
+                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'gratora-donation-platform' ) }
                     checked={ showTaxId }
                     onChange={ setShowTax }
                 />
 
                 <ToggleRow
-                    title={ __( 'Show donor address', 'gratora' ) }
-                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'gratora' ) }
+                    title={ __( 'Show donor address', 'gratora-donation-platform' ) }
+                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'gratora-donation-platform' ) }
                     checked={ showAddress }
                     onChange={ setShowAddr }
                 />
@@ -212,7 +212,7 @@ function MergeTagInserter( { onInsert } ) {
                     type="button"
                     className="gratora-merge-tag"
                     onClick={ () => onInsert( t ) }
-                    title={ __( 'Insert merge tag', 'gratora' ) }
+                    title={ __( 'Insert merge tag', 'gratora-donation-platform' ) }
                 >
                     { t }
                 </button>

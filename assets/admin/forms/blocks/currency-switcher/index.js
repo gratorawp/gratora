@@ -54,7 +54,7 @@ function Edit( { attributes, setAttributes } ) {
     const manageLink = (
         <p style={ { margin: '10px 0 0' } }>
             <ExternalLink href={ SETTINGS_URL }>
-                { __( 'Manage currencies', 'gratora' ) }
+                { __( 'Manage currencies', 'gratora-donation-platform' ) }
             </ExternalLink>
         </p>
     );
@@ -64,11 +64,11 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <Notice status="error" isDismissible={ false }>
-                    { __( 'The currencies this site offers could not be loaded, so this block cannot say which ones it will show.', 'gratora' ) }
+                    { __( 'The currencies this site offers could not be loaded, so this block cannot say which ones it will show.', 'gratora-donation-platform' ) }
                 </Notice>
                 <p style={ { margin: '10px 0 0' } }>
                     <Button variant="secondary" onClick={ load }>
-                        { __( 'Try again', 'gratora' ) }
+                        { __( 'Try again', 'gratora-donation-platform' ) }
                     </Button>
                 </p>
             </>
@@ -79,7 +79,7 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'No currencies are enabled yet.', 'gratora' ) }
+                    { __( 'No currencies are enabled yet.', 'gratora-donation-platform' ) }
                 </Notice>
                 { manageLink }
             </>
@@ -88,7 +88,7 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'Only one currency is enabled, so there is nothing for donors to switch between.', 'gratora' ) }
+                    { __( 'Only one currency is enabled, so there is nothing for donors to switch between.', 'gratora-donation-platform' ) }
                 </Notice>
                 { manageLink }
             </>
@@ -97,7 +97,7 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <p style={ { margin: '0 0 8px', fontSize: 12, color: '#6b7280' } }>
-                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'gratora' ) }
+                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'gratora-donation-platform' ) }
                 </p>
                 <div style={ { display: 'flex', flexWrap: 'wrap', gap: 8 } }>
                     { available.map( ( code ) => {
@@ -142,7 +142,7 @@ function Edit( { attributes, setAttributes } ) {
                                 { code }
                                 { locked && (
                                     <span style={ { fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.04em' } }>
-                                        { __( 'base', 'gratora' ) }
+                                        { __( 'base', 'gratora-donation-platform' ) }
                                     </span>
                                 ) }
                             </button>
@@ -159,30 +159,30 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Currency switcher', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Currency switcher', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Currency', 'gratora' ) }
+                        placeholder={ __( 'Currency', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'gratora' ) }
+                        label={ __( 'Style', 'gratora-donation-platform' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'dropdown', label: __( 'Dropdown', 'gratora' ) },
-                            { value: 'pills',    label: __( 'Pills', 'gratora' ) },
+                            { value: 'dropdown', label: __( 'Dropdown', 'gratora-donation-platform' ) },
+                            { value: 'pills',    label: __( 'Pills', 'gratora-donation-platform' ) },
                         ] }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ [
-                            { value: 'left',  label: __( 'Left', 'gratora' ) },
-                            { value: 'right', label: __( 'Right', 'gratora' ) },
+                            { value: 'left',  label: __( 'Left', 'gratora-donation-platform' ) },
+                            { value: 'right', label: __( 'Right', 'gratora-donation-platform' ) },
                         ] }
                     />
                     { panelBody }
@@ -257,8 +257,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Currency switcher', 'gratora' ),
-        description: __( 'Lets the donor pick which currency to donate in.', 'gratora' ),
+        title:      __( 'Currency switcher', 'gratora-donation-platform' ),
+        description: __( 'Lets the donor pick which currency to donate in.', 'gratora-donation-platform' ),
         category:   'gratora-amount',
         icon:       BlockIcons[ 'currency-switcher' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

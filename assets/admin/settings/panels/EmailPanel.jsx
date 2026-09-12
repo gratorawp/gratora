@@ -37,16 +37,16 @@ export default function EmailPanel( { s } ) {
                 type: unauthenticated ? 'warning' : 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'gratora' ),
-                    res?.to || __( 'the recipient', 'gratora' )
+                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'gratora-donation-platform' ),
+                    res?.to || __( 'the recipient', 'gratora-donation-platform' )
                 ) + ( unauthenticated
-                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'gratora' )
+                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'gratora-donation-platform' )
                     : '' ),
             } );
         } catch ( err ) {
             setTestNotice( {
                 type: 'error',
-                text: err?.message || __( 'Send failed.', 'gratora' ),
+                text: err?.message || __( 'Send failed.', 'gratora-donation-platform' ),
             } );
         } finally {
             setTesting( false );
@@ -56,51 +56,51 @@ export default function EmailPanel( { s } ) {
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Sender identity', 'gratora' ) }
+                title={ __( 'Sender identity', 'gratora-donation-platform' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'From name', 'gratora' ) }
-                    help={ __( 'Shown as the sender in the donor inbox.', 'gratora' ) }
+                    label={ __( 'From name', 'gratora-donation-platform' ) }
+                    help={ __( 'Shown as the sender in the donor inbox.', 'gratora-donation-platform' ) }
                 >
                     <input type="text" className="gratora-input" { ...s.bind( 'from_name' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'From email', 'gratora' ) }
-                    help={ __( 'Use an address on a domain you control.', 'gratora' ) }
+                    label={ __( 'From email', 'gratora-donation-platform' ) }
+                    help={ __( 'Use an address on a domain you control.', 'gratora-donation-platform' ) }
                 >
                     <input type="email" className="gratora-input" { ...s.bind( 'from_email' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Reply-to', 'gratora' ) }
-                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'gratora' ) }
+                    label={ __( 'Reply-to', 'gratora-donation-platform' ) }
+                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'gratora-donation-platform' ) }
                 >
                     <input type="email" className="gratora-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donor email', 'gratora' ) }
-                    sub={ __( 'Sends the site admin address a copy of every message Gratora sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied.', 'gratora' ) }
+                    title={ __( 'BCC me on every donor email', 'gratora-donation-platform' ) }
+                    sub={ __( 'Sends the site admin address a copy of every message Gratora sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied.', 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Send a test email', 'gratora' ) }
-                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'gratora' ) }
+                title={ __( 'Send a test email', 'gratora-donation-platform' ) }
+                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'gratora-donation-platform' ) }
             >
-                <FormRow label={ __( 'Recipient', 'gratora' ) }>
+                <FormRow label={ __( 'Recipient', 'gratora-donation-platform' ) }>
                     <input
                         type="email"
                         className="gratora-input"
                         value={ testTo }
                         onChange={ ( e ) => setTestTo( e.target.value ) }
-                        placeholder={ __( 'Leave blank to send to your WP user email', 'gratora' ) }
+                        placeholder={ __( 'Leave blank to send to your WP user email', 'gratora-donation-platform' ) }
                     />
                 </FormRow>
                 <div style={ { display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ sendTest } disabled={ testing } isBusy={ testing }>
-                        { testing ? __( 'Sending…', 'gratora' ) : __( 'Send test email', 'gratora' ) }
+                        { testing ? __( 'Sending…', 'gratora-donation-platform' ) : __( 'Send test email', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
                 { testNotice && (
@@ -115,18 +115,18 @@ export default function EmailPanel( { s } ) {
                      money they gave. Named as a category with a link to the
                      directory, not a recommendation of one vendor. */ }
                 <p className="gratora-muted" style={ { marginTop: 12 } }>
-                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Gratora. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'gratora' ) }
+                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Gratora. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'gratora-donation-platform' ) }
                     { ' ' }
                     <a href="https://wordpress.org/plugins/tags/smtp/" target="_blank" rel="noreferrer noopener">
-                        { __( 'SMTP plugins on WordPress.org', 'gratora' ) }
+                        { __( 'SMTP plugins on WordPress.org', 'gratora-donation-platform' ) }
                     </a>
                 </p>
             </Card>
 
             <Card
-                title={ __( 'Donor emails', 'gratora' ) }
-                sub={ __( 'Sent to donors automatically by Gratora', 'gratora' ) }
-                meta={ __( 'Click a row to edit', 'gratora' ) }
+                title={ __( 'Donor emails', 'gratora-donation-platform' ) }
+                sub={ __( 'Sent to donors automatically by Gratora', 'gratora-donation-platform' ) }
+                meta={ __( 'Click a row to edit', 'gratora-donation-platform' ) }
             >
                 <div className="gratora-email-list">
                     { templates.map( ( t ) => {
@@ -146,13 +146,13 @@ export default function EmailPanel( { s } ) {
                                     <span className="gratora-email-row__title">
                                         { t.label }
                                         <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'gratora' ) : __( '(disabled)', 'gratora' ) }
+                                            { enabled ? __( '(enabled)', 'gratora-donation-platform' ) : __( '(disabled)', 'gratora-donation-platform' ) }
                                         </span>
                                     </span>
                                     <span className="gratora-email-row__desc">{ t.desc }</span>
                                 </span>
                                 <span className="gratora-email-row__recipient">{ t.recipient }</span>
-                                <span className="gratora-email-row__edit">{ __( 'Edit', 'gratora' ) }</span>
+                                <span className="gratora-email-row__edit">{ __( 'Edit', 'gratora-donation-platform' ) }</span>
                             </button>
                         );
                     } ) }
@@ -243,8 +243,8 @@ function TemplateDialog( { t, s, onClose } ) {
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'gratora' ) }</Btn>
-                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'gratora' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'gratora-donation-platform' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'gratora-donation-platform' ) }</Btn>
                 </>
             ) }
         >
@@ -264,7 +264,7 @@ function TemplateDialog( { t, s, onClose } ) {
                     className={ `gratora-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
-                    { __( 'Edit', 'gratora' ) }
+                    { __( 'Edit', 'gratora-donation-platform' ) }
                 </button>
                 <button
                     type="button"
@@ -274,7 +274,7 @@ function TemplateDialog( { t, s, onClose } ) {
                     className={ `gratora-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >
-                    { __( 'Preview', 'gratora' ) }
+                    { __( 'Preview', 'gratora-donation-platform' ) }
                 </button>
             </div>
 
@@ -282,25 +282,25 @@ function TemplateDialog( { t, s, onClose } ) {
                 <div className="gratora-email-preview">
                     <div className="gratora-email-preview__head">
                         <div>
-                            <strong>{ __( 'Subject:', 'gratora' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Subject:', 'gratora-donation-platform' ) }</strong>{ ' ' }
                             { draft.subject.trim()
                                 ? expandTags( draft.subject )
-                                : <em>{ __( '(no subject)', 'gratora' ) }</em> }
+                                : <em>{ __( '(no subject)', 'gratora-donation-platform' ) }</em> }
                         </div>
-                        <div><strong>{ __( 'To:', 'gratora' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+                        <div><strong>{ __( 'To:', 'gratora-donation-platform' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
                     <pre className="gratora-email-preview__body">{ expandTags( draft.body ) }</pre>
                 </div>
             ) : (
                 <>
                     <ToggleRow
-                        title={ __( 'Send this email', 'gratora' ) }
-                        sub={ __( 'Disable to skip this notification entirely.', 'gratora' ) }
+                        title={ __( 'Send this email', 'gratora-donation-platform' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'gratora-donation-platform' ) }
                         checked={ draft.enabled }
                         onChange={ ( v ) => set( { enabled: v } ) }
                     />
 
-                    <FormRow label={ __( 'Subject', 'gratora' ) } wide>
+                    <FormRow label={ __( 'Subject', 'gratora-donation-platform' ) } wide>
                         <input
                             type="text"
                             className="gratora-input"
@@ -310,8 +310,8 @@ function TemplateDialog( { t, s, onClose } ) {
                     </FormRow>
 
                     <FormRow
-                        label={ __( 'Body', 'gratora' ) }
-                        help={ __( 'Plain text. Merge tags expand at send time.', 'gratora' ) }
+                        label={ __( 'Body', 'gratora-donation-platform' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'gratora-donation-platform' ) }
                         wide
                     >
                         { !! t.tags.length && (

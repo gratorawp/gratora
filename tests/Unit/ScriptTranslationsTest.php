@@ -14,7 +14,7 @@ use RecursiveIteratorIterator;
  */
 final class ScriptTranslationsTest extends TestCase
 {
-    private const DOMAIN = 'gratora';
+    private const DOMAIN = 'gratora-donation-platform';
 
     private function root(): string
     {

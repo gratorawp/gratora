@@ -153,7 +153,7 @@ final class PayPalKeysController
         if ($clientId === '' || $secret === '') {
             return new WP_Error(
                 'gratora_paypal_bad_key',
-                __('Enter both the client id and the secret.', 'gratora'),
+                __('Enter both the client id and the secret.', 'gratora-donation-platform'),
                 ['status' => 400]
             );
         }
@@ -182,7 +182,7 @@ final class PayPalKeysController
                 'gratora_paypal_unreachable',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: transport error, e.g. a DNS failure */
-                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'gratora'),
+                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'gratora-donation-platform'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -194,7 +194,7 @@ final class PayPalKeysController
                 'gratora_paypal_key_rejected',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: error from PayPal */
-                    __('PayPal rejected those %1$s credentials: %2$s', 'gratora'),
+                    __('PayPal rejected those %1$s credentials: %2$s', 'gratora-donation-platform'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -248,7 +248,7 @@ final class PayPalKeysController
                 'gratora_paypal_bad_key',
                 sprintf(
                     /* translators: %s: sandbox or live */
-                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'gratora'),
+                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'gratora-donation-platform'),
                     $this->modeLabel($test)
                 ),
                 ['status' => 400]
@@ -275,7 +275,7 @@ final class PayPalKeysController
             'gratora_paypal_webhook_unchecked',
             sprintf(
                 /* translators: %s: reason PayPal could not be asked */
-                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'gratora'),
+                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'gratora-donation-platform'),
                 $check['message']
             ),
             ['status' => 503]
@@ -391,7 +391,7 @@ final class PayPalKeysController
             if (! is_array($found) || ! isset($found['id'])) {
                 return [
                     'status'  => self::HOOK_UNKNOWN,
-                    'message' => __('PayPal did not return that webhook.', 'gratora'),
+                    'message' => __('PayPal did not return that webhook.', 'gratora-donation-platform'),
                 ];
             }
 
@@ -406,7 +406,7 @@ final class PayPalKeysController
                     'status'  => self::HOOK_INCOMPLETE,
                     'message' => sprintf(
                         /* translators: %s: comma-separated PayPal event names */
-                        __('That webhook does not send: %s', 'gratora'),
+                        __('That webhook does not send: %s', 'gratora-donation-platform'),
                         implode(', ', $missing)
                     ),
                 ];
@@ -445,14 +445,14 @@ final class PayPalKeysController
         $warning = $check['status'] === self::HOOK_MISSING
             ? sprintf(
                 /* translators: 1: the webhook id that was entered, 2: sandbox or live, 3: error from PayPal */
-                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'gratora'),
+                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'gratora-donation-platform'),
                 $webhookId,
                 $this->modeLabel($test),
                 $check['message']
             )
             : sprintf(
                 /* translators: 1: the webhook id that was entered, 2: reason PayPal could not be asked */
-                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'gratora'),
+                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'gratora-donation-platform'),
                 $webhookId,
                 $check['message']
             );
@@ -471,7 +471,7 @@ final class PayPalKeysController
             'gratora_paypal_webhook_rejected',
             sprintf(
                 /* translators: 1: sandbox or live, 2: error from PayPal */
-                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'gratora'),
+                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'gratora-donation-platform'),
                 $this->modeLabel($test),
                 $reason
             ),
@@ -501,7 +501,7 @@ final class PayPalKeysController
     /** @since 1.0.0 */
     private function modeLabel(bool $test): string
     {
-        return $test ? __('sandbox', 'gratora') : __('live', 'gratora');
+        return $test ? __('sandbox', 'gratora-donation-platform') : __('live', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

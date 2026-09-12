@@ -17,23 +17,23 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Phone', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Phone', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Phone', 'gratora' ) }
+                        placeholder={ __( 'Phone', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'gratora' ) }
+                        label={ __( 'Placeholder', 'gratora-donation-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="+1 (555) 123 4567"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -46,7 +46,7 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="gratora-block-preview__label">
-                    { label || __( 'Phone', 'gratora' ) }
+                    { label || __( 'Phone', 'gratora-donation-platform' ) }
                     { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 </span>
                 <div className="gratora-block-preview__field">
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Phone', 'gratora' ),
+        title:      __( 'Phone', 'gratora-donation-platform' ),
         category:   'gratora-donor',
         icon:       BlockIcons[ 'phone' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

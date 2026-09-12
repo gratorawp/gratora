@@ -114,15 +114,15 @@ final class AtRiskReason
     public static function labels(): array
     {
         return [
-            self::PLAN_FAILING        => __('Recurring payments failing', 'gratora'),
-            self::PLAN_PAUSED         => __('Recurring donation paused', 'gratora'),
-            self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'gratora'),
-            self::PLAN_ACTIVE         => __('Recurring plan still active', 'gratora'),
-            self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'gratora'),
-            self::NO_GAP_YET          => __('Not enough giving history to compare', 'gratora'),
-            self::WELL_PAST_GAP       => __('Well past their average gap', 'gratora'),
-            self::PAST_GAP            => __('Past their average gap', 'gratora'),
-            self::WITHIN_GAP          => __('Within their average gap', 'gratora'),
+            self::PLAN_FAILING        => __('Recurring payments failing', 'gratora-donation-platform'),
+            self::PLAN_PAUSED         => __('Recurring donation paused', 'gratora-donation-platform'),
+            self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'gratora-donation-platform'),
+            self::PLAN_ACTIVE         => __('Recurring plan still active', 'gratora-donation-platform'),
+            self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'gratora-donation-platform'),
+            self::NO_GAP_YET          => __('Not enough giving history to compare', 'gratora-donation-platform'),
+            self::WELL_PAST_GAP       => __('Well past their average gap', 'gratora-donation-platform'),
+            self::PAST_GAP            => __('Past their average gap', 'gratora-donation-platform'),
+            self::WITHIN_GAP          => __('Within their average gap', 'gratora-donation-platform'),
         ];
     }
 

@@ -48,21 +48,21 @@ export default function LifetimeMetrics( { lifetime } ) {
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of plans the gateway could not collect. */
-            _n( '%d past due', '%d past due', plan_counts.past_due, 'gratora' ),
+            _n( '%d past due', '%d past due', plan_counts.past_due, 'gratora-donation-platform' ),
             plan_counts.past_due
         ) );
     }
     if ( plan_counts?.paused > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of paused plans. */
-            _n( '%d paused', '%d paused', plan_counts.paused, 'gratora' ),
+            _n( '%d paused', '%d paused', plan_counts.paused, 'gratora-donation-platform' ),
             plan_counts.paused
         ) );
     }
 
     const activePart = active_plan_count > 0
-        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'gratora' ), active_plan_count, formatDate( next_payment_at ) )
-        : __( 'No active plans', 'gratora' );
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'gratora-donation-platform' ), active_plan_count, formatDate( next_payment_at ) )
+        : __( 'No active plans', 'gratora-donation-platform' );
 
     const mrrSub = mrr_unconverted > 0
         ? sprintf(
@@ -71,7 +71,7 @@ export default function LifetimeMetrics( { lifetime } ) {
                 '%d plan has no exchange rate and is not counted',
                 '%d plans have no exchange rate and are not counted',
                 mrr_unconverted,
-                'gratora'
+                'gratora-donation-platform'
             ),
             mrr_unconverted
         )
@@ -81,30 +81,30 @@ export default function LifetimeMetrics( { lifetime } ) {
         <div className="dp-metrics">
             <Card
                 icon={ <IconCoin width="16" height="16" /> }
-                label={ __( 'Lifetime given', 'gratora' ) }
+                label={ __( 'Lifetime given', 'gratora-donation-platform' ) }
                 value={ <span className="num">{ formatAmount( total_cents ) }</span> }
                 spark={ sparkline }
-                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'gratora' ), formatAmountCompact( largest_cents ) ) : null }
+                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'gratora-donation-platform' ), formatAmountCompact( largest_cents ) ) : null }
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
                 // Lifetime metrics count paid donations; the Donations tab includes pending and
                 // failed rows.
-                label={ __( 'Donations received', 'gratora' ) }
+                label={ __( 'Donations received', 'gratora-donation-platform' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0
-                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'gratora' ), one_time_count, recurring_count )
-                    : __( 'No donations yet', 'gratora' ) }
+                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'gratora-donation-platform' ), one_time_count, recurring_count )
+                    : __( 'No donations yet', 'gratora-donation-platform' ) }
             />
             <Card
                 icon={ <IconActivity width="16" height="16" /> }
-                label={ __( 'Avg. donation', 'gratora' ) }
+                label={ __( 'Avg. donation', 'gratora-donation-platform' ) }
                 value={ <span className="num">{ formatAmount( avg_cents ) }</span> }
-                sub={ count > 0 ? __( 'Per donation', 'gratora' ) : null }
+                sub={ count > 0 ? __( 'Per donation', 'gratora-donation-platform' ) : null }
             />
             <Card
                 icon={ <IconRotate width="16" height="16" /> }
-                label={ __( 'Recurring MRR', 'gratora' ) }
+                label={ __( 'Recurring MRR', 'gratora-donation-platform' ) }
                 value={ <span className="num">{ formatAmount( mrr_cents ) }<small> /mo</small></span> }
                 sub={ mrrSub }
             />

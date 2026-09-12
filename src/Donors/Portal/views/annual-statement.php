@@ -21,15 +21,15 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px 6px;
 tfoot td{font-weight:700;border-top:2px solid <?php echo esc_attr($accent); ?>;border-bottom:0}
 .total{font-size:18px;margin-top:18px;text-align:right}
 </style></head><body>
-<h1><?php echo esc_html(sprintf(/* translators: %d: year */ __('Annual donation statement %d', 'gratora'), $year)); ?></h1>
+<h1><?php echo esc_html(sprintf(/* translators: %d: year */ __('Annual donation statement %d', 'gratora-donation-platform'), $year)); ?></h1>
 <h2><?php echo esc_html($org_name); ?></h2>
-<p><?php echo esc_html(sprintf(/* translators: %s: donor name */ __('Issued to %s', 'gratora'), $donor_name)); ?></p>
+<p><?php echo esc_html(sprintf(/* translators: %s: donor name */ __('Issued to %s', 'gratora-donation-platform'), $donor_name)); ?></p>
 <table>
 <thead><tr>
-    <th><?php esc_html_e('Date', 'gratora'); ?></th>
-    <th><?php esc_html_e('Reference', 'gratora'); ?></th>
-    <th><?php esc_html_e('Currency', 'gratora'); ?></th>
-    <th style="text-align:right"><?php esc_html_e('Amount', 'gratora'); ?></th>
+    <th><?php esc_html_e('Date', 'gratora-donation-platform'); ?></th>
+    <th><?php esc_html_e('Reference', 'gratora-donation-platform'); ?></th>
+    <th><?php esc_html_e('Currency', 'gratora-donation-platform'); ?></th>
+    <th style="text-align:right"><?php esc_html_e('Amount', 'gratora-donation-platform'); ?></th>
 </tr></thead>
 <tbody>
 <?php foreach ($lines as $line): ?>
@@ -46,8 +46,8 @@ tfoot td{font-weight:700;border-top:2px solid <?php echo esc_attr($accent); ?>;b
     <tr>
         <td colspan="3" style="text-align:right"><?php
             echo esc_html(count($totals) > 1
-                ? sprintf(/* translators: %s: currency code */ __('Total (%s)', 'gratora'), $t['currency'])
-                : __('Total', 'gratora'));
+                ? sprintf(/* translators: %s: currency code */ __('Total (%s)', 'gratora-donation-platform'), $t['currency'])
+                : __('Total', 'gratora-donation-platform'));
         ?></td>
         <td style="text-align:right"><?php echo esc_html($t['amount']); ?></td>
     </tr>

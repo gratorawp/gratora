@@ -37,13 +37,13 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Offline donations', 'gratora');
+        return __('Offline donations', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'gratora');
+        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

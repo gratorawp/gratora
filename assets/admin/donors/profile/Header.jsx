@@ -26,7 +26,7 @@ function Banner( { kind, message, onAction } ) {
             { onAction && (
                 <div className="banner__actions">
                     <button type="button" className="btn btn--sm" onClick={ onAction }>
-                        { __( 'Open Recurring →', 'gratora' ) }
+                        { __( 'Open Recurring →', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) }
@@ -43,9 +43,9 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
     return (
         <header className="dp-head">
             <div className="dp-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'gratora' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</button>
                 <span className="sep">›</span>
-                <button type="button" onClick={ onBack }>{ __( 'Donors', 'gratora' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Donors', 'gratora-donation-platform' ) }</button>
                 <span className="sep">›</span>
                 <span>{ donor.name }</span>
             </div>
@@ -58,7 +58,7 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                     <div className="dp-page-head__chips">
                         { donor.first_donation_at && (
                             <HeadChip>
-                                { sprintf( /* translators: %s: month */ __( 'Donor since %s', 'gratora' ), formatMonth( donor.first_donation_at ) ) }
+                                { sprintf( /* translators: %s: month */ __( 'Donor since %s', 'gratora-donation-platform' ), formatMonth( donor.first_donation_at ) ) }
                             </HeadChip>
                         ) }
                         { activeCount > 0 && (
@@ -66,17 +66,17 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                                 <IconRotate className="ic" width="11" height="11" />
                                 { sprintf(
                                     /* translators: %d: count */
-                                    _n( '%d active plan', '%d active plans', activeCount, 'gratora' ),
+                                    _n( '%d active plan', '%d active plans', activeCount, 'gratora-donation-platform' ),
                                     activeCount
                                 ) }
                             </HeadChip>
                         ) }
                         { donor.id > 0 && (
                             <HeadChip tone="gray" mono>
-                                { sprintf( /* translators: %d: donor id */ __( 'ID %d', 'gratora' ), donor.id ) }
+                                { sprintf( /* translators: %d: donor id */ __( 'ID %d', 'gratora-donation-platform' ), donor.id ) }
                             </HeadChip>
                         ) }
-                        { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'gratora' ) }</HeadChip> }
+                        { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'gratora-donation-platform' ) }</HeadChip> }
                     </div>
                 </div>
                 <div className="dp-page-head__actions">
@@ -85,7 +85,7 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                          edited at all. */ }
                     { ! isRedacted && userCan( 'edit_donors' ) && (
                         <button type="button" className="btn" onClick={ onEdit }>
-                            { __( 'Edit details', 'gratora' ) }
+                            { __( 'Edit details', 'gratora-donation-platform' ) }
                         </button>
                     ) }
                 </div>

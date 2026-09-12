@@ -7,8 +7,8 @@ defined('ABSPATH') || exit;
  * @var string $linkText
  * @var string $purpose
  */
-$labelText = $label !== '' ? $label : __('I agree to the terms', 'gratora');
-$linkLabel = $linkText !== '' ? $linkText : __('Read the terms', 'gratora');
+$labelText = $label !== '' ? $label : __('I agree to the terms', 'gratora-donation-platform');
+$linkLabel = $linkText !== '' ? $linkText : __('Read the terms', 'gratora-donation-platform');
 ?>
 <div class="gratora-block gratora-block--terms gratora-terms">
     <label class="gratora-terms__agree">

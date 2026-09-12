@@ -48,16 +48,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Columns', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Columns', 'gratora-donation-platform' ) } initialOpen>
                     <Slider
-                        label={ __( 'Columns', 'gratora' ) }
+                        label={ __( 'Columns', 'gratora-donation-platform' ) }
                         value={ columns }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         min={ 1 }
                         max={ 6 }
                     />
                     <Slider
-                        label={ __( 'Gap', 'gratora' ) }
+                        label={ __( 'Gap', 'gratora-donation-platform' ) }
                         value={ gap }
                         onChange={ ( v ) => setAttributes( { gap: v } ) }
                         min={ 0 }
@@ -85,8 +85,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Columns', 'gratora' ),
-        description: __( 'Lay out content blocks side by side in a grid.', 'gratora' ),
+        title:       __( 'Columns', 'gratora-donation-platform' ),
+        description: __( 'Lay out content blocks side by side in a grid.', 'gratora-donation-platform' ),
         category:    'gratora-content',
         icon:        BlockIcons[ 'columns' ],
         supports:    { html: false, anchor: false, inserter: true },

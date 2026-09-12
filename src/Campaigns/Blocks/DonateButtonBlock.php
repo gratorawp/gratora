@@ -50,7 +50,7 @@ final class DonateButtonBlock extends CampaignBlock
         if (! $form) {
             return (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="gratora-block-notice">'
-                    . esc_html__('This campaign has no published donation form yet.', 'gratora')
+                    . esc_html__('This campaign has no published donation form yet.', 'gratora-donation-platform')
                     . '</div>'
                 : '';
         }
@@ -74,14 +74,14 @@ final class DonateButtonBlock extends CampaignBlock
         $hasForm = str_contains($formHtml, 'data-form-slug=');
         if (! $editorPreview && ! $hasForm) {
             $message = match ($campaign->notAcceptingReason()) {
-                'ended'    => __('This campaign has finished accepting donations.', 'gratora'),
-                'goal_met' => __('This campaign has reached its goal. Thank you.', 'gratora'),
-                default    => __('Donations are not open for this campaign yet.', 'gratora'),
+                'ended'    => __('This campaign has finished accepting donations.', 'gratora-donation-platform'),
+                'goal_met' => __('This campaign has reached its goal. Thank you.', 'gratora-donation-platform'),
+                default    => __('Donations are not open for this campaign yet.', 'gratora-donation-platform'),
             };
 
             $notice = (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="gratora-block-notice">'
-                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'gratora')
+                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'gratora-donation-platform')
                     . '</div>'
                 : '';
 
@@ -90,7 +90,7 @@ final class DonateButtonBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/donate-button', [
             // Use ?: because an unset label is an empty string.
-            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'gratora'),
+            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'gratora-donation-platform'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
                 ? (string) $attrs['size'] : 'md',

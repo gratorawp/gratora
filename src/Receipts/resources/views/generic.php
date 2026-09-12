@@ -20,16 +20,16 @@ defined('ABSPATH') || exit;
  * @var array    $custom_field_labels
  */
 
-$orgName = (string) ($org['name'] ?? __('Your Organization', 'gratora'));
+$orgName = (string) ($org['name'] ?? __('Your Organization', 'gratora-donation-platform'));
 $orgAddressLines = (array) ($org['address_lines'] ?? []);
 $orgTaxId  = (string) ($org['tax_id'] ?? '');
 $orgVatId  = (string) ($org['vat_id'] ?? '');
 $orgEmail  = (string) ($org['email'] ?? '');
 
 $tpl = is_array($receipt_template ?? null) ? $receipt_template : [];
-$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'gratora'));
+$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'gratora-donation-platform'));
 $intro       = (string) ($tpl['intro']        ?? '');
-$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'gratora'));
+$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'gratora-donation-platform'));
 $footerNote  = (string) ($tpl['footer_note']  ?? '');
 $showTaxId   = array_key_exists('show_tax_id', $tpl) ? (bool) $tpl['show_tax_id'] : true;
 $showDonorAddr = array_key_exists('show_donor_address', $tpl) ? (bool) $tpl['show_donor_address'] : false;
@@ -42,17 +42,17 @@ if ($donorName === '') $donorName = '-';
 // The whole receipt renders in the donor's locale, so the frequency has to be
 // a translated label rather than the stored slug.
 $frequencyLabels = [
-    'weekly'    => __('Weekly', 'gratora'),
-    'biweekly'  => __('Every 2 weeks', 'gratora'),
-    'monthly'   => __('Monthly', 'gratora'),
-    'quarterly' => __('Quarterly', 'gratora'),
-    'yearly'    => __('Yearly', 'gratora'),
+    'weekly'    => __('Weekly', 'gratora-donation-platform'),
+    'biweekly'  => __('Every 2 weeks', 'gratora-donation-platform'),
+    'monthly'   => __('Monthly', 'gratora-donation-platform'),
+    'quarterly' => __('Quarterly', 'gratora-donation-platform'),
+    'yearly'    => __('Yearly', 'gratora-donation-platform'),
 ];
 $frequencyLabel = $donation->frequency === 'one_time'
-    ? __('One-time donation', 'gratora')
+    ? __('One-time donation', 'gratora-donation-platform')
     : sprintf(
         /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
-        __('Recurring donation (%s)', 'gratora'),
+        __('Recurring donation (%s)', 'gratora-donation-platform'),
         $frequencyLabels[(string) $donation->frequency] ?? ucfirst((string) $donation->frequency)
     );
 
@@ -69,7 +69,7 @@ foreach ($customDataArr as $key => $value) {
     if ($label === '') continue;
 
     if (is_bool($value)) {
-        $display = $value ? __('Yes', 'gratora') : __('No', 'gratora');
+        $display = $value ? __('Yes', 'gratora-donation-platform') : __('No', 'gratora-donation-platform');
     } elseif (is_array($value)) {
         $display = implode(', ', array_map('strval', $value));
         if ($display === '') continue;
@@ -137,7 +137,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <?php if (! empty($donation->is_test)): ?>
 <div style="border:2pt solid #b91c1c; color:#b91c1c; font-weight:700; text-align:center; padding:8pt; margin:0 0 18pt; letter-spacing:.5pt;">
-    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'gratora'); ?>
+    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'gratora-donation-platform'); ?>
 </div>
 <?php endif; ?>
 
@@ -147,7 +147,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php
     printf(
         /* translators: %s: refunded amount. */
-        esc_html__('This donation has been refunded (%s).', 'gratora'),
+        esc_html__('This donation has been refunded (%s).', 'gratora-donation-platform'),
         esc_html($refundedDisplay)
     );
     ?>
@@ -155,7 +155,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php
     printf(
         /* translators: 1: refunded amount, 2: amount retained after the refund. */
-        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'gratora'),
+        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'gratora-donation-platform'),
         esc_html($refundedDisplay),
         esc_html($netDisplay)
     );
@@ -188,21 +188,21 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <dl class="ref">
     <?php if ($receiptNumber !== ''): ?>
-        <dt><?php esc_html_e('Receipt number', 'gratora'); ?></dt>
+        <dt><?php esc_html_e('Receipt number', 'gratora-donation-platform'); ?></dt>
         <dd><?php echo esc_html($receiptNumber); ?></dd>
     <?php endif; ?>
 
-    <dt><?php esc_html_e('Reference', 'gratora'); ?></dt>
+    <dt><?php esc_html_e('Reference', 'gratora-donation-platform'); ?></dt>
     <dd><?php echo esc_html($donation->reference); ?></dd>
 
-    <dt><?php esc_html_e('Date', 'gratora'); ?></dt>
+    <dt><?php esc_html_e('Date', 'gratora-donation-platform'); ?></dt>
     <dd><?php echo esc_html($paidAt); ?></dd>
 
-    <dt><?php esc_html_e('Donor', 'gratora'); ?></dt>
+    <dt><?php esc_html_e('Donor', 'gratora-donation-platform'); ?></dt>
     <dd><?php echo esc_html($donorName); ?></dd>
 
     <?php if ($showDonorAddr && $donorAddress !== ''): ?>
-        <dt><?php esc_html_e('Donor address', 'gratora'); ?></dt>
+        <dt><?php esc_html_e('Donor address', 'gratora-donation-platform'); ?></dt>
         <dd>
             <?php foreach (preg_split('/\R/', $donorAddress) as $line): ?>
                 <?php $line = trim((string) $line); if ($line === '') continue; ?>
@@ -212,12 +212,12 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgTaxId !== ''): ?>
-        <dt><?php esc_html_e('Organization tax ID', 'gratora'); ?></dt>
+        <dt><?php esc_html_e('Organization tax ID', 'gratora-donation-platform'); ?></dt>
         <dd><?php echo esc_html($orgTaxId); ?></dd>
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgVatId !== ''): ?>
-        <dt><?php esc_html_e('VAT ID', 'gratora'); ?></dt>
+        <dt><?php esc_html_e('VAT ID', 'gratora-donation-platform'); ?></dt>
         <dd><?php echo esc_html($orgVatId); ?></dd>
     <?php endif; ?>
 </dl>
@@ -225,36 +225,36 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 <table class="lines">
     <thead>
         <tr>
-            <th><?php esc_html_e('Description', 'gratora'); ?></th>
-            <th class="amt"><?php esc_html_e('Amount', 'gratora'); ?></th>
+            <th><?php esc_html_e('Description', 'gratora-donation-platform'); ?></th>
+            <th class="amt"><?php esc_html_e('Amount', 'gratora-donation-platform'); ?></th>
         </tr>
     </thead>
     <tbody>
         <?php if ($hasGoods): ?>
         <tr>
-            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'gratora')); ?></td>
+            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'gratora-donation-platform')); ?></td>
             <td class="amt"><?php echo esc_html($money($goodsCents)); ?></td>
         </tr>
         <?php endif; ?>
         <tr>
-            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'gratora'), esc_html($orgName)); ?></td>
+            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'gratora-donation-platform'), esc_html($orgName)); ?></td>
             <td class="amt"><?php echo esc_html($hasGoods ? $money($giftCents) : $amount_display); ?></td>
         </tr>
         <?php if ($refundedDisplay !== ''): ?>
         <tr class="refund-row">
-            <td><?php esc_html_e('Refunded', 'gratora'); ?></td>
+            <td><?php esc_html_e('Refunded', 'gratora-donation-platform'); ?></td>
             <td class="amt">-<?php echo esc_html($refundedDisplay); ?></td>
         </tr>
         <?php endif; ?>
     </tbody>
     <tfoot>
         <tr>
-            <td><?php echo $hasGoods ? esc_html__('Total', 'gratora') : '&nbsp;'; ?></td>
+            <td><?php echo $hasGoods ? esc_html__('Total', 'gratora-donation-platform') : '&nbsp;'; ?></td>
             <td class="amt total"><?php echo esc_html($netDisplay); ?></td>
         </tr>
         <?php if ($hasGoods): ?>
         <tr class="deductible-row">
-            <td><?php esc_html_e('Tax-deductible amount', 'gratora'); ?></td>
+            <td><?php esc_html_e('Tax-deductible amount', 'gratora-donation-platform'); ?></td>
             <td class="amt"><?php echo esc_html($money(max(0, $giftCents - $refundedCents))); ?></td>
         </tr>
         <?php endif; ?>
@@ -263,7 +263,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <?php if (! empty($customRows)): ?>
 <div class="custom">
-    <h3><?php esc_html_e('Additional information', 'gratora'); ?></h3>
+    <h3><?php esc_html_e('Additional information', 'gratora-donation-platform'); ?></h3>
     <dl>
         <?php foreach ($customRows as $row): ?>
             <dt><?php echo esc_html($row['label']); ?></dt>

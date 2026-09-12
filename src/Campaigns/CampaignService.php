@@ -46,7 +46,7 @@ final class CampaignService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled campaign', 'gratora');
+            $title = __('Untitled campaign', 'gratora-donation-platform');
         }
 
         $campaign = Campaign::make();
@@ -67,8 +67,8 @@ final class CampaignService
         $campaign->default_fund_id     = isset($input['default_fund_id']) && $input['default_fund_id'] !== '' && $input['default_fund_id'] !== null
             ? (int) $input['default_fund_id'] : null;
         $campaign->image_attachment_id = $this->validateImageAttachment($input['image_attachment_id'] ?? null);
-        $campaign->starts_at   = self::campaignDate($input['starts_at'] ?? null, __('start date', 'gratora'));
-        $campaign->ends_at     = self::campaignDate($input['ends_at'] ?? null, __('end date', 'gratora'));
+        $campaign->starts_at   = self::campaignDate($input['starts_at'] ?? null, __('start date', 'gratora-donation-platform'));
+        $campaign->ends_at     = self::campaignDate($input['ends_at'] ?? null, __('end date', 'gratora-donation-platform'));
         self::assertWindowOrder($campaign->starts_at, $campaign->ends_at);
         $campaign->created_at  = $now;
         $campaign->updated_at  = $now;
@@ -127,10 +127,10 @@ final class CampaignService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'gratora-donation-platform'));
                 }
                 if ($next !== $campaign->slug && $this->campaigns->slugExists($next, $campaign->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'gratora-donation-platform'));
                 }
                 $campaign->slug = $next;
             }
@@ -152,8 +152,8 @@ final class CampaignService
             $campaign->$field = self::campaignDate(
                 $value,
                 $field === 'starts_at'
-                    ? __('start date', 'gratora')
-                    : __('end date', 'gratora')
+                    ? __('start date', 'gratora-donation-platform')
+                    : __('end date', 'gratora-donation-platform')
             );
         }
 
@@ -212,7 +212,7 @@ final class CampaignService
                 $formId = (int) $value;
                 $form = Form::query()->find('id', $formId);
                 if (! $form || $form->campaign_id !== $campaign->id) {
-                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'gratora-donation-platform'));
                 }
                 $campaign->default_form_id = $formId;
             }
@@ -275,7 +275,7 @@ final class CampaignService
         if ($at === false) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the name of the date field, e.g. "start date". */
-                __('That is not a date the campaign %s can be set to.', 'gratora'),
+                __('That is not a date the campaign %s can be set to.', 'gratora-donation-platform'),
                 $label
             )));
         }
@@ -298,7 +298,7 @@ final class CampaignService
         }
 
         throw new InvalidArgumentException(
-            esc_html__('The campaign end date cannot be before its start date.', 'gratora')
+            esc_html__('The campaign end date cannot be before its start date.', 'gratora-donation-platform')
         );
     }
 
@@ -315,7 +315,7 @@ final class CampaignService
         $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
 
         if ($donations > 0 || $plans > 0) {
-            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'gratora');
+            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'gratora-donation-platform');
         }
 
         return null;
@@ -375,7 +375,7 @@ final class CampaignService
         }
         $attachmentId = (int) $value;
         if (! wp_attachment_is_image($attachmentId)) {
-            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'gratora-donation-platform'));
         }
         return $attachmentId;
     }
@@ -412,7 +412,7 @@ final class CampaignService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original campaign title */
-        $newTitle = sprintf(__('Copy of %s', 'gratora'), $source->title);
+        $newTitle = sprintf(__('Copy of %s', 'gratora-donation-platform'), $source->title);
 
         $copy = Campaign::make();
         $copy->title       = $newTitle;
@@ -644,20 +644,20 @@ final class CampaignService
         // so the editor rewrites dp-band--tight on its first save and the
         // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
         // writes it the same way.
-        $t0 = __('Campaign name', 'gratora');
+        $t0 = __('Campaign name', 'gratora-donation-platform');
         // Bound, so this is only what an organizer who has written no
         // description sees in the editor. Nothing else is seeded as prose:
         // seeded words read to a donor as the campaign's own.
-        $t2 = __('What this campaign is raising for.', 'gratora');
-        $t5 = __('Recent donations', 'gratora');
-        $t6 = __('Top donors', 'gratora');
-        $t7 = __('Our supporters', 'gratora');
+        $t2 = __('What this campaign is raising for.', 'gratora-donation-platform');
+        $t5 = __('Recent donations', 'gratora-donation-platform');
+        $t6 = __('Top donors', 'gratora-donation-platform');
+        $t7 = __('Our supporters', 'gratora-donation-platform');
         // Section headings, so a starter page reads as a page rather than a
         // stack of blocks. Above the prose and above the form, which are the
         // two things no block titles for itself.
-        $t8 = __('About this campaign', 'gratora');
-        $t9  = __('Donate', 'gratora');
-        $t10 = __('Other campaigns', 'gratora');
+        $t8 = __('About this campaign', 'gratora-donation-platform');
+        $t9  = __('Donate', 'gratora-donation-platform');
+        $t10 = __('Other campaigns', 'gratora-donation-platform');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so
@@ -697,7 +697,7 @@ final class CampaignService
 
         $form = $this->forms->create([
             /* translators: %s: campaign title */
-            'title'       => sprintf(__('%s donation form', 'gratora'), $campaign->title),
+            'title'       => sprintf(__('%s donation form', 'gratora-donation-platform'), $campaign->title),
             // Keep forms without a template in draft; required donor fields are missing.
             'status'      => $skipTemplate ? 'draft' : 'published',
             'campaign_id' => $campaign->id,

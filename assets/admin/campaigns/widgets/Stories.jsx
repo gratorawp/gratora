@@ -5,7 +5,7 @@ export default function Stories( { rows = [] } ) {
     if ( rows.length === 0 ) {
         return (
             <p className="gratora-panel__empty">
-                { __( 'No donor notes yet. Donors can leave a message at checkout, and it will appear here.', 'gratora' ) }
+                { __( 'No donor notes yet. Donors can leave a message at checkout, and it will appear here.', 'gratora-donation-platform' ) }
             </p>
         );
     }
@@ -22,9 +22,9 @@ export default function Stories( { rows = [] } ) {
                         { !! r.is_anonymous && (
                             <span
                                 className="gratora-story__anon"
-                                title={ __( 'Their name is hidden from public donor lists. It still appears here.', 'gratora' ) }
+                                title={ __( 'Their name is hidden from public donor lists. It still appears here.', 'gratora-donation-platform' ) }
                             >
-                                { __( 'anonymous publicly', 'gratora' ) }
+                                { __( 'anonymous publicly', 'gratora-donation-platform' ) }
                             </span>
                         ) }
                         <span className="gratora-story__sep" aria-hidden="true">·</span>

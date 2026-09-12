@@ -83,7 +83,7 @@ final class RecentDonationsBlock extends CampaignBlock
 
             // Hiding a donor also suppresses their name and message.
             if ($isAnonymous || $name === '' || $hidden) {
-                $name = __('Anonymous', 'gratora');
+                $name = __('Anonymous', 'gratora-donation-platform');
                 $isAnonymous = true;
             }
 
@@ -91,7 +91,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $paidTs = strtotime((string) $paidAt) ?: $nowTs;
             $timeAgo = sprintf(
                 /* translators: %s: human-readable time difference, e.g. "5 minutes" */
-                __('%s ago', 'gratora'),
+                __('%s ago', 'gratora-donation-platform'),
                 human_time_diff($paidTs, $nowTs)
             );
 
@@ -115,8 +115,8 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'gratora'),
-            'emptySubText' => __('Donations tend to follow the first one.', 'gratora'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'gratora-donation-platform'),
+            'emptySubText' => __('Donations tend to follow the first one.', 'gratora-donation-platform'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),

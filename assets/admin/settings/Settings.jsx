@@ -30,16 +30,16 @@ import {
 // Ordered by how often an operator opens it, money first. Add-on tabs land
 // after these.
 const TABS = [
-    { key: 'setup',        label: __( 'Setup', 'gratora' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payment gateways', 'gratora' ),     Icon: IconGateways },
-    { key: 'organization', label: __( 'Organization', 'gratora' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'gratora' ),                Icon: IconBrand },
-    { key: 'email',        label: __( 'Emails', 'gratora' ),               Icon: IconEmail },
-    { key: 'receipts',     label: __( 'Receipts', 'gratora' ),             Icon: IconReceipt },
-    { key: 'currency',     label: __( 'Currency', 'gratora' ),             Icon: IconCurrency },
-    { key: 'numbering',    label: __( 'Numbering', 'gratora' ),            Icon: IconNumbering },
-    { key: 'privacy',      label: __( 'Privacy', 'gratora' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'gratora' ),                Icon: IconRoles, adminOnly: true },
+    { key: 'setup',        label: __( 'Setup', 'gratora-donation-platform' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payment gateways', 'gratora-donation-platform' ),     Icon: IconGateways },
+    { key: 'organization', label: __( 'Organization', 'gratora-donation-platform' ),         Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'gratora-donation-platform' ),                Icon: IconBrand },
+    { key: 'email',        label: __( 'Emails', 'gratora-donation-platform' ),               Icon: IconEmail },
+    { key: 'receipts',     label: __( 'Receipts', 'gratora-donation-platform' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'gratora-donation-platform' ),             Icon: IconCurrency },
+    { key: 'numbering',    label: __( 'Numbering', 'gratora-donation-platform' ),            Icon: IconNumbering },
+    { key: 'privacy',      label: __( 'Privacy', 'gratora-donation-platform' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'gratora-donation-platform' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
@@ -54,17 +54,17 @@ const TAIL_TABS = [];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
-    'org-profile':     __( 'Organization', 'gratora' ),
-    'org-brand':       __( 'Brand', 'gratora' ),
-    'currency-locale': __( 'Currency & locale', 'gratora' ),
-    'exchange-rates':  __( 'Exchange rates', 'gratora' ),
-    'gateways':        __( 'Payment gateways', 'gratora' ),
-    'email':           __( 'Emails', 'gratora' ),
-    'receipts':        __( 'Receipts', 'gratora' ),
-    'numbering':       __( 'Numbering', 'gratora' ),
-    'consents':        __( 'Consents', 'gratora' ),
-    'privacy':         __( 'Data & privacy', 'gratora' ),
-    'roles':           __( 'Roles & permissions', 'gratora' ),
+    'org-profile':     __( 'Organization', 'gratora-donation-platform' ),
+    'org-brand':       __( 'Brand', 'gratora-donation-platform' ),
+    'currency-locale': __( 'Currency & locale', 'gratora-donation-platform' ),
+    'exchange-rates':  __( 'Exchange rates', 'gratora-donation-platform' ),
+    'gateways':        __( 'Payment gateways', 'gratora-donation-platform' ),
+    'email':           __( 'Emails', 'gratora-donation-platform' ),
+    'receipts':        __( 'Receipts', 'gratora-donation-platform' ),
+    'numbering':       __( 'Numbering', 'gratora-donation-platform' ),
+    'consents':        __( 'Consents', 'gratora-donation-platform' ),
+    'privacy':         __( 'Data & privacy', 'gratora-donation-platform' ),
+    'roles':           __( 'Roles & permissions', 'gratora-donation-platform' ),
 };
 
 function initialTab() {
@@ -93,7 +93,7 @@ export function SettingsGroup( { of, children } ) {
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
                     <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload?.() ) }>
-                        { __( 'Retry', 'gratora' ) }
+                        { __( 'Retry', 'gratora-donation-platform' ) }
                     </Btn>
                 </Card>
             </div>
@@ -112,7 +112,7 @@ function PanelSkeleton() {
     return (
         <>
             <p className="screen-reader-text" role="status">
-                { __( 'Loading settings…', 'gratora' ) }
+                { __( 'Loading settings…', 'gratora-donation-platform' ) }
             </p>
             <div className="gratora-card" aria-hidden="true">
                 <div className="gratora-card__head">
@@ -261,7 +261,7 @@ export default function Settings() {
             .filter( Boolean );
 
         if ( failed.length === 0 ) {
-            notify.success( __( 'All changes saved.', 'gratora' ) );
+            notify.success( __( 'All changes saved.', 'gratora-donation-platform' ) );
             return;
         }
 
@@ -272,10 +272,10 @@ export default function Settings() {
         const base = failed.length < jobs.length
             ? sprintf(
                 /* translators: %s: comma-separated section names that failed */
-                __( 'Could not save: %s.', 'gratora' ),
+                __( 'Could not save: %s.', 'gratora-donation-platform' ),
                 labels.join( ', ' ),
             )
-            : __( 'Save failed.', 'gratora' );
+            : __( 'Save failed.', 'gratora-donation-platform' );
         notify.error( reason ? `${ base } ${ reason }` : base );
     };
 
@@ -298,20 +298,20 @@ export default function Settings() {
     return (
         <div className="gratora-settings-page">
             <div className="gratora-crumbs">
-                <a href="admin.php?page=gratora">{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href="admin.php?page=gratora">{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Settings', 'gratora' ) }</span>
+                <span>{ __( 'Settings', 'gratora-donation-platform' ) }</span>
                 <span className="sep">›</span>
                 <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Settings', 'gratora' ) }</h1>
+                    <h1>{ __( 'Settings', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     <span className="gratora-page-head__meta">
-                        { __( 'Changes save when you click Save changes', 'gratora' ) }
+                        { __( 'Changes save when you click Save changes', 'gratora-donation-platform' ) }
                     </span>
                 </div>
             </div>
@@ -320,7 +320,7 @@ export default function Settings() {
                 className="gratora-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Settings sections', 'gratora' ) }
+                aria-label={ __( 'Settings sections', 'gratora-donation-platform' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
                 <div className="gratora-tabs__scroll">
@@ -340,7 +340,7 @@ export default function Settings() {
                             >
                                 <Icon className="gratora-tab__icon" />
                                 { t.label }
-                                { isDirty && <span className="gratora-tab__dot" title={ __( 'Unsaved changes', 'gratora' ) } /> }
+                                { isDirty && <span className="gratora-tab__dot" title={ __( 'Unsaved changes', 'gratora-donation-platform' ) } /> }
                             </a>
                         );
                     } ) }
@@ -397,10 +397,10 @@ export default function Settings() {
                     <span className="gratora-save-bar__dot" aria-hidden="true" />
                     <span className="gratora-save-bar__count">
                         { dirtySections === 1
-                            ? __( 'Unsaved changes in 1 section', 'gratora' )
+                            ? __( 'Unsaved changes in 1 section', 'gratora-donation-platform' )
                             : sprintf(
                                 /* translators: %d: number of sections with unsaved changes */
-                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'gratora' ),
+                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'gratora-donation-platform' ),
                                 dirtySections,
                             ) }
                     </span>
@@ -410,7 +410,7 @@ export default function Settings() {
                         onClick={ discardAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Discard', 'gratora' ) }
+                        { __( 'Discard', 'gratora-donation-platform' ) }
                     </button>
                     <button
                         type="button"
@@ -418,7 +418,7 @@ export default function Settings() {
                         onClick={ saveAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Save changes', 'gratora' ) }
+                        { __( 'Save changes', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) }

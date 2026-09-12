@@ -23,7 +23,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
     if ( ! distribution || distribution.total_count === 0 ) {
         return (
             <p className="gratora-panel__empty">
-                { __( 'Not enough donations yet to plot a distribution.', 'gratora' ) }
+                { __( 'Not enough donations yet to plot a distribution.', 'gratora-donation-platform' ) }
             </p>
         );
     }
@@ -46,7 +46,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                     <strong>
                         { sprintf(
                             /* translators: %s: median donation amount */
-                            __( 'Median: %s', 'gratora' ),
+                            __( 'Median: %s', 'gratora-donation-platform' ),
                             formatAmount( median_cents, currency )
                         ) }
                     </strong>
@@ -55,7 +55,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                     <span className="gratora-histogram__tail">
                         { sprintf(
                             /* translators: 1: donation count, 2: amount threshold (e.g. $100) */
-                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'gratora' ),
+                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'gratora-donation-platform' ),
                             longTailCount,
                             formatAmountCompact( 10000, currency )
                         ) }
@@ -97,11 +97,11 @@ export default function DistributionHistogram( { distribution, currency } ) {
                         formatter={ ( value, _name, props ) => [
                             sprintf(
                                 /* translators: 1: donation count, 2: total amount in that bucket */
-                                __( '%1$d × %2$s', 'gratora' ),
+                                __( '%1$d × %2$s', 'gratora-donation-platform' ),
                                 value,
                                 formatAmount( props.payload.amount_cents, currency )
                             ),
-                            __( 'Donations', 'gratora' ),
+                            __( 'Donations', 'gratora-donation-platform' ),
                         ] }
                     />
                     <Bar dataKey="count" fill="#8a7bff" radius={ [ 4, 4, 0, 0 ] } isAnimationActive={ false } />
@@ -111,7 +111,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                             stroke="#6b7280"
                             strokeDasharray="4 4"
                             label={ {
-                                value:     __( 'median', 'gratora' ),
+                                value:     __( 'median', 'gratora-donation-platform' ),
                                 position:  'top',
                                 fill:      '#6b7280',
                                 fontSize:  10,
@@ -124,7 +124,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
             <p className="gratora-histogram__total">
                 { sprintf(
                     /* translators: %d: total donation count */
-                    _n( '%d donation in this period', '%d donations in this period', total_count, 'gratora' ),
+                    _n( '%d donation in this period', '%d donations in this period', total_count, 'gratora-donation-platform' ),
                     total_count
                 ) }
             </p>

@@ -12,13 +12,13 @@ import { formatAmount, formatAmountCompact, formatDate } from '../_shared/format
 import { IconUsers, IconHeart, IconActivity, IconCoins } from '../_shared/widgets/icons';
 
 const SEGMENT_META = {
-    champions:   { label: __( 'Champions',    'gratora' ), color: 'var(--gratora-seg-champions, #6f5ce6)',   hint: __( 'Active, frequent, high LTV', 'gratora' ) },
-    loyal:       { label: __( 'Loyal',        'gratora' ), color: 'var(--gratora-seg-loyal, #0a9bab)',       hint: __( 'Active, 2+ donations',        'gratora' ) },
-    new:         { label: __( 'New',          'gratora' ), color: 'var(--gratora-seg-new, #1f7fb8)',         hint: __( 'Joined recently',             'gratora' ) },
-    at_risk:     { label: __( 'At risk',      'gratora' ), color: 'var(--gratora-seg-at-risk, #b08a12)',     hint: __( 'Was active, slowing down',    'gratora' ) },
-    hibernating: { label: __( 'Hibernating',  'gratora' ), color: 'var(--gratora-seg-hibernating, #9a3fb0)', hint: __( 'Long lapsed, low LTV',        'gratora' ) },
-    lost:        { label: __( 'Lost',         'gratora' ), color: 'var(--gratora-seg-lost, #c25050)',        hint: __( '> 12 months silent',           'gratora' ) },
-    other:       { label: __( 'Other',        'gratora' ), color: 'var(--gratora-seg-other, #6b7280)',       hint: __( 'Uncategorised',               'gratora' ) },
+    champions:   { label: __( 'Champions',    'gratora-donation-platform' ), color: 'var(--gratora-seg-champions, #6f5ce6)',   hint: __( 'Active, frequent, high LTV', 'gratora-donation-platform' ) },
+    loyal:       { label: __( 'Loyal',        'gratora-donation-platform' ), color: 'var(--gratora-seg-loyal, #0a9bab)',       hint: __( 'Active, 2+ donations',        'gratora-donation-platform' ) },
+    new:         { label: __( 'New',          'gratora-donation-platform' ), color: 'var(--gratora-seg-new, #1f7fb8)',         hint: __( 'Joined recently',             'gratora-donation-platform' ) },
+    at_risk:     { label: __( 'At risk',      'gratora-donation-platform' ), color: 'var(--gratora-seg-at-risk, #b08a12)',     hint: __( 'Was active, slowing down',    'gratora-donation-platform' ) },
+    hibernating: { label: __( 'Hibernating',  'gratora-donation-platform' ), color: 'var(--gratora-seg-hibernating, #9a3fb0)', hint: __( 'Long lapsed, low LTV',        'gratora-donation-platform' ) },
+    lost:        { label: __( 'Lost',         'gratora-donation-platform' ), color: 'var(--gratora-seg-lost, #c25050)',        hint: __( '> 12 months silent',           'gratora-donation-platform' ) },
+    other:       { label: __( 'Other',        'gratora-donation-platform' ), color: 'var(--gratora-seg-other, #6b7280)',       hint: __( 'Uncategorised',               'gratora-donation-platform' ) },
 };
 
 function formatBucketLabel( min, max ) {
@@ -31,39 +31,39 @@ function LifecycleKpis( { kpi } ) {
     return (
         <div className="gratora-overview__metrics">
             <MetricCard
-                label={ __( 'Total donors', 'gratora' ) }
+                label={ __( 'Total donors', 'gratora-donation-platform' ) }
                 value={ String( kpi.total ) }
-                sub={ kpi.new ? `+${ kpi.new } ${ __( 'new (30d)', 'gratora' ) }` : __( 'no new donors', 'gratora' ) }
+                sub={ kpi.new ? `+${ kpi.new } ${ __( 'new (30d)', 'gratora-donation-platform' ) }` : __( 'no new donors', 'gratora-donation-platform' ) }
                 icon={ <IconUsers /> }
             />
             <MetricCard
-                label={ __( 'Active', 'gratora' ) }
+                label={ __( 'Active', 'gratora-donation-platform' ) }
                 value={ String( kpi.active ) }
-                sub={ `${ kpi.active_pct }% ${ __( 'of base · gave in 90d', 'gratora' ) }` }
+                sub={ `${ kpi.active_pct }% ${ __( 'of base · gave in 90d', 'gratora-donation-platform' ) }` }
                 icon={ <IconHeart /> }
             />
             <MetricCard
-                label={ __( 'At risk', 'gratora' ) }
+                label={ __( 'At risk', 'gratora-donation-platform' ) }
                 value={ String( kpi.at_risk ) }
-                sub={ `${ kpi.at_risk_pct }% ${ __( 'silent 90-180d', 'gratora' ) }` }
+                sub={ `${ kpi.at_risk_pct }% ${ __( 'silent 90-180d', 'gratora-donation-platform' ) }` }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Lapsed', 'gratora' ) }
+                label={ __( 'Lapsed', 'gratora-donation-platform' ) }
                 value={ String( kpi.lapsed ) }
-                sub={ `${ kpi.lapsed_pct }% ${ __( 'silent 180-365d', 'gratora' ) }` }
+                sub={ `${ kpi.lapsed_pct }% ${ __( 'silent 180-365d', 'gratora-donation-platform' ) }` }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Lost', 'gratora' ) }
+                label={ __( 'Lost', 'gratora-donation-platform' ) }
                 value={ String( kpi.lost ) }
-                sub={ `${ kpi.lost_pct }% ${ __( '> 365d silent', 'gratora' ) }` }
+                sub={ `${ kpi.lost_pct }% ${ __( '> 365d silent', 'gratora-donation-platform' ) }` }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Median LTV', 'gratora' ) }
+                label={ __( 'Median LTV', 'gratora-donation-platform' ) }
                 value={ formatAmount( kpi.median_ltv_cents ) }
-                sub={ `${ __( 'avg', 'gratora' ) } ${ formatAmount( kpi.avg_ltv_cents ) }` }
+                sub={ `${ __( 'avg', 'gratora-donation-platform' ) } ${ formatAmount( kpi.avg_ltv_cents ) }` }
                 icon={ <IconCoins /> }
             />
         </div>
@@ -74,7 +74,7 @@ function SegmentBreakdown( { segments } ) {
     const total = segments.reduce( ( s, r ) => s + r.donor_count, 0 ) || 1;
     return (
         <div className="gratora-segments">
-            <div className="gratora-segments__bar" role="img" aria-label={ __( 'Donor segment distribution', 'gratora' ) }>
+            <div className="gratora-segments__bar" role="img" aria-label={ __( 'Donor segment distribution', 'gratora-donation-platform' ) }>
                 { segments.map( ( s ) => {
                     const meta = SEGMENT_META[ s.segment ] || SEGMENT_META.other;
                     const pct  = ( s.donor_count / total ) * 100;
@@ -92,11 +92,11 @@ function SegmentBreakdown( { segments } ) {
             <table className="gratora-segments__table">
                 <thead>
                     <tr>
-                        <th>{ __( 'Segment', 'gratora' ) }</th>
-                        <th className="gratora-num">{ __( 'Donors', 'gratora' ) }</th>
-                        <th className="gratora-num">{ __( '% of base', 'gratora' ) }</th>
-                        <th className="gratora-num">{ __( 'Avg LTV', 'gratora' ) }</th>
-                        <th className="gratora-num">{ __( 'Total LTV', 'gratora' ) }</th>
+                        <th>{ __( 'Segment', 'gratora-donation-platform' ) }</th>
+                        <th className="gratora-num">{ __( 'Donors', 'gratora-donation-platform' ) }</th>
+                        <th className="gratora-num">{ __( '% of base', 'gratora-donation-platform' ) }</th>
+                        <th className="gratora-num">{ __( 'Avg LTV', 'gratora-donation-platform' ) }</th>
+                        <th className="gratora-num">{ __( 'Total LTV', 'gratora-donation-platform' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,7 +130,7 @@ function LtvHistogram( { buckets } ) {
             { buckets.map( ( b ) => {
                 const h = ( b.donor_count / max ) * 100;
                 return (
-                    <div key={ b.min_cents } className="gratora-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'gratora' ) }` }>
+                    <div key={ b.min_cents } className="gratora-ltv-hist__col" title={ `${ b.donor_count } ${ __( 'donors', 'gratora-donation-platform' ) }` }>
                         <div className="gratora-ltv-hist__bar-wrap">
                             <div className="gratora-ltv-hist__bar" style={ { height: `${ Math.max( h, 2 ) }%` } } />
                         </div>
@@ -171,7 +171,7 @@ function ReasonPill( { row } ) {
                 'About %d day between donations, on average.',
                 'About %d days between donations, on average.',
                 row.avg_gap_days,
-                'gratora'
+                'gratora-donation-platform'
             ),
             row.avg_gap_days
         )
@@ -192,13 +192,13 @@ function DonorTable( { rows, showReason } ) {
         <table className="gratora-table">
             <thead>
                 <tr>
-                    <th>{ __( 'Donor', 'gratora' ) }</th>
-                    <th>{ __( 'Email', 'gratora' ) }</th>
-                    <th>{ __( 'Country', 'gratora' ) }</th>
-                    <th className="gratora-num">{ __( 'Donations', 'gratora' ) }</th>
-                    <th className="gratora-num">{ __( 'Total', 'gratora' ) }</th>
-                    <th className="gratora-date">{ __( 'Last donation', 'gratora' ) }</th>
-                    { showReason && <th className="gratora-why">{ __( 'Why', 'gratora' ) }</th> }
+                    <th>{ __( 'Donor', 'gratora-donation-platform' ) }</th>
+                    <th>{ __( 'Email', 'gratora-donation-platform' ) }</th>
+                    <th>{ __( 'Country', 'gratora-donation-platform' ) }</th>
+                    <th className="gratora-num">{ __( 'Donations', 'gratora-donation-platform' ) }</th>
+                    <th className="gratora-num">{ __( 'Total', 'gratora-donation-platform' ) }</th>
+                    <th className="gratora-date">{ __( 'Last donation', 'gratora-donation-platform' ) }</th>
+                    { showReason && <th className="gratora-why">{ __( 'Why', 'gratora-donation-platform' ) }</th> }
                 </tr>
             </thead>
             <tbody>
@@ -228,8 +228,8 @@ function TopDonorsLeaderboard( { rows } ) {
             <EmptyState
                 compact
                 icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donors yet', 'gratora' ) }
-                body={ __( 'The top donor leaderboard fills in as your first completed donations roll in.', 'gratora' ) }
+                title={ __( 'No donors yet', 'gratora-donation-platform' ) }
+                body={ __( 'The top donor leaderboard fills in as your first completed donations roll in.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -243,8 +243,8 @@ function CohortHeatmap( { retention } ) {
             <EmptyState
                 compact
                 icon={ <History size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'Not enough history yet', 'gratora' ) }
-                body={ __( 'Cohort retention needs at least one donation in a cohort month before the heatmap can render.', 'gratora' ) }
+                title={ __( 'Not enough history yet', 'gratora-donation-platform' ) }
+                body={ __( 'Cohort retention needs at least one donation in a cohort month before the heatmap can render.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -266,10 +266,10 @@ function CohortHeatmap( { retention } ) {
             <table className="gratora-cohort__table">
                 <thead>
                     <tr>
-                        <th>{ __( 'Cohort', 'gratora' ) }</th>
-                        <th className="gratora-num">{ __( 'Size', 'gratora' ) }</th>
+                        <th>{ __( 'Cohort', 'gratora-donation-platform' ) }</th>
+                        <th className="gratora-num">{ __( 'Size', 'gratora-donation-platform' ) }</th>
                         { cols.map( ( i ) => (
-                            <th key={ i } className="gratora-num">{ i === 0 ? __( 'M0', 'gratora' ) : `+${ i }` }</th>
+                            <th key={ i } className="gratora-num">{ i === 0 ? __( 'M0', 'gratora-donation-platform' ) : `+${ i }` }</th>
                         ) ) }
                     </tr>
                 </thead>
@@ -303,27 +303,27 @@ function RecurringStrip( { recurring } ) {
     return (
         <div className="gratora-overview__metrics">
             <MetricCard
-                label={ __( 'Active recurring', 'gratora' ) }
+                label={ __( 'Active recurring', 'gratora-donation-platform' ) }
                 value={ String( recurring.active_count ) }
-                sub={ __( 'plans currently billing', 'gratora' ) }
+                sub={ __( 'plans currently billing', 'gratora-donation-platform' ) }
                 icon={ <IconHeart /> }
             />
             <MetricCard
-                label={ __( 'MRR', 'gratora' ) }
+                label={ __( 'MRR', 'gratora-donation-platform' ) }
                 value={ formatAmount( recurring.mrr_cents ) }
-                sub={ __( 'monthly-equivalent revenue', 'gratora' ) }
+                sub={ __( 'monthly-equivalent revenue', 'gratora-donation-platform' ) }
                 icon={ <IconCoins /> }
             />
             <MetricCard
-                label={ __( 'New this month', 'gratora' ) }
+                label={ __( 'New this month', 'gratora-donation-platform' ) }
                 value={ String( recurring.new_this_month ) }
-                sub={ __( 'plans started', 'gratora' ) }
+                sub={ __( 'plans started', 'gratora-donation-platform' ) }
                 icon={ <IconActivity /> }
             />
             <MetricCard
-                label={ __( 'Churn this month', 'gratora' ) }
+                label={ __( 'Churn this month', 'gratora-donation-platform' ) }
                 value={ `${ recurring.churn_pct }%` }
-                sub={ sprintf( /* translators: %d: count */ __( '%d cancellations', 'gratora' ), recurring.churned_this_month ) }
+                sub={ sprintf( /* translators: %d: count */ __( '%d cancellations', 'gratora-donation-platform' ), recurring.churned_this_month ) }
                 icon={ <IconActivity /> }
             />
         </div>
@@ -355,7 +355,7 @@ function AtRiskTable() {
             } )
             // On failure keep data null and record the error so we show a
             // problem, not the celebratory "no donors slipping" empty state.
-            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load at-risk donors.', 'gratora' ) ); } )
+            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load at-risk donors.', 'gratora-donation-platform' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ page ] );
@@ -369,20 +369,20 @@ function AtRiskTable() {
                     <span className="gratora-at-risk__count">
                         { sprintf(
                             /* translators: %s: count */
-                            _n( '%s at-risk donor', '%s at-risk donors', total, 'gratora' ),
+                            _n( '%s at-risk donor', '%s at-risk donors', total, 'gratora-donation-platform' ),
                             total.toLocaleString()
                         ) }
                     </span>
                 </div>
             ) }
-            { loading && ! data && <p className="gratora-loading">{ __( 'Loading…', 'gratora' ) }</p> }
+            { loading && ! data && <p className="gratora-loading">{ __( 'Loading…', 'gratora-donation-platform' ) }</p> }
             { error && ! loading && <p className="gratora-error">{ error }</p> }
             { ! error && data && data.length === 0 && (
                 <EmptyState
                     compact
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors are slipping', 'gratora' ) }
-                    body={ __( 'Donors appear here when they have gone quiet for longer than usual, so you can reach them before they lapse.', 'gratora' ) }
+                    title={ __( 'No donors are slipping', 'gratora-donation-platform' ) }
+                    body={ __( 'Donors appear here when they have gone quiet for longer than usual, so you can reach them before they lapse.', 'gratora-donation-platform' ) }
                 />
             ) }
             { data && data.length > 0 && (
@@ -393,11 +393,11 @@ function AtRiskTable() {
                     { pageCount > 1 && (
                         <div className="gratora-pagination">
                             <button type="button" disabled={ page <= 1 } onClick={ () => setPage( ( p ) => p - 1 ) }>
-                                { backGlyph() } { __( 'Prev', 'gratora' ) }
+                                { backGlyph() } { __( 'Prev', 'gratora-donation-platform' ) }
                             </button>
-                            <span>{ sprintf( /* translators: 1: current page, 2: total pages */ __( 'Page %1$d of %2$d', 'gratora' ), page, pageCount ) }</span>
+                            <span>{ sprintf( /* translators: 1: current page, 2: total pages */ __( 'Page %1$d of %2$d', 'gratora-donation-platform' ), page, pageCount ) }</span>
                             <button type="button" disabled={ page >= pageCount } onClick={ () => setPage( ( p ) => p + 1 ) }>
-                                { __( 'Next', 'gratora' ) } { forwardGlyph() }
+                                { __( 'Next', 'gratora-donation-platform' ) } { forwardGlyph() }
                             </button>
                         </div>
                     ) }
@@ -423,7 +423,7 @@ export default function Insights( { toggleSlot } ) {
     }, [] );
 
     if ( loading && ! data ) {
-        return <p className="gratora-loading">{ __( 'Loading insights…', 'gratora' ) }</p>;
+        return <p className="gratora-loading">{ __( 'Loading insights…', 'gratora-donation-platform' ) }</p>;
     }
     if ( error ) {
         return <p className="gratora-error">{ error }</p>;
@@ -435,7 +435,7 @@ export default function Insights( { toggleSlot } ) {
             { toggleSlot && (
                 <div className="gratora-page-head">
                     <div className="gratora-page-head__title-row">
-                        <h1>{ __( 'Donors', 'gratora' ) }</h1>
+                        <h1>{ __( 'Donors', 'gratora-donation-platform' ) }</h1>
                     </div>
                     <div className="gratora-page-head__right">{ toggleSlot }</div>
                 </div>
@@ -448,39 +448,39 @@ export default function Insights( { toggleSlot } ) {
                             '%d donor has only test donations, so they are not in this analysis.',
                             '%d donors have only test donations, so they are not in this analysis.',
                             data.test.test_only_donors,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         data.test.test_only_donors
                     ) }
                     { ' ' }
-                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them.', 'gratora' ) }
+                    { __( 'Lifetime value, segments and retention are built from money actually taken, so there is no test version of them.', 'gratora-donation-platform' ) }
                 </Notice>
             ) }
 
             <LifecycleKpis kpi={ data.kpi } />
 
-            <WidgetCard title={ __( 'Recurring revenue', 'gratora' ) }>
+            <WidgetCard title={ __( 'Recurring revenue', 'gratora-donation-platform' ) }>
                 <RecurringStrip recurring={ data.recurring } />
             </WidgetCard>
 
             <div className="gratora-overview__grid">
-                <WidgetCard title={ __( 'Donor segments', 'gratora' ) }>
+                <WidgetCard title={ __( 'Donor segments', 'gratora-donation-platform' ) }>
                     <SegmentBreakdown segments={ data.segments } />
                 </WidgetCard>
-                <WidgetCard title={ __( 'Lifetime value distribution', 'gratora' ) }>
+                <WidgetCard title={ __( 'Lifetime value distribution', 'gratora-donation-platform' ) }>
                     <LtvHistogram buckets={ data.ltv_buckets } />
                 </WidgetCard>
             </div>
 
-            <WidgetCard title={ __( 'Cohort retention', 'gratora' ) }>
+            <WidgetCard title={ __( 'Cohort retention', 'gratora-donation-platform' ) }>
                 <CohortHeatmap retention={ data.retention } />
             </WidgetCard>
 
-            <WidgetCard title={ __( 'Needs attention: at-risk donors', 'gratora' ) }>
+            <WidgetCard title={ __( 'Needs attention: at-risk donors', 'gratora-donation-platform' ) }>
                 <AtRiskTable />
             </WidgetCard>
 
-            <WidgetCard title={ __( 'Top donors by lifetime value', 'gratora' ) }>
+            <WidgetCard title={ __( 'Top donors by lifetime value', 'gratora-donation-platform' ) }>
                 <TopDonorsLeaderboard rows={ data.top_donors } />
             </WidgetCard>
         </div>

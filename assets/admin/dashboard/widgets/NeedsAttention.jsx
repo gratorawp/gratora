@@ -19,18 +19,18 @@ export default function NeedsAttention( { items = [] } ) {
                 method: 'POST',
                 data:   { key: item.key, signature: item.signature || 'x' },
             } );
-            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'gratora' ), {
+            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'gratora-donation-platform' ), {
                 // The default 4s is not long enough to read the sentence and
                 // decide, and the row is already gone by then.
                 duration: 10000,
                 action: {
-                    label:   __( 'Undo', 'gratora' ),
+                    label:   __( 'Undo', 'gratora-donation-platform' ),
                     onClick: () => restore( item ),
                 },
             } );
         } catch ( err ) {
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
-            notify.error( err?.message || __( 'Could not dismiss that.', 'gratora' ) );
+            notify.error( err?.message || __( 'Could not dismiss that.', 'gratora-donation-platform' ) );
         }
     };
 
@@ -43,14 +43,14 @@ export default function NeedsAttention( { items = [] } ) {
             } );
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not bring that back.', 'gratora' ) );
+            notify.error( err?.message || __( 'Could not bring that back.', 'gratora-donation-platform' ) );
         }
     };
 
     if ( visible.length === 0 ) {
         return (
             <p className="gratora-attention__empty">
-                { __( 'Nothing needs attention right now.', 'gratora' ) }
+                { __( 'Nothing needs attention right now.', 'gratora-donation-platform' ) }
             </p>
         );
     }
@@ -63,15 +63,15 @@ export default function NeedsAttention( { items = [] } ) {
                     <span className="gratora-attention__title">{ item.title }</span>
                     { item.action_href && (
                         <a className="gratora-attention__action" href={ item.action_href }>
-                            { item.action_label || __( 'Open', 'gratora' ) } →
+                            { item.action_label || __( 'Open', 'gratora-donation-platform' ) } →
                         </a>
                     ) }
                     <button
                         type="button"
                         className="gratora-attention__dismiss"
                         onClick={ () => dismiss( item ) }
-                        aria-label={ __( 'Dismiss', 'gratora' ) }
-                        title={ __( 'Dismiss', 'gratora' ) }
+                        aria-label={ __( 'Dismiss', 'gratora-donation-platform' ) }
+                        title={ __( 'Dismiss', 'gratora-donation-platform' ) }
                     >
                         <DismissIcon size={ 14 } strokeWidth={ 2 } />
                     </button>

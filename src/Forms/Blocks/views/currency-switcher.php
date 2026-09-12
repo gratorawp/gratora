@@ -11,7 +11,7 @@ $wrapClasses = 'gratora-block gratora-block--currency-switcher gratora-currency'
     . ' gratora-currency--' . esc_attr($align);
 ?>
 <?php
-$ariaName = $label !== '' ? $label : __('Currency', 'gratora');
+$ariaName = $label !== '' ? $label : __('Currency', 'gratora-donation-platform');
 ?>
 <div class="<?php echo esc_attr($wrapClasses); ?>">
     <?php if ($label !== ''): ?>

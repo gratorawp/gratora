@@ -16,7 +16,7 @@ final class DefaultCampaignTypeHandler implements CampaignTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Standard', 'gratora');
+        return __('Standard', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

@@ -42,13 +42,13 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'HTML', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'HTML', 'gratora-donation-platform' ) } initialOpen>
                     <TextareaControl
-                        label={ __( 'HTML markup', 'gratora' ) }
+                        label={ __( 'HTML markup', 'gratora-donation-platform' ) }
                         value={ content }
                         onChange={ ( v ) => setAttributes( { content: v } ) }
                         rows={ 8 }
-                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'gratora' ) }
+                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 { ! content ? (
                     <div className="gratora-block-preview__html-empty">
-                        { __( 'Add HTML in the block settings panel.', 'gratora' ) }
+                        { __( 'Add HTML in the block settings panel.', 'gratora-donation-platform' ) }
                     </div>
                 ) : preview.trim() ? (
                     <Disabled>
@@ -68,7 +68,7 @@ function Edit( { attributes, setAttributes } ) {
                     </Disabled>
                 ) : (
                     <div className="gratora-block-preview__html-empty">
-                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'gratora' ) }
+                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'gratora-donation-platform' ) }
                     </div>
                 ) }
             </div>
@@ -79,8 +79,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'HTML', 'gratora' ),
-        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'gratora' ),
+        title:       __( 'HTML', 'gratora-donation-platform' ),
+        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'gratora-donation-platform' ),
         category:    'gratora-content',
         icon:        BlockIcons[ 'html' ],
         supports:    { html: false, anchor: false, inserter: true },

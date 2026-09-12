@@ -78,7 +78,7 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('gratora_unknown_group', __('Unknown settings group.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_unknown_group', __('Unknown settings group.', 'gratora-donation-platform'), ['status' => 404]);
         }
         // Never hand a stored secret back out. The gateways group holds the
         // Stripe webhook signing secret, which is the only authentication on
@@ -93,13 +93,13 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('gratora_unknown_group', __('Unknown settings group.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_unknown_group', __('Unknown settings group.', 'gratora-donation-platform'), ['status' => 404]);
         }
         // Assigning Gratora capabilities to roles grants privileges, so it needs
         // full admin - not the delegatable gratora_manage_settings, which a scoped
         // role could otherwise use to grant itself refund/redact/export caps.
         if ($group === 'roles' && ! current_user_can('manage_options')) {
-            return new WP_Error('gratora_forbidden', __('Managing roles requires full administrator access.', 'gratora'), ['status' => 403]);
+            return new WP_Error('gratora_forbidden', __('Managing roles requires full administrator access.', 'gratora-donation-platform'), ['status' => 403]);
         }
         $body = (array) $request->get_json_params();
         // Whitelist to known top-level keys for this group so arbitrary keys
@@ -121,7 +121,7 @@ final class SettingsController
         if ($group === 'privacy' && $this->widensErasure($body) && ! Capabilities::userCan('gratora_redact_donors')) {
             return new WP_Error(
                 'gratora_forbidden',
-                __('Automatic donor erasure can only be changed by someone who may redact donors.', 'gratora'),
+                __('Automatic donor erasure can only be changed by someone who may redact donors.', 'gratora-donation-platform'),
                 ['status' => 403]
             );
         }

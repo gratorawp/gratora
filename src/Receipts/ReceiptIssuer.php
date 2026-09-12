@@ -448,7 +448,7 @@ final class ReceiptIssuer
         $subject = strtr($subject, $tags);
         if (trim($subject) === '') {
             /* translators: %s: donation reference number */
-            $subject = sprintf(__('Your donation receipt - %s', 'gratora'), $ctx->donation->reference);
+            $subject = sprintf(__('Your donation receipt - %s', 'gratora-donation-platform'), $ctx->donation->reference);
         }
 
         // Honor the user-edited body when non-empty; otherwise fall back to
@@ -462,7 +462,7 @@ final class ReceiptIssuer
             // donations whatever the body content is.
             if (! empty($ctx->donation->is_test)) {
                 $body = '<p style="background:#fef2f2;border:1px solid #b91c1c;color:#b91c1c;font-weight:700;text-align:center;padding:10px;border-radius:6px;margin:0 0 20px;">'
-                      . esc_html__('Test donation. No real payment was made.', 'gratora')
+                      . esc_html__('Test donation. No real payment was made.', 'gratora-donation-platform')
                       . '</p>'
                       . $body;
             }
@@ -473,7 +473,7 @@ final class ReceiptIssuer
                 '<p><a href="%s" style="color:%s">%s</a></p>',
                 esc_url($downloadUrl),
                 esc_attr($accent),
-                esc_html__('Download receipt', 'gratora')
+                esc_html__('Download receipt', 'gratora-donation-platform')
             );
         } else {
             $body = View::load('Receipts.email', [

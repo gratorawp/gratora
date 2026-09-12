@@ -46,31 +46,31 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Consent', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Consent', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Heading', 'gratora' ) }
+                        label={ __( 'Heading', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'How can we stay in touch?', 'gratora' ) }
-                        help={ __( 'Click the heading on the form to edit it inline.', 'gratora' ) }
+                        placeholder={ __( 'How can we stay in touch?', 'gratora-donation-platform' ) }
+                        help={ __( 'Click the heading on the form to edit it inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'gratora' ) }
+                        label={ __( 'Help text', 'gratora-donation-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional explanation shown below the heading.', 'gratora' ) }
+                        placeholder={ __( 'Optional explanation shown below the heading.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
 
                     { registry.length === 0 ? (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'gratora' ) }
+                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'gratora-donation-platform' ) }
                             { settingsUrl() && (
                                 <>
                                     { ' ' }
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Add one in Settings, Consents.', 'gratora' ) }
+                                        { __( 'Add one in Settings, Consents.', 'gratora-donation-platform' ) }
                                     </ExternalLink>
                                 </>
                             ) }
@@ -81,7 +81,7 @@ function Edit( { attributes, setAttributes } ) {
                                 <CheckboxControl
                                     key={ p.key }
                                     label={ p.required
-                                        ? `${ p.label } ${ __( '(required)', 'gratora' ) }`
+                                        ? `${ p.label } ${ __( '(required)', 'gratora-donation-platform' ) }`
                                         : p.label }
                                     help={ p.description || undefined }
                                     checked={ picked.includes( p.key ) }
@@ -92,7 +92,7 @@ function Edit( { attributes, setAttributes } ) {
                             { settingsUrl() && (
                                 <p style={ { marginTop: 12 } }>
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Edit the wording in Settings, Consents.', 'gratora' ) }
+                                        { __( 'Edit the wording in Settings, Consents.', 'gratora-donation-platform' ) }
                                     </ExternalLink>
                                 </p>
                             ) }
@@ -110,7 +110,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'How can we stay in touch?', 'gratora' ) }
+                    placeholder={ __( 'How can we stay in touch?', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 { helpText && <div className="gratora-block-preview__hint">{ helpText }</div> }
@@ -118,13 +118,13 @@ function Edit( { attributes, setAttributes } ) {
                     ? (
                         <div className="gratora-block-preview__field">
                             { registry.length === 0
-                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'gratora' )
-                                : __( 'Pick which purposes this form asks for.', 'gratora' ) }
+                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'gratora-donation-platform' )
+                                : __( 'Pick which purposes this form asks for.', 'gratora-donation-platform' ) }
                         </div>
                     )
                     : shown.map( ( p ) => (
                         <div key={ p.key } className="gratora-block-preview__field">
-                            { p.required ? `${ p.label } (${ __( 'required', 'gratora' ) })` : p.label }
+                            { p.required ? `${ p.label } (${ __( 'required', 'gratora-donation-platform' ) })` : p.label }
                         </div>
                     ) ) }
             </div>
@@ -135,8 +135,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Consent', 'gratora' ),
-        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'gratora' ),
+        title:      __( 'Consent', 'gratora-donation-platform' ),
+        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'gratora-donation-platform' ),
         category:   'gratora-extras',
         icon:       BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

@@ -56,7 +56,7 @@ final class LicenseNotice
             $this->notice(
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
-                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'gratora'),
+                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'gratora-donation-platform'),
                     $this->names($lapsing)
                 )
             );
@@ -95,14 +95,14 @@ final class LicenseNotice
             ? sprintf(
                 ' <a href="%s">%s</a>',
                 esc_url($url),
-                esc_html__('Manage licenses', 'gratora')
+                esc_html__('Manage licenses', 'gratora-donation-platform')
             )
             : '';
 
         printf(
             '<div class="notice gratora-admin-notice" role="alert" style="%s"><strong>%s</strong> %s%s</div>',
             esc_attr($style),
-            esc_html__('Gratora:', 'gratora'),
+            esc_html__('Gratora:', 'gratora-donation-platform'),
             esc_html($message),
             wp_kses_post($link)
         );

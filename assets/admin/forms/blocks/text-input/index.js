@@ -25,52 +25,52 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Text input', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Text input', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'gratora' ) }
+                        label={ __( 'Placeholder', 'gratora-donation-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'gratora' ) }
+                        label={ __( 'Help text', 'gratora-donation-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'gratora' ) }
+                        label={ __( 'Field name', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Maximum length', 'gratora' ) }
+                        label={ __( 'Maximum length', 'gratora-donation-platform' ) }
                         value={ maxLength }
                         onChange={ ( v ) => setAttributes( { maxLength: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 500 }
-                        help={ __( '0 = no limit.', 'gratora' ) }
+                        help={ __( '0 = no limit.', 'gratora-donation-platform' ) }
                     />
                     <TextControl
-                        label={ __( 'Pattern (regex)', 'gratora' ) }
+                        label={ __( 'Pattern (regex)', 'gratora-donation-platform' ) }
                         value={ pattern }
                         onChange={ ( v ) => setAttributes( { pattern: v } ) }
-                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'gratora' ) }
+                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -85,7 +85,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'gratora' ) }
+                    placeholder={ __( 'Label', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
@@ -94,12 +94,12 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'gratora' ) }
+                        placeholder={ __( 'Help text', 'gratora-donation-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="gratora-block-preview__field">{ placeholder || __( 'Text', 'gratora' ) }</div>
+                <div className="gratora-block-preview__field">{ placeholder || __( 'Text', 'gratora-donation-platform' ) }</div>
             </div>
         </>
     );
@@ -108,8 +108,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Text input', 'gratora' ),
-        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'gratora' ),
+        title:      __( 'Text input', 'gratora-donation-platform' ),
+        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'gratora-donation-platform' ),
         category:   'gratora-fields',
         icon:       BlockIcons[ 'text-input' ],
         supports: { html: false, anchor: false, inserter: true },

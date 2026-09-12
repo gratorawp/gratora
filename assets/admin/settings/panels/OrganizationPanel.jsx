@@ -37,41 +37,41 @@ export default function OrganizationPanel( { s } ) {
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Identity', 'gratora' ) }
-                meta={ __( 'Used by receipts and footer', 'gratora' ) }
+                title={ __( 'Identity', 'gratora-donation-platform' ) }
+                meta={ __( 'Used by receipts and footer', 'gratora-donation-platform' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Legal name', 'gratora' ) }
+                    label={ __( 'Legal name', 'gratora-donation-platform' ) }
                     required
-                    help={ __( 'The entity that legally receives donations.', 'gratora' ) }
+                    help={ __( 'The entity that legally receives donations.', 'gratora-donation-platform' ) }
                 >
                     <input type="text" className="gratora-input" { ...s.bind( 'legal_name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Display name', 'gratora' ) }
-                    help={ __( 'Donor-facing name in subject lines and headers.', 'gratora' ) }
+                    label={ __( 'Display name', 'gratora-donation-platform' ) }
+                    help={ __( 'Donor-facing name in subject lines and headers.', 'gratora-donation-platform' ) }
                 >
                     <input type="text" className="gratora-input" { ...s.bind( 'name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Contact email', 'gratora' ) }
-                    help={ __( 'Printed on receipts, so donors know where to reply.', 'gratora' ) }
+                    label={ __( 'Contact email', 'gratora-donation-platform' ) }
+                    help={ __( 'Printed on receipts, so donors know where to reply.', 'gratora-donation-platform' ) }
                 >
                     <input type="email" className="gratora-input" { ...s.bind( 'email' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Address', 'gratora' ) }
-                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'gratora' ) }
+                    label={ __( 'Address', 'gratora-donation-platform' ) }
+                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'gratora-donation-platform' ) }
                 >
                     <div className="gratora-stack-12">
                         <input
                             type="text"
                             className="gratora-input"
-                            placeholder={ __( 'Street', 'gratora' ) }
+                            placeholder={ __( 'Street', 'gratora-donation-platform' ) }
                             value={ addressLines[ 0 ] || '' }
                             onChange={ ( e ) => updateAddressLine( 0, e.target.value ) }
                         />
@@ -79,14 +79,14 @@ export default function OrganizationPanel( { s } ) {
                             <input
                                 type="text"
                                 className="gratora-input"
-                                placeholder={ __( 'Postcode', 'gratora' ) }
+                                placeholder={ __( 'Postcode', 'gratora-donation-platform' ) }
                                 value={ addressLines[ 1 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 1, e.target.value ) }
                             />
                             <input
                                 type="text"
                                 className="gratora-input"
-                                placeholder={ __( 'City', 'gratora' ) }
+                                placeholder={ __( 'City', 'gratora-donation-platform' ) }
                                 value={ addressLines[ 2 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 2, e.target.value ) }
                             />
@@ -95,16 +95,16 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Country', 'gratora' ) }
+                    label={ __( 'Country', 'gratora-donation-platform' ) }
                     required
-                    help={ __( 'Drives tax-ID format and VAT visibility.', 'gratora' ) }
+                    help={ __( 'Drives tax-ID format and VAT visibility.', 'gratora-donation-platform' ) }
                 >
                     <select
                         className="gratora-select"
                         value={ country }
                         onChange={ ( e ) => s.setValue( 'country' )( e.target.value ) }
                     >
-                        <option value="">{ __( 'Select a country', 'gratora' ) }</option>
+                        <option value="">{ __( 'Select a country', 'gratora-donation-platform' ) }</option>
                         { localizedCountries().map( ( c ) => (
                             <option key={ c.code } value={ c.code }>{ c.label }</option>
                         ) ) }
@@ -112,14 +112,14 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Tax ID / EU VAT', 'gratora' ) }
-                    help={ __( 'VIES validation is not performed.', 'gratora' ) }
+                    label={ __( 'Tax ID / EU VAT', 'gratora-donation-platform' ) }
+                    help={ __( 'VIES validation is not performed.', 'gratora-donation-platform' ) }
                 >
                     <div className="gratora-grid-2-eq">
                         <input
                             type="text"
                             className="gratora-input gratora-input--mono"
-                            placeholder={ __( 'Tax number', 'gratora' ) }
+                            placeholder={ __( 'Tax number', 'gratora-donation-platform' ) }
                             { ...s.bind( 'tax_id' ) }
                         />
                         { /* Always offered, whatever the country reads today:
@@ -128,7 +128,7 @@ export default function OrganizationPanel( { s } ) {
                         <input
                             type="text"
                             className="gratora-input gratora-input--mono"
-                            placeholder={ __( 'EU VAT ID', 'gratora' ) }
+                            placeholder={ __( 'EU VAT ID', 'gratora-donation-platform' ) }
                             { ...s.bind( 'vat_id' ) }
                         />
                     </div>

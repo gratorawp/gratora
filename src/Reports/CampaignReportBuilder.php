@@ -51,18 +51,18 @@ final class CampaignReportBuilder
             'percent'        => $percent,
             'bar_width'      => $barWidth,
             'stats'          => [
-                ['label' => __('Donations', 'gratora'),        'value' => number_format_i18n((int) $summary['donations_count'])],
-                ['label' => __('Unique donors', 'gratora'),    'value' => number_format_i18n((int) $summary['donors_count'])],
-                ['label' => __('Average donation', 'gratora'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
+                ['label' => __('Donations', 'gratora-donation-platform'),        'value' => number_format_i18n((int) $summary['donations_count'])],
+                ['label' => __('Unique donors', 'gratora-donation-platform'),    'value' => number_format_i18n((int) $summary['donors_count'])],
+                ['label' => __('Average donation', 'gratora-donation-platform'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: campaign title. */
-            'title'   => sprintf(__('Campaign report: %s', 'gratora'), (string) $campaign->title),
+            'title'   => sprintf(__('Campaign report: %s', 'gratora-donation-platform'), (string) $campaign->title),
             'author'  => $orgName,
-            'subject' => __('Campaign performance report', 'gratora'),
+            'subject' => __('Campaign performance report', 'gratora-donation-platform'),
         ]);
     }
 
@@ -98,11 +98,11 @@ final class CampaignReportBuilder
         if ($type === 'donors') {
             $current = (int) $summary['donors_count'];
             /* translators: %s: donor goal count */
-            $display = sprintf(__('%s donors', 'gratora'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donors', 'gratora-donation-platform'), number_format_i18n($goalCount));
         } else {
             $current = (int) $summary['donations_count'];
             /* translators: %s: donation goal count */
-            $display = sprintf(__('%s donations', 'gratora'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donations', 'gratora-donation-platform'), number_format_i18n($goalCount));
         }
 
         $percent = (int) round(($current / $goalCount) * 100);
@@ -119,11 +119,11 @@ final class CampaignReportBuilder
     private function rangeLabel(string $range): string
     {
         return match ($range) {
-            'today'    => __('Today', 'gratora'),
-            'last-7'   => __('Last 7 days', 'gratora'),
-            'last-30'  => __('Last 30 days', 'gratora'),
-            'last-90'  => __('Last 90 days', 'gratora'),
-            'all-time' => __('All time', 'gratora'),
+            'today'    => __('Today', 'gratora-donation-platform'),
+            'last-7'   => __('Last 7 days', 'gratora-donation-platform'),
+            'last-30'  => __('Last 30 days', 'gratora-donation-platform'),
+            'last-90'  => __('Last 90 days', 'gratora-donation-platform'),
+            'all-time' => __('All time', 'gratora-donation-platform'),
             default    => $range,
         };
     }

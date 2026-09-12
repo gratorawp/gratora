@@ -71,19 +71,19 @@ export async function campaignDeleteMessage( campaign ) {
                 'Permanently delete this campaign? Its %d form will also be deleted.',
                 'Permanently delete this campaign? Its %d forms will also be deleted.',
                 count,
-                'gratora'
+                'gratora-donation-platform'
             ),
             count,
         )
-        : __( 'Permanently delete this campaign?', 'gratora' ) ];
+        : __( 'Permanently delete this campaign?', 'gratora-donation-platform' ) ];
 
     // The page is deleted outright rather than trashed, so an admin who has
     // built it out in the block editor has nothing left to restore from.
     if ( campaign?.page_id ) {
-        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'gratora' ) );
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'gratora-donation-platform' ) );
     }
 
-    parts.push( __( 'This cannot be undone.', 'gratora' ) );
+    parts.push( __( 'This cannot be undone.', 'gratora-donation-platform' ) );
 
     return parts.join( ' ' );
 }
@@ -97,17 +97,17 @@ export async function campaignDeleteMessage( campaign ) {
 export async function campaignDeleteConfirm( campaign, { onArchive, onDelete } ) {
     if ( campaign?.delete_blocked ) {
         return {
-            title:        __( 'This campaign cannot be deleted', 'gratora' ),
+            title:        __( 'This campaign cannot be deleted', 'gratora-donation-platform' ),
             message:      campaign.delete_blocked,
-            confirmLabel: __( 'Archive instead', 'gratora' ),
+            confirmLabel: __( 'Archive instead', 'gratora-donation-platform' ),
             onConfirm:    onArchive,
         };
     }
 
     return {
-        title:        __( 'Delete campaign', 'gratora' ),
+        title:        __( 'Delete campaign', 'gratora-donation-platform' ),
         message:      await campaignDeleteMessage( campaign ),
-        confirmLabel: __( 'Delete', 'gratora' ),
+        confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
         destructive:  true,
         onConfirm:    onDelete,
     };
@@ -126,14 +126,14 @@ export async function campaignDeleteConfirm( campaign, { onArchive, onDelete } )
  */
 export function notAcceptingMessage( reason ) {
     const COPY = {
-        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'gratora' ),
-        archived:  __( 'This campaign is archived and is not taking donations.', 'gratora' ),
-        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'gratora' ),
-        ended:     __( 'This campaign has ended and is no longer taking donations.', 'gratora' ),
-        goal_met:  __( 'This campaign has reached its goal and is set to close when it does, so it is no longer taking donations. Raise the target or turn that setting off in Goal to reopen it.', 'gratora' ),
+        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'gratora-donation-platform' ),
+        archived:  __( 'This campaign is archived and is not taking donations.', 'gratora-donation-platform' ),
+        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'gratora-donation-platform' ),
+        ended:     __( 'This campaign has ended and is no longer taking donations.', 'gratora-donation-platform' ),
+        goal_met:  __( 'This campaign has reached its goal and is set to close when it does, so it is no longer taking donations. Raise the target or turn that setting off in Goal to reopen it.', 'gratora-donation-platform' ),
     };
 
-    return COPY[ reason ] || __( 'This campaign is not taking donations.', 'gratora' );
+    return COPY[ reason ] || __( 'This campaign is not taking donations.', 'gratora-donation-platform' );
 }
 
 function NotAcceptingNotice( { campaign, onPublish } ) {
@@ -147,7 +147,7 @@ function NotAcceptingNotice( { campaign, onPublish } ) {
                 <>
                     { ' ' }
                     <Button variant="link" onClick={ onPublish }>
-                        { __( 'Publish it now', 'gratora' ) }
+                        { __( 'Publish it now', 'gratora-donation-platform' ) }
                     </Button>
                 </>
             ) }
@@ -171,7 +171,7 @@ export default function Detail( { id, tab } ) {
         if ( ! from ) return;
         notify.success( sprintf(
             /* translators: %s: source campaign title */
-            __( 'Duplicated from "%s". Review and rename before publishing.', 'gratora' ),
+            __( 'Duplicated from "%s". Review and rename before publishing.', 'gratora-donation-platform' ),
             from,
         ) );
         params.delete( 'duplicated_from' );
@@ -189,12 +189,12 @@ export default function Detail( { id, tab } ) {
         return (
             <div style={ { padding: 24 } }>
                 <Notice status="error" isDismissible={ false }>
-                    { c.loadError.message || __( 'This campaign could not be loaded.', 'gratora' ) }
+                    { c.loadError.message || __( 'This campaign could not be loaded.', 'gratora-donation-platform' ) }
                 </Notice>
                 <p>
-                    <Btn variant="secondary" onClick={ c.reload }>{ __( 'Try again', 'gratora' ) }</Btn>
+                    <Btn variant="secondary" onClick={ c.reload }>{ __( 'Try again', 'gratora-donation-platform' ) }</Btn>
                     { ' ' }
-                    <Btn href={ listHref() }>{ __( 'Back to campaigns', 'gratora' ) }</Btn>
+                    <Btn href={ listHref() }>{ __( 'Back to campaigns', 'gratora-donation-platform' ) }</Btn>
                 </p>
             </div>
         );
@@ -202,7 +202,7 @@ export default function Detail( { id, tab } ) {
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Campaign not found.', 'gratora' ) }
+                { __( 'Campaign not found.', 'gratora-donation-platform' ) }
             </Notice>
         );
     }
@@ -236,7 +236,7 @@ export default function Detail( { id, tab } ) {
                         'Campaign archived. Cancelling %d subscription in the background.',
                         'Campaign archived. Cancelling %d subscriptions in the background.',
                         queued,
-                        'gratora'
+                        'gratora-donation-platform'
                     ),
                     queued
                 ) );
@@ -244,11 +244,11 @@ export default function Detail( { id, tab } ) {
                 return;
             }
             notify.success( nextStatus === 'archived'
-                ? __( 'Campaign archived.', 'gratora' )
-                : __( 'Campaign restored to draft.', 'gratora' ) );
+                ? __( 'Campaign archived.', 'gratora-donation-platform' )
+                : __( 'Campaign restored to draft.', 'gratora-donation-platform' ) );
             c.reload();
         } catch ( err ) {
-            setError( err?.message || __( 'Update failed.', 'gratora' ) );
+            setError( err?.message || __( 'Update failed.', 'gratora-donation-platform' ) );
         }
     };
 
@@ -266,7 +266,7 @@ export default function Detail( { id, tab } ) {
                     window.location.href = url;
                 }
             } catch ( err ) {
-                setError( err?.message || __( 'Duplicate failed.', 'gratora' ) );
+                setError( err?.message || __( 'Duplicate failed.', 'gratora-donation-platform' ) );
             }
             return;
         }
@@ -299,11 +299,11 @@ export default function Detail( { id, tab } ) {
                     data: { status: nextStatus },
                 } );
                 notify.success( name === 'publish'
-                    ? __( 'Campaign published.', 'gratora' )
-                    : __( 'Campaign moved to draft.', 'gratora' ) );
+                    ? __( 'Campaign published.', 'gratora-donation-platform' )
+                    : __( 'Campaign moved to draft.', 'gratora-donation-platform' ) );
                 c.reload();
             } catch ( err ) {
-                setError( err?.message || __( 'Update failed.', 'gratora' ) );
+                setError( err?.message || __( 'Update failed.', 'gratora-donation-platform' ) );
             }
             return;
         }
@@ -318,7 +318,7 @@ export default function Detail( { id, tab } ) {
                         } );
                         window.location.href = listHref();
                     } catch ( err ) {
-                        setError( err?.message || __( 'Delete failed.', 'gratora' ) );
+                        setError( err?.message || __( 'Delete failed.', 'gratora-donation-platform' ) );
                     }
                 },
             } ) );
@@ -373,7 +373,7 @@ export default function Detail( { id, tab } ) {
 
             { archivePrompt && (
                 <Modal
-                    title={ __( 'Archive campaign', 'gratora' ) }
+                    title={ __( 'Archive campaign', 'gratora-donation-platform' ) }
                     onRequestClose={ () => setArchivePrompt( null ) }
                 >
                     <p style={ { marginTop: 0 } }>
@@ -383,30 +383,30 @@ export default function Detail( { id, tab } ) {
                                 'This campaign has %d live recurring donation.',
                                 'This campaign has %d live recurring donations.',
                                 archivePrompt.count,
-                                'gratora'
+                                'gratora-donation-platform'
                             ),
                             archivePrompt.count
                         ) }
                         { ' ' }
-                        { __( 'Live counts active, paused and past-due donations: a paused one resumes and a past-due one is still being retried.', 'gratora' ) }
+                        { __( 'Live counts active, paused and past-due donations: a paused one resumes and a past-due one is still being retried.', 'gratora-donation-platform' ) }
                         { archivePrompt.mrr_cents > 0 && ' ' + sprintf(
                             /* translators: %s: formatted monthly amount */
-                            __( 'About %s a month is at stake.', 'gratora' ),
+                            __( 'About %s a month is at stake.', 'gratora-donation-platform' ),
                             formatAmount( archivePrompt.mrr_cents, archivePrompt.currency )
                         ) }
                     </p>
                     <p>
-                        { __( 'Archiving stops new donations. These subscriptions are left as they are and stay credited to this campaign unless you cancel them.', 'gratora' ) }
+                        { __( 'Archiving stops new donations. These subscriptions are left as they are and stay credited to this campaign unless you cancel them.', 'gratora-donation-platform' ) }
                     </p>
                     <CheckboxControl
-                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'gratora' ) }
+                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'gratora-donation-platform' ) }
                         checked={ cancelSubs }
                         onChange={ setCancelSubs }
                         __nextHasNoMarginBottom
                     />
                     <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 } }>
                         <Button variant="tertiary" onClick={ () => setArchivePrompt( null ) }>
-                            { __( 'Cancel', 'gratora' ) }
+                            { __( 'Cancel', 'gratora-donation-platform' ) }
                         </Button>
                         <Button
                             variant="primary"
@@ -416,7 +416,7 @@ export default function Detail( { id, tab } ) {
                                 runArchive( 'archived', cancelSubs );
                             } }
                         >
-                            { __( 'Archive campaign', 'gratora' ) }
+                            { __( 'Archive campaign', 'gratora-donation-platform' ) }
                         </Button>
                     </div>
                 </Modal>
@@ -431,7 +431,7 @@ function Header( { campaign } ) {
     return (
         <>
             <div className="gratora-crumbs">
-                <a href={ listHref() }>{ __( 'Campaigns', 'gratora' ) }</a>
+                <a href={ listHref() }>{ __( 'Campaigns', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
                 <span>{ campaign.title }</span>
             </div>
@@ -480,15 +480,15 @@ function IconSettingsTab( props ) {
 }
 
 const VIEW_TOGGLE_DEFS = [
-    { id: 'overview', label: __( 'Overview', 'gratora' ), Icon: IconOverview },
-    { id: 'forms',    label: __( 'Forms',    'gratora' ), Icon: IconFormsTab },
-    { id: 'settings', label: __( 'Settings', 'gratora' ), Icon: IconSettingsTab },
+    { id: 'overview', label: __( 'Overview', 'gratora-donation-platform' ), Icon: IconOverview },
+    { id: 'forms',    label: __( 'Forms',    'gratora-donation-platform' ), Icon: IconFormsTab },
+    { id: 'settings', label: __( 'Settings', 'gratora-donation-platform' ), Icon: IconSettingsTab },
 ];
 
 function ViewToggle( { active, campaignId, extra = [] } ) {
     const views = [ ...VIEW_TOGGLE_DEFS, ...extra ];
     return (
-        <div className="gratora-view-toggle" role="tablist" aria-label={ __( 'Campaign sections', 'gratora' ) }>
+        <div className="gratora-view-toggle" role="tablist" aria-label={ __( 'Campaign sections', 'gratora-donation-platform' ) }>
             { views.map( ( t ) => (
                 <a
                     key={ t.id }
@@ -513,11 +513,11 @@ function DetailNav( { campaign, activeTab, onAction, extraTabs = [] } ) {
             { campaign.page_edit_url && ( ! campaign.campaign_type || campaign.campaign_type === 'standard' ) && (
                 // Non-standard types (e.g. peer-to-peer) manage their pages from
                 // their own admin tab, so the single-page edit link is redundant.
-                <Btn href={ campaign.page_edit_url }>{ __( 'Edit campaign page', 'gratora' ) }</Btn>
+                <Btn href={ campaign.page_edit_url }>{ __( 'Edit campaign page', 'gratora-donation-platform' ) }</Btn>
             ) }
             { campaign.page_url && (
                 <Btn variant="ghost" href={ campaign.page_url } target="_blank" rel="noreferrer">
-                    { __( 'View page ↗', 'gratora' ) }
+                    { __( 'View page ↗', 'gratora-donation-platform' ) }
                 </Btn>
             ) }
             <HeaderMenu campaign={ campaign } onAction={ onAction } />
@@ -576,7 +576,7 @@ function HeaderMenu( { campaign, onAction } ) {
                 type="button"
                 ref={ triggerRef }
                 className="gratora-menu__trigger"
-                aria-label={ __( 'Campaign actions', 'gratora' ) }
+                aria-label={ __( 'Campaign actions', 'gratora-donation-platform' ) }
                 aria-haspopup="menu"
                 aria-expanded={ open }
                 onClick={ () => setOpen( ( v ) => ! v ) }
@@ -587,22 +587,22 @@ function HeaderMenu( { campaign, onAction } ) {
                 <div className="gratora-menu__list" role="menu">
                     { isDraft && (
                         <button type="button" role="menuitem" className="gratora-menu__item is-primary" onClick={ () => fire( 'publish' ) }>
-                            { __( 'Publish campaign', 'gratora' ) }
+                            { __( 'Publish campaign', 'gratora-donation-platform' ) }
                         </button>
                     ) }
                     { isPublished && (
                         <button type="button" role="menuitem" className="gratora-menu__item" onClick={ () => fire( 'unpublish' ) }>
-                            { __( 'Move to draft', 'gratora' ) }
+                            { __( 'Move to draft', 'gratora-donation-platform' ) }
                         </button>
                     ) }
                     <button type="button" role="menuitem" className="gratora-menu__item" onClick={ () => fire( 'duplicate' ) }>
-                        { __( 'Duplicate campaign', 'gratora' ) }
+                        { __( 'Duplicate campaign', 'gratora-donation-platform' ) }
                     </button>
                     <button type="button" role="menuitem" className="gratora-menu__item" onClick={ () => fire( isArchived ? 'unarchive' : 'archive' ) }>
-                        { isArchived ? __( 'Restore to draft', 'gratora' ) : __( 'Archive campaign', 'gratora' ) }
+                        { isArchived ? __( 'Restore to draft', 'gratora-donation-platform' ) : __( 'Archive campaign', 'gratora-donation-platform' ) }
                     </button>
                     <button type="button" role="menuitem" className="gratora-menu__item is-danger" onClick={ () => fire( 'delete' ) }>
-                        { __( 'Delete…', 'gratora' ) }
+                        { __( 'Delete…', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) }
@@ -625,7 +625,7 @@ function formatCardNames( names ) {
     if ( names.length <= 3 ) return names.join( ', ' );
     return sprintf(
         /* translators: 1: first three section names, 2: count of remaining */
-        __( '%1$s, and %2$d more', 'gratora' ),
+        __( '%1$s, and %2$d more', 'gratora-donation-platform' ),
         names.slice( 0, 3 ).join( ', ' ),
         names.length - 3,
     );
@@ -641,7 +641,7 @@ function useLastSavedLabel( updatedAt ) {
     if ( ! updatedAt ) return null;
     return sprintf(
         /* translators: %s: relative time ago, e.g. "4m ago" */
-        __( 'Last saved %s', 'gratora' ),
+        __( 'Last saved %s', 'gratora-donation-platform' ),
         timeAgo( updatedAt ),
     );
 }
@@ -720,7 +720,7 @@ function OverviewTab( { campaign, nav, onError } ) {
                 if ( aborted ) return;
                 setFetchError( true );
                 if ( metrics ) {
-                    onError?.( e?.message || __( 'Could not load campaign metrics.', 'gratora' ) );
+                    onError?.( e?.message || __( 'Could not load campaign metrics.', 'gratora-donation-platform' ) );
                 }
             } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
@@ -756,25 +756,25 @@ function OverviewTab( { campaign, nav, onError } ) {
 
     const registry = {
         kpis: {
-            title: __( 'Key metrics', 'gratora' ),
+            title: __( 'Key metrics', 'gratora-donation-platform' ),
             span:  'full',
             bare:  true,
             render: () => (
                 <div className="gratora-overview__metrics">
                     <GoalProgressCard campaign={ campaign } metrics={ m } />
-                    <MetricCard label={ __( 'Amount raised', 'gratora' ) }
+                    <MetricCard label={ __( 'Amount raised', 'gratora-donation-platform' ) }
                                 value={ formatAmount( m.amount_raised_cents ) }
                                 changePct={ cmp?.amount_raised_cents }
                                 icon={ <IconCoins /> } />
-                    <MetricCard label={ __( 'Donations', 'gratora' ) }
+                    <MetricCard label={ __( 'Donations', 'gratora-donation-platform' ) }
                                 value={ String( m.donations_count ) }
                                 changePct={ cmp?.donations_count }
                                 icon={ <IconHeart /> } />
-                    <MetricCard label={ __( 'Donors', 'gratora' ) }
+                    <MetricCard label={ __( 'Donors', 'gratora-donation-platform' ) }
                                 value={ String( m.donors_count ) }
                                 changePct={ cmp?.donors_count }
                                 icon={ <IconUsers /> } />
-                    <MetricCard label={ __( 'Average donation', 'gratora' ) }
+                    <MetricCard label={ __( 'Average donation', 'gratora-donation-platform' ) }
                                 value={ formatAmount( m.avg_donation_cents ) }
                                 changePct={ cmp?.avg_donation_cents }
                                 icon={ <IconActivity /> } />
@@ -782,7 +782,7 @@ function OverviewTab( { campaign, nav, onError } ) {
             ),
         },
         revenue: {
-            title: __( 'Revenue', 'gratora' ),
+            title: __( 'Revenue', 'gratora-donation-platform' ),
             span:  'full',
             render: () => (
                 <RevenueChart
@@ -794,44 +794,44 @@ function OverviewTab( { campaign, nav, onError } ) {
             ),
         },
         cohort: {
-            title: __( 'Donor cohort', 'gratora' ),
+            title: __( 'Donor cohort', 'gratora-donation-platform' ),
             render: () => <DonorCohort cohort={ m.cohort } />,
         },
         distribution: {
-            title: __( 'Donation shape', 'gratora' ),
+            title: __( 'Donation shape', 'gratora-donation-platform' ),
             render: () => <DistributionHistogram distribution={ m.distribution } currency={ defaultCurrency() } />,
         },
         heatmap: {
-            title: __( 'When donors give', 'gratora' ),
+            title: __( 'When donors give', 'gratora-donation-platform' ),
             span:  'full',
             render: () => <DowHourHeatmap data={ m.dow_hour } />,
         },
         timeline: {
-            title: __( 'Timeline', 'gratora' ),
+            title: __( 'Timeline', 'gratora-donation-platform' ),
             render: () => <TimelineCard timeline={ m.timeline } />,
         },
         stories: {
-            title: __( 'Stories', 'gratora' ),
+            title: __( 'Stories', 'gratora-donation-platform' ),
             render: () => <Stories rows={ m.notes || [] } />,
         },
         recent: {
-            title: __( 'Recent donations', 'gratora' ),
+            title: __( 'Recent donations', 'gratora-donation-platform' ),
             render: () => <RecentDonations rows={ m.recent_donations } />,
         },
         'top-donors': {
-            title: __( 'Top donors', 'gratora' ),
+            title: __( 'Top donors', 'gratora-donation-platform' ),
             render: () => <TopDonors rows={ m.top_donors } currency={ defaultCurrency() } />,
         },
         'top-forms': {
-            title: __( 'Top forms', 'gratora' ),
+            title: __( 'Top forms', 'gratora-donation-platform' ),
             render: () => <TopForms rows={ m.top_forms } currency={ defaultCurrency() } donationsCount={ m.donations_count } />,
         },
         channel: {
-            title: __( 'By channel', 'gratora' ),
+            title: __( 'By channel', 'gratora-donation-platform' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ defaultCurrency() } />,
         },
         gateway: {
-            title: __( 'By payment method', 'gratora' ),
+            title: __( 'By payment method', 'gratora-donation-platform' ),
             render: () => <GatewayBreakdown rows={ m.by_gateway } currency={ defaultCurrency() } />,
         },
     };
@@ -855,13 +855,13 @@ function CampaignReportButton( { campaignId, reportRange } ) {
                         `campaign-${ campaignId }.pdf`
                     );
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not build the report.', 'gratora' ) );
+                    notify.error( err?.message || __( 'Could not build the report.', 'gratora-donation-platform' ) );
                 } finally {
                     setBusy( false );
                 }
             } }
         >
-            { __( 'Download report', 'gratora' ) }
+            { __( 'Download report', 'gratora-donation-platform' ) }
         </Btn>
     );
 }
@@ -888,11 +888,11 @@ function CampaignReportButton( { campaignId, reportRange } ) {
             { ! metrics && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load these metrics', 'gratora' ) }
-                    body={ __( 'Nothing was measured, so nothing is shown. Check your connection and try again.', 'gratora' ) }
+                    title={ __( 'Could not load these metrics', 'gratora-donation-platform' ) }
+                    body={ __( 'Nothing was measured, so nothing is shown. Check your connection and try again.', 'gratora-donation-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( n ) => n + 1 ) }>
-                            { __( 'Try again', 'gratora' ) }
+                            { __( 'Try again', 'gratora-donation-platform' ) }
                         </Btn>
                     }
                 />
@@ -918,10 +918,10 @@ function TimelineCard( { timeline } ) {
 
     const { kind, days, total_days } = timeline;
     const label = kind === 'remaining'
-        ? __( 'Days remaining', 'gratora' )
+        ? __( 'Days remaining', 'gratora-donation-platform' )
         : kind === 'ended'
-            ? __( 'Days since ended', 'gratora' )
-            : __( 'Days running', 'gratora' );
+            ? __( 'Days since ended', 'gratora-donation-platform' )
+            : __( 'Days running', 'gratora-donation-platform' );
 
     const pct = total_days
         ? Math.min( 100, Math.round( ( ( total_days - days ) / total_days ) * 100 ) )
@@ -933,7 +933,7 @@ function TimelineCard( { timeline } ) {
             <div className="gratora-timeline__value">{ days }</div>
             <div className="gratora-timeline__sub">
                 { kind === 'remaining' && total_days &&
-                    sprintf( /* translators: %d: total days */ __( 'of %d total', 'gratora' ), total_days ) }
+                    sprintf( /* translators: %d: total days */ __( 'of %d total', 'gratora-donation-platform' ), total_days ) }
             </div>
             { pct !== null && (
                 <div className="gratora-timeline__bar">
@@ -950,8 +950,8 @@ function RecentDonations( { rows } ) {
             <EmptyState
                 compact
                 icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations yet', 'gratora' ) }
-                body={ __( 'Recent donor activity will appear here once your form is live and the first donation lands.', 'gratora' ) }
+                title={ __( 'No donations yet', 'gratora-donation-platform' ) }
+                body={ __( 'Recent donor activity will appear here once your form is live and the first donation lands.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -986,11 +986,11 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                 compact
                 icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
                 title={ gotDonations
-                    ? __( 'No donations through a form yet', 'gratora' )
-                    : __( 'No form data yet', 'gratora' ) }
+                    ? __( 'No donations through a form yet', 'gratora-donation-platform' )
+                    : __( 'No form data yet', 'gratora-donation-platform' ) }
                 body={ gotDonations
-                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'gratora' )
-                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'gratora' ) }
+                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'gratora-donation-platform' )
+                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -1012,7 +1012,7 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                             <td className="gratora-table__right">
                                 <div className="gratora-table__primary">{ formatAmount( r.amount_cents, currency ) }</div>
                                 <div className="gratora-table__sub">
-                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'gratora' ), r.donations_count ) }
+                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'gratora-donation-platform' ), r.donations_count ) }
                                 </div>
                             </td>
                         </tr>
@@ -1038,8 +1038,8 @@ function GatewayBreakdown( { rows, currency } ) {
             <EmptyState
                 compact
                 icon={ <HandHeart size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No payments yet', 'gratora' ) }
-                body={ __( 'Gateway breakdown shows up after the first paid donation.', 'gratora' ) }
+                title={ __( 'No payments yet', 'gratora-donation-platform' ) }
+                body={ __( 'Gateway breakdown shows up after the first paid donation.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -1087,8 +1087,8 @@ function TopDonors( { rows, currency } ) {
             <EmptyState
                 compact
                 icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donors yet', 'gratora' ) }
-                body={ __( 'Top supporters appear here after the first donation completes.', 'gratora' ) }
+                title={ __( 'No donors yet', 'gratora-donation-platform' ) }
+                body={ __( 'Top supporters appear here after the first donation completes.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -1102,7 +1102,7 @@ function TopDonors( { rows, currency } ) {
                             <div className="gratora-table__sub">
                                 { sprintf(
                                     /* translators: %d: number of donations */
-                                    _n( '%d donation', '%d donations', r.donations_count, 'gratora' ),
+                                    _n( '%d donation', '%d donations', r.donations_count, 'gratora-donation-platform' ),
                                     r.donations_count
                                 ) }
                             </div>
@@ -1155,7 +1155,7 @@ export function GoalProgressCard( { campaign } ) {
                     </svg>
                 </span>
             </div>
-            <div className="gratora-metric__label">{ __( 'Goal progress', 'gratora' ) }</div>
+            <div className="gratora-metric__label">{ __( 'Goal progress', 'gratora-donation-platform' ) }</div>
             <div className="gratora-metric__row">
                 <div className="gratora-metric__value">{ `${ pct }%` }</div>
             </div>
@@ -1195,13 +1195,13 @@ function ShortcodeCell( { slug } ) {
             className="gratora-shortcode-copy"
             onMouseDown={ stopRowSelect }
             onClick={ copy }
-            title={ __( 'Copy shortcode', 'gratora' ) }
-            aria-label={ __( 'Copy shortcode', 'gratora' ) }
+            title={ __( 'Copy shortcode', 'gratora-donation-platform' ) }
+            aria-label={ __( 'Copy shortcode', 'gratora-donation-platform' ) }
         >
             <code className="gratora-shortcode-copy__code">{ code }</code>
             <span className="gratora-shortcode-copy__hint">
                 { copied
-                    ? __( 'Copied', 'gratora' )
+                    ? __( 'Copied', 'gratora-donation-platform' )
                     : <CopyIcon size={ 14 } strokeWidth={ 1.75 } /> }
             </span>
         </button>
@@ -1257,7 +1257,7 @@ function FormsTab( { campaign } ) {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load forms.', 'gratora' ) );
+                setError( err?.message || __( 'Failed to load forms.', 'gratora-donation-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -1273,7 +1273,7 @@ function FormsTab( { campaign } ) {
             const payload = {
                 title:       template?.name
                     ? `${ template.name } form`
-                    : __( 'Untitled donation form', 'gratora' ),
+                    : __( 'Untitled donation form', 'gratora-donation-platform' ),
                 campaign_id: campaign.id,
                 blocks:      template?.blocks || '',
             };
@@ -1287,7 +1287,7 @@ function FormsTab( { campaign } ) {
             } );
             window.location.href = formEditorHref( f.id );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not create form.', 'gratora' ) );
+            setError( err?.message || __( 'Could not create form.', 'gratora-donation-platform' ) );
             setCreating( false );
             setPickerOpen( false );
         }
@@ -1296,7 +1296,7 @@ function FormsTab( { campaign } ) {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'gratora' ),
+            label:         __( 'Title', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div style={ { lineHeight: 1.3 } }>
@@ -1305,7 +1305,7 @@ function FormsTab( { campaign } ) {
                     </a>
                     { item.id === defaultFormId && (
                         <span className="gratora-default-pill">
-                            { __( 'Default', 'gratora' ) }
+                            { __( 'Default', 'gratora-donation-platform' ) }
                         </span>
                     ) }
                     <div className="gratora-row__sub gratora-row__sub--mono">
@@ -1316,14 +1316,14 @@ function FormsTab( { campaign } ) {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'gratora' ),
+            label:    __( 'Status', 'gratora-donation-platform' ),
             elements: FORM_STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.status } />,
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'gratora' ),
+            label:         __( 'Updated', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="gratora-time" title={ formatDate( item.updated_at ) }>
@@ -1334,7 +1334,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'gratora' ),
+            label: __( 'Goal', 'gratora-donation-platform' ),
             // No orderby for these on the server, and DataViews offers sorting
             // on anything that does not opt out.
             enableSorting: false,
@@ -1342,7 +1342,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:     'shortcode',
-            label:  __( 'Shortcode', 'gratora' ),
+            label:  __( 'Shortcode', 'gratora-donation-platform' ),
             enableSorting: false,
             render: ( { item } ) => <ShortcodeCell slug={ item.slug } />,
         },
@@ -1357,14 +1357,14 @@ function FormsTab( { campaign } ) {
             } );
             setDefaultFormId( formId );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not set default form.', 'gratora' ) );
+            setError( err?.message || __( 'Could not set default form.', 'gratora-donation-platform' ) );
         }
     }, [ campaign.id ] );
 
     const actions = useMemo( () => [
         {
             id:       'edit',
-            label:    __( 'Edit', 'gratora' ),
+            label:    __( 'Edit', 'gratora-donation-platform' ),
             isPrimary: true,
             callback: ( items ) => {
                 if ( items[ 0 ] ) window.location.href = formEditorHref( items[ 0 ].id );
@@ -1372,7 +1372,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:       'set-default',
-            label:    __( 'Set as default', 'gratora' ),
+            label:    __( 'Set as default', 'gratora-donation-platform' ),
             isEligible: ( item ) =>
                 item.id !== defaultFormId && item.status === 'published',
             callback: ( items ) => {
@@ -1381,7 +1381,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:    'duplicate',
-            label: __( 'Duplicate', 'gratora' ),
+            label: __( 'Duplicate', 'gratora-donation-platform' ),
             // WP `<Icon>` cloneElements an icon-as-element with its own
             // size={24}. A render function takes the `typeof === 'function'`
             // branch instead, where the size sticks.
@@ -1404,7 +1404,7 @@ function FormsTab( { campaign } ) {
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more forms.', 'gratora' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more forms.', 'gratora-donation-platform' ) );
                     // Some of the batch may have gone through. Leaving the
                     // table as it was makes the author reload to find out
                     // which.
@@ -1414,7 +1414,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:     'delete',
-            label:  __( 'Delete', 'gratora' ),
+            label:  __( 'Delete', 'gratora-donation-platform' ),
             icon:   () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk: true,
@@ -1425,21 +1425,21 @@ function FormsTab( { campaign } ) {
                 const targets = items.filter( ( i ) => i.id !== defaultFormId );
                 if ( ! targets.length ) return;
                 const message = targets.length === 1
-                    ? __( 'Permanently delete this form? This cannot be undone.', 'gratora' )
+                    ? __( 'Permanently delete this form? This cannot be undone.', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of forms to delete */
                         _n(
                             'Permanently delete %d form? This cannot be undone.',
                             'Permanently delete %d forms? This cannot be undone.',
                             targets.length,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         targets.length
                     );
                 setConfirm( {
-                    title:        _n( 'Delete form', 'Delete forms', targets.length, 'gratora' ),
+                    title:        _n( 'Delete form', 'Delete forms', targets.length, 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Delete', 'gratora' ),
+                    confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
@@ -1449,7 +1449,7 @@ function FormsTab( { campaign } ) {
                             } ) ) );
                             load();
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more forms.', 'gratora' ) );
+                            setError( err?.message || __( 'Could not delete one or more forms.', 'gratora-donation-platform' ) );
                             // Rows already deleted are still on screen
                             // otherwise, so the error reads as nothing having
                             // happened at all.
@@ -1470,12 +1470,12 @@ function FormsTab( { campaign } ) {
         <div>
             <div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 } }>
                 <h2 style={ { margin: 0, fontSize: 16 } }>
-                    { __( 'Forms', 'gratora' ) }
+                    { __( 'Forms', 'gratora-donation-platform' ) }
                     <span style={ { color: '#666', fontWeight: 400, marginLeft: 8 } }>({ total })</span>
                 </h2>
                 <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
                     <Plus size={ 16 } strokeWidth={ 1.75 } />
-                    { __( 'Add new form', 'gratora' ) }
+                    { __( 'Add new form', 'gratora-donation-platform' ) }
                 </Btn>
             </div>
 
@@ -1486,11 +1486,11 @@ function FormsTab( { campaign } ) {
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState
                     icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No forms yet', 'gratora' ) }
-                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'gratora' ) }
+                    title={ __( 'No forms yet', 'gratora-donation-platform' ) }
+                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'gratora-donation-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
-                            { __( 'Add your first form', 'gratora' ) }
+                            { __( 'Add your first form', 'gratora-donation-platform' ) }
                         </Btn>
                     }
                 />
@@ -1528,18 +1528,18 @@ const GOAL_TYPES = [
     // "No goal" is not a fourth goal_type: a null target is already how every
     // campaign without a goal is stored, and goalMet() and the progress blocks
     // read it that way. This names the state that existed and had no control.
-    { value: 'none',      label: __( 'No goal', 'gratora' ) },
-    { value: 'amount',    label: __( 'Amount raised', 'gratora' ) },
-    { value: 'donations', label: __( 'Number of donations', 'gratora' ) },
-    { value: 'donors',    label: __( 'Number of donors', 'gratora' ) },
+    { value: 'none',      label: __( 'No goal', 'gratora-donation-platform' ) },
+    { value: 'amount',    label: __( 'Amount raised', 'gratora-donation-platform' ) },
+    { value: 'donations', label: __( 'Number of donations', 'gratora-donation-platform' ) },
+    { value: 'donors',    label: __( 'Number of donors', 'gratora-donation-platform' ) },
 ];
 
 const SUB_TABS = [
-    { key: 'general',    label: __( 'General', 'gratora' ),    Icon: IconGeneral },
-    { key: 'goal',       label: __( 'Goal', 'gratora' ),       Icon: IconGoal },
-    { key: 'appearance', label: __( 'Appearance', 'gratora' ), Icon: IconAppearance },
-    { key: 'defaults',   label: __( 'Defaults', 'gratora' ),   Icon: IconDefaults },
-    { key: 'advanced',   label: __( 'Advanced', 'gratora' ),   Icon: IconAdvanced },
+    { key: 'general',    label: __( 'General', 'gratora-donation-platform' ),    Icon: IconGeneral },
+    { key: 'goal',       label: __( 'Goal', 'gratora-donation-platform' ),       Icon: IconGoal },
+    { key: 'appearance', label: __( 'Appearance', 'gratora-donation-platform' ), Icon: IconAppearance },
+    { key: 'defaults',   label: __( 'Defaults', 'gratora-donation-platform' ),   Icon: IconDefaults },
+    { key: 'advanced',   label: __( 'Advanced', 'gratora-donation-platform' ),   Icon: IconAdvanced },
 ];
 
 const FIELD_TO_SUBTAB = {
@@ -1552,22 +1552,22 @@ const FIELD_TO_SUBTAB = {
 };
 
 const fieldToCard = () => ( {
-    title:                __( 'Identity', 'gratora' ),
-    description:          __( 'Identity', 'gratora' ),
-    slug:                 __( 'Public address', 'gratora' ),
-    image_attachment_id:  __( 'Cover image', 'gratora' ),
-    image_url:            __( 'Cover image', 'gratora' ),
-    status:               __( 'Status & schedule', 'gratora' ),
-    starts_at:            __( 'Status & schedule', 'gratora' ),
-    ends_at:              __( 'Status & schedule', 'gratora' ),
-    goal_type:            __( 'Goal', 'gratora' ),
-    goal_cents:           __( 'Goal', 'gratora' ),
-    goal_count:           __( 'Goal', 'gratora' ),
-    style:                __( 'Appearance', 'gratora' ),
-    hide_header:          __( 'Page header & footer', 'gratora' ),
-    hide_footer:          __( 'Page header & footer', 'gratora' ),
-    default_form_id:      __( 'Default form', 'gratora' ),
-    default_fund_id:      __( 'Default fund', 'gratora' ),
+    title:                __( 'Identity', 'gratora-donation-platform' ),
+    description:          __( 'Identity', 'gratora-donation-platform' ),
+    slug:                 __( 'Public address', 'gratora-donation-platform' ),
+    image_attachment_id:  __( 'Cover image', 'gratora-donation-platform' ),
+    image_url:            __( 'Cover image', 'gratora-donation-platform' ),
+    status:               __( 'Status & schedule', 'gratora-donation-platform' ),
+    starts_at:            __( 'Status & schedule', 'gratora-donation-platform' ),
+    ends_at:              __( 'Status & schedule', 'gratora-donation-platform' ),
+    goal_type:            __( 'Goal', 'gratora-donation-platform' ),
+    goal_cents:           __( 'Goal', 'gratora-donation-platform' ),
+    goal_count:           __( 'Goal', 'gratora-donation-platform' ),
+    style:                __( 'Appearance', 'gratora-donation-platform' ),
+    hide_header:          __( 'Page header & footer', 'gratora-donation-platform' ),
+    hide_footer:          __( 'Page header & footer', 'gratora-donation-platform' ),
+    default_form_id:      __( 'Default form', 'gratora-donation-platform' ),
+    default_fund_id:      __( 'Default fund', 'gratora-donation-platform' ),
 } );
 
 function SettingsTab( { campaign, onArchive, onError } ) {
@@ -1589,10 +1589,10 @@ function SettingsTab( { campaign, onArchive, onError } ) {
             include: campaign?.default_fund_id || undefined,
         } ) } )
             .then( setFunds )
-            .catch( () => onError?.( __( 'Could not load funds.', 'gratora' ) ) );
+            .catch( () => onError?.( __( 'Could not load funds.', 'gratora-donation-platform' ) ) );
         apiFetch( { path: `/gratora/v1/admin/forms?campaign_id=${ campaign.id }&per_page=100` } )
             .then( ( res ) => setForms( Array.isArray( res ) ? res : ( res?.items || [] ) ) )
-            .catch( () => onError?.( __( 'Could not load forms.', 'gratora' ) ) );
+            .catch( () => onError?.( __( 'Could not load forms.', 'gratora-donation-platform' ) ) );
     }, [ campaign.id ] );
 
     useEffect( () => {
@@ -1627,9 +1627,9 @@ function SettingsTab( { campaign, onArchive, onError } ) {
     const onSave = async () => {
         try {
             await c.save();
-            notify.success( __( 'Campaign saved.', 'gratora' ) );
+            notify.success( __( 'Campaign saved.', 'gratora-donation-platform' ) );
         } catch ( err ) {
-            onError( err?.message || __( 'Save failed.', 'gratora' ) );
+            onError( err?.message || __( 'Save failed.', 'gratora-donation-platform' ) );
         }
     };
 
@@ -1656,7 +1656,7 @@ function SettingsTab( { campaign, onArchive, onError } ) {
                         >
                             <Icon />
                             { t.label }
-                            { isDirty && <span className="gratora-subtabs__dot" title={ __( 'Unsaved changes', 'gratora' ) } /> }
+                            { isDirty && <span className="gratora-subtabs__dot" title={ __( 'Unsaved changes', 'gratora-donation-platform' ) } /> }
                         </a>
                     );
                 } ) }
@@ -1716,9 +1716,9 @@ function SettingsTab( { campaign, onArchive, onError } ) {
                     <span className="gratora-save-bar__dot" aria-hidden="true" />
                     <span className="gratora-save-bar__count">
                         <strong>{ editsCount }</strong>{ ' ' }
-                        { _n( 'unsaved change', 'unsaved changes', editsCount, 'gratora' ) }
+                        { _n( 'unsaved change', 'unsaved changes', editsCount, 'gratora-donation-platform' ) }
                         { dirtyCardNames.length > 0 && (
-                            <em>{ ' ' }{ __( 'in', 'gratora' ) } { formatCardNames( dirtyCardNames ) }</em>
+                            <em>{ ' ' }{ __( 'in', 'gratora-donation-platform' ) } { formatCardNames( dirtyCardNames ) }</em>
                         ) }
                     </span>
                     <button
@@ -1727,7 +1727,7 @@ function SettingsTab( { campaign, onArchive, onError } ) {
                         onClick={ onDiscard }
                         disabled={ c.isSaving }
                     >
-                        { __( 'Discard', 'gratora' ) }
+                        { __( 'Discard', 'gratora-donation-platform' ) }
                     </button>
                     <button
                         type="button"
@@ -1735,7 +1735,7 @@ function SettingsTab( { campaign, onArchive, onError } ) {
                         onClick={ onSave }
                         disabled={ c.isSaving }
                     >
-                        { __( 'Save changes', 'gratora' ) }
+                        { __( 'Save changes', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) }
@@ -1768,21 +1768,21 @@ function CampaignTypeCard( { campaign } ) {
         } catch ( err ) {
             setBusy( false );
             setTarget( null );
-            notify.error( err?.message || __( 'Conversion failed.', 'gratora' ) );
+            notify.error( err?.message || __( 'Conversion failed.', 'gratora-donation-platform' ) );
         }
     };
 
     return (
         <Card
-            title={ __( 'Campaign type', 'gratora' ) }
-            sub={ __( 'Set when the campaign is created. A standard campaign can be converted to a richer type, but not back.', 'gratora' ) }
+            title={ __( 'Campaign type', 'gratora-donation-platform' ) }
+            sub={ __( 'Set when the campaign is created. A standard campaign can be converted to a richer type, but not back.', 'gratora-donation-platform' ) }
         >
-            <FormRow label={ __( 'Type', 'gratora' ) }>
+            <FormRow label={ __( 'Type', 'gratora-donation-platform' ) }>
                 <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
-                    <strong>{ types[ current ] || __( 'Standard', 'gratora' ) }</strong>
+                    <strong>{ types[ current ] || __( 'Standard', 'gratora-donation-platform' ) }</strong>
                     { convertible.map( ( t ) => (
                         <Btn key={ t } variant="secondary" onClick={ () => setTarget( t ) }>
-                            { sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'gratora' ), types[ t ] ) }
+                            { sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'gratora-donation-platform' ), types[ t ] ) }
                         </Btn>
                     ) ) }
                 </div>
@@ -1790,17 +1790,17 @@ function CampaignTypeCard( { campaign } ) {
 
             { target && (
                 <Modal
-                    title={ sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'gratora' ), types[ target ] ) }
+                    title={ sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'gratora-donation-platform' ), types[ target ] ) }
                     onRequestClose={ () => ! busy && setTarget( null ) }
                 >
                     { notices[ target ] && <p>{ notices[ target ] }</p> }
-                    <p style={ { fontWeight: 600 } }>{ __( "This can't be undone.", 'gratora' ) }</p>
+                    <p style={ { fontWeight: 600 } }>{ __( "This can't be undone.", 'gratora-donation-platform' ) }</p>
                     <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 } }>
                         <Btn variant="tertiary" onClick={ () => setTarget( null ) } disabled={ busy }>
-                            { __( 'Cancel', 'gratora' ) }
+                            { __( 'Cancel', 'gratora-donation-platform' ) }
                         </Btn>
                         <Btn variant="primary" onClick={ convert } disabled={ busy }>
-                            { busy ? __( 'Converting…', 'gratora' ) : __( 'Convert', 'gratora' ) }
+                            { busy ? __( 'Converting…', 'gratora-donation-platform' ) : __( 'Convert', 'gratora-donation-platform' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -1841,13 +1841,13 @@ export function PublicAddressCard( { c, pageUrl } ) {
 
     return (
         <Card
-            title={ __( 'Public address', 'gratora' ) }
-            sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'gratora' ) }
+            title={ __( 'Public address', 'gratora-donation-platform' ) }
+            sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'gratora-donation-platform' ) }
             edited={ edited ? 1 : 0 }
         >
             <FormRow
-                label={ __( 'Slug', 'gratora' ) }
-                help={ __( 'Letters, numbers, and hyphens only.', 'gratora' ) }
+                label={ __( 'Slug', 'gratora-donation-platform' ) }
+                help={ __( 'Letters, numbers, and hyphens only.', 'gratora-donation-platform' ) }
             >
                 <div className={ `gratora-input-prefixed${ edited ? ' is-edited' : '' }` }>
                     <span className="gratora-input-prefixed__prefix">{ addr.prefix || `${ origin }/campaigns/` }</span>
@@ -1855,19 +1855,19 @@ export function PublicAddressCard( { c, pageUrl } ) {
                 </div>
                 { addr.url && (
                     <div className="gratora-url-preview">
-                        <span className="lbl">{ __( 'Public URL', 'gratora' ) }</span>
+                        <span className="lbl">{ __( 'Public URL', 'gratora-donation-platform' ) }</span>
                         <span className="url">{ addr.prefix }<em>{ addr.segment }</em></span>
-                        <a href={ addr.url } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'gratora' ) }</a>
+                        <a href={ addr.url } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'gratora-donation-platform' ) }</a>
                     </div>
                 ) }
                 { addr.url && edited && (
                     <div className="gratora-form-row__field-help">
-                        { __( 'Saving moves the page. WordPress adds a suffix if another page already holds the slug, so check this address again afterwards.', 'gratora' ) }
+                        { __( 'Saving moves the page. WordPress adds a suffix if another page already holds the slug, so check this address again afterwards.', 'gratora-donation-platform' ) }
                     </div>
                 ) }
                 { ! addr.url && !! slug && (
                     <div className="gratora-form-row__field-help">
-                        { __( 'This campaign has no page yet, so it has no public address. One is created when the campaign is published.', 'gratora' ) }
+                        { __( 'This campaign has no page yet, so it has no public address. One is created when the campaign is published.', 'gratora-donation-platform' ) }
                     </div>
                 ) }
             </FormRow>
@@ -1889,21 +1889,21 @@ function GeneralPanel( { c, campaign } ) {
     return (
         <div className="gratora-section-block">
             <Card
-                title={ __( 'Identity', 'gratora' ) }
-                sub={ __( 'Title and short description, used everywhere this campaign appears.', 'gratora' ) }
+                title={ __( 'Identity', 'gratora-donation-platform' ) }
+                sub={ __( 'Title and short description, used everywhere this campaign appears.', 'gratora-donation-platform' ) }
                 edited={ editedCount( [ 'title', 'description' ] ) }
             >
                 <FormRow
-                    label={ __( 'Campaign title', 'gratora' ) }
-                    help={ __( 'Donor-facing. Appears in the page header, on cards, in receipts.', 'gratora' ) }
-                    fieldHelp={ __( 'Try to keep it under 6 words.', 'gratora' ) }
+                    label={ __( 'Campaign title', 'gratora-donation-platform' ) }
+                    help={ __( 'Donor-facing. Appears in the page header, on cards, in receipts.', 'gratora-donation-platform' ) }
+                    fieldHelp={ __( 'Try to keep it under 6 words.', 'gratora-donation-platform' ) }
                 >
                     <input type="text" className={ inputCls( c, 'title' ) } { ...c.bind( 'title' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Short description', 'gratora' ) }
-                    help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'gratora' ) }
+                    label={ __( 'Short description', 'gratora-donation-platform' ) }
+                    help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'gratora-donation-platform' ) }
                 >
                     <div className="gratora-input-counter">
                         <textarea
@@ -1918,7 +1918,7 @@ function GeneralPanel( { c, campaign } ) {
                     </div>
                     { teaserSrc && (
                         <div className="gratora-form-row__field-help">
-                            <strong style={ { color: '#111827', fontWeight: 500 } }>{ __( 'How donors will see this:', 'gratora' ) }</strong>{ ' ' }
+                            <strong style={ { color: '#111827', fontWeight: 500 } }>{ __( 'How donors will see this:', 'gratora-donation-platform' ) }</strong>{ ' ' }
                             { teaserSrc }
                         </div>
                     ) }
@@ -1930,8 +1930,8 @@ function GeneralPanel( { c, campaign } ) {
             <PublicAddressCard c={ c } pageUrl={ campaign?.page_url || r.page_url || null } />
 
             <Card
-                title={ __( 'Cover image', 'gratora' ) }
-                sub={ __( 'Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid.', 'gratora' ) }
+                title={ __( 'Cover image', 'gratora-donation-platform' ) }
+                sub={ __( 'Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid.', 'gratora-donation-platform' ) }
                 edited={ editedCount( [ 'image_attachment_id', 'image_url' ] ) }
             >
                 <CoverImageCard
@@ -1945,19 +1945,19 @@ function GeneralPanel( { c, campaign } ) {
             </Card>
 
             <Card
-                title={ __( 'Status & schedule', 'gratora' ) }
-                sub={ __( "Whether donors can give right now, and when the campaign runs.", 'gratora' ) }
+                title={ __( 'Status & schedule', 'gratora-donation-platform' ) }
+                sub={ __( "Whether donors can give right now, and when the campaign runs.", 'gratora-donation-platform' ) }
                 edited={ editedCount( [ 'status', 'starts_at', 'ends_at' ] ) }
             >
                 <FormRow
-                    label={ __( 'Status', 'gratora' ) }
-                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't. Archive from the campaign menu, which handles any recurring donations first.", 'gratora' ) }
+                    label={ __( 'Status', 'gratora-donation-platform' ) }
+                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't. Archive from the campaign menu, which handles any recurring donations first.", 'gratora-donation-platform' ) }
                 >
                     <StatusPillGroup value={ c.value( 'status', 'draft' ) } onChange={ c.setValue( 'status' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Schedule', 'gratora' ) }
-                    help={ __( 'Optional. Leave blank for an open-ended campaign.', 'gratora' ) }
+                    label={ __( 'Schedule', 'gratora-donation-platform' ) }
+                    help={ __( 'Optional. Leave blank for an open-ended campaign.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <ScheduleTimeline
@@ -2005,11 +2005,11 @@ export function GoalPanel( { c } ) {
     return (
         <div className="gratora-section-block">
             <Card
-                title={ __( 'Campaign goal', 'gratora' ) }
-                sub={ __( 'Drives the progress widget on the campaign page and the goal donut on the overview.', 'gratora' ) }
+                title={ __( 'Campaign goal', 'gratora-donation-platform' ) }
+                sub={ __( 'Drives the progress widget on the campaign page and the goal donut on the overview.', 'gratora-donation-platform' ) }
                 edited={ editedCount }
             >
-                <FormRow label={ __( 'Goal type', 'gratora' ) }>
+                <FormRow label={ __( 'Goal type', 'gratora-donation-platform' ) }>
                     <select
                         className={ `gratora-select${ [ 'goal_type', 'goal_cents', 'goal_count' ].some( ( k ) => c.isEdited( k ) ) ? ' gratora-input--edited' : '' }` }
                         value={ mode }
@@ -2022,7 +2022,7 @@ export function GoalPanel( { c } ) {
                 </FormRow>
 
                 { mode === 'amount' && (
-                    <FormRow label={ __( 'Target amount', 'gratora' ) }>
+                    <FormRow label={ __( 'Target amount', 'gratora-donation-platform' ) }>
                         <AmountInput
                             currency={ defaultCurrency() }
                             min={ 0 }
@@ -2033,23 +2033,23 @@ export function GoalPanel( { c } ) {
                 ) }
 
                 { mode === 'donations' && (
-                    <FormRow label={ __( 'Target donations', 'gratora' ) }>
+                    <FormRow label={ __( 'Target donations', 'gratora-donation-platform' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
 
                 { mode === 'donors' && (
-                    <FormRow label={ __( 'Target donors', 'gratora' ) }>
+                    <FormRow label={ __( 'Target donors', 'gratora-donation-platform' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
 
                 { mode !== 'none' && (
                     <ToggleRow
-                        title={ __( 'Close when the goal is met', 'gratora' ) }
+                        title={ __( 'Close when the goal is met', 'gratora-donation-platform' ) }
                         sub={ hasGoal
-                            ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'gratora' )
-                            : __( 'Set a target above first. Without one there is nothing to reach.', 'gratora' ) }
+                            ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'gratora-donation-platform' )
+                            : __( 'Set a target above first. Without one there is nothing to reach.', 'gratora-donation-platform' ) }
                         disabled={ ! hasGoal }
                         checked={ !! r.close_at_goal }
                         onChange={ ( v ) => c.edit( { close_at_goal: !! v } ) }
@@ -2058,7 +2058,7 @@ export function GoalPanel( { c } ) {
 
                 { r.close_at_goal && r.goal_met && (
                     <p className="gratora-muted">
-                        { __( 'This campaign has reached its goal and is not accepting donations.', 'gratora' ) }
+                        { __( 'This campaign has reached its goal and is not accepting donations.', 'gratora-donation-platform' ) }
                     </p>
                 ) }
             </Card>
@@ -2120,18 +2120,18 @@ export function AppearancePanel( { c } ) {
         // Discard is shared with the whole settings tab, so taking these back
         // any other way costs every other unsaved change on it.
         setConfirm( {
-            title:   __( 'Discard token overrides', 'gratora' ),
+            title:   __( 'Discard token overrides', 'gratora-donation-platform' ),
             message: sprintf(
                 /* translators: %d: number of tokens this campaign overrides */
                 _n(
                     'Turning this off drops the %d token this campaign overrides. Saving makes that permanent.',
                     'Turning this off drops the %d tokens this campaign overrides. Saving makes that permanent.',
                     count,
-                    'gratora'
+                    'gratora-donation-platform'
                 ),
                 count
             ),
-            confirmLabel: __( 'Discard overrides', 'gratora' ),
+            confirmLabel: __( 'Discard overrides', 'gratora-donation-platform' ),
             destructive:  true,
             onConfirm:    dropInline,
         } );
@@ -2150,18 +2150,18 @@ export function AppearancePanel( { c } ) {
     return (
         <div className="gratora-section-block">
             <Card
-                title={ __( 'Campaign appearance', 'gratora' ) }
-                sub={ __( "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look.", 'gratora' ) }
+                title={ __( 'Campaign appearance', 'gratora-donation-platform' ) }
+                sub={ __( "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look.", 'gratora-donation-platform' ) }
                 edited={ editedCount }
             >
-                <FormRow label={ __( 'Style preset', 'gratora' ) }>
+                <FormRow label={ __( 'Style preset', 'gratora-donation-platform' ) }>
                     <select
                         className="gratora-select"
                         value={ presetId }
                         onChange={ ( e ) => selectPreset( e.target.value ) }
                     >
                         <option value="">
-                            { __( 'Use org default', 'gratora' ) +
+                            { __( 'Use org default', 'gratora-donation-platform' ) +
                                 ( defaultId ? ` (${ presets.find( ( p ) => p.id === defaultId )?.name || defaultId })` : '' ) }
                         </option>
                         { presets.map( ( p ) => (
@@ -2172,10 +2172,10 @@ export function AppearancePanel( { c } ) {
 
                 <div className="gratora-custom-style-toggle" style={ { marginTop: 16 } }>
                     <ToggleRow
-                        title={ __( 'Customize tokens for this campaign', 'gratora' ) }
+                        title={ __( 'Customize tokens for this campaign', 'gratora-donation-platform' ) }
                         sub={ isCustomizing
-                            ? __( 'Inline overrides applied on top of the chosen preset.', 'gratora' )
-                            : __( 'Toggle on to tweak individual tokens without creating a new brand preset.', 'gratora' )
+                            ? __( 'Inline overrides applied on top of the chosen preset.', 'gratora-donation-platform' )
+                            : __( 'Toggle on to tweak individual tokens without creating a new brand preset.', 'gratora-donation-platform' )
                         }
                         checked={ isCustomizing }
                         onChange={ toggleCustomizing }
@@ -2200,18 +2200,18 @@ export function AppearancePanel( { c } ) {
             </Card>
 
             <Card
-                title={ __( 'Page header & footer', 'gratora' ) }
-                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'gratora' ) }
+                title={ __( 'Page header & footer', 'gratora-donation-platform' ) }
+                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'gratora-donation-platform' ) }
                 edited={ ( c.edits?.hide_header !== undefined ? 1 : 0 ) + ( c.edits?.hide_footer !== undefined ? 1 : 0 ) }
             >
                 <ToggleRow
-                    title={ __( 'Hide theme header', 'gratora' ) }
+                    title={ __( 'Hide theme header', 'gratora-donation-platform' ) }
                     checked={ !! c.value( 'hide_header', false ) }
                     onChange={ ( v ) => c.edit( { hide_header: v } ) }
                 />
                 <div style={ { marginTop: 16 } }>
                     <ToggleRow
-                        title={ __( 'Hide theme footer', 'gratora' ) }
+                        title={ __( 'Hide theme footer', 'gratora-donation-platform' ) }
                         checked={ !! c.value( 'hide_footer', false ) }
                         onChange={ ( v ) => c.edit( { hide_footer: v } ) }
                     />
@@ -2230,17 +2230,17 @@ function DefaultsPanel( { c, forms, funds } ) {
     return (
         <div className="gratora-section-block">
             <Card
-                title={ __( 'Default form', 'gratora' ) }
-                sub={ __( 'The form the campaign page and donate-button block submit to by default.', 'gratora' ) }
+                title={ __( 'Default form', 'gratora-donation-platform' ) }
+                sub={ __( 'The form the campaign page and donate-button block submit to by default.', 'gratora-donation-platform' ) }
                 edited={ hasFormEdit ? 1 : 0 }
             >
                 <FormRow
-                    label={ __( 'Form', 'gratora' ) }
-                    help={ __( 'Only published forms that belong to this campaign appear here. A draft cannot be the default: the page would fall back to a different form without saying so.', 'gratora' ) }
+                    label={ __( 'Form', 'gratora-donation-platform' ) }
+                    help={ __( 'Only published forms that belong to this campaign appear here. A draft cannot be the default: the page would fall back to a different form without saying so.', 'gratora-donation-platform' ) }
                 >
                     <div className="gratora-grid-2-eq" style={ { gridTemplateColumns: '1fr auto', alignItems: 'center' } }>
                         <select className={ selectCls( c, 'default_form_id' ) } { ...c.bindNumber( 'default_form_id' ) }>
-                            <option value="">{ __( '( None )', 'gratora' ) }</option>
+                            <option value="">{ __( '( None )', 'gratora-donation-platform' ) }</option>
                             { /* The Forms tab's own "Set as default" already
                                  guards on published, and every runtime reader
                                  takes this id only when the form is published.
@@ -2256,7 +2256,7 @@ function DefaultsPanel( { c, forms, funds } ) {
                                             ? f.title
                                             : sprintf(
                                                 /* translators: %s: form title */
-                                                __( '%s (not published)', 'gratora' ),
+                                                __( '%s (not published)', 'gratora-donation-platform' ),
                                                 f.title
                                             ) }
                                     </option>
@@ -2264,7 +2264,7 @@ function DefaultsPanel( { c, forms, funds } ) {
                         </select>
                         { r.default_form_id && (
                             <Btn variant="ghost" size="sm" href={ formEditorHref( Number( r.default_form_id ) ) }>
-                                { __( 'Edit form', 'gratora' ) } →
+                                { __( 'Edit form', 'gratora-donation-platform' ) } →
                             </Btn>
                         ) }
                     </div>
@@ -2272,19 +2272,19 @@ function DefaultsPanel( { c, forms, funds } ) {
             </Card>
 
             <Card
-                title={ __( 'Default fund', 'gratora' ) }
-                sub={ __( 'Where donations from this campaign are routed. Useful when separating restricted donations from general operations.', 'gratora' ) }
+                title={ __( 'Default fund', 'gratora-donation-platform' ) }
+                sub={ __( 'Where donations from this campaign are routed. Useful when separating restricted donations from general operations.', 'gratora-donation-platform' ) }
                 edited={ hasFundEdit ? 1 : 0 }
             >
-                <FormRow label={ __( 'Fund', 'gratora' ) }>
+                <FormRow label={ __( 'Fund', 'gratora-donation-platform' ) }>
                     <select className={ selectCls( c, 'default_fund_id' ) } { ...c.bindNumber( 'default_fund_id' ) }>
-                        <option value="">{ __( '( Unassigned )', 'gratora' ) }</option>
+                        <option value="">{ __( '( Unassigned )', 'gratora-donation-platform' ) }</option>
                         { funds.map( ( f ) => (
                             <option key={ f.id } value={ f.id }>
                                 { f.is_active === false
                                     ? sprintf(
                                         /* translators: %s: fund name */
-                                        __( '%s (inactive)', 'gratora' ),
+                                        __( '%s (inactive)', 'gratora-donation-platform' ),
                                         f.name
                                     )
                                     : f.name }
@@ -2313,7 +2313,7 @@ function AdvancedPanel( { campaign, onArchive, onError } ) {
                     } );
                     window.location.href = listHref();
                 } catch ( err ) {
-                    onError( err?.message || __( 'Delete failed.', 'gratora' ) );
+                    onError( err?.message || __( 'Delete failed.', 'gratora-donation-platform' ) );
                     setDeleting( false );
                 }
             },
@@ -2323,21 +2323,21 @@ function AdvancedPanel( { campaign, onArchive, onError } ) {
     return (
         <div className="gratora-section-block">
             <Card
-                title={ __( 'Danger zone', 'gratora' ) }
-                sub={ __( 'Irreversible actions. Use with care.', 'gratora' ) }
+                title={ __( 'Danger zone', 'gratora-donation-platform' ) }
+                sub={ __( 'Irreversible actions. Use with care.', 'gratora-donation-platform' ) }
             >
                 <div className="gratora-danger">
                     <div className="gratora-danger__copy">
-                        <div className="gratora-danger__title">{ __( 'Delete this campaign', 'gratora' ) }</div>
+                        <div className="gratora-danger__title">{ __( 'Delete this campaign', 'gratora-donation-platform' ) }</div>
                         <div className="gratora-danger__help">
                             { __(
                                 'Removes the campaign, its forms, and the WordPress page it created. A campaign that has any donations or recurring plans is never deleted: archive it instead to keep its records.',
-                                'gratora'
+                                'gratora-donation-platform'
                             ) }
                         </div>
                     </div>
                     <Btn variant="danger" onClick={ onDelete } isBusy={ deleting } disabled={ deleting }>
-                        { __( 'Delete campaign', 'gratora' ) }
+                        { __( 'Delete campaign', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
             </Card>

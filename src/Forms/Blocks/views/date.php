@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * @var string $maxDate
  * @var string $field
  */
-$labelText = $label !== '' ? $label : __('Date', 'gratora');
+$labelText = $label !== '' ? $label : __('Date', 'gratora-donation-platform');
 $fieldName = $field !== '' ? $field : 'date';
 ?>
 <label class="gratora-block gratora-block--date gratora-donor__field">

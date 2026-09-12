@@ -58,42 +58,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Multi-select', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Multi-select', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'gratora' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'gratora' ) }
+                        label={ __( 'Field name', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'gratora' ) }
+                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'At least one option must be selected.', 'gratora' ) }
+                        help={ __( 'At least one option must be selected.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Minimum selections', 'gratora' ) }
+                        label={ __( 'Minimum selections', 'gratora-donation-platform' ) }
                         value={ minSelections }
                         onChange={ setMin }
                         min={ 0 }
                         max={ count }
                     />
                     <Slider
-                        label={ __( 'Maximum selections', 'gratora' ) }
+                        label={ __( 'Maximum selections', 'gratora-donation-platform' ) }
                         value={ maxSelections }
                         onChange={ setMax }
                         min={ 0 }
                         max={ count }
-                        help={ __( 'Set to 0 for no upper limit.', 'gratora' ) }
+                        help={ __( 'Set to 0 for no upper limit.', 'gratora-donation-platform' ) }
                     />
                     <OptionsEditor
                         options={ options }
@@ -115,7 +115,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Pick any that apply', 'gratora' ) }
+                    placeholder={ __( 'Pick any that apply', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
@@ -150,7 +150,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'gratora' ) }
+                                placeholder={ __( 'Option label', 'gratora-donation-platform' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -165,8 +165,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Multi-select', 'gratora' ),
-        description: __( 'Donor picks any number of options from a checkbox list.', 'gratora' ),
+        title:       __( 'Multi-select', 'gratora-donation-platform' ),
+        description: __( 'Donor picks any number of options from a checkbox list.', 'gratora-donation-platform' ),
         category:    'gratora-fields',
         icon:        BlockIcons[ 'multi-select' ],
         supports: { html: false, anchor: false, inserter: true },

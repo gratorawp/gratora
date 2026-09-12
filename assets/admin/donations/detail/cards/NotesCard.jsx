@@ -31,7 +31,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
             setBody( '' );
             onChanged?.();
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save', 'gratora' ) );
+            setError( err?.message || __( 'Could not save', 'gratora-donation-platform' ) );
         } finally {
             setSaving( false );
         }
@@ -39,9 +39,9 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'gratora' ),
-            message:      __( 'Delete this note?', 'gratora' ),
-            confirmLabel: __( 'Delete', 'gratora' ),
+            title:        __( 'Delete note', 'gratora-donation-platform' ),
+            message:      __( 'Delete this note?', 'gratora-donation-platform' ),
+            confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
@@ -52,7 +52,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                     setNotes( ( ns ) => ns.filter( ( n ) => n.id !== noteId ) );
                     onChanged?.();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not delete', 'gratora' ) );
+                    setError( err?.message || __( 'Could not delete', 'gratora-donation-platform' ) );
                 }
             },
         } );
@@ -66,14 +66,14 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                         <EmptyState
                             compact
                             icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No notes yet', 'gratora' ) }
-                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'gratora' ) }
+                            title={ __( 'No notes yet', 'gratora-donation-platform' ) }
+                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'gratora-donation-platform' ) }
                         />
                     )
                     : (
                         <div className="dd-notes-list">
                             { notes.map( ( n ) => {
-                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'gratora' ) : __( 'System', 'gratora' ) );
+                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'gratora-donation-platform' ) : __( 'System', 'gratora-donation-platform' ) );
                                 return (
                                     <div key={ n.id } className="dd-note">
                                         <span className="dd-avatar dd-avatar--md">{ initials( author ) }</span>
@@ -91,7 +91,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                                         <button
                                             type="button"
                                             className="dd-note__delete"
-                                            aria-label={ __( 'Delete note', 'gratora' ) }
+                                            aria-label={ __( 'Delete note', 'gratora-donation-platform' ) }
                                             onClick={ () => remove( n.id ) }
                                         >
                                             <IconTrash width="14" height="14" />
@@ -108,7 +108,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                     <textarea
                         value={ body }
                         onChange={ ( e ) => setBody( e.target.value ) }
-                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'gratora' ) }
+                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'gratora-donation-platform' ) }
                         rows={ 3 }
                     />
                     { error && <div className="dd-note-form__error">{ error }</div> }
@@ -118,7 +118,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                             className="btn btn--primary"
                             disabled={ saving || ! body.trim() }
                         >
-                            { saving ? __( 'Saving…', 'gratora' ) : __( 'Add note', 'gratora' ) }
+                            { saving ? __( 'Saving…', 'gratora-donation-platform' ) : __( 'Add note', 'gratora-donation-platform' ) }
                         </button>
                     </div>
                 </form>

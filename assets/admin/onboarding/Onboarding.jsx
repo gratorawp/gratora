@@ -73,26 +73,26 @@ const USER_TYPES = [
     {
         id:   'nonprofit',
         icon: 'building',
-        name: __( 'Nonprofit or charity', 'gratora' ),
-        desc: __( 'Registered organization collecting tax-deductible donations.', 'gratora' ),
+        name: __( 'Nonprofit or charity', 'gratora-donation-platform' ),
+        desc: __( 'Registered organization collecting tax-deductible donations.', 'gratora-donation-platform' ),
     },
     {
         id:   'community',
         icon: 'users',
-        name: __( 'Community or faith group', 'gratora' ),
-        desc: __( 'Church, school, club, mutual-aid group.', 'gratora' ),
+        name: __( 'Community or faith group', 'gratora-donation-platform' ),
+        desc: __( 'Church, school, club, mutual-aid group.', 'gratora-donation-platform' ),
     },
     {
         id:   'individual',
         icon: 'heart',
-        name: __( 'Individual fundraiser', 'gratora' ),
-        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'gratora' ),
+        name: __( 'Individual fundraiser', 'gratora-donation-platform' ),
+        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'gratora-donation-platform' ),
     },
     {
         id:   'exploring',
         icon: 'target',
-        name: __( 'Just exploring', 'gratora' ),
-        desc: __( 'Trying Gratora out. Starts in test mode, so nothing takes real money until you switch it off.', 'gratora' ),
+        name: __( 'Just exploring', 'gratora-donation-platform' ),
+        desc: __( 'Trying Gratora out. Starts in test mode, so nothing takes real money until you switch it off.', 'gratora-donation-platform' ),
     },
 ];
 
@@ -188,19 +188,19 @@ export default function Onboarding() {
         try {
             if ( step === 0 ) {
                 if ( ! who.user_type ) {
-                    throw new Error( __( 'Pick who is fundraising to continue.', 'gratora' ) );
+                    throw new Error( __( 'Pick who is fundraising to continue.', 'gratora-donation-platform' ) );
                 }
                 await persist( 'org-profile', { user_type: who.user_type } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
-                    throw new Error( __( 'Pick a country to continue.', 'gratora' ) );
+                    throw new Error( __( 'Pick a country to continue.', 'gratora-donation-platform' ) );
                 }
                 // A country that subdivides still needs its state: it is part of
                 // where the organization is, and it is one click. The postal
                 // address is not asked for here -- it is optional in Settings,
                 // and the receipt renderer omits the block when it is unset.
                 if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
-                    throw new Error( __( 'Pick a state or province to continue.', 'gratora' ) );
+                    throw new Error( __( 'Pick a state or province to continue.', 'gratora-donation-platform' ) );
                 }
                 await persist( 'org-profile', {
                     name:           org.name,
@@ -233,17 +233,17 @@ export default function Onboarding() {
                     method: 'POST',
                     data:   {
                         campaign_title: org.name
-                            ? `${ org.name } - ${ __( 'General donations', 'gratora' ) }`
-                            : __( 'General donations', 'gratora' ),
+                            ? `${ org.name } - ${ __( 'General donations', 'gratora-donation-platform' ) }`
+                            : __( 'General donations', 'gratora-donation-platform' ),
                         user_type:      who.user_type,
                     },
                 } );
-                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'gratora' ) );
+                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'gratora-donation-platform' ) );
                 setFinalized( r );
             }
             setStep( ( s ) => Math.min( TOTAL - 1, s + 1 ) );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save. Please try again.', 'gratora' ) );
+            setError( err?.message || __( 'Could not save. Please try again.', 'gratora-donation-platform' ) );
         } finally {
             setBusy( false );
         }
@@ -262,7 +262,7 @@ export default function Onboarding() {
         } catch ( e ) {
             // A failed dismiss leaves onboarding 'pending', so admin_init would
             // bounce us straight back here; surface the error instead of looping.
-            setError( __( 'Could not skip setup. Please try again.', 'gratora' ) );
+            setError( __( 'Could not skip setup. Please try again.', 'gratora-donation-platform' ) );
             return;
         }
         window.location.assign( wp.settings_url || wp.dashboard_url || '' );
@@ -279,7 +279,7 @@ export default function Onboarding() {
                 </span>
                 { ! isChecklist && (
                     <button type="button" className="gratora-onboarding__skip" onClick={ skip }>
-                        { __( 'Skip for now', 'gratora' ) }
+                        { __( 'Skip for now', 'gratora-donation-platform' ) }
                     </button>
                 ) }
             </div>
@@ -287,7 +287,7 @@ export default function Onboarding() {
             <section ref={ frameRef } className={ `gratora-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
                 <div className="gratora-onboarding__meta">
                     <span className="gratora-onboarding__caption">
-                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'gratora' ), step + 1, TOTAL ) }
+                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'gratora-donation-platform' ), step + 1, TOTAL ) }
                     </span>
                     <span className="gratora-onboarding__dots" aria-hidden="true">
                         { Array.from( { length: TOTAL } ).map( ( _, i ) => (
@@ -324,7 +324,7 @@ export default function Onboarding() {
                                 onClick={ back }
                                 disabled={ busy }
                             >
-                                { backGlyph() } { __( 'Back', 'gratora' ) }
+                                { backGlyph() } { __( 'Back', 'gratora-donation-platform' ) }
                             </button>
                         ) }
 
@@ -344,10 +344,10 @@ export default function Onboarding() {
 }
 
 function ctaLabel( step, busy ) {
-    if ( busy ) return __( 'Saving…', 'gratora' );
-    if ( step === 0 ) return __( 'Get started', 'gratora' );
-    if ( step === 2 ) return __( 'Finish setup', 'gratora' ) + ' ' + forwardGlyph();
-    return __( 'Next', 'gratora' ) + ' ' + forwardGlyph();
+    if ( busy ) return __( 'Saving…', 'gratora-donation-platform' );
+    if ( step === 0 ) return __( 'Get started', 'gratora-donation-platform' );
+    if ( step === 2 ) return __( 'Finish setup', 'gratora-donation-platform' ) + ' ' + forwardGlyph();
+    return __( 'Next', 'gratora-donation-platform' ) + ' ' + forwardGlyph();
 }
 
 function FundraiserTypeStep( { value, onChange } ) {
@@ -355,10 +355,10 @@ function FundraiserTypeStep( { value, onChange } ) {
     return (
         <div>
             <h2 className="gratora-onboarding__headline">
-                { __( "Who's fundraising?", 'gratora' ) }
+                { __( "Who's fundraising?", 'gratora-donation-platform' ) }
             </h2>
             <p className="gratora-onboarding__subtitle">
-                { __( 'Pick the one that fits best.', 'gratora' ) }
+                { __( 'Pick the one that fits best.', 'gratora-donation-platform' ) }
             </p>
 
             <div className="gratora-onboarding__section">
@@ -419,19 +419,19 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
 
     return (
         <div>
-            <h2 className="gratora-onboarding__headline">{ __( 'Where are you based?', 'gratora' ) }</h2>
+            <h2 className="gratora-onboarding__headline">{ __( 'Where are you based?', 'gratora-donation-platform' ) }</h2>
             <p className="gratora-onboarding__subtitle">
-                { __( "We use this for receipts and your default currency.", 'gratora' ) }
+                { __( "We use this for receipts and your default currency.", 'gratora-donation-platform' ) }
             </p>
 
             <div className="gratora-onboarding__section">
                 <div className="gratora-onboarding__section-label">
-                    { isIndividual ? __( 'About you', 'gratora' ) : __( 'Organization', 'gratora' ) }
+                    { isIndividual ? __( 'About you', 'gratora-donation-platform' ) : __( 'Organization', 'gratora-donation-platform' ) }
                 </div>
                 <div className="gratora-onboarding__address">
                     <div className="span-2">
                         <label className="gratora-onboarding__field-label" htmlFor="gratora-onboarding-name">
-                            { isIndividual ? __( 'Your name', 'gratora' ) : __( 'Organization name', 'gratora' ) }
+                            { isIndividual ? __( 'Your name', 'gratora-donation-platform' ) : __( 'Organization name', 'gratora-donation-platform' ) }
                         </label>
                         <input
                             id="gratora-onboarding-name"
@@ -439,18 +439,18 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
                             className="gratora-onboarding__input"
                             value={ value.name }
                             onChange={ ( e ) => set( { name: e.target.value } ) }
-                            placeholder={ __( 'Shown on receipts and your campaign', 'gratora' ) }
+                            placeholder={ __( 'Shown on receipts and your campaign', 'gratora-donation-platform' ) }
                         />
                     </div>
                     <div className="span-2">
-                        <label className="gratora-onboarding__field-label" htmlFor="gratora-onboarding-email">{ __( 'Contact email', 'gratora' ) }</label>
+                        <label className="gratora-onboarding__field-label" htmlFor="gratora-onboarding-email">{ __( 'Contact email', 'gratora-donation-platform' ) }</label>
                         <input
                             id="gratora-onboarding-email"
                             type="email"
                             className="gratora-onboarding__input"
                             value={ value.email }
                             onChange={ ( e ) => set( { email: e.target.value } ) }
-                            placeholder={ __( 'Where donors reply and receipts come from', 'gratora' ) }
+                            placeholder={ __( 'Where donors reply and receipts come from', 'gratora-donation-platform' ) }
                         />
                     </div>
                 </div>
@@ -461,7 +461,7 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
                     { /* The pickers take no id or aria-label prop, so the name
                          only exists if the label contains the control. */ }
                     <label className="gratora-onboarding__control-label">
-                        <span className="gratora-onboarding__section-label">{ __( 'Country', 'gratora' ) }</span>
+                        <span className="gratora-onboarding__section-label">{ __( 'Country', 'gratora-donation-platform' ) }</span>
                         <CountrySelect
                             value={ value.country }
                             onChange={ onCountryChange }
@@ -469,12 +469,12 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
                     </label>
                     { states && (
                         <label className="gratora-onboarding__control-label">
-                            <span className="gratora-onboarding__field-label">{ __( 'State', 'gratora' ) }</span>
+                            <span className="gratora-onboarding__field-label">{ __( 'State', 'gratora-donation-platform' ) }</span>
                             <SearchableSelect
                                 value={ value.state }
                                 onChange={ ( v ) => set( { state: v } ) }
                                 options={ states.map( ( s ) => ( { value: s, label: s } ) ) }
-                                placeholder={ __( 'Select state', 'gratora' ) }
+                                placeholder={ __( 'Select state', 'gratora-donation-platform' ) }
                             />
                         </label>
                     ) }
@@ -484,12 +484,12 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
 
             <div className="gratora-onboarding__section">
                 <label className="gratora-onboarding__control-label">
-                    <span className="gratora-onboarding__section-label">{ __( 'Currency', 'gratora' ) }</span>
+                    <span className="gratora-onboarding__section-label">{ __( 'Currency', 'gratora-donation-platform' ) }</span>
                     <SearchableSelect
                     value={ currency.default_currency }
                     onChange={ ( code ) => onCurrencyChange( ( prev ) => ( { ...prev, default_currency: code } ) ) }
                     options={ currencyOptions }
-                    placeholder={ __( 'Pick a currency', 'gratora' ) }
+                    placeholder={ __( 'Pick a currency', 'gratora-donation-platform' ) }
                     />
                 </label>
             </div>
@@ -504,25 +504,25 @@ const PRESET_CARDS = [
     {
         id:     'classic',
         thumb:  'classic',
-        name:   __( 'Classic', 'gratora' ),
-        desc:   __( 'Friendly, rounded, green. The safe choice.', 'gratora' ),
+        name:   __( 'Classic', 'gratora-donation-platform' ),
+        desc:   __( 'Friendly, rounded, green. The safe choice.', 'gratora-donation-platform' ),
     },
     {
         id:     'bold',
         thumb:  'bold',
-        name:   __( 'Bold', 'gratora' ),
-        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'gratora' ),
+        name:   __( 'Bold', 'gratora-donation-platform' ),
+        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'gratora-donation-platform' ),
     },
     {
         id:     'quiet',
         thumb:  'quiet',
-        name:   __( 'Quiet', 'gratora' ),
-        desc:   __( 'Minimal lines, lots of white space.', 'gratora' ),
+        name:   __( 'Quiet', 'gratora-donation-platform' ),
+        desc:   __( 'Minimal lines, lots of white space.', 'gratora-donation-platform' ),
     },
     {
         id:     'theme',
         thumb:  'theme',
-        name:   __( 'Use my theme', 'gratora' ),
+        name:   __( 'Use my theme', 'gratora-donation-platform' ),
         // desc filled at runtime from theme detection.
     },
 ];
@@ -592,9 +592,9 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
 
     return (
         <div>
-            <h2 className="gratora-onboarding__headline">{ __( 'Pick a starting look', 'gratora' ) }</h2>
+            <h2 className="gratora-onboarding__headline">{ __( 'Pick a starting look', 'gratora-donation-platform' ) }</h2>
             <p className="gratora-onboarding__subtitle">
-                { __( 'You can edit colors and typography anytime.', 'gratora' ) }
+                { __( 'You can edit colors and typography anytime.', 'gratora-donation-platform' ) }
             </p>
             <div className="gratora-onboarding__presets">
                 { PRESET_CARDS.map( ( card ) => {
@@ -603,8 +603,8 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                     const isSel     = value.preset_id === card.id;
                     const desc      = isTheme
                         ? ( themePreset
-                            ? __( 'Inherits styles from your site theme.', 'gratora' )
-                            : __( 'No theme palette detected.', 'gratora' ) )
+                            ? __( 'Inherits styles from your site theme.', 'gratora-donation-platform' )
+                            : __( 'No theme palette detected.', 'gratora-donation-platform' ) )
                         : card.desc;
                     return (
                         <button
@@ -623,7 +623,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                                 </span>
                             ) }
                             <div className={ `gratora-onboarding__preset-thumb gratora-onboarding__preset-thumb--${ card.thumb }` }>
-                                <span className="gratora-onboarding__preset-btn">{ __( 'Donate', 'gratora' ) }</span>
+                                <span className="gratora-onboarding__preset-btn">{ __( 'Donate', 'gratora-donation-platform' ) }</span>
                             </div>
                             <strong className="gratora-onboarding__preset-name">{ card.name }</strong>
                             <span className="gratora-onboarding__preset-desc">{ desc }</span>
@@ -633,16 +633,16 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
             </div>
 
             <div className="gratora-onboarding__preview">
-                <div className="gratora-onboarding__preview-label">{ __( 'Live preview', 'gratora' ) }</div>
+                <div className="gratora-onboarding__preview-label">{ __( 'Live preview', 'gratora-donation-platform' ) }</div>
                 { loadState === 'error' ? (
                     <div className="gratora-onboarding__preview-fallback">
-                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'gratora' ) }</p>
+                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'gratora-donation-platform' ) }</p>
                         <button
                             type="button"
                             className="gratora-btn gratora-btn--ghost"
                             onClick={ () => setReloadKey( ( k ) => k + 1 ) }
                         >
-                            { __( 'Retry', 'gratora' ) }
+                            { __( 'Retry', 'gratora-donation-platform' ) }
                         </button>
                     </div>
                 ) : (
@@ -653,7 +653,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                         <iframe
                             ref={ frameRef }
                             className="gratora-onboarding__preview-frame"
-                            title={ __( 'Donation form preview', 'gratora' ) }
+                            title={ __( 'Donation form preview', 'gratora-donation-platform' ) }
                             // Omit allow-same-origin so preview scripts cannot use admin
                             // credentials. Token messages validate window references.
                             sandbox="allow-scripts"
@@ -679,31 +679,31 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
     return (
         <div>
-            <h1 className="gratora-onboarding__headline">{ __( "You're set up", 'gratora' ) }</h1>
+            <h1 className="gratora-onboarding__headline">{ __( "You're set up", 'gratora-donation-platform' ) }</h1>
             <p className="gratora-onboarding__subtitle">
-                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'gratora' ) }
+                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'gratora-donation-platform' ) }
             </p>
 
             <ul className="gratora-onboarding__checklist">
                 <ChecklistItem
-                    title={ __( 'Connect a payment gateway', 'gratora' ) }
-                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'gratora' ) }
+                    title={ __( 'Connect a payment gateway', 'gratora-donation-platform' ) }
+                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'gratora-donation-platform' ) }
                     href={ gatewayUrl }
-                    cta={ __( 'Connect', 'gratora' ) }
+                    cta={ __( 'Connect', 'gratora-donation-platform' ) }
                 />
                 { campaignId ? (
                     <ChecklistItem
-                        title={ __( 'Build your first form', 'gratora' ) }
-                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'gratora' ) }
+                        title={ __( 'Build your first form', 'gratora-donation-platform' ) }
+                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'gratora-donation-platform' ) }
                         href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
-                        cta={ __( 'Build', 'gratora' ) }
+                        cta={ __( 'Build', 'gratora-donation-platform' ) }
                     />
                 ) : (
                     <ChecklistItem
-                        title={ __( 'Create your first campaign', 'gratora' ) }
-                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'gratora' ) }
+                        title={ __( 'Create your first campaign', 'gratora-donation-platform' ) }
+                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'gratora-donation-platform' ) }
                         href={ newCampaignUrl }
-                        cta={ __( 'Create', 'gratora' ) }
+                        cta={ __( 'Create', 'gratora-donation-platform' ) }
                     />
                 ) }
             </ul>
@@ -711,7 +711,7 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
             <p className="gratora-onboarding__checklist-foot">
                 <a className="gratora-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
-                    { __( 'Skip for now', 'gratora' ) }
+                    { __( 'Skip for now', 'gratora-donation-platform' ) }
                 </a>
             </p>
         </div>

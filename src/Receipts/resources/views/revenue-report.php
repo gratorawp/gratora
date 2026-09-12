@@ -33,10 +33,10 @@ table.months td.num,table.months th.num{text-align:right}
 .footer{margin-top:34px;padding-top:10px;border-top:1px solid #eee;font-size:11px;color:#888}
 </style></head><body>
 <p class="eyebrow"><?php echo esc_html($org_name); ?></p>
-<h1><?php echo esc_html(sprintf(/* translators: %s: four-digit year */ __('Revenue %s', 'gratora'), $year)); ?></h1>
-<p class="range"><?php echo esc_html__('Donations received, by month', 'gratora'); ?></p>
+<h1><?php echo esc_html(sprintf(/* translators: %s: four-digit year */ __('Revenue %s', 'gratora-donation-platform'), $year)); ?></h1>
+<p class="range"><?php echo esc_html__('Donations received, by month', 'gratora-donation-platform'); ?></p>
 
-<p class="raised"><?php echo esc_html(sprintf(/* translators: %s: formatted amount raised */ __('%s raised', 'gratora'), $total)); ?></p>
+<p class="raised"><?php echo esc_html(sprintf(/* translators: %s: formatted amount raised */ __('%s raised', 'gratora-donation-platform'), $total)); ?></p>
 
 <table class="stats"><tr>
 <?php foreach ($stats as $stat) : ?>
@@ -50,9 +50,9 @@ table.months td.num,table.months th.num{text-align:right}
 <table class="months">
     <thead>
         <tr>
-            <th><?php echo esc_html__('Month', 'gratora'); ?></th>
-            <th class="num"><?php echo esc_html__('Donations', 'gratora'); ?></th>
-            <th class="num"><?php echo esc_html__('Revenue', 'gratora'); ?></th>
+            <th><?php echo esc_html__('Month', 'gratora-donation-platform'); ?></th>
+            <th class="num"><?php echo esc_html__('Donations', 'gratora-donation-platform'); ?></th>
+            <th class="num"><?php echo esc_html__('Revenue', 'gratora-donation-platform'); ?></th>
         </tr>
     </thead>
     <tbody>
@@ -66,5 +66,5 @@ table.months td.num,table.months th.num{text-align:right}
     </tbody>
 </table>
 
-<p class="footer"><?php echo esc_html(sprintf(/* translators: %s: formatted date */ __('Generated %s', 'gratora'), $generated_date)); ?></p>
+<p class="footer"><?php echo esc_html(sprintf(/* translators: %s: formatted date */ __('Generated %s', 'gratora-donation-platform'), $generated_date)); ?></p>
 </body></html>

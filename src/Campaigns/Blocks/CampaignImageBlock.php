@@ -61,7 +61,7 @@ final class CampaignImageBlock extends CampaignBlock
         }
 
         return '<div class="gratora-block-notice">'
-            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'gratora')
+            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'gratora-donation-platform')
             . '</div>';
     }
 }

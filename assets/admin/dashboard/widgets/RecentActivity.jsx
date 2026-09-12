@@ -18,8 +18,8 @@ export default function RecentActivity( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations yet', 'gratora' ) }
-                body={ __( 'Donor activity rolls in here as soon as your first donation is received.', 'gratora' ) }
+                title={ __( 'No donations yet', 'gratora-donation-platform' ) }
+                body={ __( 'Donor activity rolls in here as soon as your first donation is received.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -30,15 +30,15 @@ export default function RecentActivity( { rows = [] } ) {
                 <li key={ r.id } className="gratora-activity__row">
                     <span className={ `gratora-activity__dot ${ freqDot[ r.frequency ] || 'is-onetime' }` }
                           title={ r.frequency === 'one_time'
-                              ? __( 'One-time', 'gratora' )
-                              : __( 'Recurring', 'gratora' ) }
+                              ? __( 'One-time', 'gratora-donation-platform' )
+                              : __( 'Recurring', 'gratora-donation-platform' ) }
                           aria-hidden="true" />
                     <div className="gratora-activity__body">
                         <div className="gratora-activity__top">
                             <span className="gratora-activity__donor">
                                 { r.donor_name }
                                 { r.is_test && (
-                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
+                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora-donation-platform' ) }</span>
                                 ) }
                             </span>
                             <span className="gratora-activity__amount">
@@ -51,7 +51,7 @@ export default function RecentActivity( { rows = [] } ) {
                                     { r.campaign_title }
                                 </a>
                             ) : (
-                                <span className="gratora-activity__campaign">{ __( 'No campaign', 'gratora' ) }</span>
+                                <span className="gratora-activity__campaign">{ __( 'No campaign', 'gratora-donation-platform' ) }</span>
                             ) }
                             <span className="gratora-activity__when">{ timeAgo( r.paid_at ) }</span>
                         </div>

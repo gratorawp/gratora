@@ -68,7 +68,7 @@ final class FormsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Forms', 'gratora'),
+            'title'      => __('Forms', 'gratora-donation-platform'),
             'capability' => 'gratora_access_forms',
             'position'   => 15,
             'hidden'     => true,
@@ -140,7 +140,7 @@ final class FormsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         // Include disabled gateways so saved block choices remain visible.
         $manager  = Plugin::instance()->container->get(GatewayManager::class);

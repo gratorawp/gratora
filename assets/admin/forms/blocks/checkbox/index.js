@@ -22,38 +22,38 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Checkbox', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Checkbox', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or help text to edit inline.', 'gratora' ) }
+                        help={ __( 'Click the label or help text to edit inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'gratora' ) }
+                        label={ __( 'Help text', 'gratora-donation-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'gratora' ) }
+                        label={ __( 'Field name', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Default on', 'gratora' ) }
+                        label={ __( 'Default on', 'gratora-donation-platform' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'Donor must tick this to submit.', 'gratora' ) }
+                        help={ __( 'Donor must tick this to submit.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -79,7 +79,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'I agree to…', 'gratora' ) }
+                        placeholder={ __( 'I agree to…', 'gratora-donation-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 13, color: '#111827' } }
                     />
@@ -88,7 +88,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional help text', 'gratora' ) }
+                        placeholder={ __( 'Optional help text', 'gratora-donation-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', lineHeight: 1.3 } }
                     />
@@ -101,8 +101,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Checkbox', 'gratora' ),
-        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'gratora' ),
+        title:       __( 'Checkbox', 'gratora-donation-platform' ),
+        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'gratora-donation-platform' ),
         category:    'gratora-fields',
         icon:        BlockIcons[ 'checkbox' ],
         supports: { html: false, anchor: false, inserter: true },

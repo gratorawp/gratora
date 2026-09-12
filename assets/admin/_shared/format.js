@@ -40,16 +40,16 @@ export function timeAgo( iso ) {
 
     if ( days < 30 ) {
         /* translators: %d: number of weeks */
-        return sprintf( __( '%dw ago', 'gratora' ), Math.floor( days / 7 ) );
+        return sprintf( __( '%dw ago', 'gratora-donation-platform' ), Math.floor( days / 7 ) );
     }
 
     if ( days < 365 ) {
         /* translators: %d: number of months */
-        return sprintf( __( '%dmo ago', 'gratora' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
+        return sprintf( __( '%dmo ago', 'gratora-donation-platform' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
     }
 
     /* translators: %d: number of years */
-    return sprintf( __( '%dy ago', 'gratora' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
+    return sprintf( __( '%dy ago', 'gratora-donation-platform' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
 }
 // Amounts and the org bridge they read come from the local formatter: the org's
 // "decimal places" preference belongs to the base currency and may only drop
@@ -67,15 +67,15 @@ export { default as StatusBadge } from './components/StatusBadge';
 // list + the detail header). The shared StatusBadge owns its own render map;
 // this is just the campaign-scoped label set for filter dropdowns.
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'gratora' ),
-    published: __( 'Active', 'gratora' ),
-    archived:  __( 'Archived', 'gratora' ),
+    draft:     __( 'Draft', 'gratora-donation-platform' ),
+    published: __( 'Active', 'gratora-donation-platform' ),
+    archived:  __( 'Archived', 'gratora-donation-platform' ),
     // Derived on the server, not stored: a published campaign outside its
     // schedule or past a goal it closes on. Filterable because the list shows
     // them, and a badge you cannot filter by is a dead end.
-    scheduled: __( 'Scheduled', 'gratora' ),
-    ended:     __( 'Ended', 'gratora' ),
-    goal_met:  __( 'Goal met', 'gratora' ),
+    scheduled: __( 'Scheduled', 'gratora-donation-platform' ),
+    ended:     __( 'Ended', 'gratora-donation-platform' ),
+    goal_met:  __( 'Goal met', 'gratora-donation-platform' ),
 };
 
 export function listHref() {

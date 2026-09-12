@@ -50,9 +50,9 @@ export default function ConsentsPanel( { s } ) {
 
     const remove = ( i ) => {
         setConfirm( {
-            title:        __( 'Delete consent purpose', 'gratora' ),
-            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'gratora' ),
-            confirmLabel: __( 'Delete', 'gratora' ),
+            title:        __( 'Delete consent purpose', 'gratora-donation-platform' ),
+            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'gratora-donation-platform' ),
+            confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
             destructive:  true,
             onConfirm: async () => {
                 setList( list.filter( ( _, idx ) => idx !== i ) );
@@ -68,8 +68,8 @@ export default function ConsentsPanel( { s } ) {
     return (
         <>
         <Card
-            title={ __( 'Consent purposes', 'gratora' ) }
-            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'gratora' ) }
+            title={ __( 'Consent purposes', 'gratora-donation-platform' ) }
+            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'gratora-donation-platform' ) }
             edited={ s.isDirty }
         >
             <div className="gratora-consents">
@@ -77,11 +77,11 @@ export default function ConsentsPanel( { s } ) {
                     <EmptyState
                         compact
                         icon={ <ShieldCheck size={ 22 } strokeWidth={ 1.75 } /> }
-                        title={ __( 'No consent purposes yet', 'gratora' ) }
-                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'gratora' ) }
+                        title={ __( 'No consent purposes yet', 'gratora-donation-platform' ) }
+                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'gratora-donation-platform' ) }
                         action={
                             <Btn variant="secondary" onClick={ add }>
-                                { __( 'Add a purpose', 'gratora' ) }
+                                { __( 'Add a purpose', 'gratora-donation-platform' ) }
                             </Btn>
                         }
                     />
@@ -94,7 +94,7 @@ export default function ConsentsPanel( { s } ) {
                                 className="gratora-input gratora-consent-card__label"
                                 type="text"
                                 value={ p.label }
-                                placeholder={ __( 'Purpose name', 'gratora' ) }
+                                placeholder={ __( 'Purpose name', 'gratora-donation-platform' ) }
                                 onChange={ ( e ) => update( i, {
                                     label: e.target.value,
                                     key:   p.key || slugify( e.target.value ),
@@ -104,9 +104,9 @@ export default function ConsentsPanel( { s } ) {
                                 type="button"
                                 className="gratora-consent-card__delete"
                                 onClick={ () => remove( i ) }
-                                aria-label={ __( 'Delete purpose', 'gratora' ) }
+                                aria-label={ __( 'Delete purpose', 'gratora-donation-platform' ) }
                             >
-                                { __( 'Delete', 'gratora' ) }
+                                { __( 'Delete', 'gratora-donation-platform' ) }
                             </button>
                         </header>
 
@@ -114,13 +114,13 @@ export default function ConsentsPanel( { s } ) {
                             className="gratora-textarea gratora-consent-card__desc"
                             rows={ 3 }
                             value={ p.description }
-                            placeholder={ __( 'Enter a donor-facing description', 'gratora' ) }
+                            placeholder={ __( 'Enter a donor-facing description', 'gratora-donation-platform' ) }
                             onChange={ ( e ) => update( i, { description: e.target.value } ) }
                         />
 
                         <footer className="gratora-consent-card__foot">
                             <label className="gratora-consent-card__meta-field">
-                                <span>{ __( 'Key', 'gratora' ) }</span>
+                                <span>{ __( 'Key', 'gratora-donation-platform' ) }</span>
                                 <input
                                     className="gratora-input gratora-input--mono"
                                     type="text"
@@ -130,7 +130,7 @@ export default function ConsentsPanel( { s } ) {
                                 />
                             </label>
                             <label className="gratora-consent-card__meta-field gratora-consent-card__meta-field--narrow">
-                                <span>{ __( 'Version', 'gratora' ) }</span>
+                                <span>{ __( 'Version', 'gratora-donation-platform' ) }</span>
                                 <input
                                     className="gratora-input"
                                     type="number"
@@ -142,12 +142,12 @@ export default function ConsentsPanel( { s } ) {
 
                             <div className="gratora-consent-card__toggles">
                                 <SwitchChip
-                                    label={ __( 'Required to donate', 'gratora' ) }
+                                    label={ __( 'Required to donate', 'gratora-donation-platform' ) }
                                     checked={ !! p.required }
                                     onChange={ ( v ) => update( i, { required: v } ) }
                                 />
                                 <SwitchChip
-                                    label={ __( 'Pre-selected', 'gratora' ) }
+                                    label={ __( 'Pre-selected', 'gratora-donation-platform' ) }
                                     checked={ !! p.default }
                                     onChange={ ( v ) => update( i, { default: v } ) }
                                 />
@@ -157,7 +157,7 @@ export default function ConsentsPanel( { s } ) {
                 ) ) }
 
                 <Btn variant="ghost" onClick={ add } className="gratora-consents__add">
-                    + { __( 'Add consent purpose', 'gratora' ) }
+                    + { __( 'Add consent purpose', 'gratora-donation-platform' ) }
                 </Btn>
             </div>
         </Card>

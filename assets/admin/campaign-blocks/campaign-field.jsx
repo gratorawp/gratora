@@ -61,7 +61,7 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
         enabled: Number( value ) > 0,
     } );
 
-    const options = [ { value: 0, label: noneLabel || __( 'Select a campaign', 'gratora' ) } ];
+    const options = [ { value: 0, label: noneLabel || __( 'Select a campaign', 'gratora-donation-platform' ) } ];
     const seen    = new Set( [ 0 ] );
     for ( const c of [ ...( bound ? [ bound ] : [] ), ...campaigns ] ) {
         if ( seen.has( c.id ) ) continue;
@@ -72,7 +72,7 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
     return (
         <>
             <ComboboxControl
-                label={ __( 'Campaign', 'gratora' ) }
+                label={ __( 'Campaign', 'gratora-donation-platform' ) }
                 value={ Number( value ) || 0 }
                 options={ options }
                 onFilterValueChange={ setSearch }
@@ -82,8 +82,8 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
             { empty && (
                 <Notice status="warning" isDismissible={ false }>
                     { canManageCampaigns()
-                        ? __( 'No campaigns have been created yet.', 'gratora' )
-                        : __( 'You do not have permission to list campaigns, so this block can only use the one the page is already for.', 'gratora' ) }
+                        ? __( 'No campaigns have been created yet.', 'gratora-donation-platform' )
+                        : __( 'You do not have permission to list campaigns, so this block can only use the one the page is already for.', 'gratora-donation-platform' ) }
                 </Notice>
             ) }
         </>

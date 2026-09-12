@@ -271,7 +271,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         // A POST carries the live editor blocks and settings so the checks
@@ -327,7 +327,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
         return new WP_REST_Response($this->shapeFormFull($form, $campaign), 200);
@@ -338,7 +338,7 @@ final class FormsController
     {
         $source = $this->forms->findById((int) $request['id']);
         if (! $source) {
-            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         try {
             $copy = $this->formService->duplicate($source);
@@ -370,7 +370,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
@@ -389,7 +389,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
         try {
             $this->formService->delete($form);

@@ -20,7 +20,7 @@ export default function UnshownNotice( { tokens = {}, catalogue = {} } ) {
                 <li key={ t.key }>
                     { sprintf(
                         /* translators: 1: token name, e.g. Small corner radius, 2: the value it holds, e.g. 1rem */
-                        __( '%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text.', 'gratora' ),
+                        __( '%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text.', 'gratora-donation-platform' ),
                         t.label,
                         t.value
                     ) }

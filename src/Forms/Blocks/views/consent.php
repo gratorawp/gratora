@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string                                                                            $helpText
  * @var list<array{key:string,label:string,description:string,required:bool,default:bool}> $purposes
  */
-$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'gratora');
+$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'gratora-donation-platform');
 ?>
 <fieldset class="gratora-block gratora-block--consent gratora-consent">
     <legend class="gratora-consent__legend"><?php echo esc_html($labelText); ?></legend>
@@ -33,7 +33,7 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'gratora')
                     <span class="gratora-consent__purpose-label">
                         <?php echo esc_html($pLabel !== '' ? $pLabel : $id); ?>
                         <?php if ($required): ?>
-                            <span class="gratora-consent__required-pill"><?php esc_html_e('Required', 'gratora'); ?></span>
+                            <span class="gratora-consent__required-pill"><?php esc_html_e('Required', 'gratora-donation-platform'); ?></span>
                         <?php endif; ?>
                     </span>
                     <?php if ($desc !== ''): ?>

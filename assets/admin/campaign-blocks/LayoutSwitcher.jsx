@@ -111,13 +111,13 @@ function CampaignLayoutButton() {
 
             createNotice(
                 'info',
-                __( 'Campaign template applied. Undo puts the old page back.', 'gratora' ),
+                __( 'Campaign template applied. Undo puts the old page back.', 'gratora-donation-platform' ),
                 { type: 'snackbar' }
             );
         } catch ( err ) {
             createNotice(
                 'error',
-                err?.message || __( 'The campaign template could not be applied.', 'gratora' ),
+                err?.message || __( 'The campaign template could not be applied.', 'gratora-donation-platform' ),
                 { type: 'snackbar' }
             );
         } finally {
@@ -133,7 +133,7 @@ function CampaignLayoutButton() {
         >
             { applying ? <Spinner /> : <BrandMark /> }
             <span className="gratora-layout-btn__label">
-                { __( 'Campaign templates', 'gratora' ) }
+                { __( 'Campaign templates', 'gratora-donation-platform' ) }
             </span>
         </Button>
     );

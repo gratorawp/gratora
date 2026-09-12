@@ -29,19 +29,19 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Step', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Step', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        help={ __( 'Shown as the page title and on the progress indicator.', 'gratora' ) }
+                        help={ __( 'Shown as the page title and on the progress indicator.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show label', 'gratora' ) }
+                        label={ __( 'Show label', 'gratora-donation-platform' ) }
                         checked={ showTitle }
                         onChange={ ( v ) => setAttributes( { showTitle: v } ) }
-                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'gratora' ) }
+                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 <div className="gratora-block-preview__step-meta">
                     { sprintf(
                         /* translators: %1$d: current step number. %2$d: total number of steps. */
-                        __( 'Step %1$d of %2$d', 'gratora' ),
+                        __( 'Step %1$d of %2$d', 'gratora-donation-platform' ),
                         index + 1,
                         total
                     ) }
@@ -61,13 +61,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                         className="gratora-block-preview__step-title"
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Untitled step', 'gratora' ) }
+                        placeholder={ __( 'Untitled step', 'gratora-donation-platform' ) }
                         allowedFormats={ [] }
                     />
                 ) }
                 { childCount === 0 && (
                     <Notice status="warning" isDismissible={ false }>
-                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'gratora' ) }
+                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'gratora-donation-platform' ) }
                     </Notice>
                 ) }
                 <InnerBlocks
@@ -81,8 +81,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Step', 'gratora' ),
-        description: __( 'One page inside a Steps wizard.', 'gratora' ),
+        title:       __( 'Step', 'gratora-donation-platform' ),
+        description: __( 'One page inside a Steps wizard.', 'gratora-donation-platform' ),
         category:    'gratora-content',
         icon:        BlockIcons[ 'step' ],
         parent:      [ 'gratora/steps' ],

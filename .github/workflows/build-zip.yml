@@ -67,12 +67,12 @@ jobs:
         run: bash bin/verify-zip.sh
 
       # The packager names the zip after the Text Domain, so this is
-      # dist/gratora.zip and not the folder name.
+      # dist/gratora-donation-platform.zip and not the folder name.
       - name: Upload the artefact
         uses: actions/upload-artifact@v4
         with:
           name: gratora-plugin-${{ github.sha }}
-          path: dist/gratora.zip
+          path: dist/gratora-donation-platform.zip
           # Default is a warning, so a run that uploads nothing still reports
           # success.
           if-no-files-found: error

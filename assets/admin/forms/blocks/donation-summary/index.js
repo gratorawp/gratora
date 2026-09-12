@@ -16,25 +16,25 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--summary' } );
 
     const rows = [
-        [ __( 'Amount', 'gratora' ), '-' ],
-        ...( showDonor   ? [ [ __( 'Donor', 'gratora' ), '-' ], [ __( 'Email', 'gratora' ), '-' ] ] : [] ),
-        ...( showGateway ? [ [ __( 'Payment method', 'gratora' ), '-' ] ] : [] ),
-        [ __( 'Total', 'gratora' ), '-' ],
+        [ __( 'Amount', 'gratora-donation-platform' ), '-' ],
+        ...( showDonor   ? [ [ __( 'Donor', 'gratora-donation-platform' ), '-' ], [ __( 'Email', 'gratora-donation-platform' ), '-' ] ] : [] ),
+        ...( showGateway ? [ [ __( 'Payment method', 'gratora-donation-platform' ), '-' ] ] : [] ),
+        [ __( 'Total', 'gratora-donation-platform' ), '-' ],
     ];
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Summary', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Summary', 'gratora-donation-platform' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Show who is giving', 'gratora' ) }
-                        help={ __( 'Name, email and country, when the form collects them.', 'gratora' ) }
+                        label={ __( 'Show who is giving', 'gratora-donation-platform' ) }
+                        help={ __( 'Name, email and country, when the form collects them.', 'gratora-donation-platform' ) }
                         checked={ showDonor }
                         onChange={ ( v ) => setAttributes( { showDonor: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show payment method', 'gratora' ) }
+                        label={ __( 'Show payment method', 'gratora-donation-platform' ) }
                         checked={ showGateway }
                         onChange={ ( v ) => setAttributes( { showGateway: v } ) }
                         __nextHasNoMarginBottom
@@ -63,8 +63,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Donation summary', 'gratora' ),
-        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'gratora' ),
+        title:       __( 'Donation summary', 'gratora-donation-platform' ),
+        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'gratora-donation-platform' ),
         category:    'gratora-extras',
         icon:        BlockIcons[ 'donation-summary' ],
         // One recap per form. Two would disagree the moment a condition hid a

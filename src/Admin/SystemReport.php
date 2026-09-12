@@ -50,13 +50,13 @@ final class SystemReport
     public function sections(): array
     {
         return [
-            ['title' => __('Gratora', 'gratora'),      'rows' => $this->gratora()],
-            ['title' => __('Add-ons', 'gratora'),       'rows' => $this->addOns()],
-            ['title' => __('Payments', 'gratora'),      'rows' => $this->payments()],
-            ['title' => __('WordPress', 'gratora'),     'rows' => $this->wordpress()],
-            ['title' => __('Server', 'gratora'),        'rows' => $this->server()],
-            ['title' => __('Database', 'gratora'),      'rows' => $this->database()],
-            ['title' => __('Active plugins', 'gratora'), 'rows' => $this->plugins()],
+            ['title' => __('Gratora', 'gratora-donation-platform'),      'rows' => $this->gratora()],
+            ['title' => __('Add-ons', 'gratora-donation-platform'),       'rows' => $this->addOns()],
+            ['title' => __('Payments', 'gratora-donation-platform'),      'rows' => $this->payments()],
+            ['title' => __('WordPress', 'gratora-donation-platform'),     'rows' => $this->wordpress()],
+            ['title' => __('Server', 'gratora-donation-platform'),        'rows' => $this->server()],
+            ['title' => __('Database', 'gratora-donation-platform'),      'rows' => $this->database()],
+            ['title' => __('Active plugins', 'gratora-donation-platform'), 'rows' => $this->plugins()],
         ];
     }
 
@@ -68,12 +68,12 @@ final class SystemReport
         $keyLost = SystemSetting::read('encryption_key_lost_at');
 
         $rows = [
-            self::row(__('Version', 'gratora'), defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown'),
-            self::row(__('Encryption key', 'gratora'), self::yesNo($keyHeld)),
+            self::row(__('Version', 'gratora-donation-platform'), defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown'),
+            self::row(__('Encryption key', 'gratora-donation-platform'), self::yesNo($keyHeld)),
         ];
 
         if (is_string($keyLost) && $keyLost !== '') {
-            $rows[] = self::row(__('Encryption key lost at', 'gratora'), $keyLost);
+            $rows[] = self::row(__('Encryption key lost at', 'gratora-donation-platform'), $keyLost);
         }
 
         return $rows;
@@ -98,14 +98,14 @@ final class SystemReport
                 (string) $id,
                 sprintf(
                     /* translators: 1: installed core version, 2: the version constraint the add-on asked for */
-                    __('not loaded: core %1$s does not satisfy %2$s', 'gratora'),
+                    __('not loaded: core %1$s does not satisfy %2$s', 'gratora-donation-platform'),
                     (string) ($pair[0] ?? '?'),
                     (string) ($pair[1] ?? '?')
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Installed', 'gratora'), __('None', 'gratora'))];
+        return $rows ?: [self::row(__('Installed', 'gratora-donation-platform'), __('None', 'gratora-donation-platform'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -117,12 +117,12 @@ final class SystemReport
             $rows[] = self::row(
                 (string) $gateway->label(),
                 $gateway->canCharge()
-                    ? __('ready', 'gratora')
-                    : __('not configured', 'gratora')
+                    ? __('ready', 'gratora-donation-platform')
+                    : __('not configured', 'gratora-donation-platform')
             );
         }
 
-        return $rows ?: [self::row(__('Gateways', 'gratora'), __('None registered', 'gratora'))];
+        return $rows ?: [self::row(__('Gateways', 'gratora-donation-platform'), __('None registered', 'gratora-donation-platform'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -132,25 +132,25 @@ final class SystemReport
         $parent = $theme->parent();
 
         return [
-            self::row(__('Version', 'gratora'), get_bloginfo('version')),
-            self::row(__('Site URL', 'gratora'), site_url()),
-            self::row(__('Home URL', 'gratora'), home_url()),
-            self::row(__('REST root', 'gratora'), esc_url_raw(rest_url('gratora/v1/'))),
-            self::row(__('Multisite', 'gratora'), self::yesNo(is_multisite())),
-            self::row(__('Locale', 'gratora'), get_locale()),
-            self::row(__('Timezone', 'gratora'), wp_timezone_string()),
-            self::row(__('Permalinks', 'gratora'), (string) get_option('permalink_structure') ?: __('plain', 'gratora')),
-            self::row(__('Theme', 'gratora'), sprintf(
+            self::row(__('Version', 'gratora-donation-platform'), get_bloginfo('version')),
+            self::row(__('Site URL', 'gratora-donation-platform'), site_url()),
+            self::row(__('Home URL', 'gratora-donation-platform'), home_url()),
+            self::row(__('REST root', 'gratora-donation-platform'), esc_url_raw(rest_url('gratora/v1/'))),
+            self::row(__('Multisite', 'gratora-donation-platform'), self::yesNo(is_multisite())),
+            self::row(__('Locale', 'gratora-donation-platform'), get_locale()),
+            self::row(__('Timezone', 'gratora-donation-platform'), wp_timezone_string()),
+            self::row(__('Permalinks', 'gratora-donation-platform'), (string) get_option('permalink_structure') ?: __('plain', 'gratora-donation-platform')),
+            self::row(__('Theme', 'gratora-donation-platform'), sprintf(
                 '%s %s%s',
                 (string) $theme->get('Name'),
                 (string) $theme->get('Version'),
                 $parent ? ' (child of ' . (string) $parent->get('Name') . ')' : ''
             )),
-            self::row(__('Block theme', 'gratora'), self::yesNo(wp_is_block_theme())),
-            self::row(__('Memory limit', 'gratora'), self::constantValue('WP_MEMORY_LIMIT')),
-            self::row(__('Debug mode', 'gratora'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
+            self::row(__('Block theme', 'gratora-donation-platform'), self::yesNo(wp_is_block_theme())),
+            self::row(__('Memory limit', 'gratora-donation-platform'), self::constantValue('WP_MEMORY_LIMIT')),
+            self::row(__('Debug mode', 'gratora-donation-platform'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
             // Action Scheduler depends on WP-cron.
-            self::row(__('WP-Cron disabled', 'gratora'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
+            self::row(__('WP-Cron disabled', 'gratora-donation-platform'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
         ];
     }
 
@@ -167,40 +167,40 @@ final class SystemReport
             : '';
 
         return [
-            self::row(__('PHP version', 'gratora'), PHP_VERSION),
-            self::row(__('PHP interface', 'gratora'), PHP_SAPI),
-            self::row(__('Web server', 'gratora'), $software !== '' ? $software : __('unknown', 'gratora')),
-            self::row(__('HTTPS', 'gratora'), self::yesNo(is_ssl())),
+            self::row(__('PHP version', 'gratora-donation-platform'), PHP_VERSION),
+            self::row(__('PHP interface', 'gratora-donation-platform'), PHP_SAPI),
+            self::row(__('Web server', 'gratora-donation-platform'), $software !== '' ? $software : __('unknown', 'gratora-donation-platform')),
+            self::row(__('HTTPS', 'gratora-donation-platform'), self::yesNo(is_ssl())),
             // The shape, never the address: this screen is written to be pasted
             // into a ticket, and a visitor's IP is theirs. It still answers the
             // only question an admin has here, which is whether the proxy
             // configuration is doing anything: declare ranges and see this flip
             // to "forwarded header", or it is not matching your edge.
             self::row(
-                __('Trusted proxies', 'gratora'),
+                __('Trusted proxies', 'gratora-donation-platform'),
                 ($count = count(ClientIp::trustedProxies())) > 0
                     /* translators: %d: number of declared CIDR ranges */
-                    ? sprintf(_n('%d range', '%d ranges', $count, 'gratora'), $count)
-                    : __('none declared', 'gratora')
+                    ? sprintf(_n('%d range', '%d ranges', $count, 'gratora-donation-platform'), $count)
+                    : __('none declared', 'gratora-donation-platform')
             ),
             self::row(
-                __('Visitor address from', 'gratora'),
+                __('Visitor address from', 'gratora-donation-platform'),
                 ClientIp::resolve() !== ClientIp::remote()
-                    ? __('forwarded header', 'gratora')
-                    : __('REMOTE_ADDR', 'gratora')
+                    ? __('forwarded header', 'gratora-donation-platform')
+                    : __('REMOTE_ADDR', 'gratora-donation-platform')
             ),
             self::row(
-                __('Undeclared proxy in front', 'gratora'),
+                __('Undeclared proxy in front', 'gratora-donation-platform'),
                 self::yesNo(ClientIp::looksProxied())
             ),
-            self::row(__('Memory limit', 'gratora'), (string) ini_get('memory_limit')),
-            self::row(__('Max execution time', 'gratora'), (string) ini_get('max_execution_time')),
-            self::row(__('Upload max filesize', 'gratora'), (string) ini_get('upload_max_filesize')),
-            self::row(__('Post max size', 'gratora'), (string) ini_get('post_max_size')),
-            self::row(__('Max input vars', 'gratora'), (string) ini_get('max_input_vars')),
+            self::row(__('Memory limit', 'gratora-donation-platform'), (string) ini_get('memory_limit')),
+            self::row(__('Max execution time', 'gratora-donation-platform'), (string) ini_get('max_execution_time')),
+            self::row(__('Upload max filesize', 'gratora-donation-platform'), (string) ini_get('upload_max_filesize')),
+            self::row(__('Post max size', 'gratora-donation-platform'), (string) ini_get('post_max_size')),
+            self::row(__('Max input vars', 'gratora-donation-platform'), (string) ini_get('max_input_vars')),
             self::row(
-                __('Missing PHP extensions', 'gratora'),
-                $missing === [] ? __('None', 'gratora') : implode(', ', $missing)
+                __('Missing PHP extensions', 'gratora-donation-platform'),
+                $missing === [] ? __('None', 'gratora-donation-platform') : implode(', ', $missing)
             ),
         ];
     }
@@ -217,10 +217,10 @@ final class SystemReport
         $version = (string) $wpdb->get_var('SELECT VERSION()');
 
         $rows = [
-            self::row(__('Server', 'gratora'), $version !== '' ? $version : __('unknown', 'gratora')),
-            self::row(__('Charset', 'gratora'), (string) $wpdb->charset),
-            self::row(__('Collation', 'gratora'), (string) $wpdb->collate),
-            self::row(__('Table prefix', 'gratora'), (string) $wpdb->prefix),
+            self::row(__('Server', 'gratora-donation-platform'), $version !== '' ? $version : __('unknown', 'gratora-donation-platform')),
+            self::row(__('Charset', 'gratora-donation-platform'), (string) $wpdb->charset),
+            self::row(__('Collation', 'gratora-donation-platform'), (string) $wpdb->collate),
+            self::row(__('Table prefix', 'gratora-donation-platform'), (string) $wpdb->prefix),
         ];
 
         foreach (self::COUNTED as $base) {
@@ -232,10 +232,10 @@ final class SystemReport
                 $exists
                     ? sprintf(
                         /* translators: %s: a row count */
-                        __('%s rows', 'gratora'),
+                        __('%s rows', 'gratora-donation-platform'),
                         number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a constant in this file, never from input.
                     )
-                    : __('MISSING', 'gratora')
+                    : __('MISSING', 'gratora-donation-platform')
             );
         }
         // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -261,7 +261,7 @@ final class SystemReport
             $data = $all[$file] ?? null;
             if ($data === null) {
                 // Active but not on disk, which is itself worth reporting.
-                $rows[] = self::row((string) $file, __('active, but the file is missing', 'gratora'));
+                $rows[] = self::row((string) $file, __('active, but the file is missing', 'gratora-donation-platform'));
                 continue;
             }
             $rows[] = self::row((string) $data['Name'], (string) $data['Version']);
@@ -272,13 +272,13 @@ final class SystemReport
                 (string) $data['Name'],
                 sprintf(
                     /* translators: %s: plugin version */
-                    __('%s (must-use)', 'gratora'),
+                    __('%s (must-use)', 'gratora-donation-platform'),
                     (string) $data['Version']
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Active', 'gratora'), __('None', 'gratora'))];
+        return $rows ?: [self::row(__('Active', 'gratora-donation-platform'), __('None', 'gratora-donation-platform'))];
     }
 
     /** @return array{label:string, value:string} */
@@ -290,12 +290,12 @@ final class SystemReport
     private static function yesNo(bool $value): string
     {
         return $value
-            ? __('Yes', 'gratora')
-            : __('No', 'gratora');
+            ? __('Yes', 'gratora-donation-platform')
+            : __('No', 'gratora-donation-platform');
     }
 
     private static function constantValue(string $name): string
     {
-        return defined($name) ? (string) constant($name) : __('not set', 'gratora');
+        return defined($name) ? (string) constant($name) : __('not set', 'gratora-donation-platform');
     }
 }

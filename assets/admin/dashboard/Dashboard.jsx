@@ -118,21 +118,21 @@ export default function Dashboard() {
 
     const registry = {
         today: {
-            title:  __( 'Activity (last 24h)', 'gratora' ),
+            title:  __( 'Activity (last 24h)', 'gratora-donation-platform' ),
             render: pending( () => <TodayStrip today={ m.today } /> ),
         },
         kpis: {
-            title:  __( 'Key metrics', 'gratora' ),
+            title:  __( 'Key metrics', 'gratora-donation-platform' ),
             span:   'full',
             bare:   true,
             render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } includesTest={ !! m.test?.includes_test } loading={ metrics === null && loading } />,
         },
         attention: {
-            title:  __( 'Needs attention', 'gratora' ),
+            title:  __( 'Needs attention', 'gratora-donation-platform' ),
             render: pending( () => <NeedsAttention items={ m.attention } /> ),
         },
         revenue: {
-            title:  __( 'Revenue', 'gratora' ),
+            title:  __( 'Revenue', 'gratora-donation-platform' ),
             span:   'full',
             render: pending( () => (
                 <RevenueChart
@@ -144,27 +144,27 @@ export default function Dashboard() {
             ) ),
         },
         'active-campaigns': {
-            title:  __( 'Active campaigns', 'gratora' ),
+            title:  __( 'Active campaigns', 'gratora-donation-platform' ),
             render: pending( () => <ActiveCampaigns rows={ m.active_campaigns } /> ),
         },
         recurring: {
-            title:  __( 'Recurring revenue', 'gratora' ),
+            title:  __( 'Recurring revenue', 'gratora-donation-platform' ),
             render: pending( () => <RecurringForecast recurring={ m.recurring } /> ),
         },
         'top-campaigns': {
-            title:  __( 'Top campaigns', 'gratora' ),
+            title:  __( 'Top campaigns', 'gratora-donation-platform' ),
             render: pending( () => <TopCampaigns rows={ m.top_campaigns } /> ),
         },
         channel: {
-            title:  __( 'Channels', 'gratora' ),
+            title:  __( 'Channels', 'gratora-donation-platform' ),
             render: pending( () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } /> ),
         },
         'recent-activity': {
-            title:  __( 'Recent donations', 'gratora' ),
+            title:  __( 'Recent donations', 'gratora-donation-platform' ),
             render: pending( () => <RecentActivity rows={ m.recent_activity } /> ),
         },
         'quick-actions': {
-            title:  __( 'Quick actions', 'gratora' ),
+            title:  __( 'Quick actions', 'gratora-donation-platform' ),
             render: () => <QuickActions />,
         },
     };
@@ -173,7 +173,7 @@ export default function Dashboard() {
         <div className="gratora-dashboard" data-loading={ loading ? 'true' : undefined }>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'gratora' ) }</h1>
+                    <h1>{ __( 'Dashboard', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     <SectionBar
@@ -203,23 +203,23 @@ export default function Dashboard() {
                             '%d test record is not counted here.',
                             '%d test records are not counted here.',
                             hiddenTotal,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         hiddenTotal
                     ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( true ) }>
-                        { __( 'Show them', 'gratora' ) }
+                        { __( 'Show them', 'gratora-donation-platform' ) }
                     </Button>
                 </Notice>
             ) }
 
             { metrics?.test?.includes_test && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'gratora' ) }
+                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'gratora-donation-platform' ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( false ) }>
-                        { __( 'Hide them', 'gratora' ) }
+                        { __( 'Hide them', 'gratora-donation-platform' ) }
                     </Button>
                 </Notice>
             ) }
@@ -229,13 +229,13 @@ export default function Dashboard() {
                  the range now selected. */ }
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
-                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'gratora' ) }
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'gratora-donation-platform' ) }
                     { ' ' }
                     { /* Every other way back into the fetch is a setter called
                          with the value the state already holds, so nothing is
                          asked again unless the reader changes the question. */ }
                     <Btn variant="link" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                        { __( 'Try again', 'gratora' ) }
+                        { __( 'Try again', 'gratora-donation-platform' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -243,11 +243,11 @@ export default function Dashboard() {
             { metrics === null && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load your dashboard', 'gratora' ) }
-                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'gratora' ) }
+                    title={ __( 'Could not load your dashboard', 'gratora-donation-platform' ) }
+                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'gratora-donation-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                            { __( 'Retry', 'gratora' ) }
+                            { __( 'Retry', 'gratora-donation-platform' ) }
                         </Btn>
                     }
                 />

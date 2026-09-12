@@ -57,7 +57,7 @@ echo get_block_wrapper_attributes(array_filter([
                         <div class="gratora-top-donors__podium-count">
                             <?php echo esc_html(sprintf(
                                 /* translators: %s: number of donations */
-                                _n('%s donation', '%s donations', $entry['donations_count'], 'gratora'),
+                                _n('%s donation', '%s donations', $entry['donations_count'], 'gratora-donation-platform'),
                                 number_format_i18n($entry['donations_count'])
                             ));
 ?>
@@ -80,7 +80,7 @@ echo get_block_wrapper_attributes(array_filter([
                             <span class="gratora-top-donors__count">
                                 <?php echo esc_html(sprintf(
                                     /* translators: %s: count */
-                                    _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'gratora'),
+                                    _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'gratora-donation-platform'),
                                     number_format_i18n($entry['donations_count'])
                                 ));
 ?>
@@ -109,7 +109,7 @@ echo get_block_wrapper_attributes(array_filter([
                         <span class="gratora-top-donors__count">
                             <?php echo esc_html(sprintf(
                                 /* translators: %s: count */
-                                _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'gratora'),
+                                _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'gratora-donation-platform'),
                                 number_format_i18n($entry['donations_count'])
                             ));
 ?>

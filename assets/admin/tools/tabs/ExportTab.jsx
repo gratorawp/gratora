@@ -17,7 +17,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const blob = await res.blob();
 
         if ( blob.size === 0 ) {
-            setNotice( { type: 'error', text: __( 'That export came back empty.', 'gratora' ) } );
+            setNotice( { type: 'error', text: __( 'That export came back empty.', 'gratora-donation-platform' ) } );
             return;
         }
 
@@ -29,7 +29,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
                 type: 'warning',
                 text: sprintf(
                     /* translators: %s: maximum number of rows an export can hold. */
-                    __( 'This export holds the most recent %s rows and stops there. Narrow the date range to get the rest.', 'gratora' ),
+                    __( 'This export holds the most recent %s rows and stops there. Narrow the date range to get the rest.', 'gratora-donation-platform' ),
                     Number( cap ).toLocaleString()
                 ),
             } );
@@ -38,7 +38,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const match = ( res.headers.get( 'content-disposition' ) || '' ).match( /filename="([^"]+)"/ );
         saveBlob( blob, match ? match[ 1 ] : fallbackName );
     } catch ( err ) {
-        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'gratora' ) } );
+        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'gratora-donation-platform' ) } );
     } finally {
         setBusy( false );
     }
@@ -96,7 +96,7 @@ export default function ExportTab( { setNotice } ) {
                 setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } );
                 setNotice( {
                     type: 'error',
-                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'gratora' ),
+                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'gratora-donation-platform' ),
                 } );
             } );
     }, [] );
@@ -147,7 +147,7 @@ export default function ExportTab( { setNotice } ) {
             const blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
             saveBlob( blob, `gratora-settings-${ new Date().toISOString().slice( 0, 10 ) }.json` );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'gratora-donation-platform' ) } );
         } finally {
             setBusy( '' );
         }
@@ -158,33 +158,33 @@ export default function ExportTab( { setNotice } ) {
             <table className="gratora-exports">
                 <thead>
                     <tr>
-                        <th scope="col">{ __( 'Export type', 'gratora' ) }</th>
-                        <th scope="col">{ __( 'Options', 'gratora' ) }</th>
+                        <th scope="col">{ __( 'Export type', 'gratora-donation-platform' ) }</th>
+                        <th scope="col">{ __( 'Options', 'gratora-donation-platform' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
                     { canDonations && (
                     <Row
-                        title={ __( 'Donations', 'gratora' ) }
-                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'gratora' ) }
+                        title={ __( 'Donations', 'gratora-donation-platform' ) }
+                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'gratora-donation-platform' ) }
                     >
                         <div className="gratora-exports__controls">
                             <span className="gratora-tools-field">
-                                { __( 'From', 'gratora' ) }
+                                { __( 'From', 'gratora-donation-platform' ) }
                                 <DateField
                                     value={ donationsFrom }
                                     onChange={ ( v ) => setDonationsFrom( v || '' ) }
-                                    ariaLabel={ __( 'Export donations from', 'gratora' ) }
-                                    placeholder={ __( 'Any', 'gratora' ) }
+                                    ariaLabel={ __( 'Export donations from', 'gratora-donation-platform' ) }
+                                    placeholder={ __( 'Any', 'gratora-donation-platform' ) }
                                 />
                             </span>
                             <span className="gratora-tools-field">
-                                { __( 'To', 'gratora' ) }
+                                { __( 'To', 'gratora-donation-platform' ) }
                                 <DateField
                                     value={ donationsTo }
                                     onChange={ ( v ) => setDonationsTo( v || '' ) }
-                                    ariaLabel={ __( 'Export donations to', 'gratora' ) }
-                                    placeholder={ __( 'Any', 'gratora' ) }
+                                    ariaLabel={ __( 'Export donations to', 'gratora-donation-platform' ) }
+                                    placeholder={ __( 'Any', 'gratora-donation-platform' ) }
                                 />
                             </span>
                             <Btn
@@ -193,24 +193,24 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'donations' }
                                 onClick={ () => download( donationsPath, setNotice, ( b ) => setBusy( b ? 'donations' : '' ), 'donations.csv' ) }
                             >
-                                { __( 'Generate CSV', 'gratora' ) }
+                                { __( 'Generate CSV', 'gratora-donation-platform' ) }
                             </Btn>
                         </div>
                         <label className="gratora-exports__check">
                             <input type="checkbox" checked={ includeTest } onChange={ ( e ) => setIncludeTest( e.target.checked ) } />
-                            { __( 'Include test donations', 'gratora' ) }
+                            { __( 'Include test donations', 'gratora-donation-platform' ) }
                         </label>
                     </Row>
                     ) }
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue report (PDF)', 'gratora' ) }
-                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'gratora' ) }
+                            title={ __( 'Revenue report (PDF)', 'gratora-donation-platform' ) }
+                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'gratora-donation-platform' ) }
                         >
                             <div className="gratora-exports__controls">
                                 <label className="gratora-tools-field">
-                                    { __( 'Year', 'gratora' ) }
+                                    { __( 'Year', 'gratora-donation-platform' ) }
                                     <select className="gratora-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
                                         { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
                                     </select>
@@ -221,7 +221,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'pdf' }
                                     onClick={ () => download( `/gratora/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
                                 >
-                                    { __( 'Generate PDF', 'gratora' ) }
+                                    { __( 'Generate PDF', 'gratora-donation-platform' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -229,28 +229,28 @@ export default function ExportTab( { setNotice } ) {
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue by month', 'gratora' ) }
-                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'gratora' ) }
+                            title={ __( 'Revenue by month', 'gratora-donation-platform' ) }
+                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'gratora-donation-platform' ) }
                         >
                             <div className="gratora-exports__controls">
                                 <span className="gratora-tools-field">
-                                    { __( 'From', 'gratora' ) }
+                                    { __( 'From', 'gratora-donation-platform' ) }
                                     <MonthField
                                         value={ statsFrom }
                                         onChange={ setStatsFrom }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue from month', 'gratora' ) }
+                                        ariaLabel={ __( 'Revenue from month', 'gratora-donation-platform' ) }
                                     />
                                 </span>
                                 <span className="gratora-tools-field">
-                                    { __( 'To', 'gratora' ) }
+                                    { __( 'To', 'gratora-donation-platform' ) }
                                     <MonthField
                                         value={ statsTo }
                                         onChange={ setStatsTo }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue to month', 'gratora' ) }
+                                        ariaLabel={ __( 'Revenue to month', 'gratora-donation-platform' ) }
                                     />
                                 </span>
                                 <Btn
@@ -259,7 +259,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'stats' }
                                     onClick={ () => download( statsPath, setNotice, ( b ) => setBusy( b ? 'stats' : '' ), 'revenue.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'gratora' ) }
+                                    { __( 'Generate CSV', 'gratora-donation-platform' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -267,32 +267,32 @@ export default function ExportTab( { setNotice } ) {
 
                     { canDonors && (
                         <Row
-                            title={ __( 'Donors', 'gratora' ) }
-                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'gratora' ) }
+                            title={ __( 'Donors', 'gratora-donation-platform' ) }
+                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'gratora-donation-platform' ) }
                         >
                             <div className="gratora-exports__controls">
                                 <span className="gratora-tools-field">
-                                    { __( 'From', 'gratora' ) }
+                                    { __( 'From', 'gratora-donation-platform' ) }
                                     <DateField
                                         value={ donorsFrom }
                                         onChange={ ( v ) => setDonorsFrom( v || '' ) }
-                                        ariaLabel={ __( 'Export donors from', 'gratora' ) }
-                                        placeholder={ __( 'Any', 'gratora' ) }
+                                        ariaLabel={ __( 'Export donors from', 'gratora-donation-platform' ) }
+                                        placeholder={ __( 'Any', 'gratora-donation-platform' ) }
                                     />
                                 </span>
                                 <span className="gratora-tools-field">
-                                    { __( 'To', 'gratora' ) }
+                                    { __( 'To', 'gratora-donation-platform' ) }
                                     <DateField
                                         value={ donorsTo }
                                         onChange={ ( v ) => setDonorsTo( v || '' ) }
-                                        ariaLabel={ __( 'Export donors to', 'gratora' ) }
-                                        placeholder={ __( 'Any', 'gratora' ) }
+                                        ariaLabel={ __( 'Export donors to', 'gratora-donation-platform' ) }
+                                        placeholder={ __( 'Any', 'gratora-donation-platform' ) }
                                     />
                                 </span>
                                 <label className="gratora-tools-field">
-                                    { __( 'Campaign', 'gratora' ) }
+                                    { __( 'Campaign', 'gratora-donation-platform' ) }
                                     <select className="gratora-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
-                                        <option value={ 0 }>{ __( 'All campaigns', 'gratora' ) }</option>
+                                        <option value={ 0 }>{ __( 'All campaigns', 'gratora-donation-platform' ) }</option>
                                         { ( opts?.campaigns || [] ).map( ( c ) => (
                                             <option key={ c.id } value={ c.id }>{ c.title || `#${ c.id }` }</option>
                                         ) ) }
@@ -304,12 +304,12 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'donors' }
                                     onClick={ () => download( donorsPath, setNotice, ( b ) => setBusy( b ? 'donors' : '' ), 'donors.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'gratora' ) }
+                                    { __( 'Generate CSV', 'gratora-donation-platform' ) }
                                 </Btn>
                             </div>
 
                             <div className="gratora-exports__columns">
-                                <p className="gratora-exports__columns-head">{ __( 'Columns', 'gratora' ) }</p>
+                                <p className="gratora-exports__columns-head">{ __( 'Columns', 'gratora-donation-platform' ) }</p>
                                 <div className="gratora-exports__grid">
                                     { ( opts?.donor_columns || [] ).map( ( c ) => (
                                         <label key={ c.key }>
@@ -324,7 +324,7 @@ export default function ExportTab( { setNotice } ) {
                                 </div>
                                 { noColumns && (
                                     <p className="gratora-tools-note">
-                                        { __( 'Pick at least one column. With none selected the file would still carry names and email addresses.', 'gratora' ) }
+                                        { __( 'Pick at least one column. With none selected the file would still carry names and email addresses.', 'gratora-donation-platform' ) }
                                     </p>
                                 ) }
                             </div>
@@ -333,8 +333,8 @@ export default function ExportTab( { setNotice } ) {
 
                     { canEverything && (
                     <Row
-                        title={ __( 'Everything', 'gratora' ) }
-                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Gratora site.', 'gratora' ) }
+                        title={ __( 'Everything', 'gratora-donation-platform' ) }
+                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Gratora site.', 'gratora-donation-platform' ) }
                     >
                         <div className="gratora-exports__controls">
                             <Btn
@@ -343,19 +343,19 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'everything' }
                                 onClick={ () => download( '/gratora/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'gratora-export.json' ) }
                             >
-                                { __( 'Export JSON', 'gratora' ) }
+                                { __( 'Export JSON', 'gratora-donation-platform' ) }
                             </Btn>
                         </div>
                         <p className="gratora-tools-note">
-                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'gratora' ) }
+                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'gratora-donation-platform' ) }
                         </p>
                     </Row>
                     ) }
 
                     { canEverything && (
                     <Row
-                        title={ __( 'Settings', 'gratora' ) }
-                        description={ __( 'Every Gratora setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'gratora' ) }
+                        title={ __( 'Settings', 'gratora-donation-platform' ) }
+                        description={ __( 'Every Gratora setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'gratora-donation-platform' ) }
                     >
                         <div className="gratora-exports__controls">
                             <Btn
@@ -364,11 +364,11 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'settings' }
                                 onClick={ exportSettings }
                             >
-                                { __( 'Export JSON', 'gratora' ) }
+                                { __( 'Export JSON', 'gratora-donation-platform' ) }
                             </Btn>
                         </div>
                         <p className="gratora-tools-note">
-                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'gratora' ) }
+                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'gratora-donation-platform' ) }
                         </p>
                     </Row>
                     ) }

@@ -94,7 +94,7 @@ final class PortalShortcode extends HookProvider
                 'avatarMaxBytes' => \Gratora\Donors\DonorAvatarUploader::maxBytes(),
                 'avatarMaxLabel' => size_format(\Gratora\Donors\DonorAvatarUploader::maxBytes()),
             ]);
-            wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+            wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
         }
         $cssPath = GRATORA_DIR . 'build/donor-portal/index.css';
         if (file_exists($cssPath)) {

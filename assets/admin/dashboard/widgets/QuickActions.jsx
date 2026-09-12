@@ -44,29 +44,29 @@ export default function QuickActions() {
             const c = await apiFetch( {
                 path:   '/gratora/v1/admin/campaigns',
                 method: 'POST',
-                data:   { title: __( 'Untitled campaign', 'gratora' ) },
+                data:   { title: __( 'Untitled campaign', 'gratora-donation-platform' ) },
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
             setCreating( false );
-            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'gratora' ) );
+            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'gratora-donation-platform' ) );
         }
     };
 
     return (
         <div className="gratora-quick-actions">
             <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="gratora-quick-actions__primary">
-                { ICON.plus } { __( 'New campaign', 'gratora' ) }
+                { ICON.plus } { __( 'New campaign', 'gratora-donation-platform' ) }
             </Button>
 
             <a className="gratora-quick-actions__item" href={ adminUrl( { page: 'gratora-donations' } ) }>
-                { ICON.donations } { __( 'Donations', 'gratora' ) }
+                { ICON.donations } { __( 'Donations', 'gratora-donation-platform' ) }
             </a>
             <a className="gratora-quick-actions__item" href={ adminUrl( { page: 'gratora-donors' } ) }>
-                { ICON.donors } { __( 'Donors', 'gratora' ) }
+                { ICON.donors } { __( 'Donors', 'gratora-donation-platform' ) }
             </a>
             <a className="gratora-quick-actions__item" href={ adminUrl( { page: 'gratora-settings' } ) }>
-                { ICON.settings } { __( 'Settings', 'gratora' ) }
+                { ICON.settings } { __( 'Settings', 'gratora-donation-platform' ) }
             </a>
         </div>
     );

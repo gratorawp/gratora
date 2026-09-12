@@ -8,7 +8,7 @@ const NAME = 'gratora/anonymous-toggle';
 
 function Edit( { attributes, setAttributes } ) {
     const {
-        label     = __( 'Make this donation anonymous', 'gratora' ),
+        label     = __( 'Make this donation anonymous', 'gratora-donation-platform' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
@@ -18,12 +18,12 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Anonymous toggle', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Anonymous toggle', 'gratora-donation-platform' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Default on', 'gratora' ) }
+                        label={ __( 'Default on', 'gratora-donation-platform' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Click the label to edit it inline.', 'gratora' ) }
+                        help={ __( 'Click the label to edit it inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -47,7 +47,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this donation anonymous', 'gratora' ) }
+                    placeholder={ __( 'Make this donation anonymous', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -59,8 +59,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Anonymous toggle', 'gratora' ),
-        description: __( 'Lets the donor hide their identity on public displays.', 'gratora' ),
+        title:      __( 'Anonymous toggle', 'gratora-donation-platform' ),
+        description: __( 'Lets the donor hide their identity on public displays.', 'gratora-donation-platform' ),
         category:   'gratora-extras',
         icon:       BlockIcons[ 'anonymous-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

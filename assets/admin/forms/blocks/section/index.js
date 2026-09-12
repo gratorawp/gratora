@@ -25,11 +25,11 @@ const ALLOWED = [ 'gratora/heading', 'gratora/paragraph', 'gratora/section' ];
 const BORDER_STYLES = [ 'none', 'solid', 'dashed', 'dotted' ];
 
 const SHADOW_PRESETS = [
-    { value: '',                                                                       label: __( 'None',       'gratora' ) },
-    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'gratora' ) },
-    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'gratora' ) },
-    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'gratora' ) },
-    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'gratora' ) },
+    { value: '',                                                                       label: __( 'None',       'gratora-donation-platform' ) },
+    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'gratora-donation-platform' ) },
+    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'gratora-donation-platform' ) },
+    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'gratora-donation-platform' ) },
+    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'gratora-donation-platform' ) },
 ];
 
 /**
@@ -88,50 +88,50 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Section', 'gratora' ) } initialOpen>
-                    <Field label={ __( 'Background color', 'gratora' ) }>
+                <PanelBody title={ __( 'Section', 'gratora-donation-platform' ) } initialOpen>
+                    <Field label={ __( 'Background color', 'gratora-donation-platform' ) }>
                         <ColorInput
-                            label={ __( 'Background color', 'gratora' ) }
+                            label={ __( 'Background color', 'gratora-donation-platform' ) }
                             value={ background }
                             onChange={ ( v ) => setAttributes( { background: v } ) }
                         />
                     </Field>
 
-                    <Field label={ __( 'Text color', 'gratora' ) }>
+                    <Field label={ __( 'Text color', 'gratora-donation-platform' ) }>
                         <ColorInput
-                            label={ __( 'Text color', 'gratora' ) }
+                            label={ __( 'Text color', 'gratora-donation-platform' ) }
                             value={ textColor }
                             onChange={ ( v ) => setAttributes( { textColor: v } ) }
                         />
                     </Field>
 
-                    <Field label={ __( 'Border color', 'gratora' ) }>
+                    <Field label={ __( 'Border color', 'gratora-donation-platform' ) }>
                         <ColorInput
-                            label={ __( 'Border color', 'gratora' ) }
+                            label={ __( 'Border color', 'gratora-donation-platform' ) }
                             value={ border.color }
                             onChange={ ( v ) => setBorder( { color: v } ) }
                         />
                     </Field>
                     <Slider
-                        label={ __( 'Border width', 'gratora' ) }
+                        label={ __( 'Border width', 'gratora-donation-platform' ) }
                         value={ border.width || 0 }
                         onChange={ ( v ) => setBorder( { width: v } ) }
                         min={ 0 } max={ 20 } unit="px"
                     />
                     <Segmented
-                        label={ __( 'Border style', 'gratora' ) }
+                        label={ __( 'Border style', 'gratora-donation-platform' ) }
                         value={ border.style || 'solid' }
                         onChange={ ( v ) => setBorder( { style: v } ) }
                         options={ BORDER_STYLES }
                     />
                     <Slider
-                        label={ __( 'Border radius', 'gratora' ) }
+                        label={ __( 'Border radius', 'gratora-donation-platform' ) }
                         value={ border.radius || 0 }
                         onChange={ ( v ) => setBorder( { radius: v } ) }
                         min={ 0 } max={ 60 } unit="px"
                     />
 
-                    <Field label={ __( 'Shadow', 'gratora' ) }>
+                    <Field label={ __( 'Shadow', 'gratora-donation-platform' ) }>
                         <div className="gratora-shadow-grid">
                             { SHADOW_PRESETS.map( ( p ) => {
                                 const isOn = ! showCustomShadow && shadow === p.value;
@@ -150,7 +150,7 @@ function Edit( { attributes, setAttributes } ) {
                                     >
                                         { p.value === '' ? (
                                             <span className="gratora-shadow-grid__tile__none">
-                                                { __( 'None', 'gratora' ) }
+                                                { __( 'None', 'gratora-donation-platform' ) }
                                             </span>
                                         ) : (
                                             <span
@@ -170,11 +170,11 @@ function Edit( { attributes, setAttributes } ) {
                                 checked={ showCustomShadow }
                                 onChange={ ( e ) => setShowCustomShadow( e.target.checked ) }
                             />
-                            <span>{ __( 'Use custom shadow value', 'gratora' ) }</span>
+                            <span>{ __( 'Use custom shadow value', 'gratora-donation-platform' ) }</span>
                         </label>
                     </Field>
                     { showCustomShadow && (
-                        <Field label={ __( 'Custom shadow CSS', 'gratora' ) } help={ __( 'Any valid box-shadow value.', 'gratora' ) }>
+                        <Field label={ __( 'Custom shadow CSS', 'gratora-donation-platform' ) } help={ __( 'Any valid box-shadow value.', 'gratora-donation-platform' ) }>
                             <input
                                 type="text"
                                 className="gratora-input"
@@ -186,7 +186,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <BoxControl
-                        title={ __( 'Padding', 'gratora' ) }
+                        title={ __( 'Padding', 'gratora-donation-platform' ) }
                         value={ padding }
                         onChange={ ( next ) => setAttributes( { padding: { ...padding, ...next } } ) }
                         sides="four"
@@ -194,7 +194,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <BoxControl
-                        title={ __( 'Margin', 'gratora' ) }
+                        title={ __( 'Margin', 'gratora-donation-platform' ) }
                         value={ margin }
                         onChange={ ( next ) => setAttributes( { margin: { ...margin, ...next } } ) }
                         sides="four"
@@ -202,7 +202,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <Slider
-                        label={ __( 'Minimum height', 'gratora' ) }
+                        label={ __( 'Minimum height', 'gratora-donation-platform' ) }
                         value={ minHeight || 0 }
                         onChange={ ( v ) => setAttributes( { minHeight: v } ) }
                         min={ 0 } max={ 800 } unit="px"
@@ -226,8 +226,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Section', 'gratora' ),
-        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'gratora' ),
+        title:       __( 'Section', 'gratora-donation-platform' ),
+        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'gratora-donation-platform' ),
         category:    'gratora-content',
         icon:        BlockIcons[ 'section' ],
         supports:    { html: false, anchor: false, inserter: true },

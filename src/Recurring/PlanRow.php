@@ -278,15 +278,15 @@ final class PlanRow
             $name = (string) preg_replace('/\..*$/', '', $name);
 
             // A gateway's own name, which is not ours to translate.
-            return $name !== '' ? ucfirst($name) : __('Payment provider', 'gratora');
+            return $name !== '' ? ucfirst($name) : __('Payment provider', 'gratora-donation-platform');
         }
 
         return match ($source) {
-            'portal.recurring' => __('Donor portal', 'gratora'),
-            'admin.recurring'  => __('Admin', 'gratora'),
-            'recurring'        => __('Scheduled run', 'gratora'),
-            'command'          => __('WP-CLI', 'gratora'),
-            default            => __('Site', 'gratora'),
+            'portal.recurring' => __('Donor portal', 'gratora-donation-platform'),
+            'admin.recurring'  => __('Admin', 'gratora-donation-platform'),
+            'recurring'        => __('Scheduled run', 'gratora-donation-platform'),
+            'command'          => __('WP-CLI', 'gratora-donation-platform'),
+            default            => __('Site', 'gratora-donation-platform'),
         };
     }
 }

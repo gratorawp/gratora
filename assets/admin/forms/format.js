@@ -4,9 +4,9 @@ import { __ } from '@wordpress/i18n';
 import { parseTimestamp } from '@gratora/ui/utils/format';
 
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'gratora' ),
-    published: __( 'Published', 'gratora' ),
-    archived:  __( 'Archived', 'gratora' ),
+    draft:     __( 'Draft', 'gratora-donation-platform' ),
+    published: __( 'Published', 'gratora-donation-platform' ),
+    archived:  __( 'Archived', 'gratora-donation-platform' ),
 };
 
 export function formatDate( iso, opts = {} ) {

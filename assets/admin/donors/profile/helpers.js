@@ -41,15 +41,15 @@ export function initials( name ) {
 // Donation status → pill class + label.
 export function donationStatusPill( status ) {
     switch ( status ) {
-        case 'paid':           return { cls: 'is-ok',    label: __( 'Paid',     'gratora' ) };
-        case 'pending':        return { cls: 'is-warn',  label: __( 'Pending',  'gratora' ) };
+        case 'paid':           return { cls: 'is-ok',    label: __( 'Paid',     'gratora-donation-platform' ) };
+        case 'pending':        return { cls: 'is-warn',  label: __( 'Pending',  'gratora-donation-platform' ) };
         // Not a warning like pending: the donor has paid and nothing is
         // expected of them, the money is simply still moving.
-        case 'processing':     return { cls: 'is-info',  label: __( 'Processing', 'gratora' ) };
-        case 'failed':         return { cls: 'is-error', label: __( 'Failed',   'gratora' ) };
-        case 'refunded':       return { cls: 'is-info',  label: __( 'Refunded', 'gratora' ) };
-        case 'partial_refund': return { cls: 'is-info',  label: __( 'Partial',  'gratora' ) };
-        case 'disputed':       return { cls: 'is-warn',  label: __( 'Disputed', 'gratora' ) };
+        case 'processing':     return { cls: 'is-info',  label: __( 'Processing', 'gratora-donation-platform' ) };
+        case 'failed':         return { cls: 'is-error', label: __( 'Failed',   'gratora-donation-platform' ) };
+        case 'refunded':       return { cls: 'is-info',  label: __( 'Refunded', 'gratora-donation-platform' ) };
+        case 'partial_refund': return { cls: 'is-info',  label: __( 'Partial',  'gratora-donation-platform' ) };
+        case 'disputed':       return { cls: 'is-warn',  label: __( 'Disputed', 'gratora-donation-platform' ) };
         default:               return { cls: 'is-muted', label: status };
     }
 }
@@ -57,11 +57,11 @@ export function donationStatusPill( status ) {
 // Plan status → pill class + label.
 export function planStatusPill( status ) {
     switch ( status ) {
-        case 'active':    return { cls: 'is-ok',    label: __( 'Active',    'gratora' ) };
-        case 'past_due':  return { cls: 'is-warn',  label: __( 'Past due',  'gratora' ) };
-        case 'paused':    return { cls: 'is-muted', label: __( 'Paused',    'gratora' ) };
-        case 'cancelled': return { cls: 'is-muted', label: __( 'Cancelled', 'gratora' ) };
-        case 'expired':   return { cls: 'is-muted', label: __( 'Expired',   'gratora' ) };
+        case 'active':    return { cls: 'is-ok',    label: __( 'Active',    'gratora-donation-platform' ) };
+        case 'past_due':  return { cls: 'is-warn',  label: __( 'Past due',  'gratora-donation-platform' ) };
+        case 'paused':    return { cls: 'is-muted', label: __( 'Paused',    'gratora-donation-platform' ) };
+        case 'cancelled': return { cls: 'is-muted', label: __( 'Cancelled', 'gratora-donation-platform' ) };
+        case 'expired':   return { cls: 'is-muted', label: __( 'Expired',   'gratora-donation-platform' ) };
         default:          return { cls: 'is-muted', label: status };
     }
 }
@@ -72,49 +72,49 @@ export function eventMeta( event ) {
     const { type } = event;
     switch ( type ) {
         case 'donation.intent_created':
-            return { dot: 'is-muted',  label: __( 'Donation started',     'gratora' ) };
+            return { dot: 'is-muted',  label: __( 'Donation started',     'gratora-donation-platform' ) };
         case 'donation.pending':
-            return { dot: 'is-muted',  label: __( 'Awaiting payment',     'gratora' ) };
+            return { dot: 'is-muted',  label: __( 'Awaiting payment',     'gratora-donation-platform' ) };
         case 'donation.processing':
-            return { dot: 'is-info',   label: __( 'Payment processing',   'gratora' ) };
+            return { dot: 'is-info',   label: __( 'Payment processing',   'gratora-donation-platform' ) };
         case 'donation.completed':
-            return { dot: 'is-ok',     label: __( 'Donation paid',        'gratora' ) };
+            return { dot: 'is-ok',     label: __( 'Donation paid',        'gratora-donation-platform' ) };
         case 'donation.failed':
-            return { dot: 'is-error',  label: __( 'Payment failed',       'gratora' ) };
+            return { dot: 'is-error',  label: __( 'Payment failed',       'gratora-donation-platform' ) };
         case 'donation.refunded':
-            return { dot: 'is-error',  label: __( 'Refund issued',        'gratora' ) };
+            return { dot: 'is-error',  label: __( 'Refund issued',        'gratora-donation-platform' ) };
         case 'donation.refund_reversed':
-            return { dot: 'is-warn',   label: __( 'Refund reversed',      'gratora' ) };
+            return { dot: 'is-warn',   label: __( 'Refund reversed',      'gratora-donation-platform' ) };
         case 'donation.disputed':
-            return { dot: 'is-warn',   label: __( 'Dispute opened',       'gratora' ) };
+            return { dot: 'is-warn',   label: __( 'Dispute opened',       'gratora-donation-platform' ) };
         case 'donation.reversal_reinstated':
-            return { dot: 'is-warn',   label: __( 'Reversal reinstated',  'gratora' ) };
+            return { dot: 'is-warn',   label: __( 'Reversal reinstated',  'gratora-donation-platform' ) };
         case 'receipt.issued':
-            return { dot: 'is-info',   label: __( 'Receipt issued',       'gratora' ) };
+            return { dot: 'is-info',   label: __( 'Receipt issued',       'gratora-donation-platform' ) };
         case 'recurring.renewed':
-            return { dot: 'is-ok',     label: __( 'Recurring payment',    'gratora' ) };
+            return { dot: 'is-ok',     label: __( 'Recurring payment',    'gratora-donation-platform' ) };
         case 'recurring.paused':
-            return { dot: 'is-muted',  label: __( 'Recurring paused',     'gratora' ) };
+            return { dot: 'is-muted',  label: __( 'Recurring paused',     'gratora-donation-platform' ) };
         case 'recurring.resumed':
-            return { dot: 'is-ok',     label: __( 'Recurring resumed',    'gratora' ) };
+            return { dot: 'is-ok',     label: __( 'Recurring resumed',    'gratora-donation-platform' ) };
         case 'recurring.skipped':
-            return { dot: 'is-muted',  label: __( 'Next payment skipped', 'gratora' ) };
+            return { dot: 'is-muted',  label: __( 'Next payment skipped', 'gratora-donation-platform' ) };
         case 'recurring.amount_changed':
-            return { dot: 'is-violet', label: __( 'Recurring amount changed', 'gratora' ) };
+            return { dot: 'is-violet', label: __( 'Recurring amount changed', 'gratora-donation-platform' ) };
         case 'recurring.cancelled_by_admin':
-            return { dot: 'is-muted',  label: __( 'Recurring plan cancelled', 'gratora' ) };
+            return { dot: 'is-muted',  label: __( 'Recurring plan cancelled', 'gratora-donation-platform' ) };
         case 'recurring.failed':
-            return { dot: 'is-error',  label: __( 'Renewal failed',       'gratora' ) };
+            return { dot: 'is-error',  label: __( 'Renewal failed',       'gratora-donation-platform' ) };
         case 'recurring.cancelled':
-            return { dot: 'is-muted',  label: __( 'Recurring plan cancelled', 'gratora' ) };
+            return { dot: 'is-muted',  label: __( 'Recurring plan cancelled', 'gratora-donation-platform' ) };
         case 'recurring.subscription_creation_failed':
-            return { dot: 'is-error',  label: __( 'Subscription not created',  'gratora' ) };
+            return { dot: 'is-error',  label: __( 'Subscription not created',  'gratora-donation-platform' ) };
         default:
             // An error carries its own words in the payload, and the fallback
             // would read "error.admin.recurring" as "Recurring", muted, which
             // is worse than absent.
             if ( String( type || '' ).startsWith( 'error.' ) ) {
-                return { dot: 'is-error', label: __( 'Action failed', 'gratora' ) };
+                return { dot: 'is-error', label: __( 'Action failed', 'gratora-donation-platform' ) };
             }
 
             return { dot: 'is-muted',  label: readableEventType( type ) };
@@ -134,11 +134,11 @@ function readableEventType( type ) {
 }
 
 export const SEGMENT_LABELS = {
-    champions:   __( 'Champion',     'gratora' ),
-    loyal:       __( 'Loyal',        'gratora' ),
-    new:         __( 'New',          'gratora' ),
-    at_risk:     __( 'At risk',      'gratora' ),
-    hibernating: __( 'Hibernating',  'gratora' ),
-    lost:        __( 'Lost',         'gratora' ),
-    other:       __( 'Other',        'gratora' ),
+    champions:   __( 'Champion',     'gratora-donation-platform' ),
+    loyal:       __( 'Loyal',        'gratora-donation-platform' ),
+    new:         __( 'New',          'gratora-donation-platform' ),
+    at_risk:     __( 'At risk',      'gratora-donation-platform' ),
+    hibernating: __( 'Hibernating',  'gratora-donation-platform' ),
+    lost:        __( 'Lost',         'gratora-donation-platform' ),
+    other:       __( 'Other',        'gratora-donation-platform' ),
 };

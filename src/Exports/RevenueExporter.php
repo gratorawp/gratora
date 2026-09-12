@@ -83,12 +83,12 @@ final class RevenueExporter
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
         Csv::writeRow($out, [
-            __('Month', 'gratora'),
-            __('Donations', 'gratora'),
+            __('Month', 'gratora-donation-platform'),
+            __('Donations', 'gratora-donation-platform'),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Revenue (%s)', 'gratora'), $currency),
+            sprintf(__('Revenue (%s)', 'gratora-donation-platform'), $currency),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Average donation (%s)', 'gratora'), $currency),
+            sprintf(__('Average donation (%s)', 'gratora-donation-platform'), $currency),
         ]);
 
         foreach ($this->series($fromMonth, $toMonth) as $row) {

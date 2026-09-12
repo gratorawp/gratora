@@ -83,7 +83,7 @@ final class ReportsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('gratora_campaign_not_found', __('Campaign not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_campaign_not_found', __('Campaign not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $range = (string) ($request['range'] ?? 'last-30');
@@ -101,17 +101,17 @@ final class ReportsController
     {
         $year = (int) $request['year'];
         if ($year < 2000 || $year > (int) wp_date('Y')) {
-            return new WP_Error('gratora_invalid_year', __('Unsupported statement year.', 'gratora'), ['status' => 422]);
+            return new WP_Error('gratora_invalid_year', __('Unsupported statement year.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor || $donor->redacted_at !== null) {
-            return new WP_Error('gratora_donor_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_donor_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $pdf = $this->taxStatement->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('gratora_no_donations', __('No donations found for that year.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_no_donations', __('No donations found for that year.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         return $this->stream($request, $pdf, TaxStatementBuilder::filename((int) $donor->id, $year));

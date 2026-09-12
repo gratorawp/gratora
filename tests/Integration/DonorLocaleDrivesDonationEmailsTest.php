@@ -38,7 +38,7 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
 
         // Marks anything translated while the switch is active, without a .mo.
         add_filter('gettext', static function ($translated, $text, $domain) {
-            return $domain === 'gratora' && get_locale() === 'fr_FR'
+            return $domain === 'gratora-donation-platform' && get_locale() === 'fr_FR'
                 ? '[fr] ' . $translated
                 : $translated;
         }, 10, 3);

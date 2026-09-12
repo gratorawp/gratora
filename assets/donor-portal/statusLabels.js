@@ -6,11 +6,11 @@ import { __ } from '@wordpress/i18n';
 // straight here to fix it.
 export function recurringStatusLabel( s ) {
     switch ( s ) {
-        case 'active':    return __( 'Active', 'gratora' );
-        case 'paused':    return __( 'Paused', 'gratora' );
-        case 'past_due':  return __( 'Past due', 'gratora' );
-        case 'cancelled': return __( 'Cancelled', 'gratora' );
-        case 'expired':   return __( 'Expired', 'gratora' );
+        case 'active':    return __( 'Active', 'gratora-donation-platform' );
+        case 'paused':    return __( 'Paused', 'gratora-donation-platform' );
+        case 'past_due':  return __( 'Past due', 'gratora-donation-platform' );
+        case 'cancelled': return __( 'Cancelled', 'gratora-donation-platform' );
+        case 'expired':   return __( 'Expired', 'gratora-donation-platform' );
         // Words rather than a token, for a status added on the server before
         // this list learns about it.
         default:          return String( s || '' ).replace( /_/g, ' ' );

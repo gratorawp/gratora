@@ -4,8 +4,8 @@
  * hardcoded upstream can be right. Rewriting at build time is what makes the
  * runtime lookup and the wp.org language pack agree.
  */
-const FROM = 'gratora';
-const TO   = 'gratora';
+const FROM = 'gratora-fundraising-campaigns';
+const TO   = 'gratora-donation-platform';
 
 function rewrite( source ) {
     return source.split( `'${ FROM }'` ).join( `'${ TO }'` )

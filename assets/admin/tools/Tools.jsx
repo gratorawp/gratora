@@ -16,11 +16,11 @@ import { userCan } from '../_shared/caps';
 // capabilities, so every route behind that tab wants a full administrator. A
 // settings manager reaching it finds a screen where nothing works.
 const TABS = [
-    { key: 'maintenance', label: __( 'Maintenance', 'gratora' ) },
-    { key: 'logs',        label: __( 'Logs', 'gratora' ) },
-    { key: 'system',      label: __( 'System info', 'gratora' ) },
-    { key: 'export',      label: __( 'Export', 'gratora' ) },
-    ...( userCan( 'manage_options' ) ? [ { key: 'import', label: __( 'Import', 'gratora' ) } ] : [] ),
+    { key: 'maintenance', label: __( 'Maintenance', 'gratora-donation-platform' ) },
+    { key: 'logs',        label: __( 'Logs', 'gratora-donation-platform' ) },
+    { key: 'system',      label: __( 'System info', 'gratora-donation-platform' ) },
+    { key: 'export',      label: __( 'Export', 'gratora-donation-platform' ) },
+    ...( userCan( 'manage_options' ) ? [ { key: 'import', label: __( 'Import', 'gratora-donation-platform' ) } ] : [] ),
 ];
 
 const fromHash = () => {
@@ -59,16 +59,16 @@ export default function Tools() {
     return (
         <div className="gratora-settings-page">
             <div className="gratora-crumbs">
-                <a href="admin.php?page=gratora">{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href="admin.php?page=gratora">{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Tools', 'gratora' ) }</span>
+                <span>{ __( 'Tools', 'gratora-donation-platform' ) }</span>
                 <span className="sep">›</span>
                 <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Tools', 'gratora' ) }</h1>
+                    <h1>{ __( 'Tools', 'gratora-donation-platform' ) }</h1>
                 </div>
             </div>
 
@@ -76,7 +76,7 @@ export default function Tools() {
                 className="gratora-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Tools sections', 'gratora' ) }
+                aria-label={ __( 'Tools sections', 'gratora-donation-platform' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, TABS.map( ( t ) => t.key ), tab, jumpTo ) }
             >
                 <div className="gratora-tabs__scroll">

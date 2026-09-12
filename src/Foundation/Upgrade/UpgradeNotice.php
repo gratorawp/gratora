@@ -76,10 +76,10 @@ final class UpgradeNotice
         if ($stuck) {
             printf(
                 '<div class="notice notice-error"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-                esc_html__('Gratora could not finish a data update.', 'gratora'),
-                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'gratora'),
+                esc_html__('Gratora could not finish a data update.', 'gratora-donation-platform'),
+                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'gratora-donation-platform'),
                 esc_url($url),
-                esc_html__('See what failed', 'gratora')
+                esc_html__('See what failed', 'gratora-donation-platform')
             );
 
             return;
@@ -87,17 +87,17 @@ final class UpgradeNotice
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-            esc_html__('Gratora is finishing a data update.', 'gratora'),
+            esc_html__('Gratora is finishing a data update.', 'gratora-donation-platform'),
             esc_html(
                 _n(
                     'One job is still outstanding. It runs in the background; if it is still here in a few minutes, this site\'s scheduled tasks are not running.',
                     'Some jobs are still outstanding. They run in the background; if they are still here in a few minutes, this site\'s scheduled tasks are not running.',
                     count($pending),
-                    'gratora'
+                    'gratora-donation-platform'
                 )
             ),
             esc_url($url),
-            esc_html__('Finish them now', 'gratora')
+            esc_html__('Finish them now', 'gratora-donation-platform')
         );
     }
 }

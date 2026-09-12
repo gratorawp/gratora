@@ -21,7 +21,7 @@ function ensureEntity() {
             kind: ENTITY_KIND,
             name: ENTITY_NAME,
             baseURL: '/gratora/v1/campaign-binding-preview',
-            label: __( 'Gratora campaign binding preview', 'gratora' ),
+            label: __( 'Gratora campaign binding preview', 'gratora-donation-platform' ),
         },
     ] );
 }
@@ -44,7 +44,7 @@ export function registerCampaignBindingSource( fields ) {
 
     registerBlockBindingsSource( {
         name: 'gratora/campaign',
-        label: __( 'Gratora campaign', 'gratora' ),
+        label: __( 'Gratora campaign', 'gratora-donation-platform' ),
         usesContext: [ 'postId' ],
         getValues: ( { select, context, bindings } ) => {
             const record = preview( select, context );

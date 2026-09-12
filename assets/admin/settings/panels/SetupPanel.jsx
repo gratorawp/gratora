@@ -10,12 +10,12 @@ import useCardOpen from '../../_shared/useCardOpen';
 // Order: money first, then whether a donor can reach you, then whether they
 // hear back, then the machinery underneath.
 const GROUPS = [
-    { id: 'money',    title: __( 'Taking money', 'gratora' ),          sub: __( 'What has to be true before a card is charged', 'gratora' ) },
-    { id: 'page',     title: __( 'A live donation page', 'gratora' ),  sub: __( 'Somewhere for a donor to land', 'gratora' ) },
-    { id: 'receipts', title: __( 'Receipts and email', 'gratora' ),    sub: __( 'What the donor gets back', 'gratora' ) },
-    { id: 'jobs',     title: __( 'Background jobs', 'gratora' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'gratora' ) },
-    { id: 'portal',   title: __( 'Donor portal', 'gratora' ),          sub: __( 'Where sign-in and receipt links point', 'gratora' ) },
-    { id: 'licenses', title: __( 'Add-ons and licenses', 'gratora' ),  sub: __( 'Updates and security fixes for what you installed', 'gratora' ) },
+    { id: 'money',    title: __( 'Taking money', 'gratora-donation-platform' ),          sub: __( 'What has to be true before a card is charged', 'gratora-donation-platform' ) },
+    { id: 'page',     title: __( 'A live donation page', 'gratora-donation-platform' ),  sub: __( 'Somewhere for a donor to land', 'gratora-donation-platform' ) },
+    { id: 'receipts', title: __( 'Receipts and email', 'gratora-donation-platform' ),    sub: __( 'What the donor gets back', 'gratora-donation-platform' ) },
+    { id: 'jobs',     title: __( 'Background jobs', 'gratora-donation-platform' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'gratora-donation-platform' ) },
+    { id: 'portal',   title: __( 'Donor portal', 'gratora-donation-platform' ),          sub: __( 'Where sign-in and receipt links point', 'gratora-donation-platform' ) },
+    { id: 'licenses', title: __( 'Add-ons and licenses', 'gratora-donation-platform' ),  sub: __( 'Updates and security fixes for what you installed', 'gratora-donation-platform' ) },
 ];
 
 export default function SetupPanel( { onJumpTo, active } ) {
@@ -38,11 +38,11 @@ export default function SetupPanel( { onJumpTo, active } ) {
     if ( error ) {
         return (
             <div className="gratora-panel">
-                <Card title={ __( 'Could not check your setup', 'gratora' ) }>
+                <Card title={ __( 'Could not check your setup', 'gratora-donation-platform' ) }>
                     <p className="gratora-connect-p">
-                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'gratora' ) }
+                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'gratora-donation-platform' ) }
                     </p>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'gratora' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'gratora-donation-platform' ) }</Btn>
                 </Card>
             </div>
         );
@@ -52,7 +52,7 @@ export default function SetupPanel( { onJumpTo, active } ) {
         return (
             <div className="gratora-panel">
                 <div className="gratora-readiness__head">
-                    <div className="gratora-readiness__title">{ __( 'Checking your setup…', 'gratora' ) }</div>
+                    <div className="gratora-readiness__title">{ __( 'Checking your setup…', 'gratora-donation-platform' ) }</div>
                 </div>
             </div>
         );
@@ -80,23 +80,23 @@ function Summary( { report } ) {
     const blockers = report.blockers || 0;
     const warnings = report.warnings || 0;
 
-    let title = __( 'Ready to accept donations', 'gratora' );
-    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'gratora' );
+    let title = __( 'Ready to accept donations', 'gratora-donation-platform' );
+    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'gratora-donation-platform' );
     let tone  = 'green';
 
     if ( blockers > 0 ) {
         tone  = 'red';
         title = sprintf(
             /* translators: %d: number of things preventing donations. */
-            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'gratora' ),
+            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'gratora-donation-platform' ),
             blockers
         );
-        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'gratora' );
+        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'gratora-donation-platform' );
     } else if ( warnings > 0 ) {
         tone = 'amber';
         sub  = sprintf(
             /* translators: %d: number of non-blocking issues. */
-            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'gratora' ),
+            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'gratora-donation-platform' ),
             warnings
         );
     }
@@ -119,13 +119,13 @@ function Group( { group, rows, onJumpTo } ) {
     const [ open, setOpen ] = useCardOpen( trouble > 0 );
 
     const pill = trouble === 0
-        ? <span className="gratora-pill gratora-pill--green"><span className="gratora-pill__dot" />{ __( 'All good', 'gratora' ) }</span>
+        ? <span className="gratora-pill gratora-pill--green"><span className="gratora-pill__dot" />{ __( 'All good', 'gratora-donation-platform' ) }</span>
         : (
             <span className="gratora-pill gratora-pill--amber">
                 <span className="gratora-pill__dot" />
                 { sprintf(
                     /* translators: %d: number of checks in this group needing attention. */
-                    _n( '%d needs attention', '%d need attention', trouble, 'gratora' ),
+                    _n( '%d needs attention', '%d need attention', trouble, 'gratora-donation-platform' ),
                     trouble
                 ) }
             </span>
@@ -168,7 +168,7 @@ function Row( { row, onJumpTo } ) {
             </div>
             { row.action_url && (
                 <a className="gratora-readiness-row__action" href={ row.action_url } onClick={ jump }>
-                    { row.action_label || __( 'Fix', 'gratora' ) } { forwardGlyph() }
+                    { row.action_label || __( 'Fix', 'gratora-donation-platform' ) } { forwardGlyph() }
                 </a>
             ) }
         </li>

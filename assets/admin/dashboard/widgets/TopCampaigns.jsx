@@ -28,8 +28,8 @@ export default function TopCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <TrendingUp size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations in this range', 'gratora' ) }
-                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'gratora' ) }
+                title={ __( 'No donations in this range', 'gratora-donation-platform' ) }
+                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -60,7 +60,7 @@ export default function TopCampaigns( { rows = [] } ) {
                                 </div>
                                 <div className="gratora-table__sub">
                                     { sprintf(
-                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'gratora' ),
+                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'gratora-donation-platform' ),
                                         c.donations_count
                                     ) }
                                 </div>

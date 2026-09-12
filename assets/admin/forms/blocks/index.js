@@ -40,11 +40,11 @@ import registerHtmlBlock            from './html';
 import registerPrivacyNoticeBlock   from './privacy-notice';
 
 const GRATORA_CATEGORIES = [
-    { slug: 'gratora-amount',  title: __( 'Donation amount',   'gratora' ) },
-    { slug: 'gratora-donor',   title: __( 'Donor information', 'gratora' ) },
-    { slug: 'gratora-fields',  title: __( 'Custom fields',     'gratora' ) },
-    { slug: 'gratora-content', title: __( 'Content & layout',  'gratora' ) },
-    { slug: 'gratora-extras',  title: __( 'Extras',            'gratora' ) },
+    { slug: 'gratora-amount',  title: __( 'Donation amount',   'gratora-donation-platform' ) },
+    { slug: 'gratora-donor',   title: __( 'Donor information', 'gratora-donation-platform' ) },
+    { slug: 'gratora-fields',  title: __( 'Custom fields',     'gratora-donation-platform' ) },
+    { slug: 'gratora-content', title: __( 'Content & layout',  'gratora-donation-platform' ) },
+    { slug: 'gratora-extras',  title: __( 'Extras',            'gratora-donation-platform' ) },
 ];
 
 function ensureCategories() {

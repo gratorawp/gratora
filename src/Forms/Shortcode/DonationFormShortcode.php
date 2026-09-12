@@ -136,14 +136,14 @@ final class DonationFormShortcode extends HookProvider
         $atts = is_array($atts) ? $atts : [];
         $slug = trim((string) ($atts['slug'] ?? ''));
         if ($slug === '') {
-            return $this->renderError(__('Specify a form slug: [gratora_donation_form slug="..."].', 'gratora'));
+            return $this->renderError(__('Specify a form slug: [gratora_donation_form slug="..."].', 'gratora-donation-platform'));
         }
 
         $form = $this->forms->findBySlug($slug);
         if (! $form) {
             return $this->renderError(sprintf(
                 /* translators: %s: form slug */
-                __('No donation form found for slug "%s".', 'gratora'),
+                __('No donation form found for slug "%s".', 'gratora-donation-platform'),
                 $slug
             ));
         }
@@ -159,11 +159,11 @@ final class DonationFormShortcode extends HookProvider
             // its form does not depend on the admin thinking to check the
             // campaign screen. The equivalent block already explains itself.
             if ($form->status !== 'published') {
-                return $this->renderError(__('This form is not published, so it is hidden here.', 'gratora'));
+                return $this->renderError(__('This form is not published, so it is hidden here.', 'gratora-donation-platform'));
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
             if (! $campaign) {
-                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'gratora'));
+                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'gratora-donation-platform'));
             }
             if (! $campaign->acceptsDonations()) {
                 return $this->renderNotAccepting($campaign->notAcceptingReason());
@@ -252,7 +252,7 @@ final class DonationFormShortcode extends HookProvider
         // Only a no-JS visitor sees this: a dead form would GET their inputs
         // into the URL on submit.
         $noscript = '<noscript><div class="gratora-donation-form__noscript">'
-            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'gratora')
+            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'gratora-donation-platform')
             . '</div></noscript>';
 
         return sprintf(
@@ -548,7 +548,7 @@ final class DonationFormShortcode extends HookProvider
 
         $thankYouMessage = trim((string) ($form->settings['thank_you_message'] ?? ''));
         if ($thankYouMessage === '') {
-            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'gratora');
+            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'gratora-donation-platform');
         }
         $redirectUrl = trim((string) ($form->settings['redirect_url'] ?? ''));
 
@@ -685,37 +685,37 @@ final class DonationFormShortcode extends HookProvider
             'pageNav'    => $pageNav,
             'preamble'   => $preamble,
             'i18n'     => [
-                'chooseAmount'   => __('Choose an amount', 'gratora'),
-                'customAmount'   => __('Custom amount', 'gratora'),
-                'yourDetails'    => __('Your details', 'gratora'),
-                'firstName'      => __('First name', 'gratora'),
-                'lastName'       => __('Last name', 'gratora'),
-                'email'          => __('Email', 'gratora'),
-                'country'        => __('Country', 'gratora'),
-                'reviewDonation' => __('Review your donation', 'gratora'),
-                'amount'         => __('Amount', 'gratora'),
-                'frequency'      => __('Donation frequency', 'gratora'),
-                'fees'           => __('Processing fee', 'gratora'),
-                'total'          => __('Total', 'gratora'),
-                'manageGiving'   => __('Manage your giving', 'gratora'),
-                'portalLinkSent' => __('Check your email', 'gratora'),
-                'donor'          => __('Donor', 'gratora'),
-                'paymentMethod'  => __('Payment method', 'gratora'),
+                'chooseAmount'   => __('Choose an amount', 'gratora-donation-platform'),
+                'customAmount'   => __('Custom amount', 'gratora-donation-platform'),
+                'yourDetails'    => __('Your details', 'gratora-donation-platform'),
+                'firstName'      => __('First name', 'gratora-donation-platform'),
+                'lastName'       => __('Last name', 'gratora-donation-platform'),
+                'email'          => __('Email', 'gratora-donation-platform'),
+                'country'        => __('Country', 'gratora-donation-platform'),
+                'reviewDonation' => __('Review your donation', 'gratora-donation-platform'),
+                'amount'         => __('Amount', 'gratora-donation-platform'),
+                'frequency'      => __('Donation frequency', 'gratora-donation-platform'),
+                'fees'           => __('Processing fee', 'gratora-donation-platform'),
+                'total'          => __('Total', 'gratora-donation-platform'),
+                'manageGiving'   => __('Manage your giving', 'gratora-donation-platform'),
+                'portalLinkSent' => __('Check your email', 'gratora-donation-platform'),
+                'donor'          => __('Donor', 'gratora-donation-platform'),
+                'paymentMethod'  => __('Payment method', 'gratora-donation-platform'),
                 /* translators: %s: the selected currency code, e.g. INR. */
-                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'gratora'),
-                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'gratora'),
+                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'gratora-donation-platform'),
+                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'gratora-donation-platform'),
                 // Not a currency problem: no allowed gateway is switched on.
                 // Naming the currency sends donors hunting for a fix that is not
                 // theirs to make.
-                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'gratora'),
-                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'gratora'),
-                'back'           => __('Back', 'gratora'),
-                'next'           => __('Continue', 'gratora'),
-                'donateNow'      => __('Donate now', 'gratora'),
-                'processing'     => __('Processing…', 'gratora'),
-                'thanks'         => __('Thank you for your donation!', 'gratora'),
-                'pendingTitle'   => __('Your donation is pending', 'gratora'),
-                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'gratora'),
+                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'gratora-donation-platform'),
+                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'gratora-donation-platform'),
+                'back'           => __('Back', 'gratora-donation-platform'),
+                'next'           => __('Continue', 'gratora-donation-platform'),
+                'donateNow'      => __('Donate now', 'gratora-donation-platform'),
+                'processing'     => __('Processing…', 'gratora-donation-platform'),
+                'thanks'         => __('Thank you for your donation!', 'gratora-donation-platform'),
+                'pendingTitle'   => __('Your donation is pending', 'gratora-donation-platform'),
+                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'gratora-donation-platform'),
                 // The donor has finished and nothing is expected of them. The
                 // pending copy would tell someone who has already paid that we
                 // are still waiting on them.
@@ -725,85 +725,85 @@ final class DonationFormShortcode extends HookProvider
                 // clearing, and by a card PayPal has held for review, and those
                 // owe the donor different explanations. Naming a bank told a
                 // card donor something untrue about their own payment.
-                'processingTitle'   => __('Thank you, your donation is on its way', 'gratora'),
-                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'gratora'),
-                'donateAgain'    => __('Donate again', 'gratora'),
-                'error'          => __('Sorry, something went wrong. Please try again.', 'gratora'),
+                'processingTitle'   => __('Thank you, your donation is on its way', 'gratora-donation-platform'),
+                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'gratora-donation-platform'),
+                'donateAgain'    => __('Donate again', 'gratora-donation-platform'),
+                'error'          => __('Sorry, something went wrong. Please try again.', 'gratora-donation-platform'),
                 // A donor who cancelled at their bank, or whose bank refused
                 // the debit, comes back to the same page as a donor whose
                 // payment broke. Only this one can promise the money stayed
                 // where it was, and the generic copy sends them to check a
                 // statement with nothing on it.
-                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'gratora'),
+                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'gratora-donation-platform'),
                 // The other half of that pair: the browser could not find out
                 // what happened, which is not the same as knowing nothing
                 // happened. A donor whose bank has taken the money must not be
                 // sent back to the form to pay a second time.
-                'unresolvedTitle'  => __('We could not confirm your payment', 'gratora'),
-                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'gratora'),
-                'checkAgain'       => __('Check again', 'gratora'),
-                'paymentTitle'   => __('Complete your donation', 'gratora'),
-                'paymentLoading' => __('Loading secure payment…', 'gratora'),
-                'payNow'         => __('Pay', 'gratora'),
-                'confirming'     => __('Confirming your payment…', 'gratora'),
-                'cancel'         => __('Cancel', 'gratora'),
-                'comment'        => __('Add a message', 'gratora'),
-                'notePublic'     => __('Show my message publicly on the supporter wall', 'gratora'),
-                'anonymous'      => __('Make this donation anonymous', 'gratora'),
-                'phone'          => __('Phone', 'gratora'),
-                'addressLine1'   => __('Address line 1', 'gratora'),
-                'addressLine2'   => __('Apartment, suite, etc.', 'gratora'),
-                'addressCity'    => __('City', 'gratora'),
-                'addressRegion'  => __('State / region', 'gratora'),
-                'addressPostal'  => __('Postal code', 'gratora'),
-                'addressCountry' => __('Country', 'gratora'),
-                'noSpecificFund' => __('No specific fund', 'gratora'),
-                'number'         => __('Number', 'gratora'),
-                'impact'         => __('Provides', 'gratora'),
-                'currency'       => __('Currency', 'gratora'),
-                'coverFees'      => __('I\'d like to help cover the transaction fee', 'gratora'),
-                'feesTotal'      => __('Total with fees:', 'gratora'),
-                'formTitle'      => __('Donation form', 'gratora'),
-                'close'          => __('Close', 'gratora'),
-                'required'       => __('Required', 'gratora'),
-                'freqOneTime'    => __('One-time', 'gratora'),
-                'freqWeekly'     => __('Weekly', 'gratora'),
-                'freqBiweekly'   => __('Every 2 weeks', 'gratora'),
-                'freqMonthly'    => __('Monthly', 'gratora'),
-                'freqQuarterly'  => __('Quarterly', 'gratora'),
-                'freqYearly'     => __('Yearly', 'gratora'),
-                'searchCountry'  => __('Search country…', 'gratora'),
-                'framedTitle'    => __('This donation form is being shown inside another website.', 'gratora'),
-                'framedAction'   => __('Open the donation page', 'gratora'),
+                'unresolvedTitle'  => __('We could not confirm your payment', 'gratora-donation-platform'),
+                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'gratora-donation-platform'),
+                'checkAgain'       => __('Check again', 'gratora-donation-platform'),
+                'paymentTitle'   => __('Complete your donation', 'gratora-donation-platform'),
+                'paymentLoading' => __('Loading secure payment…', 'gratora-donation-platform'),
+                'payNow'         => __('Pay', 'gratora-donation-platform'),
+                'confirming'     => __('Confirming your payment…', 'gratora-donation-platform'),
+                'cancel'         => __('Cancel', 'gratora-donation-platform'),
+                'comment'        => __('Add a message', 'gratora-donation-platform'),
+                'notePublic'     => __('Show my message publicly on the supporter wall', 'gratora-donation-platform'),
+                'anonymous'      => __('Make this donation anonymous', 'gratora-donation-platform'),
+                'phone'          => __('Phone', 'gratora-donation-platform'),
+                'addressLine1'   => __('Address line 1', 'gratora-donation-platform'),
+                'addressLine2'   => __('Apartment, suite, etc.', 'gratora-donation-platform'),
+                'addressCity'    => __('City', 'gratora-donation-platform'),
+                'addressRegion'  => __('State / region', 'gratora-donation-platform'),
+                'addressPostal'  => __('Postal code', 'gratora-donation-platform'),
+                'addressCountry' => __('Country', 'gratora-donation-platform'),
+                'noSpecificFund' => __('No specific fund', 'gratora-donation-platform'),
+                'number'         => __('Number', 'gratora-donation-platform'),
+                'impact'         => __('Provides', 'gratora-donation-platform'),
+                'currency'       => __('Currency', 'gratora-donation-platform'),
+                'coverFees'      => __('I\'d like to help cover the transaction fee', 'gratora-donation-platform'),
+                'feesTotal'      => __('Total with fees:', 'gratora-donation-platform'),
+                'formTitle'      => __('Donation form', 'gratora-donation-platform'),
+                'close'          => __('Close', 'gratora-donation-platform'),
+                'required'       => __('Required', 'gratora-donation-platform'),
+                'freqOneTime'    => __('One-time', 'gratora-donation-platform'),
+                'freqWeekly'     => __('Weekly', 'gratora-donation-platform'),
+                'freqBiweekly'   => __('Every 2 weeks', 'gratora-donation-platform'),
+                'freqMonthly'    => __('Monthly', 'gratora-donation-platform'),
+                'freqQuarterly'  => __('Quarterly', 'gratora-donation-platform'),
+                'freqYearly'     => __('Yearly', 'gratora-donation-platform'),
+                'searchCountry'  => __('Search country…', 'gratora-donation-platform'),
+                'framedTitle'    => __('This donation form is being shown inside another website.', 'gratora-donation-platform'),
+                'framedAction'   => __('Open the donation page', 'gratora-donation-platform'),
                 // The same source strings the server-rendered terms field
                 // uses, so one translation covers both render paths.
-                'agreeToTerms'   => __('I agree to the terms', 'gratora'),
-                'readTerms'      => __('Read the terms', 'gratora'),
+                'agreeToTerms'   => __('I agree to the terms', 'gratora-donation-platform'),
+                'readTerms'      => __('Read the terms', 'gratora-donation-platform'),
                 'validation'     => [
-                    'required'       => __('Required.', 'gratora'),
-                    'termsRequired'  => __('Please agree to continue.', 'gratora'),
-                    'pickAmount'     => __('Pick or enter an amount.', 'gratora'),
+                    'required'       => __('Required.', 'gratora-donation-platform'),
+                    'termsRequired'  => __('Please agree to continue.', 'gratora-donation-platform'),
+                    'pickAmount'     => __('Pick or enter an amount.', 'gratora-donation-platform'),
                     /* translators: %s: minimum donation amount formatted */
-                    'minAmount'      => __('Minimum donation is %s.', 'gratora'),
-                    'invalidEmail'   => __('Enter a valid email.', 'gratora'),
-                    'enterName'      => __('Enter a name.', 'gratora'),
-                    'invalidNumber'  => __('Enter a number.', 'gratora'),
+                    'minAmount'      => __('Minimum donation is %s.', 'gratora-donation-platform'),
+                    'invalidEmail'   => __('Enter a valid email.', 'gratora-donation-platform'),
+                    'enterName'      => __('Enter a name.', 'gratora-donation-platform'),
+                    'invalidNumber'  => __('Enter a number.', 'gratora-donation-platform'),
                     /* translators: %s: minimum value */
-                    'minNumber'      => __('Must be at least %s.', 'gratora'),
+                    'minNumber'      => __('Must be at least %s.', 'gratora-donation-platform'),
                     /* translators: %s: maximum value */
-                    'maxNumber'      => __('Must be at most %s.', 'gratora'),
+                    'maxNumber'      => __('Must be at most %s.', 'gratora-donation-platform'),
                     /* translators: %s: earliest allowed date */
-                    'minDate'        => __('On or after %s.', 'gratora'),
+                    'minDate'        => __('On or after %s.', 'gratora-donation-platform'),
                     /* translators: %s: latest allowed date */
-                    'maxDate'        => __('On or before %s.', 'gratora'),
+                    'maxDate'        => __('On or before %s.', 'gratora-donation-platform'),
                     /* translators: %s: maximum length */
-                    'tooLong'        => __('Too long (max %s).', 'gratora'),
-                    'invalidFormat'  => __('Invalid format.', 'gratora'),
-                    'pickAtLeastOne' => __('Pick at least one.', 'gratora'),
+                    'tooLong'        => __('Too long (max %s).', 'gratora-donation-platform'),
+                    'invalidFormat'  => __('Invalid format.', 'gratora-donation-platform'),
+                    'pickAtLeastOne' => __('Pick at least one.', 'gratora-donation-platform'),
                     /* translators: %s: minimum number of selections */
-                    'pickAtLeast'    => __('Pick at least %s.', 'gratora'),
+                    'pickAtLeast'    => __('Pick at least %s.', 'gratora-donation-platform'),
                     /* translators: %s: maximum number of selections */
-                    'pickNoMoreThan' => __('Pick no more than %s.', 'gratora'),
+                    'pickNoMoreThan' => __('Pick no more than %s.', 'gratora-donation-platform'),
                 ],
             ],
         ];
@@ -1114,8 +1114,8 @@ final class DonationFormShortcode extends HookProvider
                 case 'gratora/comment':
                     $items[] = $tagRow([
                         'kind'        => 'comment',
-                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'gratora')),
-                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'gratora')),
+                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'gratora-donation-platform')),
+                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'gratora-donation-platform')),
                         'required'    => (bool)   ($attrs['required']    ?? false),
                     ], $row, $attrs);
                     break;
@@ -1125,7 +1125,7 @@ final class DonationFormShortcode extends HookProvider
                     $globalDefault  = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
                     $items[] = $tagRow([
                         'kind'      => 'anonymous',
-                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'gratora')),
+                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'gratora-donation-platform')),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
                     ], $row, $attrs);
                     break;
@@ -1133,7 +1133,7 @@ final class DonationFormShortcode extends HookProvider
                 case 'gratora/cover-fees':
                     $items[] = $tagRow([
                         'kind'      => 'cover_fees',
-                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'gratora')),
+                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'gratora-donation-platform')),
                         'percent'   => (float)  ($attrs['percent']   ?? 2.9),
                         'fixed'     => (int)    ($attrs['fixed']     ?? 30),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
@@ -1325,7 +1325,7 @@ final class DonationFormShortcode extends HookProvider
                     $steps[] = [
                         'type'        => 'submit',
                         'page'        => $currentPage,
-                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'gratora')),
+                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'gratora-donation-platform')),
                         'align'       => $sbAlign,
                     ];
                     break;
@@ -1482,7 +1482,7 @@ final class DonationFormShortcode extends HookProvider
             if ($s['type'] === 'submit') { $hasSubmit = true; break; }
         }
         if (! $hasSubmit) {
-            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'gratora')];
+            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'gratora-donation-platform')];
         }
 
         // Walker pages are 1-indexed; runtime wants dense 0-indexed.
@@ -1639,14 +1639,14 @@ final class DonationFormShortcode extends HookProvider
     private function renderNotAccepting(?string $reason): string
     {
         $public = match ($reason) {
-            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'gratora'),
-            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'gratora'),
-            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'gratora'),
+            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'gratora-donation-platform'),
+            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'gratora-donation-platform'),
+            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'gratora-donation-platform'),
             default     => null,
         };
 
         if ($public === null) {
-            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'gratora'));
+            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'gratora-donation-platform'));
         }
 
         // The visitor's sentence explains the situation; it does not say what to
@@ -1656,9 +1656,9 @@ final class DonationFormShortcode extends HookProvider
         $note = '';
         if (current_user_can('manage_options') || current_user_can('manage_gratora')) {
             $for = match ($reason) {
-                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'gratora'),
-                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'gratora'),
-                'scheduled' => __('It opens on its start date. Only you can see this note.', 'gratora'),
+                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'gratora-donation-platform'),
+                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'gratora-donation-platform'),
+                'scheduled' => __('It opens on its start date. Only you can see this note.', 'gratora-donation-platform'),
                 default     => '',
             };
 

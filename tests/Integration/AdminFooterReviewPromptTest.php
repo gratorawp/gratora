@@ -60,7 +60,7 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
     public function test_the_link_points_at_the_assigned_permalink(): void
     {
         $this->assertStringContainsString(
-            'https://wordpress.org/support/plugin/gratora/reviews/?rate=5#new-post',
+            'https://wordpress.org/support/plugin/gratora-donation-platform/reviews/?rate=5#new-post',
             $this->footerOn('gratora')
         );
     }
@@ -76,7 +76,7 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
 
         $this->assertSame(
             $header['TextDomain'],
-            'gratora',
+            'gratora-donation-platform',
             'the review link slug and the Text Domain header have drifted apart'
         );
     }

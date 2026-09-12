@@ -66,7 +66,7 @@ final class FormReadinessService
         $pass = [
             'id'     => 'consent-purposes',
             'status' => 'pass',
-            'label'  => __('Every consent this form asks for still exists', 'gratora'),
+            'label'  => __('Every consent this form asks for still exists', 'gratora-donation-platform'),
         ];
 
         $asked = $this->consentKeys(parse_blocks((string) $form->blocks));
@@ -90,14 +90,14 @@ final class FormReadinessService
         return [
             'id'           => 'consent-purposes',
             'status'       => 'fail',
-            'label'        => __('This form asks for consent that no longer exists', 'gratora'),
+            'label'        => __('This form asks for consent that no longer exists', 'gratora-donation-platform'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated consent purpose keys. */
-                __('%s is not in the consent registry any more, so donors are never asked and nothing is recorded, including where the consent was required. Put the purpose back under the same key, or take the block off this form.', 'gratora'),
+                __('%s is not in the consent registry any more, so donors are never asked and nothing is recorded, including where the consent was required. Put the purpose back under the same key, or take the block off this form.', 'gratora-donation-platform'),
                 implode(', ', $gone)
             ),
             'action_url'   => admin_url('admin.php?page=gratora-settings#privacy'),
-            'action_label' => __('Open consent settings', 'gratora'),
+            'action_label' => __('Open consent settings', 'gratora-donation-platform'),
         ];
     }
 
@@ -144,7 +144,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('No recurring toggle on this form', 'gratora'),
+                'label'  => __('No recurring toggle on this form', 'gratora-donation-platform'),
             ];
         }
         $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($stub['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
@@ -155,14 +155,14 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('Recurring toggle offers at least two frequencies', 'gratora'),
+                'label'  => __('Recurring toggle offers at least two frequencies', 'gratora-donation-platform'),
             ];
         }
         return [
             'id'           => 'recurring-toggle-frequencies',
             'status'       => 'warn',
-            'label'        => __('Recurring toggle has fewer than two frequencies', 'gratora'),
-            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'gratora'),
+            'label'        => __('Recurring toggle has fewer than two frequencies', 'gratora-donation-platform'),
+            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'gratora-donation-platform'),
         ];
     }
 
@@ -188,21 +188,21 @@ final class FormReadinessService
             return [
                 'id'     => 'gateway-block',
                 'status' => 'pass',
-                'label'  => __('Donors can pick how to pay', 'gratora'),
+                'label'  => __('Donors can pick how to pay', 'gratora-donation-platform'),
             ];
         }
 
         return [
             'id'           => 'gateway-block',
             'status'       => 'warn',
-            'label'        => __('This form does not let the donor choose a payment method', 'gratora'),
+            'label'        => __('This form does not let the donor choose a payment method', 'gratora-donation-platform'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of enabled gateway names. */
-                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'gratora'),
+                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'gratora-donation-platform'),
                 implode(', ', $offered)
             ),
             'action_url'   => admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id),
-            'action_label' => __('Edit the form', 'gratora'),
+            'action_label' => __('Edit the form', 'gratora-donation-platform'),
         ];
     }
 
@@ -248,10 +248,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('Stripe account is not ready to take donations', 'gratora'),
-                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'gratora'),
+                'label'        => __('Stripe account is not ready to take donations', 'gratora-donation-platform'),
+                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'gratora-donation-platform'),
                 'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
-                'action_label' => __('Open settings', 'gratora'),
+                'action_label' => __('Open settings', 'gratora-donation-platform'),
             ];
         }
 
@@ -269,10 +269,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('No payment gateway enabled for this form', 'gratora'),
-                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'gratora'),
+                'label'        => __('No payment gateway enabled for this form', 'gratora-donation-platform'),
+                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'gratora-donation-platform'),
                 'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
-                'action_label' => __('Configure gateways', 'gratora'),
+                'action_label' => __('Configure gateways', 'gratora-donation-platform'),
             ];
         }
 
@@ -280,7 +280,7 @@ final class FormReadinessService
             'id'     => 'gateway',
             'status' => 'pass',
             /* translators: %s: comma-separated list of enabled gateway names. */
-            'label'  => sprintf(__('Payment gateways enabled: %s', 'gratora'), implode(', ', $enabled)),
+            'label'  => sprintf(__('Payment gateways enabled: %s', 'gratora-donation-platform'), implode(', ', $enabled)),
         ];
     }
 
@@ -291,7 +291,7 @@ final class FormReadinessService
             return [
                 'id'     => 'test-mode',
                 'status' => 'pass',
-                'label'  => __('Test mode is off', 'gratora'),
+                'label'  => __('Test mode is off', 'gratora-donation-platform'),
             ];
         }
 
@@ -329,32 +329,32 @@ final class FormReadinessService
                 'status' => 'fail',
                 'label'  => sprintf(
                     /* translators: %s: gateway names, comma separated */
-                    __('This form is in test mode, but %s has no test credentials', 'gratora'),
+                    __('This form is in test mode, but %s has no test credentials', 'gratora-donation-platform'),
                     implode(', ', $noTestKeys)
                 ),
-                'detail' => __('Every donation on this form will fail at the payment step. Add the test credentials, or turn test mode off.', 'gratora'),
+                'detail' => __('Every donation on this form will fail at the payment step. Add the test credentials, or turn test mode off.', 'gratora-donation-platform'),
                 'action_url'   => $ownSwitch
                     ? admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id)
                     : admin_url('admin.php?page=gratora-settings#gateways'),
                 'action_label' => $ownSwitch
-                    ? __('Open this form', 'gratora')
-                    : __('Open settings', 'gratora'),
+                    ? __('Open this form', 'gratora-donation-platform')
+                    : __('Open settings', 'gratora-donation-platform'),
             ];
         }
 
         return [
             'id'           => 'test-mode',
             'status'       => 'warn',
-            'label'        => __('This form is in test mode', 'gratora'),
+            'label'        => __('This form is in test mode', 'gratora-donation-platform'),
             'detail'       => $ownSwitch
-                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'gratora')
-                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'gratora'),
+                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'gratora-donation-platform')
+                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'gratora-donation-platform'),
             'action_url'   => $ownSwitch
                 ? admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id)
                 : admin_url('admin.php?page=gratora-settings#gateways'),
             'action_label' => $ownSwitch
-                ? __('Open this form', 'gratora')
-                : __('Open settings', 'gratora'),
+                ? __('Open this form', 'gratora-donation-platform')
+                : __('Open settings', 'gratora-donation-platform'),
         ];
     }
 
@@ -376,22 +376,22 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-sender',
                 'status'       => 'warn',
-                'label'        => __('Receipt sender uses WordPress fallback', 'gratora'),
-                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'gratora'),
+                'label'        => __('Receipt sender uses WordPress fallback', 'gratora-donation-platform'),
+                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'gratora-donation-platform'),
                 'action_url'   => admin_url('admin.php?page=gratora-settings#email'),
-                'action_label' => __('Set sender', 'gratora'),
+                'action_label' => __('Set sender', 'gratora-donation-platform'),
             ];
         }
         return [
             'id'     => 'receipt-sender',
             'status' => 'pass',
             /* translators: %s: from-email address used for donation receipts. */
-            'label'  => sprintf(__('Receipts sent from %s', 'gratora'), $from),
+            'label'  => sprintf(__('Receipts sent from %s', 'gratora-donation-platform'), $from),
             // Deliberately not a clean bill of health. This check can only see
             // the address; a receipt sent from a perfectly valid one still
             // bounces when the host has no authenticated transport, which is
             // the usual shape of "no donor ever got a receipt".
-            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'gratora'),
+            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'gratora-donation-platform'),
         ];
     }
 
@@ -406,16 +406,16 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-template',
                 'status'       => 'fail',
-                'label'        => __('Donation receipt email is disabled', 'gratora'),
-                'detail'       => __('Donors will not receive a confirmation after paying.', 'gratora'),
+                'label'        => __('Donation receipt email is disabled', 'gratora-donation-platform'),
+                'detail'       => __('Donors will not receive a confirmation after paying.', 'gratora-donation-platform'),
                 'action_url'   => admin_url('admin.php?page=gratora-settings#email'),
-                'action_label' => __('Enable template', 'gratora'),
+                'action_label' => __('Enable template', 'gratora-donation-platform'),
             ];
         }
         return [
             'id'     => 'receipt-template',
             'status' => 'pass',
-            'label'  => __('Donation receipt email is enabled', 'gratora'),
+            'label'  => __('Donation receipt email is enabled', 'gratora-donation-platform'),
         ];
     }
 
@@ -426,7 +426,7 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'pass',
-                'label'  => __('Site is served over HTTPS', 'gratora'),
+                'label'  => __('Site is served over HTTPS', 'gratora-donation-platform'),
             ];
         }
         // Test mode moves no real money, so HTTPS only warns. Live mode fails:
@@ -435,15 +435,15 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'warn',
-                'label'  => __('Site is not on HTTPS', 'gratora'),
-                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'gratora'),
+                'label'  => __('Site is not on HTTPS', 'gratora-donation-platform'),
+                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'gratora-donation-platform'),
             ];
         }
         return [
             'id'     => 'https',
             'status' => 'fail',
-            'label'  => __('Site is not on HTTPS', 'gratora'),
-            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'gratora'),
+            'label'  => __('Site is not on HTTPS', 'gratora-donation-platform'),
+            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'gratora-donation-platform'),
         ];
     }
 
@@ -454,7 +454,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Form is one-time only', 'gratora'),
+                'label'  => __('Form is one-time only', 'gratora-donation-platform'),
             ];
         }
 
@@ -477,7 +477,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Recurring donations are supported', 'gratora'),
+                'label'  => __('Recurring donations are supported', 'gratora-donation-platform'),
             ];
         }
 
@@ -485,10 +485,10 @@ final class FormReadinessService
             return [
                 'id'           => 'recurring-gateway',
                 'status'       => 'fail',
-                'label'        => __('No gateway supports recurring donations', 'gratora'),
-                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'gratora'),
+                'label'        => __('No gateway supports recurring donations', 'gratora-donation-platform'),
+                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'gratora-donation-platform'),
                 'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
-                'action_label' => __('Open gateways', 'gratora'),
+                'action_label' => __('Open gateways', 'gratora-donation-platform'),
             ];
         }
 
@@ -497,14 +497,14 @@ final class FormReadinessService
         return [
             'id'           => 'recurring-gateway',
             'status'       => 'fail',
-            'label'        => __('None of your enabled gateways supports recurring', 'gratora'),
+            'label'        => __('None of your enabled gateways supports recurring', 'gratora-donation-platform'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of recurring-capable gateway names. */
-                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'gratora'),
+                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'gratora-donation-platform'),
                 implode(', ', $names)
             ),
             'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
-            'action_label' => __('Open gateways', 'gratora'),
+            'action_label' => __('Open gateways', 'gratora-donation-platform'),
         ];
     }
 

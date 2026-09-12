@@ -48,7 +48,7 @@ final class ConsentBlock implements Block
             }
 
             return '<div class="gratora-block-notice">'
-                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'gratora')
+                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'gratora-donation-platform')
                 . '</div>';
         }
 

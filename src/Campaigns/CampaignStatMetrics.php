@@ -31,15 +31,15 @@ final class CampaignStatMetrics
     public static function labels(): array
     {
         return [
-            'raised'    => __('Amount raised', 'gratora'),
-            'goal'      => __('Our goal', 'gratora'),
-            'remaining' => __('Still needed', 'gratora'),
-            'percent'   => __('Of goal reached', 'gratora'),
-            'donations' => __('Donations', 'gratora'),
-            'donors'    => __('Donors', 'gratora'),
-            'average'   => __('Average donation', 'gratora'),
-            'top'       => __('Top donation', 'gratora'),
-            'days_left' => __('Days left', 'gratora'),
+            'raised'    => __('Amount raised', 'gratora-donation-platform'),
+            'goal'      => __('Our goal', 'gratora-donation-platform'),
+            'remaining' => __('Still needed', 'gratora-donation-platform'),
+            'percent'   => __('Of goal reached', 'gratora-donation-platform'),
+            'donations' => __('Donations', 'gratora-donation-platform'),
+            'donors'    => __('Donors', 'gratora-donation-platform'),
+            'average'   => __('Average donation', 'gratora-donation-platform'),
+            'top'       => __('Top donation', 'gratora-donation-platform'),
+            'days_left' => __('Days left', 'gratora-donation-platform'),
         ];
     }
 

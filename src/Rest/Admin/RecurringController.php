@@ -396,7 +396,7 @@ final class RecurringController
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'gratora');
+            return __('[redacted]', 'gratora-donation-platform');
         }
 
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
@@ -409,7 +409,7 @@ final class RecurringController
     {
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);
         if (! $plan) {
-            return new WP_Error('gratora_not_found', __('Recurring plan not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Recurring plan not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         $action = (string) $request['action'];
@@ -449,7 +449,7 @@ final class RecurringController
                     break;
 
                 default:
-                    return new WP_Error('gratora_invalid_action', __('Unknown action.', 'gratora'), ['status' => 422]);
+                    return new WP_Error('gratora_invalid_action', __('Unknown action.', 'gratora-donation-platform'), ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of RuntimeException, which is its parent. Nothing was
@@ -458,7 +458,7 @@ final class RecurringController
             // what the card is actually charged.
             return new WP_Error(
                 'gratora_change_needs_approval',
-                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'gratora'),
+                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'gratora-donation-platform'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (GatewayTransportException $e) {
@@ -470,7 +470,7 @@ final class RecurringController
                 'gratora_gateway_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'gratora'),
+                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'gratora-donation-platform'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -498,7 +498,7 @@ final class RecurringController
             ]);
             return new WP_Error(
                 'gratora_gateway_error',
-                __('The payment provider would not accept that change. Nothing has been altered.', 'gratora'),
+                __('The payment provider would not accept that change. Nothing has been altered.', 'gratora-donation-platform'),
                 ['status' => 502]
             );
         }

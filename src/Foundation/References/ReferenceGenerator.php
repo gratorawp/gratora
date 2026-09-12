@@ -63,7 +63,7 @@ final class ReferenceGenerator
     public function nextNumber(string $scope, int $nextValue): void
     {
         if ($nextValue < 1) {
-            throw new \InvalidArgumentException(esc_html__('The next number must be 1 or more.', 'gratora'));
+            throw new \InvalidArgumentException(esc_html__('The next number must be 1 or more.', 'gratora-donation-platform'));
         }
 
         $scope = $this->normaliseScope($scope);
@@ -74,7 +74,7 @@ final class ReferenceGenerator
         if ($nextValue <= $current) {
             throw new \RuntimeException(esc_html(sprintf(
                 /* translators: 1: reference scope, e.g. donation, 2: the number submitted, 3: the counter's current value. */
-                __('The %1$s counter is already at %3$d, so it cannot be set to %2$d. Choose a higher number, or references would repeat.', 'gratora'),
+                __('The %1$s counter is already at %3$d, so it cannot be set to %2$d. Choose a higher number, or references would repeat.', 'gratora-donation-platform'),
                 $scope,
                 $nextValue,
                 $current
@@ -169,13 +169,13 @@ final class ReferenceGenerator
     public static function assertTokens(array $input): void
     {
         $labels = [
-            'donation'     => __('Donation prefix', 'gratora'),
-            'receipt'      => __('Receipt prefix', 'gratora'),
+            'donation'     => __('Donation prefix', 'gratora-donation-platform'),
+            'receipt'      => __('Receipt prefix', 'gratora-donation-platform'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {
             throw new InvalidReferenceToken(
-                __('Separator', 'gratora'),
+                __('Separator', 'gratora-donation-platform'),
                 (string) $input['separator'],
             );
         }
@@ -230,7 +230,7 @@ final class ReferenceGenerator
         if ($longest > self::MAX_REFERENCE) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: 1: length this numbering would produce, 2: the maximum. */
-                __('This numbering would produce references of up to %1$d characters and the limit is %2$d. Shorten a prefix, the separator or the padding.', 'gratora'),
+                __('This numbering would produce references of up to %1$d characters and the limit is %2$d. Shorten a prefix, the separator or the padding.', 'gratora-donation-platform'),
                 $longest,
                 self::MAX_REFERENCE
             )));

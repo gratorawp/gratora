@@ -19,7 +19,7 @@ final class DefaultFormTypeHandler implements FormTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Donation', 'gratora');
+        return __('Donation', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

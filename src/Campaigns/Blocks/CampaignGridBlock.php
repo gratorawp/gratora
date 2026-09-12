@@ -33,12 +33,12 @@ final class CampaignGridBlock extends CampaignBlock
         return match ($type) {
             'donations' => sprintf(
                 /* translators: %s: number of donations */
-                _n('%s donation', '%s donations', $current, 'gratora'),
+                _n('%s donation', '%s donations', $current, 'gratora-donation-platform'),
                 number_format_i18n($current)
             ),
             'donors' => sprintf(
                 /* translators: %s: number of donors */
-                _n('%s donor', '%s donors', $current, 'gratora'),
+                _n('%s donor', '%s donors', $current, 'gratora-donation-platform'),
                 number_format_i18n($current)
             ),
             default => Money::compact($current, $currency),
@@ -73,18 +73,18 @@ final class CampaignGridBlock extends CampaignBlock
                 'cards'     => [],
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
                     ?: ($only
-                        ? __('This is the only campaign running right now.', 'gratora')
-                        : __('No campaigns are running right now.', 'gratora')),
+                        ? __('This is the only campaign running right now.', 'gratora-donation-platform')
+                        : __('No campaigns are running right now.', 'gratora-donation-platform')),
                 // Unlike the donation and donor blocks, nothing a visitor does
                 // makes another campaign appear. So the invitation points at
                 // the one they are already reading, which is the only way to
                 // give that exists today.
-                'emptySubText' => $only ? __('Which makes it an easy choice.', 'gratora') : '',
+                'emptySubText' => $only ? __('Which makes it an easy choice.', 'gratora-donation-platform') : '',
                 'emptyIcon'    => 'campaigns',
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
                     ? ($only
-                        ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'gratora')
-                        : __('No campaigns are published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'gratora'))
+                        ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'gratora-donation-platform')
+                        : __('No campaigns are published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'gratora-donation-platform'))
                     : '',
                 'styleVars' => $this->styleVars($current),
             ]);
@@ -114,7 +114,7 @@ final class CampaignGridBlock extends CampaignBlock
                 'raised'    => self::cardValue($type, $current, (string) $c->currency),
                 'goalLabel' => $target > 0
                     /* translators: %s: the goal, as money or a count */
-                    ? sprintf(__('of %s', 'gratora'), $type === 'amount'
+                    ? sprintf(__('of %s', 'gratora-donation-platform'), $type === 'amount'
                         ? Money::compact($target, $c->currency)
                         : number_format_i18n($target))
                     : '',

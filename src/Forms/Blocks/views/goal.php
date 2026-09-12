@@ -19,8 +19,8 @@ $fmt = static function (int $v) use ($isAmount, $currency): string {
         : (string) number_format_i18n($v);
 };
 $unitLabel = match ($goalType) {
-    'donations' => _n('donation', 'donations', $target, 'gratora'),
-    'donors'    => _n('donor', 'donors', $target, 'gratora'),
+    'donations' => _n('donation', 'donations', $target, 'gratora-donation-platform'),
+    'donors'    => _n('donor', 'donors', $target, 'gratora-donation-platform'),
     default     => '',
 };
 ?>
@@ -31,11 +31,11 @@ $unitLabel = match ($goalType) {
             <span><?php
             if ($isAmount) {
                 /* translators: %s formatted goal amount with currency */
-                printf(esc_html__('raised of %s goal', 'gratora'), esc_html($fmt($target)));
+                printf(esc_html__('raised of %s goal', 'gratora-donation-platform'), esc_html($fmt($target)));
             } else {
                 printf(
                     /* translators: 1: target number, 2: unit label e.g. donations */
-                    esc_html__('of %1$s %2$s goal', 'gratora'),
+                    esc_html__('of %1$s %2$s goal', 'gratora-donation-platform'),
                     esc_html($fmt($target)),
                     esc_html($unitLabel)
                 );
@@ -54,7 +54,7 @@ $unitLabel = match ($goalType) {
             <span class="gratora-goal__donors">
                 <?php
                 /* translators: %d number of donors */
-                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'gratora')), (int) $donorsCount);
+                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'gratora-donation-platform')), (int) $donorsCount);
                 ?>
             </span>
         <?php endif; ?>
@@ -64,7 +64,7 @@ $unitLabel = match ($goalType) {
                 <?php
                 $days = max(0, (int) floor((strtotime((string) $endsAt) - time()) / 86400));
                 /* translators: %d days remaining */
-                printf(esc_html(_n('%d day left', '%d days left', $days, 'gratora')), (int) $days);
+                printf(esc_html(_n('%d day left', '%d days left', $days, 'gratora-donation-platform')), (int) $days);
                 ?>
             </span>
         <?php endif; ?>

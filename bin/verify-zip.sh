@@ -6,7 +6,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-SLUG=gratora
+SLUG=gratora-donation-platform
 
 ZIP="dist/$SLUG.zip"
 OUT="dist/$SLUG"

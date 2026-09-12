@@ -71,13 +71,13 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Test donation', 'gratora');
+        return __('Test donation', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'gratora');
+        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

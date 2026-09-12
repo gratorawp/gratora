@@ -85,8 +85,8 @@ final class FormTemplates
     {
         return [
             'id'             => 'blank',
-            'name'           => __('Blank', 'gratora'),
-            'description'    => __('Empty form. Build it from scratch.', 'gratora'),
+            'name'           => __('Blank', 'gratora-donation-platform'),
+            'description'    => __('Empty form. Build it from scratch.', 'gratora-donation-platform'),
             'icon'           => 'admin-page',
             'category'       => 'Blank',
             'thumbnail_hint' => 'Empty canvas with a single + button.',
@@ -100,16 +100,16 @@ final class FormTemplates
     {
         // Short because that is the entire point. A goal bar, phone number,
         // message box and anonymity toggle all belong on some other template.
-        $blocks = self::block('gratora/heading', ['text' => __('Chip in', 'gratora'), 'level' => 2])
-                . self::block('gratora/paragraph', ['text' => __('Every bit helps. Takes 20 seconds.', 'gratora')])
+        $blocks = self::block('gratora/heading', ['text' => __('Chip in', 'gratora-donation-platform'), 'level' => 2])
+                . self::block('gratora/paragraph', ['text' => __('Every bit helps. Takes 20 seconds.', 'gratora-donation-platform')])
                 . self::block('gratora/donation-amount', [
                     'presets' => self::presets(
                         [10, 25, 50, 100],
                         [
-                            __("A coffee's worth", 'gratora'),
-                            __('A round of thanks', 'gratora'),
-                            __('A bigger boost', 'gratora'),
-                            __('MVP status', 'gratora'),
+                            __("A coffee's worth", 'gratora-donation-platform'),
+                            __('A round of thanks', 'gratora-donation-platform'),
+                            __('A bigger boost', 'gratora-donation-platform'),
+                            __('MVP status', 'gratora-donation-platform'),
                         ]
                     ),
                     'allowCustom' => true,
@@ -117,14 +117,14 @@ final class FormTemplates
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => false])
                 . self::block('gratora/email', ['required' => true])
                 . self::checkout(
-                    __('Send {amount}', 'gratora'),
-                    __("I'll cover the fees so 100% goes to the cause", 'gratora')
+                    __('Send {amount}', 'gratora-donation-platform'),
+                    __("I'll cover the fees so 100% goes to the cause", 'gratora-donation-platform')
                 );
 
         return [
             'id'             => 'quick-give',
-            'name'           => __('Quick Give', 'gratora'),
-            'description'    => __('Minimal single-page form. Amount, name, email, donate. Perfect first form.', 'gratora'),
+            'name'           => __('Quick Give', 'gratora-donation-platform'),
+            'description'    => __('Minimal single-page form. Amount, name, email, donate. Perfect first form.', 'gratora-donation-platform'),
             'icon'           => 'share',
             'category'       => 'Starter',
             'thumbnail_hint' => 'Mobile-shaped card, three purple progress dots, rounded amount pills.',
@@ -134,7 +134,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly']],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __("You're amazing. Share to multiply your impact.", 'gratora'),
+                'thank_you_message' => __("You're amazing. Share to multiply your impact.", 'gratora-donation-platform'),
             ],
             'blocks'         => $blocks,
         ];
@@ -143,18 +143,18 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function impactTiers(): array
     {
-        $blocks = self::block('gratora/heading', ['text' => __('Every tier makes a real difference', 'gratora'), 'level' => 1])
-                . self::block('gratora/paragraph', ['text' => __('Last year, your support reached thousands of people across our community. Your donation moves a family from just getting by to getting ahead.', 'gratora')])
+        $blocks = self::block('gratora/heading', ['text' => __('Every tier makes a real difference', 'gratora-donation-platform'), 'level' => 1])
+                . self::block('gratora/paragraph', ['text' => __('Last year, your support reached thousands of people across our community. Your donation moves a family from just getting by to getting ahead.', 'gratora-donation-platform')])
                 . self::block('gratora/donation-amount', [
                     'presets' => self::presets(
                         [25, 50, 100, 250, 500, 1000],
                         [
-                            __('Friend - supports one person', 'gratora'),
-                            __('Sustainer - supports a family for a week', 'gratora'),
-                            __('Champion - supports a family for a month', 'gratora'),
-                            __('Guardian - supports ten households', 'gratora'),
-                            __('Patron - supports a community program', 'gratora'),
-                            __('Benefactor - supports a person for a season', 'gratora'),
+                            __('Friend - supports one person', 'gratora-donation-platform'),
+                            __('Sustainer - supports a family for a week', 'gratora-donation-platform'),
+                            __('Champion - supports a family for a month', 'gratora-donation-platform'),
+                            __('Guardian - supports ten households', 'gratora-donation-platform'),
+                            __('Patron - supports a community program', 'gratora-donation-platform'),
+                            __('Benefactor - supports a person for a season', 'gratora-donation-platform'),
                         ]
                     ),
                     'allowCustom' => true,
@@ -163,27 +163,27 @@ final class FormTemplates
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
                 . self::block('gratora/comment', [
-                    'label' => __('Add a message of support', 'gratora'),
-                    'placeholder' => __('Why this cause matters to you...', 'gratora'),
+                    'label' => __('Add a message of support', 'gratora-donation-platform'),
+                    'placeholder' => __('Why this cause matters to you...', 'gratora-donation-platform'),
                     'required' => false,
                 ])
                 . self::block('gratora/anonymous-toggle', [
-                    'label' => __('Hide my name from the donor wall', 'gratora'),
+                    'label' => __('Hide my name from the donor wall', 'gratora-donation-platform'),
                     'defaultOn' => false,
                 ])
                 . self::block('gratora/cover-fees', [
                     'percent' => 2.9, 'fixed' => 30,
-                    'label' => __("I'll cover the processing fee so 100% of my donation goes to the mission", 'gratora'),
+                    'label' => __("I'll cover the processing fee so 100% of my donation goes to the mission", 'gratora-donation-platform'),
                     'defaultOn' => false,
                 ])
                 . self::block('gratora/payment-gateways', ['style' => 'cards'])
                 . self::block('gratora/donation-summary')
-                . self::block('gratora/submit-button', ['label' => __('Give {amount}', 'gratora')]);
+                . self::block('gratora/submit-button', ['label' => __('Give {amount}', 'gratora-donation-platform')]);
 
         return [
             'id'             => 'impact-tiers',
-            'name'           => __('Impact Tiers', 'gratora'),
-            'description'    => __('Long-scroll campaign page where each donation level maps to a named tier and a tangible outcome.', 'gratora'),
+            'name'           => __('Impact Tiers', 'gratora-donation-platform'),
+            'description'    => __('Long-scroll campaign page where each donation level maps to a named tier and a tangible outcome.', 'gratora-donation-platform'),
             'icon'           => 'awards',
             'category'       => 'Standard',
             'thumbnail_hint' => 'Cream page, serif headline above six green tier cards stacked over a goal bar.',
@@ -193,7 +193,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __("Thank you. Your donation is already at work. Here's what happens next, and how to tell a friend.", 'gratora'),
+                'thank_you_message' => __("Thank you. Your donation is already at work. Here's what happens next, and how to tell a friend.", 'gratora-donation-platform'),
             ],
             'blocks'         => $blocks,
         ];
@@ -226,13 +226,13 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function everyday(): array
     {
-        $blocks = self::block('gratora/heading', ['text' => __('Make a donation', 'gratora'), 'level' => 1])
+        $blocks = self::block('gratora/heading', ['text' => __('Make a donation', 'gratora-donation-platform'), 'level' => 1])
                 . self::block('gratora/donation-amount', [
                     'presets'     => self::presets([25, 50, 100, 250], [], 1),
                     'allowCustom' => true,
                 ])
                 . self::block('gratora/recurring-toggle', [
-                    'label'            => __('Make this a recurring donation', 'gratora'),
+                    'label'            => __('Make this a recurring donation', 'gratora-donation-platform'),
                     'defaultFrequency' => 'one-time',
                     'frequencies'      => ['one-time', 'monthly'],
                     'style'            => 'pills',
@@ -241,14 +241,14 @@ final class FormTemplates
                 . self::block('gratora/email', ['required' => true])
                 . self::block('gratora/country', ['required' => false])
                 . self::checkout(
-                    __('Donate {amount}', 'gratora'),
-                    __('Cover the processing fee so the full amount reaches us', 'gratora')
+                    __('Donate {amount}', 'gratora-donation-platform'),
+                    __('Cover the processing fee so the full amount reaches us', 'gratora-donation-platform')
                 );
 
         return [
             'id'             => 'everyday',
-            'name'           => __('Everyday donation', 'gratora'),
-            'description'    => __('The general-purpose form: pick an amount, optionally make it monthly, pay. Start here if no other template fits.', 'gratora'),
+            'name'           => __('Everyday donation', 'gratora-donation-platform'),
+            'description'    => __('The general-purpose form: pick an amount, optionally make it monthly, pay. Start here if no other template fits.', 'gratora-donation-platform'),
             'icon'           => 'heart',
             'category'       => 'Standard',
             'thumbnail_hint' => 'Single column, four amount tiles, one-time/monthly pills, three donor fields, pay button.',
@@ -262,13 +262,13 @@ final class FormTemplates
     {
         $amount = self::block(
             'gratora/step',
-            ['title' => __('Your donation', 'gratora')],
+            ['title' => __('Your donation', 'gratora-donation-platform')],
             self::block('gratora/donation-amount', [
                 'presets'     => self::presets([25, 50, 100, 250], [], 1),
                 'allowCustom' => true,
             ])
             . self::block('gratora/recurring-toggle', [
-                'label'            => __('Make this a recurring donation', 'gratora'),
+                'label'            => __('Make this a recurring donation', 'gratora-donation-platform'),
                 'defaultFrequency' => 'one-time',
                 'frequencies'      => ['one-time', 'monthly'],
                 'style'            => 'pills',
@@ -277,7 +277,7 @@ final class FormTemplates
 
         $details = self::block(
             'gratora/step',
-            ['title' => __('Your details', 'gratora')],
+            ['title' => __('Your details', 'gratora-donation-platform')],
             self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
             . self::block('gratora/email', ['required' => true])
             . self::block('gratora/country', ['required' => false])
@@ -285,17 +285,17 @@ final class FormTemplates
 
         $confirm = self::block(
             'gratora/step',
-            ['title' => __('Confirm', 'gratora')],
+            ['title' => __('Confirm', 'gratora-donation-platform')],
             self::checkout(
-                __('Donate {amount}', 'gratora'),
-                __('Cover the processing fee so the full amount reaches us', 'gratora')
+                __('Donate {amount}', 'gratora-donation-platform'),
+                __('Cover the processing fee so the full amount reaches us', 'gratora-donation-platform')
             )
         );
 
         return [
             'id'             => 'guided',
-            'name'           => __('Guided donation', 'gratora'),
-            'description'    => __('The same fields as the everyday form, split across three steps. Fewer decisions per screen, which suits longer forms and small screens.', 'gratora'),
+            'name'           => __('Guided donation', 'gratora-donation-platform'),
+            'description'    => __('The same fields as the everyday form, split across three steps. Fewer decisions per screen, which suits longer forms and small screens.', 'gratora-donation-platform'),
             'icon'           => 'forms',
             'category'       => 'Wizard',
             'thumbnail_hint' => 'Three-step wizard with dot progress: amounts, then donor fields, then payment.',
@@ -307,12 +307,12 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function monthlySustainer(): array
     {
-        $blocks = self::block('gratora/heading', ['text' => __('Become a monthly supporter', 'gratora'), 'level' => 1])
-                . self::block('gratora/paragraph', ['text' => __('A donation that arrives every month lets us plan further ahead than any single one can.', 'gratora')])
+        $blocks = self::block('gratora/heading', ['text' => __('Become a monthly supporter', 'gratora-donation-platform'), 'level' => 1])
+                . self::block('gratora/paragraph', ['text' => __('A donation that arrives every month lets us plan further ahead than any single one can.', 'gratora-donation-platform')])
                 // Preselected monthly, and no one-time option: a form that offers
                 // both is the everyday one. Add one-time here if you want both.
                 . self::block('gratora/recurring-toggle', [
-                    'label'            => __('How often', 'gratora'),
+                    'label'            => __('How often', 'gratora-donation-platform'),
                     'defaultFrequency' => 'monthly',
                     'frequencies'      => ['monthly', 'yearly'],
                     'style'            => 'pills',
@@ -321,27 +321,27 @@ final class FormTemplates
                     // The amount renders above the label in the org's currency and
                     // the cadence is whichever pill is active, so labels name neither.
                     'presets' => self::presets([10, 25, 50, 100], [
-                        __('Supporter', 'gratora'),
-                        __('Sustainer', 'gratora'),
-                        __('Champion', 'gratora'),
-                        __('Guardian', 'gratora'),
+                        __('Supporter', 'gratora-donation-platform'),
+                        __('Sustainer', 'gratora-donation-platform'),
+                        __('Champion', 'gratora-donation-platform'),
+                        __('Guardian', 'gratora-donation-platform'),
                     ], 1),
                     'allowCustom' => true,
                 ])
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
-                . self::coverFees(__('Cover the processing fee on each payment', 'gratora'))
+                . self::coverFees(__('Cover the processing fee on each payment', 'gratora-donation-platform'))
                 . self::block('gratora/payment-gateways', ['style' => 'cards'])
                 . self::block('gratora/donation-summary')
                 // Next to the button, not on a screen already passed: this is the
                 // last moment the donor can act on what they are agreeing to.
-                . self::block('gratora/paragraph', ['text' => __('Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal.', 'gratora')])
-                . self::block('gratora/submit-button', ['label' => __('Start my monthly donation', 'gratora')]);
+                . self::block('gratora/paragraph', ['text' => __('Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal.', 'gratora-donation-platform')])
+                . self::block('gratora/submit-button', ['label' => __('Start my monthly donation', 'gratora-donation-platform')]);
 
         return [
             'id'             => 'monthly-sustainer',
-            'name'           => __('Monthly sustainer', 'gratora'),
-            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are named tiers, and the commitment is restated next to the button.', 'gratora'),
+            'name'           => __('Monthly sustainer', 'gratora-donation-platform'),
+            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are named tiers, and the commitment is restated next to the button.', 'gratora-donation-platform'),
             'icon'           => 'update',
             'category'       => 'Recurring',
             'thumbnail_hint' => 'Monthly/yearly pills with monthly active, named amount tiles, commitment sentence above the button.',
@@ -351,7 +351,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __('Thank you. Your first payment is on its way, and we will email you before anything changes.', 'gratora'),
+                'thank_you_message' => __('Thank you. Your first payment is on its way, and we will email you before anything changes.', 'gratora-donation-platform'),
             ],
             'blocks'         => $blocks,
         ];
@@ -360,8 +360,8 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function emergencyAppeal(): array
     {
-        $blocks = self::block('gratora/heading', ['text' => __('Emergency appeal', 'gratora'), 'level' => 1])
-                . self::block('gratora/paragraph', ['text' => __('Say what happened, who it affects, and what a donation pays for today. Keep it to a few sentences.', 'gratora')])
+        $blocks = self::block('gratora/heading', ['text' => __('Emergency appeal', 'gratora-donation-platform'), 'level' => 1])
+                . self::block('gratora/paragraph', ['text' => __('Say what happened, who it affects, and what a donation pays for today. Keep it to a few sentences.', 'gratora-donation-platform')])
                 . self::block('gratora/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => true])
                 . self::block('gratora/donation-amount', [
                     'presets'     => self::presets([25, 50, 100, 250], [], 1),
@@ -372,14 +372,14 @@ final class FormTemplates
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
                 . self::checkout(
-                    __('Give now', 'gratora'),
-                    __('Cover the processing fee so the full amount reaches the response', 'gratora')
+                    __('Give now', 'gratora-donation-platform'),
+                    __('Cover the processing fee so the full amount reaches the response', 'gratora-donation-platform')
                 );
 
         return [
             'id'             => 'emergency-appeal',
-            'name'           => __('Emergency appeal', 'gratora'),
-            'description'    => __('For a crisis with a deadline. Leads with the goal and countdown, asks only for what a receipt needs, and offers no fund choice because the appeal is the fund.', 'gratora'),
+            'name'           => __('Emergency appeal', 'gratora-donation-platform'),
+            'description'    => __('For a crisis with a deadline. Leads with the goal and countdown, asks only for what a receipt needs, and offers no fund choice because the appeal is the fund.', 'gratora-donation-platform'),
             'icon'           => 'megaphone',
             'category'       => 'Campaign',
             'thumbnail_hint' => 'Bold headline over a goal bar with countdown, four amount tiles, two donor fields, one button.',
@@ -389,7 +389,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => false, 'frequencies' => []],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __('Thank you. Your donation is already part of the response.', 'gratora'),
+                'thank_you_message' => __('Thank you. Your donation is already part of the response.', 'gratora-donation-platform'),
             ],
             'blocks'         => $blocks,
         ];
@@ -398,15 +398,15 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function designated(): array
     {
-        $blocks = self::block('gratora/heading', ['text' => __('Choose where your donation goes', 'gratora'), 'level' => 1])
-                . self::block('gratora/paragraph', ['text' => __('Pick the work you want to fund, or leave it to us to send it wherever it is needed most.', 'gratora')])
+        $blocks = self::block('gratora/heading', ['text' => __('Choose where your donation goes', 'gratora-donation-platform'), 'level' => 1])
+                . self::block('gratora/paragraph', ['text' => __('Pick the work you want to fund, or leave it to us to send it wherever it is needed most.', 'gratora-donation-platform')])
                 // Needs at least two real funds to be worth showing. The
                 // greatest-need option is what a donor with no preference picks.
                 . self::block('gratora/fund-picker', [
-                    'label'            => __('Fund', 'gratora'),
+                    'label'            => __('Fund', 'gratora-donation-platform'),
                     'allowEmpty'       => true,
-                    'emptyLabel'       => __('Wherever the need is greatest', 'gratora'),
-                    'emptyDescription' => __('We direct it to the most urgent work that month.', 'gratora'),
+                    'emptyLabel'       => __('Wherever the need is greatest', 'gratora-donation-platform'),
+                    'emptyDescription' => __('We direct it to the most urgent work that month.', 'gratora-donation-platform'),
                 ])
                 . self::block('gratora/donation-amount', [
                     'presets'     => self::presets([25, 50, 100, 250], [], 1),
@@ -416,14 +416,14 @@ final class FormTemplates
                 . self::block('gratora/email', ['required' => true])
                 . self::block('gratora/country', ['required' => false])
                 . self::checkout(
-                    __('Donate {amount}', 'gratora'),
-                    __('Cover the processing fee so the full amount reaches this fund', 'gratora')
+                    __('Donate {amount}', 'gratora-donation-platform'),
+                    __('Cover the processing fee so the full amount reaches this fund', 'gratora-donation-platform')
                 );
 
         return [
             'id'             => 'designated',
-            'name'           => __('Designated giving', 'gratora'),
-            'description'    => __('Lets the donor say which fund their money goes to. Set up your funds first, since a picker with one option is just a label.', 'gratora'),
+            'name'           => __('Designated giving', 'gratora-donation-platform'),
+            'description'    => __('Lets the donor say which fund their money goes to. Set up your funds first, since a picker with one option is just a label.', 'gratora-donation-platform'),
             'icon'           => 'portfolio',
             'category'       => 'Campaign',
             'thumbnail_hint' => 'Fund dropdown above the amount tiles, greatest-need option listed last.',
@@ -445,23 +445,23 @@ final class FormTemplates
                 // Both of these assume a public supporter list. Remove them if
                 // the page has none: a privacy promise about nothing reads badly.
                 . self::block('gratora/comment', [
-                    'label'       => __('Add a message of support', 'gratora'),
-                    'placeholder' => __('Shown on the supporter wall', 'gratora'),
+                    'label'       => __('Add a message of support', 'gratora-donation-platform'),
+                    'placeholder' => __('Shown on the supporter wall', 'gratora-donation-platform'),
                     'required'    => false,
                 ])
                 . self::block('gratora/anonymous-toggle', [
-                    'label'     => __('Hide my name from the supporter wall', 'gratora'),
+                    'label'     => __('Hide my name from the supporter wall', 'gratora-donation-platform'),
                     'defaultOn' => false,
                 ])
                 . self::checkout(
-                    __('Donate {amount}', 'gratora'),
-                    __('Cover the processing fee so 100% reaches the campaign', 'gratora')
+                    __('Donate {amount}', 'gratora-donation-platform'),
+                    __('Cover the processing fee so 100% reaches the campaign', 'gratora-donation-platform')
                 );
 
         return [
             'id'             => 'campaign-page',
-            'name'           => __('Campaign page', 'gratora'),
-            'description'    => __('For a public campaign with a goal and a supporter wall. Carries a progress bar, a message field and a name-hiding toggle.', 'gratora'),
+            'name'           => __('Campaign page', 'gratora-donation-platform'),
+            'description'    => __('For a public campaign with a goal and a supporter wall. Carries a progress bar, a message field and a name-hiding toggle.', 'gratora-donation-platform'),
             'icon'           => 'chart-area',
             'category'       => 'Campaign',
             'thumbnail_hint' => 'Goal bar on top, amount tiles, message box and anonymity checkbox above the button.',

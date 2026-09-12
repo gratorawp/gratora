@@ -5,13 +5,13 @@ import { __, sprintf } from '@wordpress/i18n';
 import { deriveFieldKey } from './slug';
 
 export const OP_OPTIONS = [
-    { value: '=', label: __( 'equals', 'gratora' ) },
-    { value: '!=', label: __( 'does not equal', 'gratora' ) },
-    { value: '>', label: __( 'greater than', 'gratora' ) },
-    { value: '>=', label: __( 'greater than or equal', 'gratora' ) },
-    { value: '<', label: __( 'less than', 'gratora' ) },
-    { value: '<=', label: __( 'less than or equal', 'gratora' ) },
-    { value: 'contains', label: __( 'contains', 'gratora' ) },
+    { value: '=', label: __( 'equals', 'gratora-donation-platform' ) },
+    { value: '!=', label: __( 'does not equal', 'gratora-donation-platform' ) },
+    { value: '>', label: __( 'greater than', 'gratora-donation-platform' ) },
+    { value: '>=', label: __( 'greater than or equal', 'gratora-donation-platform' ) },
+    { value: '<', label: __( 'less than', 'gratora-donation-platform' ) },
+    { value: '<=', label: __( 'less than or equal', 'gratora-donation-platform' ) },
+    { value: 'contains', label: __( 'contains', 'gratora-donation-platform' ) },
 ];
 
 export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
@@ -19,10 +19,10 @@ export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
 // Built-in donor inputs whose value the runtime exposes at a fixed key.
 // Offered as a condition source only when that block is in the form.
 const BUILTIN_SOURCES = {
-    'gratora/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'gratora' ) },
-    'gratora/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'gratora' ) },
-    'gratora/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'gratora' ) },
-    'gratora/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'gratora' ) },
+    'gratora/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'gratora-donation-platform' ) },
+    'gratora/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'gratora-donation-platform' ) },
+    'gratora/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'gratora-donation-platform' ) },
+    'gratora/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'gratora-donation-platform' ) },
 };
 
 // Custom-input blocks: the donor runtime stores their value at
@@ -40,7 +40,7 @@ const CUSTOM_FIELD_BLOCKS = new Set( [
 
 // Kept for backwards-compatible imports; the live list is computed per-render
 // in ConditionPanel from the blocks actually in the editor.
-export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'gratora' ) } ];
+export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'gratora-donation-platform' ) } ];
 
 function flatten( blocks, out ) {
     for ( const b of blocks || [] ) {
@@ -64,7 +64,7 @@ export function ConditionPanel( { condition, onChange, title } ) {
         // key too, so it can be a condition source like any built-in.
         const sources = applyFilters( 'gratora.editor.conditionSources', BUILTIN_SOURCES );
 
-        const opts = [ { value: '', label: __( '(Always show)', 'gratora' ) } ];
+        const opts = [ { value: '', label: __( '(Always show)', 'gratora-donation-platform' ) } ];
         const seen = new Set( [ '' ] );
 
         for ( const b of all ) {
@@ -101,36 +101,36 @@ export function ConditionPanel( { condition, onChange, title } ) {
             opts.push( {
                 value: c.field,
                 /* translators: %s: stored condition field key that is no longer in the form. */
-                label: sprintf( __( '%s (not in form)', 'gratora' ), c.field ),
+                label: sprintf( __( '%s (not in form)', 'gratora-donation-platform' ), c.field ),
             } );
         }
         return opts;
     }, [ c.field ] );
 
     return (
-        <PanelBody title={ title || __( 'Conditional logic', 'gratora' ) } initialOpen={ false }>
+        <PanelBody title={ title || __( 'Conditional logic', 'gratora-donation-platform' ) } initialOpen={ false }>
             <SelectControl
-                label={ __( 'Show this when', 'gratora' ) }
+                label={ __( 'Show this when', 'gratora-donation-platform' ) }
                 value={ c.field }
                 options={ options }
                 onChange={ ( v ) => set( { field: v } ) }
-                help={ __( 'Only fields already added to this form can be used.', 'gratora' ) }
+                help={ __( 'Only fields already added to this form can be used.', 'gratora-donation-platform' ) }
                 __nextHasNoMarginBottom
             />
             { c.field && (
                 <>
                     <SelectControl
-                        label={ __( 'Operator', 'gratora' ) }
+                        label={ __( 'Operator', 'gratora-donation-platform' ) }
                         value={ c.op }
                         options={ OP_OPTIONS }
                         onChange={ ( v ) => set( { op: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'gratora' ) }
+                        label={ __( 'Value', 'gratora-donation-platform' ) }
                         value={ c.value }
                         onChange={ ( v ) => set( { value: v } ) }
-                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'gratora' ) }
+                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </>

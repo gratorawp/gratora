@@ -29,7 +29,7 @@ final class UnautoloadGatewayConfig implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Taking the payment gateway credentials out of the options loaded on every page view.', 'gratora');
+        return __('Taking the payment gateway credentials out of the options loaded on every page view.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

@@ -34,14 +34,14 @@ export function campaignsDeleteMessage( items ) {
     const withPages = items.filter( ( i ) => i.page_id ).length;
 
     const parts = [ n === 1
-        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'gratora' )
+        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'gratora-donation-platform' )
         : sprintf(
             /* translators: %d: number of campaigns to delete */
             _n(
                 'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted.',
                 'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted.',
                 n,
-                'gratora'
+                'gratora-donation-platform'
             ),
             n
         ) ];
@@ -50,7 +50,7 @@ export function campaignsDeleteMessage( items ) {
     // several campaigns selected and one page between them, "the page it
     // created" leaves the admin guessing which campaign "it" is.
     if ( withPages > 0 && n === 1 ) {
-        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'gratora' ) );
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'gratora-donation-platform' ) );
     } else if ( withPages > 0 ) {
         parts.push( sprintf(
             /* translators: %d: how many of the selected campaigns have a WordPress page */
@@ -58,13 +58,13 @@ export function campaignsDeleteMessage( items ) {
                 '%d of them has a WordPress page, which is deleted with it rather than sent to the trash, so any content you built on it is gone for good.',
                 '%d of them have WordPress pages, which are deleted with them rather than sent to the trash, so any content you built on those pages is gone for good.',
                 withPages,
-                'gratora'
+                'gratora-donation-platform'
             ),
             withPages
         ) );
     }
 
-    parts.push( __( 'This cannot be undone.', 'gratora' ) );
+    parts.push( __( 'This cannot be undone.', 'gratora-donation-platform' ) );
 
     return parts.join( ' ' );
 }
@@ -133,7 +133,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load campaigns.', 'gratora' ) );
+                setError( err?.message || __( 'Failed to load campaigns.', 'gratora-donation-platform' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -157,7 +157,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'gratora' ),
+            label:         __( 'Title', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div className="gratora-row__body">
@@ -181,14 +181,14 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'gratora' ),
+            label:    __( 'Status', 'gratora-donation-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.not_accepting || item.status } />,
         },
         {
             id:            'raised',
-            label:         __( 'Raised', 'gratora' ),
+            label:         __( 'Raised', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums' } }>
@@ -198,7 +198,7 @@ export default function List() {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'gratora' ),
+            label: __( 'Goal', 'gratora-donation-platform' ),
             // DataViews offers sorting on every field that does not opt out,
             // and the server has no orderby for these, so the indicator moved
             // and the rows came back in the same order.
@@ -207,7 +207,7 @@ export default function List() {
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'gratora' ),
+            label:         __( 'Donations', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -217,7 +217,7 @@ export default function List() {
         },
         {
             id:            'donors_count',
-            label:         __( 'Donors', 'gratora' ),
+            label:         __( 'Donors', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -227,7 +227,7 @@ export default function List() {
         },
         {
             id:    'forms_count',
-            label: __( 'Forms', 'gratora' ),
+            label: __( 'Forms', 'gratora-donation-platform' ),
             enableSorting: false,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -237,7 +237,7 @@ export default function List() {
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'gratora' ),
+            label:         __( 'Updated', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="gratora-time" title={ formatDate( item.updated_at ) }>
@@ -256,7 +256,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:    'view',
-            label: __( 'View campaign', 'gratora' ),
+            label: __( 'View campaign', 'gratora-donation-platform' ),
             icon:  () => <ViewIcon size={ 16 } strokeWidth={ 1.75 } />,
             // One page per invocation, so no bulk: opening six tabs at once is
             // not what anyone meant by selecting six campaigns.
@@ -272,7 +272,7 @@ export default function List() {
         },
         {
             id:           'duplicate',
-            label:        __( 'Duplicate', 'gratora' ),
+            label:        __( 'Duplicate', 'gratora-donation-platform' ),
             icon:         () => <CopyIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             callback: async ( items ) => {
@@ -284,13 +284,13 @@ export default function List() {
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'gratora' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'gratora-donation-platform' ) );
                 }
             },
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'gratora' ),
+            label:         __( 'Delete', 'gratora-donation-platform' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -304,9 +304,9 @@ export default function List() {
                 const n = items.length;
                 const message = campaignsDeleteMessage( items );
                 setConfirm( {
-                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'gratora' ),
+                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Delete', 'gratora' ),
+                    confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: one refusal must not reject the
@@ -323,14 +323,14 @@ export default function List() {
                         if ( deleted > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of campaigns deleted */
-                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'gratora' ),
+                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'gratora-donation-platform' ),
                                 deleted
                             ) );
                         }
                         if ( refused.length > 0 ) {
                             setError( sprintf(
                                 /* translators: %s: comma separated campaign titles */
-                                __( 'These campaigns were not deleted, because they have donations: %s', 'gratora' ),
+                                __( 'These campaigns were not deleted, because they have donations: %s', 'gratora-donation-platform' ),
                                 refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
                             ) );
                         }
@@ -345,21 +345,21 @@ export default function List() {
     return (
         <div>
             <div className="gratora-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Campaigns', 'gratora' ) }</span>
+                <span>{ __( 'Campaigns', 'gratora-donation-platform' ) }</span>
             </div>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Campaigns', 'gratora' ) }</h1>
+                    <h1>{ __( 'Campaigns', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     <span className="gratora-page-head__meta">
-                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'gratora' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'gratora-donation-platform' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Add new campaign', 'gratora' ) }
+                        { __( 'Add new campaign', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
             </div>
@@ -381,7 +381,7 @@ export default function List() {
                             '%d test donation is not counted in these figures.',
                             '%d test donations are not counted in these figures.',
                             testHidden,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         testHidden
                     ) }
@@ -392,11 +392,11 @@ export default function List() {
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No campaigns yet', 'gratora' ) }
-                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'gratora' ) }
+                    title={ __( 'No campaigns yet', 'gratora-donation-platform' ) }
+                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'gratora-donation-platform' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
-                            { __( 'Create your first campaign', 'gratora' ) }
+                            { __( 'Create your first campaign', 'gratora-donation-platform' ) }
                         </Btn>
                     }
                 />
@@ -418,11 +418,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'gratora' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora-donation-platform' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora-donation-platform' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'gratora' ) }
+                                    { __( 'Clear filters', 'gratora-donation-platform' ) }
                                 </Btn>
                             }
                         />
@@ -442,24 +442,24 @@ export default function List() {
 export function campaignKpis( stats ) {
     return [
         {
-            label: __( 'Total', 'gratora' ),
+            label: __( 'Total', 'gratora-donation-platform' ),
             value: stats ? String( stats.total_count ) : '-',
         },
         {
-            label: __( 'Active', 'gratora' ),
+            label: __( 'Active', 'gratora-donation-platform' ),
             value: stats ? String( stats.active_count ) : '-',
         },
         {
-            label: __( 'Raised', 'gratora' ),
+            label: __( 'Raised', 'gratora-donation-platform' ),
             value: stats && stats.raised_cents > 0
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: stats?.currency
-                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'gratora' ), stats.currency )
+                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'gratora-donation-platform' ), stats.currency )
                 : null,
         },
         {
-            label: __( 'Donations', 'gratora' ),
+            label: __( 'Donations', 'gratora-donation-platform' ),
             value: stats ? String( stats.donations_count ) : '-',
         },
     ];

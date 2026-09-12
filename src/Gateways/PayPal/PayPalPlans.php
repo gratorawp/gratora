@@ -44,7 +44,7 @@ final class PayPalPlans
             'product_id' => $this->resolveProduct($test),
             'name'       => sprintf(
                 /* translators: 1: amount, 2: currency, 3: interval */
-                __('Donation %1$s %2$s / %3$s', 'gratora'),
+                __('Donation %1$s %2$s / %3$s', 'gratora-donation-platform'),
                 PayPalMoney::toValue($amountCents, $currency),
                 $currency,
                 $this->intervalLabel($intervalUnit, $intervalCount)
@@ -99,8 +99,8 @@ final class PayPalPlans
         }
 
         $product = $this->api->post('/v1/catalogs/products', [
-            'name'        => __('Donation', 'gratora'),
-            'description' => __('Recurring donation', 'gratora'),
+            'name'        => __('Donation', 'gratora-donation-platform'),
+            'description' => __('Recurring donation', 'gratora-donation-platform'),
             'type'        => 'SERVICE',
             'category'    => 'NONPROFIT',
         ], ['PayPal-Request-Id' => 'gratora_product_' . $key]);

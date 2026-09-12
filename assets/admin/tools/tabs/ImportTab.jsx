@@ -24,7 +24,7 @@ export default function ImportTab( { setNotice } ) {
         try {
             parsed = JSON.parse( await file.text() );
         } catch ( e ) {
-            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'gratora' ) } );
+            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'gratora-donation-platform' ) } );
             return;
         }
 
@@ -36,22 +36,22 @@ export default function ImportTab( { setNotice } ) {
 
         setConfirm( {
             title: isFullExport
-                ? __( 'Restore records from this file', 'gratora' )
-                : __( 'Replace settings from this file', 'gratora' ),
+                ? __( 'Restore records from this file', 'gratora-donation-platform' )
+                : __( 'Replace settings from this file', 'gratora-donation-platform' ),
             message: isFullExport
                 ? sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'gratora' ),
+                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'gratora-donation-platform' ),
                     file.name
                 ) + ( hasSettings
-                    ? ' ' + __( 'It carries settings too, and those are written over yours: gateway, email, receipt, numbering and roles.', 'gratora' )
+                    ? ' ' + __( 'It carries settings too, and those are written over yours: gateway, email, receipt, numbering and roles.', 'gratora-donation-platform' )
                     : '' )
                 : sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Gratora capabilities. Donations, donors and campaigns are untouched. This cannot be undone.', 'gratora' ),
+                    __( '%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Gratora capabilities. Donations, donors and campaigns are untouched. This cannot be undone.', 'gratora-donation-platform' ),
                     file.name
                 ),
-            confirmLabel: isFullExport ? __( 'Restore', 'gratora' ) : __( 'Replace settings', 'gratora' ),
+            confirmLabel: isFullExport ? __( 'Restore', 'gratora-donation-platform' ) : __( 'Replace settings', 'gratora-donation-platform' ),
             destructive:  ! isFullExport,
             onConfirm:    () => doImport( parsed ),
         } );
@@ -74,7 +74,7 @@ export default function ImportTab( { setNotice } ) {
 
             parts.push( sprintf(
                 /* translators: %d: number of records. */
-                _n( '%d record restored.', '%d records restored.', created, 'gratora' ),
+                _n( '%d record restored.', '%d records restored.', created, 'gratora-donation-platform' ),
                 created
             ) );
             // Said plainly, because "already here" is the expected answer on
@@ -82,14 +82,14 @@ export default function ImportTab( { setNotice } ) {
             if ( existing ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d was already here.', '%d were already here.', existing, 'gratora' ),
+                    _n( '%d was already here.', '%d were already here.', existing, 'gratora-donation-platform' ),
                     existing
                 ) );
             }
             if ( skipped ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d skipped.', '%d skipped.', skipped, 'gratora' ),
+                    _n( '%d skipped.', '%d skipped.', skipped, 'gratora-donation-platform' ),
                     skipped
                 ) );
             }
@@ -99,7 +99,7 @@ export default function ImportTab( { setNotice } ) {
         if ( applied > 0 ) {
             parts.push( sprintf(
                 /* translators: %d: number of settings groups. */
-                _n( '%d settings group restored.', '%d settings groups restored.', applied, 'gratora' ),
+                _n( '%d settings group restored.', '%d settings groups restored.', applied, 'gratora-donation-platform' ),
                 applied
             ) );
         }
@@ -121,11 +121,11 @@ export default function ImportTab( { setNotice } ) {
             const parts = landedParts( res );
 
             setNotice( parts.length
-                ? { type: 'success', text: [ ...parts, __( 'Reload the page to see it.', 'gratora' ) ].join( ' ' ) }
-                : { type: 'error', text: __( 'Nothing in that file matched a Gratora setting or record.', 'gratora' ) }
+                ? { type: 'success', text: [ ...parts, __( 'Reload the page to see it.', 'gratora-donation-platform' ) ].join( ' ' ) }
+                : { type: 'error', text: __( 'Nothing in that file matched a Gratora setting or record.', 'gratora-donation-platform' ) }
             );
         } catch ( err ) {
-            const reason = err?.message || __( 'Import failed. Check that the file is a Gratora settings export.', 'gratora' );
+            const reason = err?.message || __( 'Import failed. Check that the file is a Gratora settings export.', 'gratora-donation-platform' );
             const landed = landedParts( err?.data );
 
             setNotice( {
@@ -133,9 +133,9 @@ export default function ImportTab( { setNotice } ) {
                 text: landed.length
                     ? [
                         reason,
-                        __( 'Some of it landed.', 'gratora' ),
+                        __( 'Some of it landed.', 'gratora-donation-platform' ),
                         ...landed,
-                        __( 'Running the file again is safe.', 'gratora' ),
+                        __( 'Running the file again is safe.', 'gratora-donation-platform' ),
                     ].join( ' ' )
                     : reason,
             } );
@@ -148,8 +148,8 @@ export default function ImportTab( { setNotice } ) {
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Import settings', 'gratora' ) }
-                sub={ __( 'Reads a Gratora settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'gratora' ) }
+                title={ __( 'Import settings', 'gratora-donation-platform' ) }
+                sub={ __( 'Reads a Gratora settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'gratora-donation-platform' ) }
             >
                 <div className="gratora-advanced-actions">
                     <Btn
@@ -158,7 +158,7 @@ export default function ImportTab( { setNotice } ) {
                         disabled={ importing }
                         isBusy={ importing }
                     >
-                        { importing ? __( 'Importing…', 'gratora' ) : __( 'Choose a JSON file', 'gratora' ) }
+                        { importing ? __( 'Importing…', 'gratora-donation-platform' ) : __( 'Choose a JSON file', 'gratora-donation-platform' ) }
                     </Btn>
                     <input
                         ref={ fileRef }
@@ -169,7 +169,7 @@ export default function ImportTab( { setNotice } ) {
                     />
                 </div>
                 <p className="gratora-tools-note">
-                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'gratora' ) }
+                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'gratora-donation-platform' ) }
                 </p>
             </Card>
 

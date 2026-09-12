@@ -63,7 +63,7 @@ final class FormSubmissionValidator
         $freq = (string) ($body['frequency'] ?? 'one_time');
         if ($freq === '') $freq = 'one_time';
         if (! in_array($freq, $offered, true)) {
-            return $this->reject(__('That donation frequency is not available for this form.', 'gratora'));
+            return $this->reject(__('That donation frequency is not available for this form.', 'gratora-donation-platform'));
         }
 
         return null;
@@ -243,10 +243,10 @@ final class FormSubmissionValidator
                 // requireFirst/requireLast default true (NameBlock); the editor
                 // omits an attr equal to its default, so absent means required.
                 if ((bool) ($attrs['requireFirst'] ?? true) && ! $this->filled($profile['first_name'] ?? null)) {
-                    return $this->requiredError(__('First name', 'gratora'));
+                    return $this->requiredError(__('First name', 'gratora-donation-platform'));
                 }
                 if ((bool) ($attrs['requireLast'] ?? true) && ! $this->filled($profile['last_name'] ?? null)) {
-                    return $this->requiredError(__('Last name', 'gratora'));
+                    return $this->requiredError(__('Last name', 'gratora-donation-platform'));
                 }
                 break;
 
@@ -256,33 +256,33 @@ final class FormSubmissionValidator
                 if (TermsBlock::isConfigured($attrs)) {
                     $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                     if (empty($consents[TermsBlock::PURPOSE])) {
-                        return $this->reject(__('Please agree to the terms to continue.', 'gratora'));
+                        return $this->reject(__('Please agree to the terms to continue.', 'gratora-donation-platform'));
                     }
                 }
                 break;
 
             case 'gratora/phone':
                 if (! empty($attrs['required']) && ! $this->filled($profile['phone'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Phone', 'gratora')));
+                    return $this->requiredError($this->label($attrs, __('Phone', 'gratora-donation-platform')));
                 }
                 break;
 
             case 'gratora/country':
                 if (! empty($attrs['required']) && ! $this->filled($profile['country'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Country', 'gratora')));
+                    return $this->requiredError($this->label($attrs, __('Country', 'gratora-donation-platform')));
                 }
                 break;
 
             case 'gratora/comment':
                 $note = (string) ($body['note_to_org'] ?? '');
                 if (! empty($attrs['required']) && ! $this->filled($note)) {
-                    return $this->requiredError($this->label($attrs, __('Comment', 'gratora')));
+                    return $this->requiredError($this->label($attrs, __('Comment', 'gratora-donation-platform')));
                 }
                 // Cap length server-side: the note can surface publicly, and the
                 // client's maxlength is bypassable by a crafted POST.
                 $noteMax = (int) ($attrs['maxLength'] ?? 5000);
                 if ($noteMax > 0 && mb_strlen($note) > $noteMax) {
-                    return $this->reject(__('Your message is too long.', 'gratora'));
+                    return $this->reject(__('Your message is too long.', 'gratora-donation-platform'));
                 }
                 break;
 
@@ -307,7 +307,7 @@ final class FormSubmissionValidator
                     if ($bar !== null && $net < $bar) {
                         return $this->reject(sprintf(
                             /* translators: %s: minimum donation amount, formatted. */
-                            __('The smallest donation this form accepts is %s.', 'gratora'),
+                            __('The smallest donation this form accepts is %s.', 'gratora-donation-platform'),
                             Money::format($bar, $paying)
                         ));
                     }
@@ -348,7 +348,7 @@ final class FormSubmissionValidator
 
                     if (! $convertedByDonor) {
                         if (! in_array($net, $allowedCents, true)) {
-                            return $this->reject(__('Choose one of the listed donation amounts.', 'gratora'));
+                            return $this->reject(__('Choose one of the listed donation amounts.', 'gratora-donation-platform'));
                         }
                         break;
                     }
@@ -356,7 +356,7 @@ final class FormSubmissionValidator
                     // Allow FX drift between render and submission, but require proximity to an
                     // authored preset.
                     if (! self::nearAnyPreset($net, $allowedCents, $presetCurrency, $submittedCurrency)) {
-                        return $this->reject(__('Choose one of the listed donation amounts.', 'gratora'));
+                        return $this->reject(__('Choose one of the listed donation amounts.', 'gratora-donation-platform'));
                     }
                 }
                 break;
@@ -369,18 +369,18 @@ final class FormSubmissionValidator
                 $allowedFunds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
                 $chosenFund   = (int) ($body['fund_id'] ?? 0);
                 if ($allowedFunds !== [] && $chosenFund !== 0 && ! in_array($chosenFund, $allowedFunds, true)) {
-                    return $this->reject(__('That fund is not available for this form.', 'gratora'));
+                    return $this->reject(__('That fund is not available for this form.', 'gratora-donation-platform'));
                 }
                 break;
 
             case 'gratora/address':
                 $addr = is_array($profile['address'] ?? null) ? $profile['address'] : [];
                 $sub  = [
-                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'gratora')],
-                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'gratora')],
-                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'gratora')],
-                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'gratora')],
-                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'gratora')],
+                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'gratora-donation-platform')],
+                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'gratora-donation-platform')],
+                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'gratora-donation-platform')],
+                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'gratora-donation-platform')],
+                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'gratora-donation-platform')],
                 ];
                 foreach ($sub as $key => [$showAttr, $reqAttr, $reqDefault, $sLabel]) {
                     $shown    = (bool) ($attrs[$showAttr] ?? true);
@@ -400,11 +400,11 @@ final class FormSubmissionValidator
                 if ($this->filled($val)) {
                     $max = (int) ($attrs['maxLength'] ?? 0);
                     if ($max > 0 && mb_strlen((string) $val) > $max) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'gratora'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                     }
                     $pattern = (string) ($attrs['pattern'] ?? '');
                     if ($pattern !== '' && ! $this->matchesPattern($pattern, (string) $val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'gratora'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -417,14 +417,14 @@ final class FormSubmissionValidator
                 }
                 if ($this->filled($val)) {
                     if (! is_numeric($val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'gratora'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                     }
                     $n = (float) $val;
                     if (isset($attrs['min']) && is_numeric($attrs['min']) && $n < (float) $attrs['min']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'gratora'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                     }
                     if (isset($attrs['max']) && is_numeric($attrs['max']) && $n > (float) $attrs['max']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'gratora'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -440,7 +440,7 @@ final class FormSubmissionValidator
                     $min = DateBlock::normalizeDate((string) ($attrs['minDate'] ?? ''));
                     $max = DateBlock::normalizeDate((string) ($attrs['maxDate'] ?? ''));
                     if (($min !== '' && $d < $min) || ($max !== '' && $d > $max)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'gratora'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -456,7 +456,7 @@ final class FormSubmissionValidator
             case 'gratora/checkbox':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && empty($custom[$key])) {
-                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'gratora'), $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'gratora-donation-platform'), $this->label($attrs, $key)));
                 }
                 break;
 
@@ -469,10 +469,10 @@ final class FormSubmissionValidator
                 }
                 [$min, $max] = MultiSelectBlock::limits($attrs, count(DropdownBlock::normalizeOptions($attrs['options'] ?? null)));
                 if ($count > 0 && $min > 0 && $count < $min) {
-                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'gratora'), $min, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'gratora-donation-platform'), $min, $this->label($attrs, $key)));
                 }
                 if ($max > 0 && $count > $max) {
-                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'gratora'), $max, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'gratora-donation-platform'), $max, $this->label($attrs, $key)));
                 }
                 break;
 
@@ -489,7 +489,7 @@ final class FormSubmissionValidator
                     if (! empty($p['required']) && empty($consents[$key])) {
                         return $this->reject(sprintf(
                             /* translators: %s: consent purpose label */
-                            __('Please agree to: %s', 'gratora'),
+                            __('Please agree to: %s', 'gratora-donation-platform'),
                             (string) ($p['label'] ?? '')
                         ));
                     }
@@ -684,7 +684,7 @@ final class FormSubmissionValidator
     {
         return $this->reject(sprintf(
             /* translators: %s: form field label */
-            __('Please complete the %s field.', 'gratora'),
+            __('Please complete the %s field.', 'gratora-donation-platform'),
             $label
         ));
     }

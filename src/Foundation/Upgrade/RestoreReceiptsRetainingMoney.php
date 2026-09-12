@@ -31,7 +31,7 @@ final class RestoreReceiptsRetainingMoney implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Restoring receipts that a partial refund withdrew.', 'gratora');
+        return __('Restoring receipts that a partial refund withdrew.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

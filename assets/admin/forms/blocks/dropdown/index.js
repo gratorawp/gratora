@@ -26,7 +26,7 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--dropdown' } );
 
     const selected = options.find( ( o ) => o.isDefault ) || options[ 0 ];
-    const previewText = placeholder || selected?.label || __( 'Select one…', 'gratora' );
+    const previewText = placeholder || selected?.label || __( 'Select one…', 'gratora-donation-platform' );
 
     const updateOptionLabel = ( i, v ) => {
         const row     = options[ i ];
@@ -44,31 +44,31 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Dropdown', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Dropdown', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or an option to edit inline.', 'gratora' ) }
+                        help={ __( 'Click the label or an option to edit inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'gratora' ) }
+                        label={ __( 'Placeholder', 'gratora-donation-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Select one…', 'gratora' ) }
-                        help={ __( 'First option shown before a value is picked.', 'gratora' ) }
+                        placeholder={ __( 'Select one…', 'gratora-donation-platform' ) }
+                        help={ __( 'First option shown before a value is picked.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'gratora' ) }
+                        label={ __( 'Field name', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -90,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'gratora' ) }
+                    placeholder={ __( 'Question', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
@@ -125,7 +125,7 @@ function Edit( { attributes, setAttributes } ) {
                             tagName="span"
                             value={ o.label }
                             onChange={ ( v ) => updateOptionLabel( i, v ) }
-                            placeholder={ __( 'Option label', 'gratora' ) }
+                            placeholder={ __( 'Option label', 'gratora-donation-platform' ) }
                             allowedFormats={ [] }
                             style={ {
                                 fontSize:    12,
@@ -146,8 +146,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Dropdown', 'gratora' ),
-        description: __( 'A select question where the donor picks one option from a dropdown list.', 'gratora' ),
+        title:       __( 'Dropdown', 'gratora-donation-platform' ),
+        description: __( 'A select question where the donor picks one option from a dropdown list.', 'gratora-donation-platform' ),
         category:    'gratora-fields',
         icon:        BlockIcons[ 'dropdown' ],
         supports: { html: false, anchor: false, inserter: true },

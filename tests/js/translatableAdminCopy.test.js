@@ -22,7 +22,6 @@ import { setLocaleData } from '@wordpress/i18n';
 import MaintenanceTab from '../../assets/admin/tools/tabs/MaintenanceTab';
 import GatewaysPanel from '../../assets/admin/settings/panels/GatewaysPanel';
 
-const SAMPLE = 'Account holder: …\nIBAN: …\nBIC: …\nReference: {reference}\nAmount: {amount}';
 const GERMAN = 'Kontoinhaber: …\nIBAN: …\nBIC: …\nVerwendungszweck: {reference}\nBetrag: {amount}';
 
 const settle = () => new Promise( ( resolve ) => setTimeout( resolve, 20 ) );
@@ -36,8 +35,10 @@ beforeEach( () => {
     setLocaleData( {
         '': { plural_forms: 'nplurals=2; plural=(n != 1);' },
         'Type %s to confirm.': [ 'Tapez %s pour confirmer.' ],
-        [ SAMPLE ]: [ GERMAN ],
-    }, 'gratora' );
+        'Account holder: …': [ 'Kontoinhaber: …' ],
+        'Reference: {reference}': [ 'Verwendungszweck: {reference}' ],
+        'Amount: {amount}': [ 'Betrag: {amount}' ],
+    }, 'gratora-donation-platform' );
 
     window.gratora = { can: { manage_options: true } };
 } );
@@ -87,7 +88,5 @@ it( 'writes the sample bank details in the language of the screen', () => {
 
     const box = document.querySelector( '.gratora-textarea--mono' );
     expect( box ).toBeTruthy();
-    expect( box.placeholder ).toContain( 'Kontoinhaber' );
-    expect( box.placeholder ).toContain( '{reference}' );
-    expect( box.placeholder ).toContain( '{amount}' );
+    expect( box.placeholder ).toBe( GERMAN );
 } );

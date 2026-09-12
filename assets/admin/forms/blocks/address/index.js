@@ -54,18 +54,18 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Address', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Address', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Heading', 'gratora' ) }
+                        label={ __( 'Heading', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Mailing address', 'gratora' ) }
-                        help={ __( 'Click the heading or any field label to edit inline.', 'gratora' ) }
+                        placeholder={ __( 'Mailing address', 'gratora-donation-platform' ) }
+                        help={ __( 'Click the heading or any field label to edit inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
 
                     <ToggleControl
-                        label={ __( 'Line 1: show', 'gratora' ) }
+                        label={ __( 'Line 1: show', 'gratora-donation-platform' ) }
                         checked={ showLine1 }
                         onChange={ ( v ) => setAttributes( { showLine1: v } ) }
                         __nextHasNoMarginBottom
@@ -73,14 +73,14 @@ function Edit( { attributes, setAttributes } ) {
                     { showLine1 && (
                         <>
                             <TextControl
-                                label={ __( 'Line 1: label', 'gratora' ) }
+                                label={ __( 'Line 1: label', 'gratora-donation-platform' ) }
                                 value={ line1Label }
                                 onChange={ ( v ) => setAttributes( { line1Label: v } ) }
-                                placeholder={ __( 'Address line 1', 'gratora' ) }
+                                placeholder={ __( 'Address line 1', 'gratora-donation-platform' ) }
                                 __nextHasNoMarginBottom
                             />
                             <ToggleControl
-                                label={ __( 'Line 1: required', 'gratora' ) }
+                                label={ __( 'Line 1: required', 'gratora-donation-platform' ) }
                                 checked={ requireLine1 }
                                 onChange={ ( v ) => setAttributes( { requireLine1: v } ) }
                                 __nextHasNoMarginBottom
@@ -89,23 +89,23 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <ToggleControl
-                        label={ __( 'Line 2: show', 'gratora' ) }
+                        label={ __( 'Line 2: show', 'gratora-donation-platform' ) }
                         checked={ showLine2 }
                         onChange={ ( v ) => setAttributes( { showLine2: v } ) }
                         __nextHasNoMarginBottom
                     />
                     { showLine2 && (
                         <TextControl
-                            label={ __( 'Line 2: label', 'gratora' ) }
+                            label={ __( 'Line 2: label', 'gratora-donation-platform' ) }
                             value={ line2Label }
                             onChange={ ( v ) => setAttributes( { line2Label: v } ) }
-                            placeholder={ __( 'Apartment, suite, etc.', 'gratora' ) }
+                            placeholder={ __( 'Apartment, suite, etc.', 'gratora-donation-platform' ) }
                             __nextHasNoMarginBottom
                         />
                     ) }
 
                     <ToggleControl
-                        label={ __( 'City: show', 'gratora' ) }
+                        label={ __( 'City: show', 'gratora-donation-platform' ) }
                         checked={ showCity }
                         onChange={ ( v ) => setAttributes( { showCity: v } ) }
                         __nextHasNoMarginBottom
@@ -113,14 +113,14 @@ function Edit( { attributes, setAttributes } ) {
                     { showCity && (
                         <>
                             <TextControl
-                                label={ __( 'City: label', 'gratora' ) }
+                                label={ __( 'City: label', 'gratora-donation-platform' ) }
                                 value={ cityLabel }
                                 onChange={ ( v ) => setAttributes( { cityLabel: v } ) }
-                                placeholder={ __( 'City', 'gratora' ) }
+                                placeholder={ __( 'City', 'gratora-donation-platform' ) }
                                 __nextHasNoMarginBottom
                             />
                             <ToggleControl
-                                label={ __( 'City: required', 'gratora' ) }
+                                label={ __( 'City: required', 'gratora-donation-platform' ) }
                                 checked={ requireCity }
                                 onChange={ ( v ) => setAttributes( { requireCity: v } ) }
                                 __nextHasNoMarginBottom
@@ -129,7 +129,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <ToggleControl
-                        label={ __( 'State / region: show', 'gratora' ) }
+                        label={ __( 'State / region: show', 'gratora-donation-platform' ) }
                         checked={ showRegion }
                         onChange={ ( v ) => setAttributes( { showRegion: v } ) }
                         __nextHasNoMarginBottom
@@ -137,14 +137,14 @@ function Edit( { attributes, setAttributes } ) {
                     { showRegion && (
                         <>
                             <TextControl
-                                label={ __( 'State / region: label', 'gratora' ) }
+                                label={ __( 'State / region: label', 'gratora-donation-platform' ) }
                                 value={ regionLabel }
                                 onChange={ ( v ) => setAttributes( { regionLabel: v } ) }
-                                placeholder={ __( 'State / region', 'gratora' ) }
+                                placeholder={ __( 'State / region', 'gratora-donation-platform' ) }
                                 __nextHasNoMarginBottom
                             />
                             <ToggleControl
-                                label={ __( 'State / region: required', 'gratora' ) }
+                                label={ __( 'State / region: required', 'gratora-donation-platform' ) }
                                 checked={ requireRegion }
                                 onChange={ ( v ) => setAttributes( { requireRegion: v } ) }
                                 __nextHasNoMarginBottom
@@ -153,7 +153,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <ToggleControl
-                        label={ __( 'Postal code: show', 'gratora' ) }
+                        label={ __( 'Postal code: show', 'gratora-donation-platform' ) }
                         checked={ showPostal }
                         onChange={ ( v ) => setAttributes( { showPostal: v } ) }
                         __nextHasNoMarginBottom
@@ -161,14 +161,14 @@ function Edit( { attributes, setAttributes } ) {
                     { showPostal && (
                         <>
                             <TextControl
-                                label={ __( 'Postal code: label', 'gratora' ) }
+                                label={ __( 'Postal code: label', 'gratora-donation-platform' ) }
                                 value={ postalLabel }
                                 onChange={ ( v ) => setAttributes( { postalLabel: v } ) }
-                                placeholder={ __( 'Postal code', 'gratora' ) }
+                                placeholder={ __( 'Postal code', 'gratora-donation-platform' ) }
                                 __nextHasNoMarginBottom
                             />
                             <ToggleControl
-                                label={ __( 'Postal code: required', 'gratora' ) }
+                                label={ __( 'Postal code: required', 'gratora-donation-platform' ) }
                                 checked={ requirePostal }
                                 onChange={ ( v ) => setAttributes( { requirePostal: v } ) }
                                 __nextHasNoMarginBottom
@@ -177,7 +177,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <ToggleControl
-                        label={ __( 'Country: show', 'gratora' ) }
+                        label={ __( 'Country: show', 'gratora-donation-platform' ) }
                         checked={ showCountry }
                         onChange={ ( v ) => setAttributes( { showCountry: v } ) }
                         __nextHasNoMarginBottom
@@ -185,14 +185,14 @@ function Edit( { attributes, setAttributes } ) {
                     { showCountry && (
                         <>
                             <TextControl
-                                label={ __( 'Country: label', 'gratora' ) }
+                                label={ __( 'Country: label', 'gratora-donation-platform' ) }
                                 value={ countryLabel }
                                 onChange={ ( v ) => setAttributes( { countryLabel: v } ) }
-                                placeholder={ __( 'Country', 'gratora' ) }
+                                placeholder={ __( 'Country', 'gratora-donation-platform' ) }
                                 __nextHasNoMarginBottom
                             />
                             <ToggleControl
-                                label={ __( 'Country: required', 'gratora' ) }
+                                label={ __( 'Country: required', 'gratora-donation-platform' ) }
                                 checked={ requireCountry }
                                 onChange={ ( v ) => setAttributes( { requireCountry: v } ) }
                                 __nextHasNoMarginBottom
@@ -211,22 +211,22 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__title"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Mailing address', 'gratora' ) }
+                    placeholder={ __( 'Mailing address', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 <div style={ { display: 'flex', flexDirection: 'column', gap: 10 } }>
-                    { fieldRow( showLine1, line1Label, 'line1Label', __( 'Address line 1', 'gratora' ), 'requireLine1', requireLine1 ) }
-                    { fieldRow( showLine2, line2Label, 'line2Label', __( 'Apartment, suite, etc.', 'gratora' ), null, false ) }
+                    { fieldRow( showLine1, line1Label, 'line1Label', __( 'Address line 1', 'gratora-donation-platform' ), 'requireLine1', requireLine1 ) }
+                    { fieldRow( showLine2, line2Label, 'line2Label', __( 'Apartment, suite, etc.', 'gratora-donation-platform' ), null, false ) }
                     { ( showCity || showRegion ) && (
                         <div className="gratora-block-preview__grid-2">
-                            { fieldRow( showCity, cityLabel, 'cityLabel', __( 'City', 'gratora' ), 'requireCity', requireCity ) }
-                            { fieldRow( showRegion, regionLabel, 'regionLabel', __( 'State / region', 'gratora' ), 'requireRegion', requireRegion ) }
+                            { fieldRow( showCity, cityLabel, 'cityLabel', __( 'City', 'gratora-donation-platform' ), 'requireCity', requireCity ) }
+                            { fieldRow( showRegion, regionLabel, 'regionLabel', __( 'State / region', 'gratora-donation-platform' ), 'requireRegion', requireRegion ) }
                         </div>
                     ) }
                     { ( showPostal || showCountry ) && (
                         <div className="gratora-block-preview__grid-2">
-                            { fieldRow( showPostal, postalLabel, 'postalLabel', __( 'Postal code', 'gratora' ), 'requirePostal', requirePostal ) }
-                            { fieldRow( showCountry, countryLabel, 'countryLabel', __( 'Country', 'gratora' ), 'requireCountry', requireCountry ) }
+                            { fieldRow( showPostal, postalLabel, 'postalLabel', __( 'Postal code', 'gratora-donation-platform' ), 'requirePostal', requirePostal ) }
+                            { fieldRow( showCountry, countryLabel, 'countryLabel', __( 'Country', 'gratora-donation-platform' ), 'requireCountry', requireCountry ) }
                         </div>
                     ) }
                 </div>
@@ -238,8 +238,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Address', 'gratora' ),
-        description: __( 'Structured donor mailing address.', 'gratora' ),
+        title:       __( 'Address', 'gratora-donation-platform' ),
+        description: __( 'Structured donor mailing address.', 'gratora-donation-platform' ),
         category:    'gratora-donor',
         icon:        BlockIcons[ 'address' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

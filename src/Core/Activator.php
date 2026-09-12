@@ -59,8 +59,8 @@ final class Activator
 
         $fund = Fund::make();
         $fund->code           = 'general';
-        $fund->name           = __('General', 'gratora');
-        $fund->description    = __('Default fund for unrestricted donations.', 'gratora');
+        $fund->name           = __('General', 'gratora-donation-platform');
+        $fund->description    = __('Default fund for unrestricted donations.', 'gratora-donation-platform');
         $fund->is_restricted  = false;
         $fund->is_default     = true;
         $fund->is_active      = true;

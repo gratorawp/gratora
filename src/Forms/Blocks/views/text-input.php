@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
  * @var string $pattern
  * @var string $field
  */
-$labelText = $label !== '' ? $label : __('Text', 'gratora');
+$labelText = $label !== '' ? $label : __('Text', 'gratora-donation-platform');
 $fieldName = $field !== '' ? $field : 'text';
 ?>
 <label class="gratora-block gratora-block--text-input gratora-donor__field">

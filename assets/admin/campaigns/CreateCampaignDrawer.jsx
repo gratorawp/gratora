@@ -17,17 +17,17 @@ import CampaignTemplatePicker from '../_shared/components/CampaignTemplatePicker
 import { DollarSign, HandHeart, Users, Ban, ImagePlus, Plus } from 'lucide-react';
 
 const GOAL_OPTIONS = [
-    { value: 'amount',    label: __( 'Amount', 'gratora' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
-    { value: 'donations', label: __( 'Donations', 'gratora' ), icon: <HandHeart strokeWidth={ 1.75 } /> },
-    { value: 'donors',    label: __( 'Donors', 'gratora' ),    icon: <Users strokeWidth={ 1.75 } /> },
-    { value: 'none',      label: __( 'No goal', 'gratora' ),   icon: <Ban strokeWidth={ 1.75 } /> },
+    { value: 'amount',    label: __( 'Amount', 'gratora-donation-platform' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
+    { value: 'donations', label: __( 'Donations', 'gratora-donation-platform' ), icon: <HandHeart strokeWidth={ 1.75 } /> },
+    { value: 'donors',    label: __( 'Donors', 'gratora-donation-platform' ),    icon: <Users strokeWidth={ 1.75 } /> },
+    { value: 'none',      label: __( 'No goal', 'gratora-donation-platform' ),   icon: <Ban strokeWidth={ 1.75 } /> },
 ];
 
 const GOAL_DESC = {
-    amount:    __( 'Track progress toward a fundraising total.', 'gratora' ),
-    donations: __( 'Track the number of completed donations.', 'gratora' ),
-    donors:    __( 'Track the number of unique donors who give to this campaign.', 'gratora' ),
-    none:      __( 'No progress bar or target.', 'gratora' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'gratora-donation-platform' ),
+    donations: __( 'Track the number of completed donations.', 'gratora-donation-platform' ),
+    donors:    __( 'Track the number of unique donors who give to this campaign.', 'gratora-donation-platform' ),
+    none:      __( 'No progress bar or target.', 'gratora-donation-platform' ),
 };
 
 function slugify( s ) {
@@ -38,8 +38,8 @@ function openCoverFrame( onSelect ) {
     const media = window.wp?.media;
     if ( ! media ) return;
     const frame = media( {
-        title:    __( 'Select or upload a cover image', 'gratora' ),
-        button:   { text: __( 'Use this image', 'gratora' ) },
+        title:    __( 'Select or upload a cover image', 'gratora-donation-platform' ),
+        button:   { text: __( 'Use this image', 'gratora-donation-platform' ) },
         multiple: false,
         library:  { type: 'image' },
     } );
@@ -73,7 +73,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
     const [ startsAt, setStartsAt ]     = useState( null );
     const [ endsAt, setEndsAt ]         = useState( null );
 
-    const [ pageTemplate, setPageTemplate ]   = useState( { id: 'standard', name: __( 'Standard campaign', 'gratora' ) } );
+    const [ pageTemplate, setPageTemplate ]   = useState( { id: 'standard', name: __( 'Standard campaign', 'gratora-donation-platform' ) } );
     const [ pickingLayout, setPickingLayout ] = useState( false );
 
     const [ cover, setCover ]           = useState( null );
@@ -155,7 +155,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not create campaign.', 'gratora' ) );
+            setError( err?.message || __( 'Could not create campaign.', 'gratora-donation-platform' ) );
             setSubmitting( false );
         }
     };
@@ -164,21 +164,21 @@ export default function CreateCampaignDrawer( { onClose } ) {
         <div className="gratora-cc__foot">
             { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop; the wrapping label makes the whole row a click target */ }
             <label className="gratora-cc__publish">
-                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'gratora' ) } />
+                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'gratora-donation-platform' ) } />
                 <span className="gratora-cc__publish-txt">
-                    <strong>{ publishNow ? __( 'Publish now', 'gratora' ) : __( 'Create as draft', 'gratora' ) }</strong>
+                    <strong>{ publishNow ? __( 'Publish now', 'gratora-donation-platform' ) : __( 'Create as draft', 'gratora-donation-platform' ) }</strong>
                     <span>{ publishNow
-                        ? __( 'Page goes live on create', 'gratora' )
-                        : __( 'Toggle to publish now', 'gratora' ) }</span>
+                        ? __( 'Page goes live on create', 'gratora-donation-platform' )
+                        : __( 'Toggle to publish now', 'gratora-donation-platform' ) }</span>
                 </span>
             </label>
             <div className="gratora-cc__foot-actions">
                 <Btn variant="ghost" onClick={ onClose } disabled={ submitting }>
-                    { __( 'Cancel', 'gratora' ) }
+                    { __( 'Cancel', 'gratora-donation-platform' ) }
                 </Btn>
                 <Btn variant="primary" onClick={ submit } isBusy={ submitting } disabled={ ! canCreate }>
                     <Plus size={ 14 } strokeWidth={ 1.75 } />
-                    { __( 'Create', 'gratora' ) }
+                    { __( 'Create', 'gratora-donation-platform' ) }
                 </Btn>
             </div>
         </div>
@@ -187,12 +187,12 @@ export default function CreateCampaignDrawer( { onClose } ) {
     return (
         <>
         <Dialog
-            title={ __( 'New campaign', 'gratora' ) }
+            title={ __( 'New campaign', 'gratora-donation-platform' ) }
             onClose={ submitting ? undefined : onClose }
             foot={ foot }
         >
             <p className="gratora-dialog__help">
-                { __( 'A few quick details, then you are live. You can change everything later.', 'gratora' ) }
+                { __( 'A few quick details, then you are live. You can change everything later.', 'gratora-donation-platform' ) }
             </p>
             <div className="gratora-cc">
             { error && (
@@ -201,34 +201,34 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 </div>
             ) }
 
-            <Field label={ __( 'Campaign title', 'gratora' ) }>
+            <Field label={ __( 'Campaign title', 'gratora-donation-platform' ) }>
                 <input
                     className="gratora-input"
                     type="text"
                     value={ title }
                     autoFocus
-                    placeholder={ __( 'Enter campaign title', 'gratora' ) }
+                    placeholder={ __( 'Enter campaign title', 'gratora-donation-platform' ) }
                     onChange={ ( e ) => onTitle( e.target.value ) }
                 />
             </Field>
 
             { Object.keys( campaignTypes ).length > 1 && (
-                <Field label={ __( 'Campaign type', 'gratora' ) }>
+                <Field label={ __( 'Campaign type', 'gratora-donation-platform' ) }>
                     <Segmented
-                        ariaLabel={ __( 'Campaign type', 'gratora' ) }
+                        ariaLabel={ __( 'Campaign type', 'gratora-donation-platform' ) }
                         value={ campaignType }
                         onChange={ setCampaignType }
                         options={ Object.entries( campaignTypes ).map( ( [ value, label ] ) => ( { value, label } ) ) }
                     />
                     <div className="gratora-cc__goal-desc">
                         { campaignType === 'standard'
-                            ? __( 'Collects donations directly on the campaign page.', 'gratora' )
+                            ? __( 'Collects donations directly on the campaign page.', 'gratora-donation-platform' )
                             : ( typeNotices[ campaignType ] || '' ) }
                     </div>
                 </Field>
             ) }
 
-            <Field label={ __( 'Campaign template', 'gratora' ) }>
+            <Field label={ __( 'Campaign template', 'gratora-donation-platform' ) }>
                 <button
                     type="button"
                     className="gratora-cc__layout"
@@ -237,17 +237,17 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 >
                     <span className="gratora-cc__layout-name">{ pageTemplate.name }</span>
                     <span className="gratora-cc__layout-change">
-                        { __( 'Change', 'gratora' ) }
+                        { __( 'Change', 'gratora-donation-platform' ) }
                     </span>
                 </button>
                 <div className="gratora-cc__goal-desc">
-                    { __( 'The starting arrangement of the campaign page. Blocks, so you can rearrange it afterwards.', 'gratora' ) }
+                    { __( 'The starting arrangement of the campaign page. Blocks, so you can rearrange it afterwards.', 'gratora-donation-platform' ) }
                 </div>
             </Field>
 
-            <Field label={ __( 'Goal', 'gratora' ) }>
+            <Field label={ __( 'Goal', 'gratora-donation-platform' ) }>
                 <Segmented
-                    ariaLabel={ __( 'Goal type', 'gratora' ) }
+                    ariaLabel={ __( 'Goal type', 'gratora-donation-platform' ) }
                     value={ goalType }
                     onChange={ setGoalType }
                     options={ GOAL_OPTIONS }
@@ -269,7 +269,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             type="number"
                             min="0"
                             value={ count }
-                            placeholder={ __( 'Enter a number', 'gratora' ) }
+                            placeholder={ __( 'Enter a number', 'gratora-donation-platform' ) }
                             onChange={ ( e ) => setCount( e.target.value ) }
                         />
                     </div>
@@ -278,8 +278,8 @@ export default function CreateCampaignDrawer( { onClose } ) {
             </Field>
 
             <Field
-                label={ __( 'Description', 'gratora' ) }
-                help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'gratora' ) }
+                label={ __( 'Description', 'gratora-donation-platform' ) }
+                help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'gratora-donation-platform' ) }
             >
                 <textarea
                     className="gratora-textarea"
@@ -290,20 +290,20 @@ export default function CreateCampaignDrawer( { onClose } ) {
             </Field>
 
             <Field
-                label={ __( 'Fund', 'gratora' ) }
-                help={ __( 'Donations to this campaign are designated to this fund.', 'gratora' ) }
+                label={ __( 'Fund', 'gratora-donation-platform' ) }
+                help={ __( 'Donations to this campaign are designated to this fund.', 'gratora-donation-platform' ) }
             >
                 <SearchableSelect
                     value={ fundId }
                     onChange={ setFundId }
                     options={ funds }
-                    placeholder={ __( 'Search funds', 'gratora' ) }
+                    placeholder={ __( 'Search funds', 'gratora-donation-platform' ) }
                 />
             </Field>
 
             <Field
-                label={ __( 'Schedule', 'gratora' ) }
-                help={ __( 'By default the campaign is always on with no end date.', 'gratora' ) }
+                label={ __( 'Schedule', 'gratora-donation-platform' ) }
+                help={ __( 'By default the campaign is always on with no end date.', 'gratora-donation-platform' ) }
             >
                 <ScheduleFields
                     enabled={ scheduleOn }
@@ -315,16 +315,16 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 />
             </Field>
 
-            <Field label={ __( 'Cover image', 'gratora' ) }>
+            <Field label={ __( 'Cover image', 'gratora-donation-platform' ) }>
                 { cover ? (
                     <div className="gratora-cc__cover-sel">
                         <img className="gratora-cc__cover-thumb" src={ cover.url } alt="" />
-                        <span className="gratora-cc__cover-name">{ __( 'Cover image selected', 'gratora' ) }</span>
+                        <span className="gratora-cc__cover-name">{ __( 'Cover image selected', 'gratora-donation-platform' ) }</span>
                         <Btn variant="ghost" size="sm" onClick={ () => openCoverFrame( setCover ) }>
-                            { __( 'Change', 'gratora' ) }
+                            { __( 'Change', 'gratora-donation-platform' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => setCover( null ) }>
-                            { __( 'Remove', 'gratora' ) }
+                            { __( 'Remove', 'gratora-donation-platform' ) }
                         </Btn>
                     </div>
                 ) : (
@@ -337,15 +337,15 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             <ImagePlus size={ 18 } strokeWidth={ 1.75 } />
                         </span>
                         <span className="gratora-cc__cover-txt">
-                            <span className="gratora-cc__cover-title">{ __( 'Select or upload an image', 'gratora' ) }</span>
+                            <span className="gratora-cc__cover-title">{ __( 'Select or upload an image', 'gratora-donation-platform' ) }</span>
                         </span>
                     </button>
                 ) }
             </Field>
 
             <Field
-                label={ __( 'Permalink', 'gratora' ) }
-                help={ __( 'Auto-generated from the title.', 'gratora' ) }
+                label={ __( 'Permalink', 'gratora-donation-platform' ) }
+                help={ __( 'Auto-generated from the title.', 'gratora-donation-platform' ) }
             >
                 { editingSlug ? (
                     <>
@@ -356,7 +356,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                                 type="text"
                                 value={ slug }
                                 autoFocus
-                                aria-label={ __( 'Campaign slug', 'gratora' ) }
+                                aria-label={ __( 'Campaign slug', 'gratora-donation-platform' ) }
                                 onChange={ ( e ) => {
                                     setSlug( e.target.value.toLowerCase().replace( /[^a-z0-9-]+/g, '-' ) );
                                     setSlugEdited( true );
@@ -365,21 +365,21 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             />
                         </div>
                         <div className="gratora-cc__slug-help">
-                            { __( 'Lowercase letters, numbers and hyphens. Must be unique across campaigns.', 'gratora' ) }
+                            { __( 'Lowercase letters, numbers and hyphens. Must be unique across campaigns.', 'gratora-donation-platform' ) }
                         </div>
                     </>
                 ) : (
                     <div className="gratora-cc__slug">
-                        <span className="gratora-cc__slug-lbl">{ __( 'URL', 'gratora' ) }</span>
+                        <span className="gratora-cc__slug-lbl">{ __( 'URL', 'gratora-donation-platform' ) }</span>
                         <span className="gratora-cc__slug-url">
-                            { slugBase }/<em>{ slug || __( 'campaign', 'gratora' ) }</em>
+                            { slugBase }/<em>{ slug || __( 'campaign', 'gratora-donation-platform' ) }</em>
                         </span>
                         <button
                             type="button"
                             className="gratora-cc__slug-btn"
                             onClick={ () => setEditingSlug( true ) }
                         >
-                            { __( 'Edit', 'gratora' ) }
+                            { __( 'Edit', 'gratora-donation-platform' ) }
                         </button>
                     </div>
                 ) }

@@ -32,7 +32,7 @@ final class OpenTheDefaultFund implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Reopening the default fund. Donations already filed against another fund stay where they are.', 'gratora');
+        return __('Reopening the default fund. Donations already filed against another fund stay where they are.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

@@ -38,15 +38,15 @@ function hasContext( row ) {
  */
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
-        return { tone: 'red', label: __( 'Not verified', 'gratora' ) };
+        return { tone: 'red', label: __( 'Not verified', 'gratora-donation-platform' ) };
     }
     if ( row.error ) {
-        return { tone: 'red', label: __( 'Handling failed', 'gratora' ) };
+        return { tone: 'red', label: __( 'Handling failed', 'gratora-donation-platform' ) };
     }
     if ( row.processed ) {
-        return { tone: 'green', label: __( 'Processed', 'gratora' ) };
+        return { tone: 'green', label: __( 'Processed', 'gratora-donation-platform' ) };
     }
-    return { tone: 'gray', label: __( 'No action needed', 'gratora' ) };
+    return { tone: 'gray', label: __( 'No action needed', 'gratora-donation-platform' ) };
 }
 
 function Pill( { tone, label } ) {
@@ -115,7 +115,7 @@ export default function LogsTab( { active, setNotice } ) {
                 // Deliberately not an empty result: "nothing has happened" and
                 // "we could not find out" are opposite answers, and this screen
                 // is read precisely when someone suspects the second.
-                setError( err?.message || __( 'The log could not be read.', 'gratora' ) );
+                setError( err?.message || __( 'The log could not be read.', 'gratora-donation-platform' ) );
             } )
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
@@ -139,12 +139,12 @@ export default function LogsTab( { active, setNotice } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'gratora' ),
+                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'gratora-donation-platform' ),
                     Number( res?.deleted ) || 0
                 ),
             } );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'gratora-donation-platform' ) } );
         } finally {
             setClearing( false );
         }
@@ -156,16 +156,16 @@ export default function LogsTab( { active, setNotice } ) {
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
         title: source
-            ? __( 'Clear this source', 'gratora' )
-            : __( 'Clear the log', 'gratora' ),
+            ? __( 'Clear this source', 'gratora-donation-platform' )
+            : __( 'Clear the log', 'gratora-donation-platform' ),
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'gratora' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'gratora-donation-platform' ),
                 source
             )
-            : __( 'Deletes every entry: the failures Gratora recorded and the history of what your gateways sent. The log fills again as things happen.', 'gratora' ),
-        confirmLabel: __( 'Clear log', 'gratora' ),
+            : __( 'Deletes every entry: the failures Gratora recorded and the history of what your gateways sent. The log fills again as things happen.', 'gratora-donation-platform' ),
+        confirmLabel: __( 'Clear log', 'gratora-donation-platform' ),
         destructive:  true,
         onConfirm:    doClear,
     } );
@@ -179,7 +179,7 @@ export default function LogsTab( { active, setNotice } ) {
     const fields = useMemo( () => [
         {
             id:            'occurred_at',
-            label:         __( 'When', 'gratora' ),
+            label:         __( 'When', 'gratora-donation-platform' ),
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
@@ -187,7 +187,7 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'source',
-            label:         __( 'Source', 'gratora' ),
+            label:         __( 'Source', 'gratora-donation-platform' ),
             enableSorting: true,
             elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
             filterBy:      { operators: [ 'is' ] },
@@ -196,7 +196,7 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'message',
-            label:         __( 'What it says', 'gratora' ),
+            label:         __( 'What it says', 'gratora-donation-platform' ),
             enableSorting: false,
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
@@ -210,11 +210,11 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'outcome',
-            label:         __( 'Outcome', 'gratora' ),
+            label:         __( 'Outcome', 'gratora-donation-platform' ),
             enableSorting: false,
             // The one narrowing worth offering: everything else on this screen
             // is ordinary traffic an org reads by scanning, not by filtering.
-            elements:      [ { value: 'failed', label: __( 'Problems only', 'gratora' ) } ],
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'gratora-donation-platform' ) } ],
             filterBy:      { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.kind === 'webhook' ) {
@@ -230,7 +230,7 @@ export default function LogsTab( { active, setNotice } ) {
     const actions = useMemo( () => [
         {
             id:         'detail',
-            label:      __( 'View detail', 'gratora' ),
+            label:      __( 'View detail', 'gratora-donation-platform' ),
             isEligible: hasContext,
             callback:   ( [ item ] ) => setDetail( item ),
         },
@@ -250,7 +250,7 @@ export default function LogsTab( { active, setNotice } ) {
         <div className="gratora-panel">
             <div className="gratora-tools-logbar">
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                    { __( 'Refresh', 'gratora' ) }
+                    { __( 'Refresh', 'gratora-donation-platform' ) }
                 </Btn>
                 { userCan( 'manage_options' ) && (
                     <Btn
@@ -259,19 +259,19 @@ export default function LogsTab( { active, setNotice } ) {
                         disabled={ clearing || total === 0 }
                         isBusy={ clearing }
                     >
-                        { __( 'Clear log', 'gratora' ) }
+                        { __( 'Clear log', 'gratora-donation-platform' ) }
                     </Btn>
                 ) }
             </div>
 
             { error ? (
                 <p className="gratora-tools-empty">
-                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'gratora' ) }
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'gratora-donation-platform' ) }
                     { ' ' }
                     <code>{ error }</code>
                 </p>
             ) : emptyAndUnfiltered ? (
-                <p className="gratora-tools-empty">{ __( 'Nothing recorded yet.', 'gratora' ) }</p>
+                <p className="gratora-tools-empty">{ __( 'Nothing recorded yet.', 'gratora-donation-platform' ) }</p>
             ) : (
                 // Carries the shared table styling every other list screen uses.
                 <div className="gratora-dataviews">
@@ -292,12 +292,12 @@ export default function LogsTab( { active, setNotice } ) {
 
             { detail && (
                 <Dialog
-                    title={ __( 'Entry detail', 'gratora' ) }
+                    title={ __( 'Entry detail', 'gratora-donation-platform' ) }
                     size="wide"
                     onClose={ () => setDetail( null ) }
                     foot={ (
                         <Btn variant="secondary" onClick={ () => setDetail( null ) }>
-                            { __( 'Close', 'gratora' ) }
+                            { __( 'Close', 'gratora-donation-platform' ) }
                         </Btn>
                     ) }
                 >

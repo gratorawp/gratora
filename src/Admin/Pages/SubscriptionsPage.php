@@ -24,7 +24,7 @@ final class SubscriptionsPage extends HookProvider
     {
         $pages[] = [
             'id'    => self::PAGE_ID,
-            'title' => __('Subscriptions', 'gratora'),
+            'title' => __('Subscriptions', 'gratora-donation-platform'),
             // Listing needs donations access; mutations check their own permissions.
             'capability' => 'gratora_access_donations',
             'position'   => 15,
@@ -59,7 +59,7 @@ final class SubscriptionsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

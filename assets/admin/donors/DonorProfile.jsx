@@ -85,18 +85,18 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         // The footer sits outside the form.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
-            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'gratora' ) );
+            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'gratora-donation-platform' ) );
             return;
         }
         if ( emailInvalid ) {
-            setError( __( 'Email address looks malformed.', 'gratora' ) );
+            setError( __( 'Email address looks malformed.', 'gratora-donation-platform' ) );
             return;
         }
         if ( emailChanged ) {
             setConfirm( {
-                title:        __( 'Change donor email', 'gratora' ),
-                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'gratora' ),
-                confirmLabel: __( 'Change email', 'gratora' ),
+                title:        __( 'Change donor email', 'gratora-donation-platform' ),
+                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'gratora-donation-platform' ),
+                confirmLabel: __( 'Change email', 'gratora-donation-platform' ),
                 onConfirm:    doSave,
             } );
             return;
@@ -121,13 +121,13 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     return (
         <>
             <Dialog
-                title={ __( 'Edit donor details', 'gratora' ) }
+                title={ __( 'Edit donor details', 'gratora-donation-platform' ) }
                 onClose={ () => ( saving ? null : onCancel() ) }
                 size="wide"
                 foot={
                     <>
                         <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'gratora' ) }
+                            { __( 'Cancel', 'gratora-donation-platform' ) }
                         </Btn>
                         <Btn
                             variant="primary"
@@ -135,14 +135,14 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             isBusy={ saving }
                             disabled={ saving || phoneInvalid }
                         >
-                            { saving ? __( 'Saving…', 'gratora' ) : __( 'Save', 'gratora' ) }
+                            { saving ? __( 'Saving…', 'gratora-donation-platform' ) : __( 'Save', 'gratora-donation-platform' ) }
                         </Btn>
                     </>
                 }
             >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Email', 'gratora' ) }
+                        { __( 'Email', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="email"
                             value={ form.email }
@@ -153,25 +153,25 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { emailChanged && (
                             <span className="dp-field__hint">
-                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'gratora' ) }
+                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'gratora-donation-platform' ) }
                             </span>
                         ) }
                     </label>
                     <label>
-                        { __( 'First name', 'gratora' ) }
+                        { __( 'First name', 'gratora-donation-platform' ) }
                         <input className="gratora-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
                     </label>
                     <label>
-                        { __( 'Last name', 'gratora' ) }
+                        { __( 'Last name', 'gratora-donation-platform' ) }
                         <input className="gratora-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
                     </label>
                     <label className="dp-edit-form__country">
-                        { __( 'Country', 'gratora' ) }
+                        { __( 'Country', 'gratora-donation-platform' ) }
                         <div className="dp-edit-form__country-wrap">
                             <input className="gratora-input"
                                 type="text"
                                 value={ countryQuery }
-                                placeholder={ __( 'Search country…', 'gratora' ) }
+                                placeholder={ __( 'Search country…', 'gratora-donation-platform' ) }
                                 onFocus={ () => setCountryOpen( true ) }
                                 onBlur={ () => setTimeout( () => setCountryOpen( false ), 150 ) }
                                 onChange={ ( e ) => { setCountryQuery( e.target.value ); setCountryOpen( true ); } }
@@ -191,19 +191,19 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         </div>
                     </label>
                     <label>
-                        { __( 'Type', 'gratora' ) }
+                        { __( 'Type', 'gratora-donation-platform' ) }
                         <select className="gratora-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
-                            <option value="individual">{ __( 'Individual', 'gratora' ) }</option>
-                            <option value="organization">{ __( 'Organization', 'gratora' ) }</option>
-                            <option value="household">{ __( 'Household', 'gratora' ) }</option>
+                            <option value="individual">{ __( 'Individual', 'gratora-donation-platform' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'gratora-donation-platform' ) }</option>
+                            <option value="household">{ __( 'Household', 'gratora-donation-platform' ) }</option>
                         </select>
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Company', 'gratora' ) }
+                        { __( 'Company', 'gratora-donation-platform' ) }
                         <input className="gratora-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Phone', 'gratora' ) }
+                        { __( 'Phone', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="tel"
                             value={ form.phone }
@@ -214,32 +214,32 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { phoneInvalid && (
                             <span className="dp-field__hint dp-field__hint--err">
-                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'gratora' ) }
+                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'gratora-donation-platform' ) }
                             </span>
                         ) }
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 1', 'gratora' ) }
+                        { __( 'Address line 1', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="text"
                             value={ form.address.line1 }
                             onChange={ setAddr( 'line1' ) }
-                            placeholder={ __( 'Street and number', 'gratora' ) }
+                            placeholder={ __( 'Street and number', 'gratora-donation-platform' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 2', 'gratora' ) }
+                        { __( 'Address line 2', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="text"
                             value={ form.address.line2 }
                             onChange={ setAddr( 'line2' ) }
-                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'gratora' ) }
+                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'gratora-donation-platform' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label>
-                        { __( 'City', 'gratora' ) }
+                        { __( 'City', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="text"
                             value={ form.address.city }
@@ -248,7 +248,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Region', 'gratora' ) }
+                        { __( 'Region', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="text"
                             value={ form.address.region }
@@ -257,7 +257,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Postal code', 'gratora' ) }
+                        { __( 'Postal code', 'gratora-donation-platform' ) }
                         <input className="gratora-input"
                             type="text"
                             value={ form.address.postal }
@@ -290,7 +290,7 @@ export default function DonorProfile( { id, onBack } ) {
         setError( null );
         return apiFetch( { path: `/gratora/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { setData( d ); setError( null ); } )
-            .catch( ( e ) => setError( e?.message || __( 'Could not load this donor.', 'gratora' ) ) )
+            .catch( ( e ) => setError( e?.message || __( 'Could not load this donor.', 'gratora-donation-platform' ) ) )
             .finally( () => setLoading( false ) );
     };
 
@@ -300,12 +300,12 @@ export default function DonorProfile( { id, onBack } ) {
         setData( null );
         apiFetch( { path: `/gratora/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { if ( ! aborted ) { setData( d ); setError( null ); } } )
-            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load this donor.', 'gratora' ) ); } )
+            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load this donor.', 'gratora-donation-platform' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ id ] );
 
-    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'gratora' ) }</p>;
+    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'gratora-donation-platform' ) }</p>;
 
     // Keep loaded data and retry controls after refresh failures.
     if ( error && ! data ) {
@@ -313,9 +313,9 @@ export default function DonorProfile( { id, onBack } ) {
             <div className="dp-shell">
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 <p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'gratora' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'gratora-donation-platform' ) }</Btn>
                     { ' ' }
-                    <Btn onClick={ onBack }>{ __( 'Back to donors', 'gratora' ) }</Btn>
+                    <Btn onClick={ onBack }>{ __( 'Back to donors', 'gratora-donation-platform' ) }</Btn>
                 </p>
             </div>
         );

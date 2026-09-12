@@ -32,7 +32,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( ! data.years ) {
         return (
             <p className="gratora-muted">
-                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'gratora' ) }
+                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'gratora-donation-platform' ) }
             </p>
         );
     }
@@ -51,7 +51,7 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor is past this window.',
                 '%s donors are past this window.',
                 now,
-                'gratora'
+                'gratora-donation-platform'
             ),
             now.toLocaleString()
         ) );
@@ -63,7 +63,7 @@ function RetentionPreview( { years, inForce } ) {
                     '%s in total reaches it within 30 days.',
                     '%s in total reach it within 30 days.',
                     soon,
-                    'gratora'
+                    'gratora-donation-platform'
                 ),
                 soon.toLocaleString()
             ) );
@@ -75,18 +75,18 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor reaches this window within 30 days.',
                 '%s donors reach this window within 30 days.',
                 soon,
-                'gratora'
+                'gratora-donation-platform'
             ),
             soon.toLocaleString()
         ) );
     }
 
     if ( lines.length === 0 ) {
-        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'gratora' ) );
+        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'gratora-donation-platform' ) );
     } else if ( ! inForce ) {
-        lines.push( __( 'Nothing is erased until this is saved.', 'gratora' ) );
+        lines.push( __( 'Nothing is erased until this is saved.', 'gratora-donation-platform' ) );
     } else if ( ! pending ) {
-        lines.push( __( 'They are erased on the next nightly run.', 'gratora' ) );
+        lines.push( __( 'They are erased on the next nightly run.', 'gratora-donation-platform' ) );
     }
 
     // Only once the window is the saved one. While it is still being chosen the
@@ -95,7 +95,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( pending && inForce ) {
         lines.push( sprintf(
             /* translators: %s: a date. */
-            __( 'Nothing is erased before %s.', 'gratora' ),
+            __( 'Nothing is erased before %s.', 'gratora-donation-platform' ),
             formatDate( new Date( startsAt ).toISOString() )
         ) );
     }
@@ -128,14 +128,14 @@ function ProxyFix( { s } ) {
     }
 
     const label = detected === 'cloudflare'
-        ? __( 'This site is behind Cloudflare.', 'gratora' )
-        : __( 'This site is behind a proxy or load balancer.', 'gratora' );
+        ? __( 'This site is behind Cloudflare.', 'gratora-donation-platform' )
+        : __( 'This site is behind a proxy or load balancer.', 'gratora-donation-platform' );
 
     return (
         <Notice status="warning" isDismissible={ false }>
             <p>
                 <strong>{ label }</strong>{ ' ' }
-                { __( 'Every visitor is reaching the site as the same address, so spam limits are counting the whole site as one visitor. Donors can be turned away because of somebody else.', 'gratora' ) }
+                { __( 'Every visitor is reaching the site as the same address, so spam limits are counting the whole site as one visitor. Donors can be turned away because of somebody else.', 'gratora-donation-platform' ) }
             </p>
             <p>
                 <button
@@ -143,11 +143,11 @@ function ProxyFix( { s } ) {
                     className="button button-primary"
                     onClick={ () => s.setValue( 'trusted_proxies' )( [ detected ] ) }
                 >
-                    { __( 'Fix this', 'gratora' ) }
+                    { __( 'Fix this', 'gratora-donation-platform' ) }
                 </button>
                 { ' ' }
                 <span className="gratora-muted">
-                    { __( 'Then save. Nothing else to look up.', 'gratora' ) }
+                    { __( 'Then save. Nothing else to look up.', 'gratora-donation-platform' ) }
                 </span>
             </p>
         </Notice>
@@ -167,26 +167,26 @@ export default function PrivacyPanel( { s } ) {
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Donor data handling', 'gratora' ) }
-                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'gratora' ) }
+                title={ __( 'Donor data handling', 'gratora-donation-platform' ) }
+                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'gratora-donation-platform' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Privacy policy URL', 'gratora' ) }
-                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'gratora' ) }
+                    label={ __( 'Privacy policy URL', 'gratora-donation-platform' ) }
+                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'gratora-donation-platform' ) }
                 >
                     <input
                         type="url"
                         className="gratora-input"
                         value={ s.value( 'privacy_policy_url', '' ) }
                         onChange={ ( e ) => s.edit( { privacy_policy_url: e.target.value } ) }
-                        placeholder={ __( 'Enter your privacy policy URL', 'gratora' ) }
+                        placeholder={ __( 'Enter your privacy policy URL', 'gratora-donation-platform' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Reunite window after redaction (days)', 'gratora' ) }
-                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'gratora' ) }
+                    label={ __( 'Reunite window after redaction (days)', 'gratora-donation-platform' ) }
+                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'gratora-donation-platform' ) }
                 >
                     <input
                         type="number"
@@ -200,8 +200,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Erase inactive donors automatically', 'gratora' ) }
-                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'gratora' ) }
+                    title={ __( 'Erase inactive donors automatically', 'gratora-donation-platform' ) }
+                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'gratora-donation-platform' ) }
                     checked={ eraseInactive }
                     onChange={ s.setValue( 'erase_inactive_donors' ) }
                 />
@@ -209,8 +209,8 @@ export default function PrivacyPanel( { s } ) {
                 { eraseInactive && (
                     <>
                         <FormRow
-                            label={ __( 'Erase donors inactive for (years)', 'gratora' ) }
-                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'gratora' ) }
+                            label={ __( 'Erase donors inactive for (years)', 'gratora-donation-platform' ) }
+                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'gratora-donation-platform' ) }
                         >
                             <input
                                 type="number"
@@ -227,8 +227,8 @@ export default function PrivacyPanel( { s } ) {
                 ) }
 
                 <FormRow
-                    label={ __( 'Keep the activity log for (days)', 'gratora' ) }
-                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'gratora' ) }
+                    label={ __( 'Keep the activity log for (days)', 'gratora-donation-platform' ) }
+                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'gratora-donation-platform' ) }
                 >
                     <input
                         type="number"
@@ -242,8 +242,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Anonymize IPs in event logs', 'gratora' ) }
-                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'gratora' ) }
+                    title={ __( 'Anonymize IPs in event logs', 'gratora-donation-platform' ) }
+                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'anonymize_ips', true ) }
                     onChange={ s.setValue( 'anonymize_ips' ) }
                 />
@@ -251,8 +251,8 @@ export default function PrivacyPanel( { s } ) {
                 <ProxyFix s={ s } />
 
                 <FormRow
-                    label={ __( 'What is in front of this site', 'gratora' ) }
-                    help={ __( 'Leave empty unless a CDN, load balancer or reverse proxy serves this site. Write cloudflare, or private_ranges for a proxy on your own network, or list addresses and CIDR ranges one per line. Spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site would share one visitor\'s allowance.', 'gratora' ) }
+                    label={ __( 'What is in front of this site', 'gratora-donation-platform' ) }
+                    help={ __( 'Leave empty unless a CDN, load balancer or reverse proxy serves this site. Write cloudflare, or private_ranges for a proxy on your own network, or list addresses and CIDR ranges one per line. Spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site would share one visitor\'s allowance.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <textarea
@@ -268,29 +268,29 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show Gravatar profile pictures', 'gratora' ) }
-                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'gratora' ) }
+                    title={ __( 'Show Gravatar profile pictures', 'gratora-donation-platform' ) }
+                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'gravatar_avatars', false ) }
                     onChange={ s.setValue( 'gravatar_avatars' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Default new donations to anonymous', 'gratora' ) }
-                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'gratora' ) }
+                    title={ __( 'Default new donations to anonymous', 'gratora-donation-platform' ) }
+                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'always_anonymous_default', false ) }
                     onChange={ s.setValue( 'always_anonymous_default' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow data export from portal', 'gratora' ) }
-                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'gratora' ) }
+                    title={ __( 'Allow data export from portal', 'gratora-donation-platform' ) }
+                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'allow_data_export', true ) }
                     onChange={ s.setValue( 'allow_data_export' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow account delete from portal', 'gratora' ) }
-                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'gratora' ) }
+                    title={ __( 'Allow account delete from portal', 'gratora-donation-platform' ) }
+                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'allow_account_delete', true ) }
                     onChange={ s.setValue( 'allow_account_delete' ) }
                 />

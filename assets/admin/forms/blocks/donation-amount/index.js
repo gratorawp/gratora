@@ -86,25 +86,25 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Amounts', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Amounts', 'gratora-donation-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Donation type', 'gratora' ) }
+                        label={ __( 'Donation type', 'gratora-donation-platform' ) }
                         value={ donationType }
                         onChange={ ( v ) => setAttributes( { donationType: v } ) }
                         options={ [
-                            { value: 'multi', label: __( 'Multi-level', 'gratora' ) },
-                            { value: 'fixed', label: __( 'Open amount', 'gratora' ) },
+                            { value: 'multi', label: __( 'Multi-level', 'gratora-donation-platform' ) },
+                            { value: 'fixed', label: __( 'Open amount', 'gratora-donation-platform' ) },
                         ] }
                     />
                     <p style={ { margin: '6px 0 12px', fontSize: 11, color: '#6b7280' } }>
                         { donationType === 'fixed'
-                            ? __( 'Donors enter any amount. No preset tiles.', 'gratora' )
-                            : __( 'Show preset amounts donors can pick from.', 'gratora' ) }
+                            ? __( 'Donors enter any amount. No preset tiles.', 'gratora-donation-platform' )
+                            : __( 'Show preset amounts donors can pick from.', 'gratora-donation-platform' ) }
                     </p>
 
                     { donationType === 'multi' && (
                         <ToggleControl
-                            label={ __( 'Allow custom amount', 'gratora' ) }
+                            label={ __( 'Allow custom amount', 'gratora-donation-platform' ) }
                             checked={ allowCustom }
                             onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
                             __nextHasNoMarginBottom
@@ -116,8 +116,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             type="number"
                             min="0"
                             step="0.01"
-                            label={ __( 'Minimum amount', 'gratora' ) }
-                            help={ __( 'Leave empty for no minimum beyond the site default.', 'gratora' ) }
+                            label={ __( 'Minimum amount', 'gratora-donation-platform' ) }
+                            help={ __( 'Leave empty for no minimum beyond the site default.', 'gratora-donation-platform' ) }
                             value={ minCents ? String( minCents / 100 ) : '' }
                             onChange={ ( v ) => setAttributes( {
                                 minCents: v === '' ? 0 : Math.max( 0, Math.round( parseFloat( v ) * 100 ) || 0 ),
@@ -130,13 +130,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     { donationType === 'multi' && (
                     <>
                     <div className="gratora-amounts-head">
-                        <span className="gratora-amounts-head__label">{ __( 'Options', 'gratora' ) }</span>
+                        <span className="gratora-amounts-head__label">{ __( 'Options', 'gratora-donation-platform' ) }</span>
                         <button
                             type="button"
                             className="gratora-amounts-add"
                             onClick={ addPreset }
-                            aria-label={ __( 'Add amount', 'gratora' ) }
-                            title={ __( 'Add amount', 'gratora' ) }
+                            aria-label={ __( 'Add amount', 'gratora-donation-platform' ) }
+                            title={ __( 'Add amount', 'gratora-donation-platform' ) }
                         >
                             +
                         </button>
@@ -164,8 +164,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                     if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
                                 } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'gratora' ) }
-                                title={ __( 'Drag to reorder', 'gratora' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'gratora-donation-platform' ) }
+                                title={ __( 'Drag to reorder', 'gratora-donation-platform' ) }
                             >
                                 ⠿
                             </span>
@@ -176,8 +176,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 checked={ !! p.preselected }
                                 onChange={ () => setPreselected( i ) }
                                 onClick={ () => { if ( p.preselected ) setPreselected( i ); } }
-                                aria-label={ __( 'Preselect this amount', 'gratora' ) }
-                                title={ __( 'Preselect this amount', 'gratora' ) }
+                                aria-label={ __( 'Preselect this amount', 'gratora-donation-platform' ) }
+                                title={ __( 'Preselect this amount', 'gratora-donation-platform' ) }
                             />
                             <span className="gratora-preset-row__amt">
                                 <AmountInput
@@ -193,15 +193,15 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 className="gratora-preset-row__remove"
                                 onClick={ () => removePreset( i ) }
                                 disabled={ presets.length <= 1 }
-                                aria-label={ __( 'Remove amount', 'gratora' ) }
-                                title={ __( 'Remove amount', 'gratora' ) }
+                                aria-label={ __( 'Remove amount', 'gratora-donation-platform' ) }
+                                title={ __( 'Remove amount', 'gratora-donation-platform' ) }
                             >
                                 −
                             </button>
                         </div>
                     ) ) }
                     <p style={ { margin: '6px 0 0', fontSize: 11, color: '#6b7280' } }>
-                        { __( 'Select a radio to preselect an amount.', 'gratora' ) }
+                        { __( 'Select a radio to preselect an amount.', 'gratora-donation-platform' ) }
                     </p>
                     </>
                     ) }
@@ -209,7 +209,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <div style={ { fontSize: 12, color: '#666', marginBottom: 8 } }>
-                    { __( 'Donation amount', 'gratora' ) }
+                    { __( 'Donation amount', 'gratora-donation-platform' ) }
                 </div>
                 { donationType === 'multi' && (
                 <div style={ { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 } }>
@@ -241,7 +241,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 tagName="div"
                                 value={ p.impact }
                                 onChange={ ( v ) => updatePreset( i, { impact: v } ) }
-                                placeholder={ __( 'Add a caption', 'gratora' ) }
+                                placeholder={ __( 'Add a caption', 'gratora-donation-platform' ) }
                                 allowedFormats={ [] }
                                 style={ {
                                     fontSize: 11,
@@ -267,7 +267,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             textAlign:    'left',
                         } }
                     >
-                        { __( 'Custom amount', 'gratora' ) }
+                        { __( 'Custom amount', 'gratora-donation-platform' ) }
                     </div>
                 ) }
             </div>
@@ -278,8 +278,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donation amount', 'gratora' ),
-        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'gratora' ),
+        title:      __( 'Donation amount', 'gratora-donation-platform' ),
+        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'gratora-donation-platform' ),
         category:   'gratora-amount',
         icon:       BlockIcons[ 'donation-amount' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

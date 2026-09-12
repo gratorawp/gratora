@@ -397,7 +397,7 @@ final class GatewayReconciler
         // Word for word what the DENIED webhook stores, so a donation resolved
         // here reads identically to one the delivery resolved. markFailed()
         // refuses to walk a paid or refunded row backwards.
-        $this->donations->markFailed($donation, __('PayPal declined the payment.', 'gratora'));
+        $this->donations->markFailed($donation, __('PayPal declined the payment.', 'gratora-donation-platform'));
     }
 
     /**

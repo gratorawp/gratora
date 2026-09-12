@@ -89,12 +89,12 @@ final class ReceiptsController
 
         $valid = $this->magicLinks->validate($rawToken, 'download_receipt', $receiptId);
         if (! $valid) {
-            return new WP_Error('gratora_invalid_token', __('Link is invalid or expired.', 'gratora'), ['status' => 403]);
+            return new WP_Error('gratora_invalid_token', __('Link is invalid or expired.', 'gratora-donation-platform'), ['status' => 403]);
         }
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('gratora_receipt_not_found', __('Receipt not found.', 'gratora'), ['status' => 404]);
+            return new WP_Error('gratora_receipt_not_found', __('Receipt not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
         if ($receipt->voided) {
@@ -103,20 +103,20 @@ final class ReceiptsController
             // donation was refunded in full, so say that instead.
             return new WP_Error(
                 'gratora_receipt_voided',
-                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'gratora'),
+                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'gratora-donation-platform'),
                 ['status' => 410]
             );
         }
 
         // Defense-in-depth: token must belong to the same donor as the receipt.
         if ($valid->donor_id !== $receipt->donor_id) {
-            return new WP_Error('gratora_invalid_token', __('Link is invalid.', 'gratora'), ['status' => 403]);
+            return new WP_Error('gratora_invalid_token', __('Link is invalid.', 'gratora-donation-platform'), ['status' => 403]);
         }
 
         $donation = $this->donations->findById($receipt->donation_id);
         $donor    = $this->donors->findById($receipt->donor_id);
         if (! $donation || ! $donor) {
-            return new WP_Error('gratora_receipt_data_missing', __('Receipt data is no longer available.', 'gratora'), ['status' => 410]);
+            return new WP_Error('gratora_receipt_data_missing', __('Receipt data is no longer available.', 'gratora-donation-platform'), ['status' => 410]);
         }
 
         $ctx = new ReceiptContext(
@@ -147,7 +147,7 @@ final class ReceiptsController
             // under the same receipt number.
             return new WP_Error(
                 'gratora_renderer_missing',
-                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'gratora'),
+                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'gratora-donation-platform'),
                 ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
             );
         }
@@ -168,7 +168,7 @@ final class ReceiptsController
 
             return new WP_Error(
                 'gratora_receipt_render_failed',
-                __('We could not produce this receipt right now. Please try again shortly, or contact the organization.', 'gratora'),
+                __('We could not produce this receipt right now. Please try again shortly, or contact the organization.', 'gratora-donation-platform'),
                 ['status' => 500]
             );
         } finally {

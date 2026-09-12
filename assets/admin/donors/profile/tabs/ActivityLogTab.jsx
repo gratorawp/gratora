@@ -47,7 +47,7 @@ export default function ActivityLogTab( { donorId } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load activity. Refresh to try again.', 'gratora' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load activity. Refresh to try again.', 'gratora-donation-platform' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ donorId, apiParams ] );
@@ -55,7 +55,7 @@ export default function ActivityLogTab( { donorId } ) {
     const fields = useMemo( () => [
         {
             id:    'event',
-            label: __( 'Event', 'gratora' ),
+            label: __( 'Event', 'gratora-donation-platform' ),
             enableSorting: false,
             render: ( { item } ) => {
                 const meta = eventMeta( item );
@@ -68,7 +68,7 @@ export default function ActivityLogTab( { donorId } ) {
                                  it, and the timeline does not. */ }
                             { eventTitle( item ) }
                             { item.payload?.by === 'admin' && (
-                                <span className="dp-actlog__note">{ __( 'by an admin', 'gratora' ) }</span>
+                                <span className="dp-actlog__note">{ __( 'by an admin', 'gratora-donation-platform' ) }</span>
                             ) }
                             { item.note && (
                                 <span className="dp-actlog__note">“{ item.note }”</span>
@@ -80,7 +80,7 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'reference',
-            label: __( 'Reference', 'gratora' ),
+            label: __( 'Reference', 'gratora-donation-platform' ),
             enableSorting: false,
             // A receipt event carries both a donation and a receipt, so
             // returning on the first would have meant a receipt row never
@@ -103,13 +103,13 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'gratora' ),
+            label: __( 'Campaign', 'gratora-donation-platform' ),
             enableSorting: false,
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'gratora' ),
+            label: __( 'Amount', 'gratora-donation-platform' ),
             enableSorting: false,
             render: ( { item } ) => item.amount_cents !== null && item.amount_cents !== undefined
                 ? (
@@ -121,7 +121,7 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'occurred_at',
-            label: __( 'When', 'gratora' ),
+            label: __( 'When', 'gratora-donation-platform' ),
             enableSorting: true,
             // Relative over absolute, the way the overview timeline reads it:
             // a bare "15h ago" with the real moment hidden in a tooltip made

@@ -264,7 +264,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
         ]);
 
         add_filter('gettext', static function ($translated, $text, $domain) {
-            if ($domain !== 'gratora') return $translated;
+            if ($domain !== 'gratora-donation-platform') return $translated;
 
             return match ($text) {
                 'Receipts do not carry your organization name.' => 'S1',

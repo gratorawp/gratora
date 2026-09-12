@@ -91,7 +91,7 @@ final class FxController
         if (! $this->updater->saveSettings((bool) ($body['auto'] ?? true), $manual, $frame)) {
             return new WP_REST_Response([
                 'code'    => 'gratora_fx_frame_moved',
-                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'gratora'),
+                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'gratora-donation-platform'),
             ], 409);
         }
 

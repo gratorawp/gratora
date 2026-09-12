@@ -65,7 +65,7 @@ final class TaxStatementBuilder
             'org_name'            => $orgName,
             'org_address_lines'   => $this->orgAddressLines($org),
             'org_tax_id'          => trim((string) ($org['tax_id'] ?? '')),
-            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'gratora'),
+            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'gratora-donation-platform'),
             'donor_address_lines' => $donorAddr !== null ? explode("\n", $donorAddr) : [],
             'lines'               => $itemized['lines'],
             'totals'              => $itemized['totals'],
@@ -75,9 +75,9 @@ final class TaxStatementBuilder
 
         return $this->pdf->fromHtml($html, [
             /* translators: %d: statement year. */
-            'title'   => sprintf(__('%d annual donation statement', 'gratora'), $year),
+            'title'   => sprintf(__('%d annual donation statement', 'gratora-donation-platform'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'gratora'),
+            'subject' => __('Annual donation statement', 'gratora-donation-platform'),
             'format'  => 'Letter',
         ]);
     }
@@ -147,7 +147,7 @@ final class TaxStatementBuilder
                 'amount'        => Money::format($net, $currency),
                 'refunded_note' => $refunded > 0
                     /* translators: %s: formatted refunded amount */
-                    ? sprintf(__('Net of %s refunded', 'gratora'), Money::format($refunded, $currency))
+                    ? sprintf(__('Net of %s refunded', 'gratora-donation-platform'), Money::format($refunded, $currency))
                     : '',
             ];
         }
@@ -158,8 +158,8 @@ final class TaxStatementBuilder
             $totals[] = [
                 'label'  => $multi
                     /* translators: %s: currency code */
-                    ? sprintf(__('Total contributions (%s)', 'gratora'), $currency)
-                    : __('Total contributions', 'gratora'),
+                    ? sprintf(__('Total contributions (%s)', 'gratora-donation-platform'), $currency)
+                    : __('Total contributions', 'gratora-donation-platform'),
                 'amount' => Money::format($cents, $currency),
             ];
         }

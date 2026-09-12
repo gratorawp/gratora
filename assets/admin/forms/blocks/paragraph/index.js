@@ -8,9 +8,9 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'gratora/paragraph';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'gratora' ) },
-    { value: 'center', label: __( 'Center', 'gratora' ) },
-    { value: 'right',  label: __( 'Right',  'gratora' ) },
+    { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+    { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
+    { value: 'right',  label: __( 'Right',  'gratora-donation-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -25,9 +25,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Paragraph', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Paragraph', 'gratora-donation-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -43,7 +43,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="p"
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Add a short description for donors.', 'gratora' ) }
+                    placeholder={ __( 'Add a short description for donors.', 'gratora-donation-platform' ) }
                     allowedFormats={ [ 'core/bold', 'core/italic', 'core/link' ] }
                     style={ { margin: 0, lineHeight: 1.5 } }
                 />
@@ -55,8 +55,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Paragraph', 'gratora' ),
-        description: __( 'Short copy shown above the next field step.', 'gratora' ),
+        title:      __( 'Paragraph', 'gratora-donation-platform' ),
+        description: __( 'Short copy shown above the next field step.', 'gratora-donation-platform' ),
         category:   'gratora-content',
         icon:       BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true },

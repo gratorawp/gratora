@@ -8,13 +8,13 @@ import { __ } from '@wordpress/i18n';
 
 // Grouping keys are stable; only the display text is translated.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'gratora' ),
-    General:   __( 'General', 'gratora' ),
-    Appeals:   __( 'Appeals', 'gratora' ),
-    Community: __( 'Community', 'gratora' ),
-    Impact:    __( 'Impact', 'gratora' ),
-    Bare:      __( 'Bare', 'gratora' ),
-    Other:     __( 'Other', 'gratora' ),
+    All:       __( 'All', 'gratora-donation-platform' ),
+    General:   __( 'General', 'gratora-donation-platform' ),
+    Appeals:   __( 'Appeals', 'gratora-donation-platform' ),
+    Community: __( 'Community', 'gratora-donation-platform' ),
+    Impact:    __( 'Impact', 'gratora-donation-platform' ),
+    Bare:      __( 'Bare', 'gratora-donation-platform' ),
+    Other:     __( 'Other', 'gratora-donation-platform' ),
 };
 
 const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
@@ -258,16 +258,16 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
 
     return (
         <Modal
-            title={ __( 'Campaign templates', 'gratora' ) }
+            title={ __( 'Campaign templates', 'gratora-donation-platform' ) }
             onRequestClose={ onClose }
             className="gratora-template-picker gratora-ctp"
             size="large"
         >
             { failed ? (
                 <div className="gratora-template-picker__state">
-                    <p>{ __( 'The campaign templates could not be loaded.', 'gratora' ) }</p>
+                    <p>{ __( 'The campaign templates could not be loaded.', 'gratora-donation-platform' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'gratora' ) }
+                        { __( 'Try again', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) : loading ? (
@@ -275,7 +275,7 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
             ) : (
                 <>
                     <p className="gratora-template-picker__intro">
-                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'gratora' ) }
+                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'gratora-donation-platform' ) }
                     </p>
 
                     { categories.length > 2 && (

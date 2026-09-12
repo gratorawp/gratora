@@ -32,7 +32,7 @@ final class AnonymousToggleBlock implements Block
         $globalDefault = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
 
         return View::loadRelative(__DIR__, 'views/anonymous-toggle', [
-            'label'     => (string) ($attrs['label']     ?? '') ?: __('Hide my name from the public list of donors', 'gratora'),
+            'label'     => (string) ($attrs['label']     ?? '') ?: __('Hide my name from the public list of donors', 'gratora-donation-platform'),
             'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
         ]);
     }

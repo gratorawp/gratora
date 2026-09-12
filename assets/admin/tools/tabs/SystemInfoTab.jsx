@@ -27,23 +27,23 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             setCopied( true );
             setTimeout( () => setCopied( false ), 2000 );
         } catch ( err ) {
-            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'gratora' ) } );
+            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'gratora-donation-platform' ) } );
         }
     };
 
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'System info', 'gratora' ) }
-                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'gratora' ) }
+                title={ __( 'System info', 'gratora-donation-platform' ) }
+                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'gratora-donation-platform' ) }
             >
                 { infoError ? (
                     <div className="gratora-advanced-actions">
-                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'gratora' ) }</p>
-                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'gratora' ) }</Btn>
+                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'gratora-donation-platform' ) }</p>
+                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'gratora-donation-platform' ) }</Btn>
                     </div>
                 ) : ! info ? (
-                    <p className="gratora-tools-empty">{ __( 'Loading…', 'gratora' ) }</p>
+                    <p className="gratora-tools-empty">{ __( 'Loading…', 'gratora-donation-platform' ) }</p>
                 ) : (
                     <>
                         { sections.map( ( section ) => (
@@ -61,7 +61,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                         ) ) }
                         <div className="gratora-advanced-actions" style={ { marginTop: 12 } }>
                             <Btn variant="secondary" onClick={ copy }>
-                                { copied ? __( 'Copied', 'gratora' ) : __( 'Copy to clipboard', 'gratora' ) }
+                                { copied ? __( 'Copied', 'gratora-donation-platform' ) : __( 'Copy to clipboard', 'gratora-donation-platform' ) }
                             </Btn>
                         </div>
                     </>
@@ -69,8 +69,8 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             </Card>
 
             <Card
-                title={ __( 'Scheduled tasks', 'gratora' ) }
-                sub={ __( 'Gratora jobs queued with Action Scheduler, and when each is due.', 'gratora' ) }
+                title={ __( 'Scheduled tasks', 'gratora-donation-platform' ) }
+                sub={ __( 'Gratora jobs queued with Action Scheduler, and when each is due.', 'gratora-donation-platform' ) }
             >
                 { info?.cron?.length ? (
                     <ul className="gratora-advanced-cron">
@@ -82,7 +82,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                         ) ) }
                     </ul>
                 ) : (
-                    <p className="gratora-tools-empty">{ __( 'Nothing queued right now.', 'gratora' ) }</p>
+                    <p className="gratora-tools-empty">{ __( 'Nothing queued right now.', 'gratora-donation-platform' ) }</p>
                 ) }
             </Card>
         </div>

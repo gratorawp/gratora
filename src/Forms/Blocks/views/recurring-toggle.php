@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
  * from the form settings and renders the live pill row; this fallback shows
  * a single hidden value so the no-JS submission still includes a frequency.
  */
-$labelText = $label !== '' ? $label : __('Make this recurring', 'gratora');
+$labelText = $label !== '' ? $label : __('Make this recurring', 'gratora-donation-platform');
 ?>
 <fieldset class="gratora-block gratora-block--recurring gratora-recurring gratora-recurring--<?php echo esc_attr($style); ?>">
     <legend class="gratora-recurring__legend"><?php echo esc_html($labelText); ?></legend>

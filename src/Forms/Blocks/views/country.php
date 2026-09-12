@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Country', 'gratora');
+$labelText = $label !== '' ? $label : __('Country', 'gratora-donation-platform');
 $placeholderText = $placeholder !== '' ? $placeholder : 'DE';
 ?>
 <label class="gratora-block gratora-block--country gratora-donor__field">

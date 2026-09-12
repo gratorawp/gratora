@@ -75,14 +75,14 @@ function TaxStatement( { donor, donations } ) {
     return (
         <div className="dp-tax-statement">
             <div className="dp-tax-statement__text">
-                <strong>{ __( 'Annual tax statement', 'gratora' ) }</strong>
-                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'gratora' ) }</span>
+                <strong>{ __( 'Annual tax statement', 'gratora-donation-platform' ) }</strong>
+                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'gratora-donation-platform' ) }</span>
             </div>
             <select
                 className="gratora-input dp-tax-statement__year"
                 value={ chosen }
                 onChange={ ( e ) => setYear( Number( e.target.value ) ) }
-                aria-label={ __( 'Statement year', 'gratora' ) }
+                aria-label={ __( 'Statement year', 'gratora-donation-platform' ) }
             >
                 { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
             </select>
@@ -99,13 +99,13 @@ function TaxStatement( { donor, donations } ) {
                             `tax-statement-${ chosen }.pdf`
                         );
                     } catch ( err ) {
-                        notify.error( err?.message || __( 'Could not build the statement.', 'gratora' ) );
+                        notify.error( err?.message || __( 'Could not build the statement.', 'gratora-donation-platform' ) );
                     } finally {
                         setBusy( false );
                     }
                 } }
             >
-                { __( 'Download statement', 'gratora' ) }
+                { __( 'Download statement', 'gratora-donation-platform' ) }
             </Btn>
         </div>
     );
@@ -126,7 +126,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const fields = useMemo( () => [
         {
             id:    'receipt_number',
-            label: __( 'Receipt', 'gratora' ),
+            label: __( 'Receipt', 'gratora-donation-platform' ),
             enableSorting: true,
             enableGlobalSearch: true,
             // Plain mono, not a link: a receipt has no page of its own, and the
@@ -135,7 +135,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
         },
         {
             id:    'donation_reference',
-            label: __( 'Donation', 'gratora' ),
+            label: __( 'Donation', 'gratora-donation-platform' ),
             enableSorting: true,
             enableGlobalSearch: true,
             render: ( { item } ) => item.donation_reference
@@ -148,24 +148,24 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
         },
         {
             id:    'issued_at',
-            label: __( 'Issued', 'gratora' ),
+            label: __( 'Issued', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.issued_at } />,
         },
         {
             id:    'sent_to_email_at',
-            label: __( 'Sent', 'gratora' ),
+            label: __( 'Sent', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.sent_to_email_at } />,
         },
         {
             id:    'status',
-            label: __( 'Status', 'gratora' ),
+            label: __( 'Status', 'gratora-donation-platform' ),
             enableSorting: false,
             getValue: ( { item } ) => item.voided ? 'voided' : 'issued',
             render: ( { item } ) => item.voided
-                ? <span className="dp-pill is-muted">{ __( 'Voided', 'gratora' ) }</span>
-                : <span className="dp-pill is-ok">{ __( 'Issued', 'gratora' ) }</span>,
+                ? <span className="dp-pill is-muted">{ __( 'Voided', 'gratora-donation-platform' ) }</span>
+                : <span className="dp-pill is-ok">{ __( 'Issued', 'gratora-donation-platform' ) }</span>,
         },
     ], [] );
 
@@ -177,18 +177,18 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const actions = useMemo( () => [
         {
             id:       'download-pdf',
-            label:    __( 'Download PDF', 'gratora' ),
+            label:    __( 'Download PDF', 'gratora-donation-platform' ),
             icon:     () => <DownloadIcon size={ 16 } strokeWidth={ 1.75 } />,
             callback: ( items ) => {
                 items.forEach( ( r ) => downloadFile(
                     `/gratora/v1/admin/receipts/${ r.id }/pdf`,
                     `${ r.receipt_number }.pdf`
-                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'gratora' ) ) ) );
+                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'gratora-donation-platform' ) ) ) );
             },
         },
         {
             id:           'resend',
-            label:        __( 'Resend receipt', 'gratora' ),
+            label:        __( 'Resend receipt', 'gratora-donation-platform' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Resend goes out over the donation, so a receipt with no reference
@@ -202,16 +202,16 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend this receipt to the donor?', 'gratora' )
+                    ? __( 'Resend this receipt to the donor?', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: receipt count */
-                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'gratora' ),
+                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'gratora-donation-platform' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'gratora' ),
+                    title:        __( 'Resend receipts', 'gratora-donation-platform' ),
                     message,
-                    confirmLabel: __( 'Resend', 'gratora' ),
+                    confirmLabel: __( 'Resend', 'gratora-donation-platform' ),
                     onConfirm: async () => {
                         // Silence reads as nothing happening, so admins press it
                         // again and the donor gets the receipt twice.
@@ -226,14 +226,14 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora-donation-platform' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora-donation-platform' ),
                                 failed
                             ) );
                         }
@@ -255,8 +255,8 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 <EmptyState
                     compact
                     icon={ <Receipt size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No receipts yet', 'gratora' ) }
-                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'gratora' ) }
+                    title={ __( 'No receipts yet', 'gratora-donation-platform' ) }
+                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'gratora-donation-platform' ) }
                     />
                 </div>
             </>
@@ -275,7 +275,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: receipts shown, 2: receipts in total */
-                        __( 'Showing the %1$d most recent of %2$d receipts.', 'gratora' ),
+                        __( 'Showing the %1$d most recent of %2$d receipts.', 'gratora-donation-platform' ),
                         receipts.length,
                         total
                     ) }
@@ -291,7 +291,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search receipts', 'gratora' ) }
+                searchLabel={ __( 'Search receipts', 'gratora-donation-platform' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

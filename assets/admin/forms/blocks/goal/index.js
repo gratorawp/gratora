@@ -97,43 +97,43 @@ function Edit( { attributes, setAttributes } ) {
         isAmount ? formatAmount( v, currency, { compact: true } ) : String( v.toLocaleString() );
 
     const missingHint = isFormSource
-        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'gratora' )
+        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'gratora-donation-platform' )
         : ( campaign
-            ? __( 'The parent campaign has no goal set.', 'gratora' )
-            : __( 'Link this form to a campaign to show its goal.', 'gratora' ) );
+            ? __( 'The parent campaign has no goal set.', 'gratora-donation-platform' )
+            : __( 'Link this form to a campaign to show its goal.', 'gratora-donation-platform' ) );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Goal', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Goal', 'gratora-donation-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Show', 'gratora' ) }
+                        label={ __( 'Show', 'gratora-donation-platform' ) }
                         value={ source }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
                         options={ [
-                            { value: 'campaign', label: __( 'Campaign goal', 'gratora' ) },
-                            { value: 'form',     label: __( 'Form goal', 'gratora' ) },
+                            { value: 'campaign', label: __( 'Campaign goal', 'gratora-donation-platform' ) },
+                            { value: 'form',     label: __( 'Form goal', 'gratora-donation-platform' ) },
                         ] }
                         help={ isFormSource
-                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'gratora' )
-                            : __( 'Tracks the parent campaign total against the campaign goal.', 'gratora' ) }
+                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'gratora-donation-platform' )
+                            : __( 'Tracks the parent campaign total against the campaign goal.', 'gratora-donation-platform' ) }
                     />
 
                     <ToggleControl
-                        label={ __( 'Show amount raised vs goal', 'gratora' ) }
+                        label={ __( 'Show amount raised vs goal', 'gratora-donation-platform' ) }
                         checked={ showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor count', 'gratora' ) }
+                        label={ __( 'Show donor count', 'gratora-donation-platform' ) }
                         checked={ showDonors }
                         onChange={ ( v ) => setAttributes( { showDonors: v } ) }
                         __nextHasNoMarginBottom
                     />
                     { ! isFormSource && (
                         <ToggleControl
-                            label={ __( 'Show deadline', 'gratora' ) }
+                            label={ __( 'Show deadline', 'gratora-donation-platform' ) }
                             checked={ showDeadline }
                             onChange={ ( v ) => setAttributes( { showDeadline: v } ) }
                             __nextHasNoMarginBottom
@@ -142,7 +142,7 @@ function Edit( { attributes, setAttributes } ) {
                     { ! isFormSource && campaign && ! hasGoal && (
                         <p style={ { margin: '16px 0 0' } }>
                             <ExternalLink href={ `admin.php?page=gratora-campaigns&view=detail&id=${ campaign.id }&tab=settings#goal` }>
-                                { __( 'Set the campaign goal', 'gratora' ) }
+                                { __( 'Set the campaign goal', 'gratora-donation-platform' ) }
                             </ExternalLink>
                         </p>
                     ) }
@@ -160,7 +160,7 @@ function Edit( { attributes, setAttributes } ) {
                         { showAmount && (
                             <div className="gratora-block-preview__goal-top">
                                 <strong>{ fmtValue( current ) }</strong>
-                                <span>{ __( 'of', 'gratora' ) } { fmtValue( target ) }</span>
+                                <span>{ __( 'of', 'gratora-donation-platform' ) } { fmtValue( target ) }</span>
                             </div>
                         ) }
                         <div className="gratora-block-preview__goal-bar">
@@ -175,7 +175,7 @@ function Edit( { attributes, setAttributes } ) {
                                 <span>
                                     { sprintf(
                                         /* translators: %d: number of donors */
-                                        _n( '%d donor', '%d donors', donors, 'gratora' ),
+                                        _n( '%d donor', '%d donors', donors, 'gratora-donation-platform' ),
                                         donors
                                     ) }
                                 </span>
@@ -183,10 +183,10 @@ function Edit( { attributes, setAttributes } ) {
                             { showDeadline && ! isFormSource && days !== null && (
                                 <span>
                                     { days === 0
-                                        ? __( 'Last day', 'gratora' )
+                                        ? __( 'Last day', 'gratora-donation-platform' )
                                         : sprintf(
                                             /* translators: %d: days remaining */
-                                            _n( '%d day left', '%d days left', days, 'gratora' ),
+                                            _n( '%d day left', '%d days left', days, 'gratora-donation-platform' ),
                                             days
                                         ) }
                                 </span>
@@ -194,7 +194,7 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                         { isFormSource && (
                             <p className="gratora-block-preview__note">
-                                { __( 'Live progress appears on the published form.', 'gratora' ) }
+                                { __( 'Live progress appears on the published form.', 'gratora-donation-platform' ) }
                             </p>
                         ) }
                     </>
@@ -207,8 +207,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Goal', 'gratora' ),
-        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'gratora' ),
+        title:      __( 'Goal', 'gratora-donation-platform' ),
+        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'gratora-donation-platform' ),
         category:   'gratora-extras',
         icon:       BlockIcons[ 'goal' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

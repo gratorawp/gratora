@@ -8,8 +8,8 @@ defined('ABSPATH') || exit;
  * @var string                                                                              $emptyLabel
  * @var string                                                                              $emptyDescription
  */
-$labelText      = $label !== '' ? $label : __('Direct my donation to', 'gratora');
-$emptyLabelText = $emptyLabel !== '' ? $emptyLabel : __('No specific fund', 'gratora');
+$labelText      = $label !== '' ? $label : __('Direct my donation to', 'gratora-donation-platform');
+$emptyLabelText = $emptyLabel !== '' ? $emptyLabel : __('No specific fund', 'gratora-donation-platform');
 ?>
 <fieldset class="gratora-block gratora-block--fund gratora-fund">
     <legend class="gratora-fund__legend"><?php echo esc_html($labelText); ?></legend>

@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
 ?>
 <div class="gratora-block gratora-block--amount" data-block="gratora/donation-amount">
     <fieldset class="gratora-amount">
-        <legend class="gratora-amount__legend"><?php esc_html_e('Choose an amount', 'gratora'); ?></legend>
+        <legend class="gratora-amount__legend"><?php esc_html_e('Choose an amount', 'gratora-donation-platform'); ?></legend>
         <input type="hidden" name="amount_cents" value="<?php echo esc_attr((string) $default); ?>">
         <input type="hidden" name="currency"     value="<?php echo esc_attr($currency); ?>">
 
@@ -37,13 +37,13 @@ defined('ABSPATH') || exit;
 
         <?php if ($allowCustom): ?>
             <label class="gratora-amount__custom">
-                <span class="gratora-amount__custom-label"><?php esc_html_e('Custom amount', 'gratora'); ?></span>
+                <span class="gratora-amount__custom-label"><?php esc_html_e('Custom amount', 'gratora-donation-platform'); ?></span>
                 <input type="number"
                        class="gratora-amount__custom-input"
                        name="gratora_amount_custom"
                        step="0.01"
                        min="0.5"
-                       placeholder="<?php esc_attr_e('0.00', 'gratora'); ?>"
+                       placeholder="<?php esc_attr_e('0.00', 'gratora-donation-platform'); ?>"
                        inputmode="decimal">
             </label>
         <?php endif; ?>

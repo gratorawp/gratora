@@ -90,11 +90,11 @@ final class FrequencyMap
     public static function label(string $frequency): string
     {
         return match ($frequency) {
-            'weekly'    => __('every week', 'gratora'),
-            'biweekly'  => __('every 2 weeks', 'gratora'),
-            'monthly'   => __('every month', 'gratora'),
-            'quarterly' => __('every 3 months', 'gratora'),
-            'yearly'    => __('every year', 'gratora'),
+            'weekly'    => __('every week', 'gratora-donation-platform'),
+            'biweekly'  => __('every 2 weeks', 'gratora-donation-platform'),
+            'monthly'   => __('every month', 'gratora-donation-platform'),
+            'quarterly' => __('every 3 months', 'gratora-donation-platform'),
+            'yearly'    => __('every year', 'gratora-donation-platform'),
             default     => $frequency,
         };
     }

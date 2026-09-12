@@ -16,20 +16,20 @@ const NAME = 'gratora/steps';
 const ALLOWED = [ 'gratora/step' ];
 
 const TEMPLATE = [
-    [ 'gratora/step', { title: __( 'Your donation', 'gratora' ) } ],
-    [ 'gratora/step', { title: __( 'Your info', 'gratora' ) } ],
+    [ 'gratora/step', { title: __( 'Your donation', 'gratora-donation-platform' ) } ],
+    [ 'gratora/step', { title: __( 'Your info', 'gratora-donation-platform' ) } ],
 ];
 
 const PROGRESS_STYLES = [
-    { value: 'dots', label: __( 'Dots',   'gratora' ) },
-    { value: 'bar',  label: __( 'Bar',    'gratora' ) },
-    { value: 'none', label: __( 'None',   'gratora' ) },
+    { value: 'dots', label: __( 'Dots',   'gratora-donation-platform' ) },
+    { value: 'bar',  label: __( 'Bar',    'gratora-donation-platform' ) },
+    { value: 'none', label: __( 'None',   'gratora-donation-platform' ) },
 ];
 
 const PROGRESS_HELP = {
-    dots: __( 'Centered dots beneath the form.', 'gratora' ),
-    bar:  __( 'Header bar with back arrow + title + progress fill.', 'gratora' ),
-    none: __( 'No progress indicator.', 'gratora' ),
+    dots: __( 'Centered dots beneath the form.', 'gratora-donation-platform' ),
+    bar:  __( 'Header bar with back arrow + title + progress fill.', 'gratora-donation-platform' ),
+    none: __( 'No progress indicator.', 'gratora-donation-platform' ),
 };
 
 function Edit( { attributes, setAttributes, clientId } ) {
@@ -48,7 +48,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
         const next = createBlock( 'gratora/step', {
             title: sprintf(
                 /* translators: %d: new step number. */
-                __( 'Step %d', 'gratora' ),
+                __( 'Step %d', 'gratora-donation-platform' ),
                 childCount + 1
             ),
         } );
@@ -58,30 +58,30 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Wizard navigation', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Wizard navigation', 'gratora-donation-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Progress style', 'gratora' ) }
+                        label={ __( 'Progress style', 'gratora-donation-platform' ) }
                         value={ progressStyle }
                         onChange={ ( v ) => setAttributes( { progressStyle: v } ) }
                         options={ PROGRESS_STYLES }
                         help={ PROGRESS_HELP[ progressStyle ] }
                     />
                     <TextControl
-                        label={ __( 'Back-button label', 'gratora' ) }
+                        label={ __( 'Back-button label', 'gratora-donation-platform' ) }
                         value={ prevLabel }
                         onChange={ ( v ) => setAttributes( { prevLabel: v } ) }
-                        placeholder={ __( 'Back', 'gratora' ) }
+                        placeholder={ __( 'Back', 'gratora-donation-platform' ) }
                         help={ progressStyle === 'bar'
-                            ? __( 'Used as the aria-label on the back arrow.', 'gratora' )
+                            ? __( 'Used as the aria-label on the back arrow.', 'gratora-donation-platform' )
                             : undefined
                         }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Next-button label', 'gratora' ) }
+                        label={ __( 'Next-button label', 'gratora-donation-platform' ) }
                         value={ nextLabel }
                         onChange={ ( v ) => setAttributes( { nextLabel: v } ) }
-                        placeholder={ __( 'Continue', 'gratora' ) }
+                        placeholder={ __( 'Continue', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -95,7 +95,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 />
                 <div className="gratora-block-preview__steps-add">
                     <Button variant="secondary" onClick={ addStep }>
-                        { __( '+ Add step', 'gratora' ) }
+                        { __( '+ Add step', 'gratora-donation-platform' ) }
                     </Button>
                 </div>
             </div>
@@ -106,8 +106,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Steps', 'gratora' ),
-        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'gratora' ),
+        title:       __( 'Steps', 'gratora-donation-platform' ),
+        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'gratora-donation-platform' ),
         category:    'gratora-content',
         icon:        BlockIcons[ 'steps' ],
         supports:    { html: false, anchor: false, inserter: true, multiple: false },

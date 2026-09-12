@@ -24,7 +24,7 @@ final class ToolsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Tools', 'gratora'),
+            'title'      => __('Tools', 'gratora-donation-platform'),
             // Every Tools route wants gratora_manage_settings; this virtual menu cap
             // is granted on exactly that (or manage_options), so what the menu shows
             // and what the screen can do agree.
@@ -65,7 +65,7 @@ final class ToolsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         // DataViews layout requires its vendor stylesheet.

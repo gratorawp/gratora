@@ -19,6 +19,7 @@ final class Capabilities
         'gratora_edit_donations',
         'gratora_refund_donations',
         'gratora_resend_receipt',
+        'gratora_delete_donations',
         'gratora_view_reports',
         'gratora_manage_campaigns',
         'gratora_manage_forms',
@@ -27,7 +28,7 @@ final class Capabilities
 
     public const GROUPS = [
         'Donors'    => ['gratora_view_donors', 'gratora_edit_donors', 'gratora_export_donors', 'gratora_redact_donors'],
-        'Donations' => ['gratora_view_donations', 'gratora_edit_donations', 'gratora_refund_donations', 'gratora_resend_receipt'],
+        'Donations' => ['gratora_view_donations', 'gratora_edit_donations', 'gratora_refund_donations', 'gratora_resend_receipt', 'gratora_delete_donations'],
         'Reports'   => ['gratora_view_reports'],
         'Setup'     => ['gratora_manage_campaigns', 'gratora_manage_forms', 'gratora_manage_settings'],
     ];
@@ -44,18 +45,19 @@ final class Capabilities
     private static function coreLabels(): array
     {
         return [
-            'gratora_view_donors'      => __('View donors', 'gratora'),
-            'gratora_edit_donors'      => __('Edit donor records', 'gratora'),
-            'gratora_export_donors'    => __('Export donor list (CSV)', 'gratora'),
-            'gratora_redact_donors'    => __('Redact donors (GDPR)', 'gratora'),
-            'gratora_view_donations'   => __('View donations', 'gratora'),
-            'gratora_edit_donations'   => __('Edit donations (notes)', 'gratora'),
-            'gratora_refund_donations' => __('Change what is charged (refund, mark paid, record by hand, change a recurring plan)', 'gratora'),
-            'gratora_resend_receipt'   => __('Resend receipts', 'gratora'),
-            'gratora_view_reports'     => __('View dashboards & reports', 'gratora'),
-            'gratora_manage_campaigns' => __('Manage campaigns', 'gratora'),
-            'gratora_manage_forms'     => __('Manage donation forms', 'gratora'),
-            'gratora_manage_settings'  => __('Manage settings', 'gratora'),
+            'gratora_view_donors'      => __('View donors', 'gratora-donation-platform'),
+            'gratora_edit_donors'      => __('Edit donor records', 'gratora-donation-platform'),
+            'gratora_export_donors'    => __('Export donor list (CSV)', 'gratora-donation-platform'),
+            'gratora_redact_donors'    => __('Redact donors (GDPR)', 'gratora-donation-platform'),
+            'gratora_view_donations'   => __('View donations', 'gratora-donation-platform'),
+            'gratora_edit_donations'   => __('Edit donations (notes)', 'gratora-donation-platform'),
+            'gratora_refund_donations' => __('Change what is charged (refund, mark paid, record by hand, change a recurring plan)', 'gratora-donation-platform'),
+            'gratora_resend_receipt'   => __('Resend receipts', 'gratora-donation-platform'),
+            'gratora_delete_donations' => __('Permanently delete donations from the trash', 'gratora-donation-platform'),
+            'gratora_view_reports'     => __('View dashboards & reports', 'gratora-donation-platform'),
+            'gratora_manage_campaigns' => __('Manage campaigns', 'gratora-donation-platform'),
+            'gratora_manage_forms'     => __('Manage donation forms', 'gratora-donation-platform'),
+            'gratora_manage_settings'  => __('Manage settings', 'gratora-donation-platform'),
         ];
     }
 

@@ -26,7 +26,7 @@ final class RolesCapabilityListTest extends IntegrationTestCase
 
     public function test_a_capability_label_is_translated(): void
     {
-        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'gratora' && $text === 'View donors'
+        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'gratora-donation-platform' && $text === 'View donors'
             ? 'Voir les donateurs'
             : $translated, 10, 3);
 
@@ -42,7 +42,7 @@ final class RolesCapabilityListTest extends IntegrationTestCase
 
     public function test_a_group_heading_is_translated(): void
     {
-        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'gratora' && $text === 'Donors'
+        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'gratora-donation-platform' && $text === 'Donors'
             ? 'Donateurs'
             : $translated, 10, 3);
 

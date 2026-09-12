@@ -25,7 +25,7 @@ final class DonorsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Donors', 'gratora'),
+            'title'      => __('Donors', 'gratora-donation-platform'),
             'capability' => 'gratora_access_donors',
             'position'   => 20,
             'render'     => [$this, 'render'],
@@ -61,7 +61,7 @@ final class DonorsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

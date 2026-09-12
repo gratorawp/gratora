@@ -2,7 +2,7 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 
 export default function DonorCohort( { cohort } ) {
     if ( ! cohort ) {
-        return <p className="gratora-panel__empty">{ __( 'No donor activity yet.', 'gratora' ) }</p>;
+        return <p className="gratora-panel__empty">{ __( 'No donor activity yet.', 'gratora-donation-platform' ) }</p>;
     }
 
     const {
@@ -13,33 +13,33 @@ export default function DonorCohort( { cohort } ) {
     return (
         <div className="gratora-cohort">
             <div className="gratora-cohort__stat">
-                <div className="gratora-cohort__label">{ __( 'New donors', 'gratora' ) }</div>
+                <div className="gratora-cohort__label">{ __( 'New donors', 'gratora-donation-platform' ) }</div>
                 <div className="gratora-cohort__value">{ first_time }</div>
                 <div className="gratora-cohort__sub">
                     { returning > 0
                         ? sprintf(
                             /* translators: 1: number of returning donors, 2: conversion percent */
-                            __( '%1$d came back (%2$s%%)', 'gratora' ),
+                            __( '%1$d came back (%2$s%%)', 'gratora-donation-platform' ),
                             returning,
                             conversion_pct === null ? '-' : conversion_pct
                         )
-                        : __( 'No repeat donations yet.', 'gratora' ) }
+                        : __( 'No repeat donations yet.', 'gratora-donation-platform' ) }
                 </div>
             </div>
 
             <div className="gratora-cohort__divider" aria-hidden="true" />
 
             <div className="gratora-cohort__stat">
-                <div className="gratora-cohort__label">{ __( 'Recurring donors', 'gratora' ) }</div>
+                <div className="gratora-cohort__label">{ __( 'Recurring donors', 'gratora-donation-platform' ) }</div>
                 <div className="gratora-cohort__value">{ recurring_active }</div>
                 <div className="gratora-cohort__sub">
                     { recurring_new_in_range > 0
                         ? sprintf(
                             /* translators: %d: new recurring plans in this range */
-                            _n( '+%d new in range', '+%d new in range', recurring_new_in_range, 'gratora' ),
+                            _n( '+%d new in range', '+%d new in range', recurring_new_in_range, 'gratora-donation-platform' ),
                             recurring_new_in_range
                         )
-                        : __( 'No new plans in range.', 'gratora' ) }
+                        : __( 'No new plans in range.', 'gratora-donation-platform' ) }
                 </div>
             </div>
 
@@ -47,7 +47,7 @@ export default function DonorCohort( { cohort } ) {
                 <div className="gratora-cohort__share-label">
                     { sprintf(
                         /* translators: %d: percent of revenue from recurring donors */
-                        __( '%d%% of revenue is recurring', 'gratora' ),
+                        __( '%d%% of revenue is recurring', 'gratora-donation-platform' ),
                         recurring_share_pct
                     ) }
                 </div>

@@ -117,14 +117,14 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                             style={ { left: markerLeft( startPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'start' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change start date', 'gratora' ) }
+                            aria-label={ __( 'Drag to change start date', 'gratora-donation-platform' ) }
                             aria-valuenow={ Math.round( startPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
                         <div className="gratora-schedule__label" style={ { left: markerLeft( startPct ) } }>
                             { shortDate( start ) }
-                            <small>{ __( 'Start', 'gratora' ) }</small>
+                            <small>{ __( 'Start', 'gratora-donation-platform' ) }</small>
                         </div>
                     </>
                 ) }
@@ -136,14 +136,14 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                             style={ { left: markerLeft( endPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'end' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change end date', 'gratora' ) }
+                            aria-label={ __( 'Drag to change end date', 'gratora-donation-platform' ) }
                             aria-valuenow={ Math.round( endPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
                         <div className="gratora-schedule__label" style={ { left: markerLeft( endPct ) } }>
                             { shortDate( end ) }
-                            <small>{ __( 'End', 'gratora' ) }</small>
+                            <small>{ __( 'End', 'gratora-donation-platform' ) }</small>
                         </div>
                     </>
                 ) }
@@ -155,25 +155,25 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
 
             <div className="gratora-schedule__dates">
                 <label>
-                    <span>{ __( 'Starts at', 'gratora' ) }</span>
+                    <span>{ __( 'Starts at', 'gratora-donation-platform' ) }</span>
                     <DateField
                         withTime
                         value={ startsAt || '' }
                         onChange={ setStart }
                         edited={ startEdited }
-                        placeholder={ __( 'No start scheduled', 'gratora' ) }
-                        ariaLabel={ __( 'Pick a start date and time', 'gratora' ) }
+                        placeholder={ __( 'No start scheduled', 'gratora-donation-platform' ) }
+                        ariaLabel={ __( 'Pick a start date and time', 'gratora-donation-platform' ) }
                     />
                 </label>
                 <label>
-                    <span>{ __( 'Ends at', 'gratora' ) }</span>
+                    <span>{ __( 'Ends at', 'gratora-donation-platform' ) }</span>
                     <DateField
                         withTime
                         value={ endsAt || '' }
                         onChange={ setEnd }
                         edited={ endEdited }
-                        placeholder={ __( 'No end scheduled', 'gratora' ) }
-                        ariaLabel={ __( 'Pick an end date and time', 'gratora' ) }
+                        placeholder={ __( 'No end scheduled', 'gratora-donation-platform' ) }
+                        ariaLabel={ __( 'Pick an end date and time', 'gratora-donation-platform' ) }
                     />
                 </label>
             </div>

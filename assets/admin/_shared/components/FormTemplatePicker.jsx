@@ -15,14 +15,14 @@ import { resolveEffectiveTokens } from '../styling/StylePreview';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'gratora' ),
-    Blank:     __( 'Blank', 'gratora' ),
-    Starter:   __( 'Starter', 'gratora' ),
-    Standard:  __( 'Standard', 'gratora' ),
-    Recurring: __( 'Recurring', 'gratora' ),
-    Wizard:    __( 'Wizard', 'gratora' ),
-    Formal:    __( 'Formal', 'gratora' ),
-    Other:     __( 'Other', 'gratora' ),
+    All:       __( 'All', 'gratora-donation-platform' ),
+    Blank:     __( 'Blank', 'gratora-donation-platform' ),
+    Starter:   __( 'Starter', 'gratora-donation-platform' ),
+    Standard:  __( 'Standard', 'gratora-donation-platform' ),
+    Recurring: __( 'Recurring', 'gratora-donation-platform' ),
+    Wizard:    __( 'Wizard', 'gratora-donation-platform' ),
+    Formal:    __( 'Formal', 'gratora-donation-platform' ),
+    Other:     __( 'Other', 'gratora-donation-platform' ),
 };
 
 export default function FormTemplatePicker( { onPick, onClose, creating = false, intro } ) {
@@ -62,16 +62,16 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     return (
         <Modal
-            title={ __( 'Choose a starter template', 'gratora' ) }
+            title={ __( 'Choose a starter template', 'gratora-donation-platform' ) }
             onRequestClose={ onClose }
             className="gratora-template-picker"
             size="large"
         >
             { failed ? (
                 <div style={ { padding: 40, textAlign: 'center' } }>
-                    <p>{ __( 'The starter templates could not be loaded.', 'gratora' ) }</p>
+                    <p>{ __( 'The starter templates could not be loaded.', 'gratora-donation-platform' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'gratora' ) }
+                        { __( 'Try again', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) : loading ? (

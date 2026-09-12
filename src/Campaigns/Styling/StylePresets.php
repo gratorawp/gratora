@@ -33,8 +33,8 @@ final class StylePresets
         return [
             [
                 'id'          => 'classic',
-                'name'        => __('Classic', 'gratora'),
-                'description' => __('Balanced, friendly, accent green. The Gratora default.', 'gratora'),
+                'name'        => __('Classic', 'gratora-donation-platform'),
+                'description' => __('Balanced, friendly, accent green. The Gratora default.', 'gratora-donation-platform'),
                 'tokens'      => [
                     // Signature Gratora pill donate button. Other presets fall
                     // back to --gratora-radius-sm; the Theme preset inherits the
@@ -45,8 +45,8 @@ final class StylePresets
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'gratora'),
-                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'gratora'),
+                'name'        => __('Bold', 'gratora-donation-platform'),
+                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'gratora-donation-platform'),
                 'tokens'      => [
                     'gratora-accent'         => '#0F3D5C',
                     'gratora-accent-soft'    => '#dde6ed',
@@ -62,8 +62,8 @@ final class StylePresets
             ],
             [
                 'id'          => 'quiet',
-                'name'        => __('Quiet', 'gratora'),
-                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'gratora'),
+                'name'        => __('Quiet', 'gratora-donation-platform'),
+                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'gratora-donation-platform'),
                 'tokens'      => [
                     'gratora-accent'          => '#111827',
                     'gratora-accent-soft'     => '#f3f4f6',
@@ -221,8 +221,8 @@ final class StylePresets
 
         return [
             'id'          => 'theme',
-            'name'        => __('Site theme', 'gratora'),
-            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'gratora'),
+            'name'        => __('Site theme', 'gratora-donation-platform'),
+            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'gratora-donation-platform'),
             'tokens'      => $tokens,
             'builtin'     => true,
             'source'      => 'theme',

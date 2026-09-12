@@ -29,7 +29,7 @@ export default function DowHourHeatmap( { data } ) {
     if ( ! data || ( data.total ?? 0 ) === 0 ) {
         return (
             <p className="gratora-panel__empty">
-                { __( 'No donation activity yet to plot timing.', 'gratora' ) }
+                { __( 'No donation activity yet to plot timing.', 'gratora-donation-platform' ) }
             </p>
         );
     }
@@ -84,7 +84,7 @@ export default function DowHourHeatmap( { data } ) {
                                         '%1$s at %2$d:00, %3$d donation',
                                         '%1$s at %2$d:00, %3$d donations',
                                         count,
-                                        'gratora'
+                                        'gratora-donation-platform'
                                     ),
                                     days[ day ].long,
                                     hour,
@@ -97,7 +97,7 @@ export default function DowHourHeatmap( { data } ) {
             ) ) }
 
             <div className="gratora-heatmap__legend">
-                <span className="gratora-heatmap__legend-label">{ __( 'Fewer', 'gratora' ) }</span>
+                <span className="gratora-heatmap__legend-label">{ __( 'Fewer', 'gratora-donation-platform' ) }</span>
                 { [ 0.15, 0.35, 0.55, 0.75, 0.9 ].map( ( a ) => (
                     <span
                         key={ a }
@@ -105,7 +105,7 @@ export default function DowHourHeatmap( { data } ) {
                         style={ { background: `rgba(${ RAMP }, ${ a })` } }
                     />
                 ) ) }
-                <span className="gratora-heatmap__legend-label">{ __( 'More', 'gratora' ) }</span>
+                <span className="gratora-heatmap__legend-label">{ __( 'More', 'gratora-donation-platform' ) }</span>
             </div>
 
             { hovered && (
@@ -116,7 +116,7 @@ export default function DowHourHeatmap( { data } ) {
                     { ' - ' }
                     { sprintf(
                         /* translators: %d: number of donations */
-                        _n( '%d donation', '%d donations', hovered.count, 'gratora' ),
+                        _n( '%d donation', '%d donations', hovered.count, 'gratora-donation-platform' ),
                         hovered.count
                     ) }
                 </div>

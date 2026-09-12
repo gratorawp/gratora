@@ -8,8 +8,8 @@ defined('ABSPATH') || exit;
  * @var bool   $requireFirst
  * @var bool   $requireLast
  */
-$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'gratora');
-$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'gratora');
+$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'gratora-donation-platform');
+$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'gratora-donation-platform');
 ?>
 <div class="gratora-block gratora-block--name gratora-donor__name">
     <label class="gratora-donor__field">

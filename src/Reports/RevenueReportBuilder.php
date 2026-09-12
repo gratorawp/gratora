@@ -63,18 +63,18 @@ final class RevenueReportBuilder
             'total'          => Money::format($totalCents, $currency),
             'months'         => $months,
             'stats'          => [
-                ['label' => __('Donations', 'gratora'),        'value' => number_format_i18n($totalCount)],
-                ['label' => __('Average donation', 'gratora'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
-                ['label' => __('Best month', 'gratora'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
+                ['label' => __('Donations', 'gratora-donation-platform'),        'value' => number_format_i18n($totalCount)],
+                ['label' => __('Average donation', 'gratora-donation-platform'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
+                ['label' => __('Best month', 'gratora-donation-platform'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: four-digit year. */
-            'title'   => sprintf(__('Revenue report %s', 'gratora'), (string) $year),
+            'title'   => sprintf(__('Revenue report %s', 'gratora-donation-platform'), (string) $year),
             'author'  => $orgName,
-            'subject' => __('Revenue and donations report', 'gratora'),
+            'subject' => __('Revenue and donations report', 'gratora-donation-platform'),
         ]);
     }
 

@@ -44,32 +44,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Radio group', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Radio group', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'gratora' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'gratora' ) }
+                        label={ __( 'Field name', 'gratora-donation-platform' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Layout', 'gratora' ) }
+                        label={ __( 'Layout', 'gratora-donation-platform' ) }
                         value={ layout }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         options={ [
-                            { value: 'vertical',   label: __( 'Vertical',   'gratora' ) },
-                            { value: 'horizontal', label: __( 'Horizontal', 'gratora' ) },
+                            { value: 'vertical',   label: __( 'Vertical',   'gratora-donation-platform' ) },
+                            { value: 'horizontal', label: __( 'Horizontal', 'gratora-donation-platform' ) },
                         ] }
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -91,7 +91,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'gratora' ) }
+                    placeholder={ __( 'Question', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
@@ -127,7 +127,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'gratora' ) }
+                                placeholder={ __( 'Option label', 'gratora-donation-platform' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -142,8 +142,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Radio group', 'gratora' ),
-        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'gratora' ),
+        title:       __( 'Radio group', 'gratora-donation-platform' ),
+        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'gratora-donation-platform' ),
         category:    'gratora-fields',
         icon:        BlockIcons[ 'radio' ],
         supports: { html: false, anchor: false, inserter: true },

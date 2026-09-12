@@ -55,9 +55,9 @@ final class FormService
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
-            'Amount' => __('Amount', 'gratora'),
-            'Name'   => __('Name', 'gratora'),
-            'Email'  => __('Email', 'gratora'),
+            'Amount' => __('Amount', 'gratora-donation-platform'),
+            'Name'   => __('Name', 'gratora-donation-platform'),
+            'Email'  => __('Email', 'gratora-donation-platform'),
             default  => $label,
         };
     }
@@ -93,7 +93,7 @@ final class FormService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled donation form', 'gratora');
+            $title = __('Untitled donation form', 'gratora-donation-platform');
         }
 
         $campaign = $this->resolveCampaign($input['campaign_id'] ?? null);
@@ -241,10 +241,10 @@ final class FormService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'gratora-donation-platform'));
                 }
                 if ($next !== $form->slug && $this->forms->slugExists($next, $form->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'gratora'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'gratora-donation-platform'));
                 }
                 $form->slug = $next;
             }
@@ -315,7 +315,7 @@ final class FormService
 
         if ($defaultFormId === (int) $form->id) {
             throw new InvalidArgumentException(
-                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'gratora')
+                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'gratora-donation-platform')
             );
         }
 
@@ -350,7 +350,7 @@ final class FormService
         $plans     = (int) RecurringPlan::query()->where('form_id', $form->id)->count();
 
         if ($donations > 0 || $plans > 0) {
-            return __('This form has donations and cannot be deleted. Its records would be left pointing at nothing. Set it back to draft instead.', 'gratora');
+            return __('This form has donations and cannot be deleted. Its records would be left pointing at nothing. Set it back to draft instead.', 'gratora-donation-platform');
         }
 
         return null;
@@ -362,7 +362,7 @@ final class FormService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original form title */
-        $title = sprintf(__('%s (copy)', 'gratora'), $source->title);
+        $title = sprintf(__('%s (copy)', 'gratora-donation-platform'), $source->title);
 
         $copy = Form::make();
         $copy->title        = $title;
@@ -405,7 +405,7 @@ final class FormService
         throw new InvalidArgumentException(
             esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('This form is published and cannot be saved without these blocks: %s. Add them back, or move the form to draft to keep editing.', 'gratora'),
+                __('This form is published and cannot be saved without these blocks: %s. Add them back, or move the form to draft to keep editing.', 'gratora-donation-platform'),
                 implode(', ', $labels)
             ))
         );
@@ -425,7 +425,7 @@ final class FormService
         throw new InvalidArgumentException(
             esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('A published donation form needs these blocks: %s.', 'gratora'),
+                __('A published donation form needs these blocks: %s.', 'gratora-donation-platform'),
                 implode(', ', $labels)
             ))
         );
@@ -436,11 +436,11 @@ final class FormService
     {
         $id = (int) ($idOrNull ?? 0);
         if ($id <= 0) {
-            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'gratora-donation-platform'));
         }
         $campaign = $this->campaigns->findById($id);
         if (! $campaign) {
-            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'gratora-donation-platform'));
         }
         return $campaign;
     }
@@ -516,7 +516,7 @@ final class FormService
 
         throw new InvalidArgumentException(esc_html(sprintf(
             /* translators: %s: campaign title. */
-            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'gratora'),
+            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'gratora-donation-platform'),
             $campaign->title
         )));
     }

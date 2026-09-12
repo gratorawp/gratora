@@ -23,7 +23,7 @@ final class UnpinSiteIdentity implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Letting the sender name and organisation name follow the site again.', 'gratora');
+        return __('Letting the sender name and organisation name follow the site again.', 'gratora-donation-platform');
     }
 
     /** @since 1.0.0 */

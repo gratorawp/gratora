@@ -22,9 +22,9 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
     if ( ctx.historical_count === 0 ) {
         return (
             <div className="gratora-ambition gratora-ambition--info">
-                <div className="gratora-ambition__title">{ __( 'Your first campaign', 'gratora' ) }</div>
+                <div className="gratora-ambition__title">{ __( 'Your first campaign', 'gratora-donation-platform' ) }</div>
                 <div className="gratora-ambition__desc">
-                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'gratora' ) }
+                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'gratora-donation-platform' ) }
                 </div>
             </div>
         );
@@ -52,7 +52,7 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
                 <div className="gratora-ambition__ratio num">
                     { avg > 0 && cur > 0 && sprintf(
                         /* translators: %s: multiplier of historical average, e.g. "1.4×" */
-                        __( '%s× avg', 'gratora' ),
+                        __( '%s× avg', 'gratora-donation-platform' ),
                         ( cur / avg ).toFixed( cur / avg < 10 ? 1 : 0 ),
                     ) }
                 </div>
@@ -71,16 +71,16 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
             <div className="gratora-ambition__legend">
                 <span>
                     <span className="gratora-ambition__legend-dot gratora-ambition__legend-dot--current" />
-                    { __( 'Your target', 'gratora' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
+                    { __( 'Your target', 'gratora-donation-platform' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
                 </span>
                 <span>
                     <span className="gratora-ambition__legend-dot gratora-ambition__legend-dot--avg" />
-                    { __( 'Past average', 'gratora' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
+                    { __( 'Past average', 'gratora-donation-platform' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
                 </span>
                 { max > 0 && max !== avg && (
                     <span>
                         <span className="gratora-ambition__legend-dot gratora-ambition__legend-dot--max" />
-                        { __( 'Past best', 'gratora' ) }: <strong>{ formatAmount( max, cy ) }</strong>
+                        { __( 'Past best', 'gratora-donation-platform' ) }: <strong>{ formatAmount( max, cy ) }</strong>
                     </span>
                 ) }
             </div>
@@ -89,15 +89,15 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
 }
 
 function localVerdict( cur, avg, count ) {
-    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'gratora' ), desc: '' };
-    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'gratora' ), desc: __( 'Add a target above to see how it compares.', 'gratora' ) };
-    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'gratora' ), desc: '' };
+    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'gratora-donation-platform' ), desc: '' };
+    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'gratora-donation-platform' ), desc: __( 'Add a target above to see how it compares.', 'gratora-donation-platform' ) };
+    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'gratora-donation-platform' ), desc: '' };
 
     const r = cur / avg;
-    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'gratora' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'gratora' ) };
-    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'gratora' ), desc: __( 'Right around your historical average.', 'gratora' ) };
-    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'gratora' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'gratora' ) };
-    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'gratora' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'gratora' ) };
+    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'gratora-donation-platform' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'gratora-donation-platform' ) };
+    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'gratora-donation-platform' ), desc: __( 'Right around your historical average.', 'gratora-donation-platform' ) };
+    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'gratora-donation-platform' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'gratora-donation-platform' ) };
+    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'gratora-donation-platform' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'gratora-donation-platform' ) };
 }
 
 function clamp( n, lo = 0, hi = 100 ) {

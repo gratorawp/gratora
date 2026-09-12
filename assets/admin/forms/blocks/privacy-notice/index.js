@@ -8,9 +8,9 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'gratora/privacy-notice';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'gratora' ) },
-    { value: 'center', label: __( 'Center', 'gratora' ) },
-    { value: 'right',  label: __( 'Right',  'gratora' ) },
+    { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+    { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
+    { value: 'right',  label: __( 'Right',  'gratora-donation-platform' ) },
 ];
 
 function readPrivacyUrl() {
@@ -28,8 +28,8 @@ function Edit( { attributes, setAttributes } ) {
 
     // Fall back to the translated strings for the preview; the saved attrs stay
     // empty so the PHP render emits the localized default.
-    const text     = textAttr     || __( 'By donating you agree to our', 'gratora' );
-    const linkText = linkTextAttr || __( 'Privacy Policy', 'gratora' );
+    const text     = textAttr     || __( 'By donating you agree to our', 'gratora-donation-platform' );
+    const linkText = linkTextAttr || __( 'Privacy Policy', 'gratora-donation-platform' );
 
     const settingsUrl = readPrivacyUrl();
     const hasUrl      = settingsUrl !== '';
@@ -45,36 +45,36 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Privacy notice', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Privacy notice', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Leading text', 'gratora' ) }
+                        label={ __( 'Leading text', 'gratora-donation-platform' ) }
                         value={ textAttr }
-                        placeholder={ __( 'By donating you agree to our', 'gratora' ) }
+                        placeholder={ __( 'By donating you agree to our', 'gratora-donation-platform' ) }
                         onChange={ ( v ) => setAttributes( { text: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Link label', 'gratora' ) }
+                        label={ __( 'Link label', 'gratora-donation-platform' ) }
                         value={ linkTextAttr }
-                        placeholder={ __( 'Privacy Policy', 'gratora' ) }
+                        placeholder={ __( 'Privacy Policy', 'gratora-donation-platform' ) }
                         onChange={ ( v ) => setAttributes( { linkText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     { hasUrl ? (
                         <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                            { __( 'Linking to:', 'gratora' ) }{ ' ' }
+                            { __( 'Linking to:', 'gratora-donation-platform' ) }{ ' ' }
                             <ExternalLink href={ settingsUrl }>{ settingsUrl }</ExternalLink>
                         </p>
                     ) : (
                         <Notice status="warning" isDismissible={ false } style={ { marginTop: 12 } }>
-                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'gratora' ) }{ ' ' }
-                            <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'gratora' ) }</ExternalLink>.
+                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'gratora-donation-platform' ) }{ ' ' }
+                            <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'gratora-donation-platform' ) }</ExternalLink>.
                         </Notice>
                     ) }
                 </PanelBody>
@@ -105,8 +105,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Privacy notice', 'gratora' ),
-        description: __( 'A short line of text plus a link to your privacy policy. Pair with the URL set in Settings → Privacy.', 'gratora' ),
+        title:      __( 'Privacy notice', 'gratora-donation-platform' ),
+        description: __( 'A short line of text plus a link to your privacy policy. Pair with the URL set in Settings → Privacy.', 'gratora-donation-platform' ),
         category:   'gratora-content',
         icon:       BlockIcons[ 'privacy-notice' ] || BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

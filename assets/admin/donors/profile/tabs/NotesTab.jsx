@@ -39,9 +39,9 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'gratora' ),
-            message:      __( 'Delete this note?', 'gratora' ),
-            confirmLabel: __( 'Delete', 'gratora' ),
+            title:        __( 'Delete note', 'gratora-donation-platform' ),
+            message:      __( 'Delete this note?', 'gratora-donation-platform' ),
+            confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
@@ -68,7 +68,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: notes shown, 2: notes in total */
-                        __( 'Showing the %1$d most recent of %2$d notes.', 'gratora' ),
+                        __( 'Showing the %1$d most recent of %2$d notes.', 'gratora-donation-platform' ),
                         notes.length,
                         total
                     ) }
@@ -81,14 +81,14 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                             <EmptyState
                                 compact
                                 icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                                title={ __( 'No notes yet', 'gratora' ) }
-                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'gratora' ) }
+                                title={ __( 'No notes yet', 'gratora-donation-platform' ) }
+                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'gratora-donation-platform' ) }
                             />
                         )
                         : (
                             <div className="dp-notes-list">
                                 { notes.map( ( n ) => {
-                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'gratora' ) : __( 'System', 'gratora' ) );
+                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'gratora-donation-platform' ) : __( 'System', 'gratora-donation-platform' ) );
                                     return (
                                         <div key={ n.id } className="dp-note">
                                             <span className="dp-note__avatar" aria-hidden="true">{ initials( author ) }</span>
@@ -106,7 +106,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                                                 <button
                                                     type="button"
                                                     className="dp-note__delete"
-                                                    aria-label={ __( 'Delete note', 'gratora' ) }
+                                                    aria-label={ __( 'Delete note', 'gratora-donation-platform' ) }
                                                     onClick={ () => remove( n.id ) }
                                                 >
                                                     <IconTrash width="14" height="14" />
@@ -123,7 +123,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                         <textarea className="gratora-textarea"
                             value={ body }
                             onChange={ ( e ) => setBody( e.target.value ) }
-                            placeholder={ __( 'Add a note about this donor…', 'gratora' ) }
+                            placeholder={ __( 'Add a note about this donor…', 'gratora-donation-platform' ) }
                             rows={ 3 }
                         />
                         { error && <div className="dp-note-form__error">{ error }</div> }
@@ -133,7 +133,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                                 className="btn btn--primary"
                                 disabled={ saving || ! body.trim() }
                             >
-                                { saving ? __( 'Saving…', 'gratora' ) : __( 'Add note', 'gratora' ) }
+                                { saving ? __( 'Saving…', 'gratora-donation-platform' ) : __( 'Add note', 'gratora-donation-platform' ) }
                             </button>
                         </div>
                     </form>

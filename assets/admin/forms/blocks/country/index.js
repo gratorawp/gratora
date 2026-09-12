@@ -17,23 +17,23 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Country', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Country', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Country', 'gratora' ) }
+                        placeholder={ __( 'Country', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'gratora' ) }
+                        label={ __( 'Placeholder', 'gratora-donation-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Search country…', 'gratora' ) }
+                        placeholder={ __( 'Search country…', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -46,11 +46,11 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="gratora-block-preview__label">
-                    { label || __( 'Country', 'gratora' ) }
+                    { label || __( 'Country', 'gratora-donation-platform' ) }
                     { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 </span>
                 <div className="gratora-block-preview__field">
-                    { placeholder || __( 'Search country…', 'gratora' ) }
+                    { placeholder || __( 'Search country…', 'gratora-donation-platform' ) }
                 </div>
             </div>
         </>
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Country', 'gratora' ),
+        title:      __( 'Country', 'gratora-donation-platform' ),
         category:   'gratora-donor',
         icon:       BlockIcons[ 'country' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

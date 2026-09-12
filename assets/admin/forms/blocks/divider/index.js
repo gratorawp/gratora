@@ -27,9 +27,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Divider', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Divider', 'gratora-donation-platform' ) } initialOpen>
                     <Slider
-                        label={ __( 'Space above', 'gratora' ) }
+                        label={ __( 'Space above', 'gratora-donation-platform' ) }
                         value={ marginTop }
                         onChange={ ( v ) => setAttributes( { marginTop: Number( v ) } ) }
                         min={ 0 }
@@ -37,7 +37,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Space below', 'gratora' ) }
+                        label={ __( 'Space below', 'gratora-donation-platform' ) }
                         value={ marginBottom }
                         onChange={ ( v ) => setAttributes( { marginBottom: Number( v ) } ) }
                         min={ 0 }
@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Line thickness', 'gratora' ) }
+                        label={ __( 'Line thickness', 'gratora-donation-platform' ) }
                         value={ thickness }
                         onChange={ ( v ) => setAttributes( { thickness: Number( v ) } ) }
                         min={ 1 }
@@ -53,12 +53,12 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <ColorInput
-                        label={ __( 'Line colour', 'gratora' ) }
+                        label={ __( 'Line colour', 'gratora-donation-platform' ) }
                         value={ color }
                         onChange={ ( v ) => setAttributes( { color: v || '' } ) }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '8px 0 0' } }>
-                        { __( 'Leave the colour empty to follow the form border colour.', 'gratora' ) }
+                        { __( 'Leave the colour empty to follow the form border colour.', 'gratora-donation-platform' ) }
                     </p>
                 </PanelBody>
                 <ConditionPanel
@@ -83,8 +83,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Divider', 'gratora' ),
-        description: __( 'A horizontal line with adjustable spacing and colour.', 'gratora' ),
+        title:      __( 'Divider', 'gratora-donation-platform' ),
+        description: __( 'A horizontal line with adjustable spacing and colour.', 'gratora-donation-platform' ),
         category:   'gratora-content',
         icon:       BlockIcons.divider,
         supports: { html: false, anchor: false, inserter: true },

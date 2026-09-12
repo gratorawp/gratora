@@ -24,25 +24,25 @@ function Pill( { tone, children } ) {
 
 function AccountFoot( { account, onRemove, removing } ) {
     const tail = account?.account_id ? account.account_id.slice( -4 ) : '';
-    const yes = <span style={ { color: 'var(--gratora-color-accent)' } }>{ __( 'Enabled', 'gratora' ) }</span>;
-    const no  = <span style={ { color: 'var(--gratora-color-red)' } }>{ __( 'Disabled', 'gratora' ) }</span>;
+    const yes = <span style={ { color: 'var(--gratora-color-accent)' } }>{ __( 'Enabled', 'gratora-donation-platform' ) }</span>;
+    const no  = <span style={ { color: 'var(--gratora-color-red)' } }>{ __( 'Disabled', 'gratora-donation-platform' ) }</span>;
     return (
         <div className="gratora-gateway-foot">
             <div className="gratora-gateway-foot__cell">
-                <div className="lbl">{ __( 'Account', 'gratora' ) }</div>
+                <div className="lbl">{ __( 'Account', 'gratora-donation-platform' ) }</div>
                 <div className="val is-muted is-mono">{ tail ? `acct_…${ tail }` : '...' }</div>
             </div>
             <div className="gratora-gateway-foot__cell">
-                <div className="lbl">{ __( 'Charges', 'gratora' ) }</div>
+                <div className="lbl">{ __( 'Charges', 'gratora-donation-platform' ) }</div>
                 <div className="val">{ account?.charges_enabled ? yes : no }</div>
             </div>
             <div className="gratora-gateway-foot__cell">
-                <div className="lbl">{ __( 'Payouts', 'gratora' ) }</div>
+                <div className="lbl">{ __( 'Payouts', 'gratora-donation-platform' ) }</div>
                 <div className="val">{ account?.payouts_enabled ? yes : no }</div>
             </div>
             <div style={ { flex: 1 } } />
             <Btn variant="danger" size="sm" onClick={ onRemove } isBusy={ removing } disabled={ removing }>
-                { __( 'Remove keys', 'gratora' ) }
+                { __( 'Remove keys', 'gratora-donation-platform' ) }
             </Btn>
         </div>
     );
@@ -59,12 +59,12 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
     const [ pk, setPk ]     = useState( '' );
     const [ busy, setBusy ] = useState( false );
 
-    const label = isTest ? __( 'Test keys', 'gratora' ) : __( 'Live keys', 'gratora' );
+    const label = isTest ? __( 'Test keys', 'gratora-donation-platform' ) : __( 'Live keys', 'gratora-donation-platform' );
     const prefix = isTest ? 'test' : 'live';
 
     const save = () => {
         if ( ! sk.trim() || ! pk.trim() ) {
-            notify.error( __( 'Enter both the publishable key and the secret key.', 'gratora' ) );
+            notify.error( __( 'Enter both the publishable key and the secret key.', 'gratora-donation-platform' ) );
             return;
         }
         setBusy( true );
@@ -79,12 +79,12 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                 setOpen( false );
                 notify.success(
                     isTest
-                        ? __( 'Test keys verified and saved.', 'gratora' )
-                        : __( 'Live keys verified and saved.', 'gratora' )
+                        ? __( 'Test keys verified and saved.', 'gratora-donation-platform' )
+                        : __( 'Live keys verified and saved.', 'gratora-donation-platform' )
                 );
                 onSaved( res );
             } )
-            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'gratora' ) ) )
+            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'gratora-donation-platform' ) ) )
             .finally( () => setBusy( false ) );
     };
 
@@ -93,8 +93,8 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             <div className="gratora-stripe-mode__head">
                 <strong>{ label }</strong>
                 { saved
-                    ? <Pill tone="green">{ __( 'Saved', 'gratora' ) }</Pill>
-                    : <Pill tone="gray">{ __( 'Not set', 'gratora' ) }</Pill> }
+                    ? <Pill tone="green">{ __( 'Saved', 'gratora-donation-platform' ) }</Pill>
+                    : <Pill tone="gray">{ __( 'Not set', 'gratora-donation-platform' ) }</Pill> }
             </div>
 
             { saved && ! open && (
@@ -102,10 +102,10 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                     <span className="is-mono is-muted">{ publishable || '' }</span>
                     <div className="gratora-stripe-mode__actions">
                         <Btn variant="secondary" size="sm" onClick={ () => setOpen( true ) }>
-                            { __( 'Replace', 'gratora' ) }
+                            { __( 'Replace', 'gratora-donation-platform' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => onRemove( mode ) }>
-                            { __( 'Remove', 'gratora' ) }
+                            { __( 'Remove', 'gratora-donation-platform' ) }
                         </Btn>
                     </div>
                 </div>
@@ -114,24 +114,24 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             { open && (
                 <>
                     <FormRow
-                        label={ __( 'Publishable key', 'gratora' ) }
-                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'gratora' ) }
+                        label={ __( 'Publishable key', 'gratora-donation-platform' ) }
+                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'gratora-donation-platform' ) }
                     >
                         <KeyField value={ pk } onChange={ setPk } placeholder={ `pk_${ prefix }_…` } />
                     </FormRow>
                     <FormRow
-                        label={ __( 'Secret key', 'gratora' ) }
-                        help={ __( 'Stored encrypted and never shown again. Gratora verifies it with Stripe before saving.', 'gratora' ) }
+                        label={ __( 'Secret key', 'gratora-donation-platform' ) }
+                        help={ __( 'Stored encrypted and never shown again. Gratora verifies it with Stripe before saving.', 'gratora-donation-platform' ) }
                     >
                         <KeyField value={ sk } onChange={ setSk } placeholder={ `sk_${ prefix }_…` } secret />
                     </FormRow>
                     <div className="gratora-stripe-mode__actions">
                         <Btn variant="primary" size="sm" onClick={ save } isBusy={ busy } disabled={ busy }>
-                            { __( 'Save and verify', 'gratora' ) }
+                            { __( 'Save and verify', 'gratora-donation-platform' ) }
                         </Btn>
                         { saved && (
                             <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setSk( '' ); setPk( '' ); } }>
-                                { __( 'Cancel', 'gratora' ) }
+                                { __( 'Cancel', 'gratora-donation-platform' ) }
                             </Btn>
                         ) }
                     </div>
@@ -162,11 +162,11 @@ function ApplePaySection( { status, onDone } ) {
     const enable = () => {
         const pasted = file.trim();
         if ( ! hasFile && ! pasted ) {
-            notify.error( __( 'Paste the domain association file from Stripe first.', 'gratora' ) );
+            notify.error( __( 'Paste the domain association file from Stripe first.', 'gratora-donation-platform' ) );
             return;
         }
         if ( ! modes.length ) {
-            notify.error( __( 'Save your Stripe keys first.', 'gratora' ) );
+            notify.error( __( 'Save your Stripe keys first.', 'gratora-donation-platform' ) );
             return;
         }
 
@@ -186,12 +186,12 @@ function ApplePaySection( { status, onDone } ) {
                 if ( bad ) {
                     notify.error(
                         bad.message ||
-                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'gratora' )
+                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'gratora-donation-platform' )
                     );
                 } else {
                     setFile( '' );
                     setOpen( false );
-                    notify.success( __( 'Apple Pay is verified for this domain.', 'gratora' ) );
+                    notify.success( __( 'Apple Pay is verified for this domain.', 'gratora-donation-platform' ) );
                 }
                 onDone();
             } )
@@ -200,14 +200,14 @@ function ApplePaySection( { status, onDone } ) {
 
     const stateLabel = ( mode ) => {
         const st = apple?.[ mode ]?.status;
-        if ( st === 'active' )   return __( 'verified', 'gratora' );
-        if ( st === 'inactive' ) return __( 'not verified', 'gratora' );
-        return __( 'not checked yet', 'gratora' );
+        if ( st === 'active' )   return __( 'verified', 'gratora-donation-platform' );
+        if ( st === 'inactive' ) return __( 'not verified', 'gratora-donation-platform' );
+        return __( 'not checked yet', 'gratora-donation-platform' );
     };
 
-    let pill = <Pill tone="gray">{ __( 'Not set up', 'gratora' ) }</Pill>;
-    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'gratora' ) }</Pill>;
-    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'gratora' ) }</Pill>;
+    let pill = <Pill tone="gray">{ __( 'Not set up', 'gratora-donation-platform' ) }</Pill>;
+    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'gratora-donation-platform' ) }</Pill>;
+    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'gratora-donation-platform' ) }</Pill>;
 
     const firstMessage = modes.map( ( m ) => apple?.[ m ]?.message ).find( Boolean );
 
@@ -215,15 +215,15 @@ function ApplePaySection( { status, onDone } ) {
         <div className="gratora-connect-options">
             <div className="gratora-stripe-mode">
                 <div className="gratora-stripe-mode__head">
-                    <strong>{ __( 'Apple Pay', 'gratora' ) }</strong>
+                    <strong>{ __( 'Apple Pay', 'gratora-donation-platform' ) }</strong>
                     { pill }
                 </div>
 
                 <p className="gratora-connect-p">
-                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'gratora' ) }
+                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'gratora-donation-platform' ) }
                 </p>
 
-                <FormRow label={ __( 'Domain', 'gratora' ) }>
+                <FormRow label={ __( 'Domain', 'gratora-donation-platform' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ apple.domain || '' } />
                 </FormRow>
@@ -231,8 +231,8 @@ function ApplePaySection( { status, onDone } ) {
                 { open ? (
                     <>
                         <FormRow
-                            label={ __( 'Domain association file', 'gratora' ) }
-                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'gratora' ) }
+                            label={ __( 'Domain association file', 'gratora-donation-platform' ) }
+                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'gratora-donation-platform' ) }
                             wide
                         >
                             <textarea
@@ -245,11 +245,11 @@ function ApplePaySection( { status, onDone } ) {
                         </FormRow>
                         <div className="gratora-stripe-mode__actions">
                             <Btn variant="primary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Enable Apple Pay', 'gratora' ) }
+                                { __( 'Enable Apple Pay', 'gratora-donation-platform' ) }
                             </Btn>
                             { hasFile && (
                                 <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setFile( '' ); } }>
-                                    { __( 'Cancel', 'gratora' ) }
+                                    { __( 'Cancel', 'gratora-donation-platform' ) }
                                 </Btn>
                             ) }
                         </div>
@@ -259,17 +259,17 @@ function ApplePaySection( { status, onDone } ) {
                         <span className="is-muted">
                             { modes.map( ( m ) => sprintf(
                                 /* translators: 1: Stripe mode, test or live. 2: verification state. */
-                                __( '%1$s: %2$s', 'gratora' ),
-                                m === 'test' ? __( 'Test', 'gratora' ) : __( 'Live', 'gratora' ),
+                                __( '%1$s: %2$s', 'gratora-donation-platform' ),
+                                m === 'test' ? __( 'Test', 'gratora-donation-platform' ) : __( 'Live', 'gratora-donation-platform' ),
                                 stateLabel( m )
                             ) ).join( '  ·  ' ) }
                         </span>
                         <div className="gratora-stripe-mode__actions">
                             <Btn variant="secondary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Check again', 'gratora' ) }
+                                { __( 'Check again', 'gratora-donation-platform' ) }
                             </Btn>
                             <Btn variant="ghost" size="sm" onClick={ () => setOpen( true ) }>
-                                { __( 'Replace file', 'gratora' ) }
+                                { __( 'Replace file', 'gratora-donation-platform' ) }
                             </Btn>
                         </div>
                     </div>
@@ -304,17 +304,17 @@ export default function StripeKeysCard( { s } ) {
     const removeKeys = useCallback( ( mode ) => {
         const all = mode === 'all';
         setConfirm( {
-            title: all ? __( 'Remove Stripe keys', 'gratora' ) : __( 'Remove these keys', 'gratora' ),
+            title: all ? __( 'Remove Stripe keys', 'gratora-donation-platform' ) : __( 'Remove these keys', 'gratora-donation-platform' ),
             message: all
-                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'gratora' )
-                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'gratora' ),
-            confirmLabel: __( 'Remove', 'gratora' ),
+                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'gratora-donation-platform' )
+                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'gratora-donation-platform' ),
+            confirmLabel: __( 'Remove', 'gratora-donation-platform' ),
             destructive: true,
             onConfirm: async () => {
                 setRemoving( true );
                 apiFetch( { path: `/gratora/v1/gateways/stripe/keys?mode=${ mode }`, method: 'DELETE' } )
                     .then( ( res ) => setStatus( res ) )
-                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'gratora' ) ) )
+                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'gratora-donation-platform' ) ) )
                     .finally( () => setRemoving( false ) );
             },
         } );
@@ -328,17 +328,17 @@ export default function StripeKeysCard( { s } ) {
 
     const head = {
         leading:     <BrandMark letter="S" variant="stripe" />,
-        title:       __( 'Stripe', 'gratora' ),
+        title:       __( 'Stripe', 'gratora-donation-platform' ),
         collapsible: true,
         open,
         onToggle:    setOpen,
     };
-    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'gratora' );
+    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'gratora-donation-platform' );
 
     if ( loading ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'gratora' ) }</Pill> }>
-                <p className="gratora-connect-p">{ __( 'Loading Stripe status…', 'gratora' ) }</p>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'gratora-donation-platform' ) }</Pill> }>
+                <p className="gratora-connect-p">{ __( 'Loading Stripe status…', 'gratora-donation-platform' ) }</p>
             </Card>
         );
     }
@@ -347,21 +347,21 @@ export default function StripeKeysCard( { s } ) {
     // through to a state that misreports the real setup.
     if ( loadError ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'gratora' ) }</Pill> }>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'gratora-donation-platform' ) }</Pill> }>
                 <Notice status="warning">
-                    <strong>{ __( 'Could not check your Stripe setup.', 'gratora' ) }</strong>{ ' ' }
-                    { __( 'Something went wrong loading the status. Please try again.', 'gratora' ) }
+                    <strong>{ __( 'Could not check your Stripe setup.', 'gratora-donation-platform' ) }</strong>{ ' ' }
+                    { __( 'Something went wrong loading the status. Please try again.', 'gratora-donation-platform' ) }
                 </Notice>
                 <div style={ { marginTop: 18 } }>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'gratora' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'gratora-donation-platform' ) }</Btn>
                 </div>
             </Card>
         );
     }
 
-    let meta = <Pill tone="gray">{ __( 'Not set up', 'gratora' ) }</Pill>;
-    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'gratora' ) }</Pill>;
-    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'gratora' ) }</Pill>;
+    let meta = <Pill tone="gray">{ __( 'Not set up', 'gratora-donation-platform' ) }</Pill>;
+    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'gratora-donation-platform' ) }</Pill>;
+    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'gratora-donation-platform' ) }</Pill>;
 
     const bizName = account?.business_name || account?.email || '';
 
@@ -378,19 +378,19 @@ export default function StripeKeysCard( { s } ) {
             { ! connected && (
                 <>
                     <p className="gratora-connect-p">
-                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Gratora never takes a cut.', 'gratora' ) }
+                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Gratora never takes a cut.', 'gratora-donation-platform' ) }
                     </p>
                     <p className="gratora-connect-p">
-                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'gratora' ) }
+                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'gratora-donation-platform' ) }
                     </p>
                 </>
             ) }
 
             <ToggleRow
-                title={ __( 'Enable the Stripe gateway', 'gratora' ) }
+                title={ __( 'Enable the Stripe gateway', 'gratora-donation-platform' ) }
                 sub={ connected
-                    ? __( 'Your keys stay on file while it is off.', 'gratora' )
-                    : __( 'Available once your keys are saved.', 'gratora' ) }
+                    ? __( 'Your keys stay on file while it is off.', 'gratora-donation-platform' )
+                    : __( 'Available once your keys are saved.', 'gratora-donation-platform' ) }
                 checked={ connected && !! s.value( 'stripe.enabled', true ) }
                 onChange={ s.setValue( 'stripe.enabled' ) }
                 disabled={ ! connected }
@@ -398,15 +398,15 @@ export default function StripeKeysCard( { s } ) {
 
             { connected && ! canCharge && (
                 <Notice status="warning">
-                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'gratora' ) }</strong>{ ' ' }
-                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'gratora' ) }
+                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'gratora-donation-platform' ) }</strong>{ ' ' }
+                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'gratora-donation-platform' ) }
                 </Notice>
             ) }
 
             { connected && canCharge && (
                 <Notice status="success">
-                    <strong>{ __( 'You are all set.', 'gratora' ) }</strong>{ ' ' }
-                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'gratora' ) }
+                    <strong>{ __( 'You are all set.', 'gratora-donation-platform' ) }</strong>{ ' ' }
+                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'gratora-donation-platform' ) }
                 </Notice>
             ) }
 
@@ -431,17 +431,17 @@ export default function StripeKeysCard( { s } ) {
 
             <div className="gratora-connect-options">
                 <p className="gratora-connect-p">
-                    { __( 'Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'gratora' ) }
+                    { __( 'Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'gratora-donation-platform' ) }
                 </p>
-                <FormRow label={ __( 'Webhook endpoint', 'gratora' ) }>
+                <FormRow label={ __( 'Webhook endpoint', 'gratora-donation-platform' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ status?.webhook_url || '' } />
                 </FormRow>
                 { s && (
                     <>
                         <FormRow
-                            label={ __( 'Webhook signing secret (test)', 'gratora' ) }
-                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'gratora' ) }
+                            label={ __( 'Webhook signing secret (test)', 'gratora-donation-platform' ) }
+                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'gratora-donation-platform' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_test', '' ) }
@@ -451,8 +451,8 @@ export default function StripeKeysCard( { s } ) {
                             />
                         </FormRow>
                         <FormRow
-                            label={ __( 'Webhook signing secret (live)', 'gratora' ) }
-                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'gratora' ) }
+                            label={ __( 'Webhook signing secret (live)', 'gratora-donation-platform' ) }
+                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'gratora-donation-platform' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_live', '' ) }

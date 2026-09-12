@@ -158,7 +158,7 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         // The probe for translation: it fires only if the string passes through
         // __(), and it needs no language pack.
         $filter = static function ($translated, $text, $domain) {
-            return $domain === 'gratora' && str_contains($text, 'counter is already at')
+            return $domain === 'gratora-donation-platform' && str_contains($text, 'counter is already at')
                 ? 'COUNTER REFUSED'
                 : $translated;
         };

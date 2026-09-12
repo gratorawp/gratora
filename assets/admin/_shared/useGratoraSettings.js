@@ -29,7 +29,7 @@ export function useGratoraSettings( group ) {
             // Surface the failure instead of swallowing it: a swallowed load left
             // isLoading stuck forever, and (worse) saving from the unloaded state
             // PUT a partial record that wiped keys like the whole roles mapping.
-            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings.', 'gratora' ) ); } );
+            .catch( () => { if ( ! aborted ) setError( __( 'Could not load these settings.', 'gratora-donation-platform' ) ); } );
         return () => { aborted = true; };
     }, [ group, reloadKey ] );
 
@@ -64,7 +64,7 @@ export function useGratoraSettings( group ) {
         // Never PUT from an unloaded record: it would replace the group with a
         // partial object and drop keys that weren't loaded (e.g. roles mapping).
         if ( saved === null ) {
-            throw new Error( __( 'Settings have not loaded yet. Refresh and try again.', 'gratora' ) );
+            throw new Error( __( 'Settings have not loaded yet. Refresh and try again.', 'gratora-donation-platform' ) );
         }
         setSaving( true );
         try {

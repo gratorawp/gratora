@@ -14,16 +14,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Email', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Email', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Email', 'gratora' ) }
+                        placeholder={ __( 'Email', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'gratora' ) }
+                        label={ __( 'Placeholder', 'gratora-donation-platform' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="you@example.com"
@@ -35,7 +35,7 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="gratora-block-preview__label">
-                    { label || __( 'Email', 'gratora' ) }
+                    { label || __( 'Email', 'gratora-donation-platform' ) }
                     <em className="gratora-block-preview__req" aria-hidden="true">*</em>
                 </span>
                 <div className="gratora-block-preview__field">
@@ -49,7 +49,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Email', 'gratora' ),
+        title:      __( 'Email', 'gratora-donation-platform' ),
         category:   'gratora-donor',
         icon:       BlockIcons[ 'email' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

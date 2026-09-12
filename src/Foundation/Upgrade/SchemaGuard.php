@@ -164,8 +164,8 @@ final class SchemaGuard
 
         printf(
             '<div class="notice notice-error"><p><strong>%s</strong> %s</p><p><code>%s</code></p></div>',
-            esc_html__('Gratora could not create its database tables.', 'gratora'),
-            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Gratora retries on every request.', 'gratora'),
+            esc_html__('Gratora could not create its database tables.', 'gratora-donation-platform'),
+            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Gratora retries on every request.', 'gratora-donation-platform'),
             esc_html($names)
         );
     }

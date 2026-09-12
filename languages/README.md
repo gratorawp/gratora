@@ -5,16 +5,16 @@ Notes for whoever regenerates the template. Kept out of the distributed zip by
 
 ## Text domain
 
-Every translatable string uses the `gratora` text domain,
+Every translatable string uses the `gratora-donation-platform` text domain,
 which is the plugin slug and has to stay that way: WordPress.org derives the
 slug from the plugin name and refuses a domain that disagrees with it. File
 naming follows from the domain:
 
 ```
-gratora.pot           - template
-gratora-de_DE.po/.mo  - German
-gratora-fr_FR.po/.mo  - French
-gratora-hr.po/.mo     - Croatian
+gratora-donation-platform.pot           - template
+gratora-donation-platform-de_DE.po/.mo  - German
+gratora-donation-platform-fr_FR.po/.mo  - French
+gratora-donation-platform-hr.po/.mo     - Croatian
 ```
 
 ## Regenerating the POT file

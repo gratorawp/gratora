@@ -80,10 +80,10 @@ final class RolesController
     private static function groupLabel(string $key): string
     {
         $labels = [
-            'Donors'    => __('Donors', 'gratora'),
-            'Donations' => __('Donations', 'gratora'),
-            'Reports'   => __('Reports', 'gratora'),
-            'Setup'     => __('Setup', 'gratora'),
+            'Donors'    => __('Donors', 'gratora-donation-platform'),
+            'Donations' => __('Donations', 'gratora-donation-platform'),
+            'Reports'   => __('Reports', 'gratora-donation-platform'),
+            'Setup'     => __('Setup', 'gratora-donation-platform'),
         ];
 
         return $labels[$key] ?? $key;
@@ -121,7 +121,7 @@ final class RolesController
             $ungrouped[] = ['cap' => $cap, 'label' => (string) ($labels[$cap] ?? $cap)];
         }
         if ($ungrouped !== []) {
-            $out[] = ['label' => __('Other', 'gratora'), 'caps' => $ungrouped];
+            $out[] = ['label' => __('Other', 'gratora-donation-platform'), 'caps' => $ungrouped];
         }
 
         return $out;

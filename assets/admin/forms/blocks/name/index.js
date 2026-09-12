@@ -18,43 +18,43 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Name', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Name', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'First name label', 'gratora' ) }
+                        label={ __( 'First name label', 'gratora-donation-platform' ) }
                         value={ firstLabel }
                         onChange={ ( v ) => setAttributes( { firstLabel: v } ) }
-                        placeholder={ __( 'First name', 'gratora' ) }
+                        placeholder={ __( 'First name', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'First name placeholder', 'gratora' ) }
+                        label={ __( 'First name placeholder', 'gratora-donation-platform' ) }
                         value={ firstPlaceholder }
                         onChange={ ( v ) => setAttributes( { firstPlaceholder: v } ) }
                         placeholder="Jane"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'First name required', 'gratora' ) }
+                        label={ __( 'First name required', 'gratora-donation-platform' ) }
                         checked={ requireFirst }
                         onChange={ ( v ) => setAttributes( { requireFirst: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name label', 'gratora' ) }
+                        label={ __( 'Last name label', 'gratora-donation-platform' ) }
                         value={ lastLabel }
                         onChange={ ( v ) => setAttributes( { lastLabel: v } ) }
-                        placeholder={ __( 'Last name', 'gratora' ) }
+                        placeholder={ __( 'Last name', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name placeholder', 'gratora' ) }
+                        label={ __( 'Last name placeholder', 'gratora-donation-platform' ) }
                         value={ lastPlaceholder }
                         onChange={ ( v ) => setAttributes( { lastPlaceholder: v } ) }
                         placeholder="Doe"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Last name required', 'gratora' ) }
+                        label={ __( 'Last name required', 'gratora-donation-platform' ) }
                         checked={ requireLast }
                         onChange={ ( v ) => setAttributes( { requireLast: v } ) }
                         __nextHasNoMarginBottom
@@ -65,7 +65,7 @@ function Edit( { attributes, setAttributes } ) {
                 <div className="gratora-block-preview__grid-2">
                     <div>
                         <span className="gratora-block-preview__label">
-                            { firstLabel || __( 'First name', 'gratora' ) }
+                            { firstLabel || __( 'First name', 'gratora-donation-platform' ) }
                             { requireFirst && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                         </span>
                         <div className="gratora-block-preview__field">
@@ -74,7 +74,7 @@ function Edit( { attributes, setAttributes } ) {
                     </div>
                     <div>
                         <span className="gratora-block-preview__label">
-                            { lastLabel || __( 'Last name', 'gratora' ) }
+                            { lastLabel || __( 'Last name', 'gratora-donation-platform' ) }
                             { requireLast && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                         </span>
                         <div className="gratora-block-preview__field">
@@ -90,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Name', 'gratora' ),
+        title:      __( 'Name', 'gratora-donation-platform' ),
         category:   'gratora-donor',
         icon:       BlockIcons[ 'name' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

@@ -36,15 +36,15 @@ final class FundService
 
         $code = $this->normalizeCode((string) ($input['code'] ?? ''));
         if ($code === '') {
-            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'gratora-donation-platform'));
         }
         if ($this->funds->codeExists($code)) {
-            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'gratora-donation-platform'));
         }
 
         $name = trim((string) ($input['name'] ?? ''));
         if ($name === '') {
-            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'gratora-donation-platform'));
         }
 
         $fund = Fund::make();
@@ -58,14 +58,14 @@ final class FundService
         // offered to nobody. update() refuses this pairing too.
         if ($fund->is_default && ! $fund->is_active) {
             throw new InvalidArgumentException(
-                esc_html__('A fund that is not active cannot be the default. Every donation with no fund chosen goes to the default.', 'gratora')
+                esc_html__('A fund that is not active cannot be the default. Every donation with no fund chosen goes to the default.', 'gratora-donation-platform')
             );
         }
         $fund->sort_order      = (int) ($input['sort_order'] ?? 0);
         $fund->parent_fund_id  = $this->resolveParent($input['parent_fund_id'] ?? null, null);
         $fund->goal_cents      = $this->nullableInt($input['goal_cents'] ?? null);
-        $fund->starts_at       = self::scheduleDate($input['starts_at'] ?? null, __('start date', 'gratora'));
-        $fund->ends_at         = self::scheduleDate($input['ends_at'] ?? null, __('end date', 'gratora'));
+        $fund->starts_at       = self::scheduleDate($input['starts_at'] ?? null, __('start date', 'gratora-donation-platform'));
+        $fund->ends_at         = self::scheduleDate($input['ends_at'] ?? null, __('end date', 'gratora-donation-platform'));
         $fund->accounting_code = $this->nullableString($input['accounting_code'] ?? null);
         $fund->raised_cents    = 0;
         $fund->created_at      = $now;
@@ -97,10 +97,10 @@ final class FundService
         if (array_key_exists('code', $input)) {
             $code = $this->normalizeCode((string) $input['code']);
             if ($code === '') {
-                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'gratora'));
+                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'gratora-donation-platform'));
             }
             if ($code !== $fund->code && $this->funds->codeExists($code, (int) $fund->id)) {
-                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'gratora'));
+                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'gratora-donation-platform'));
             }
             $fund->code = $code;
         }
@@ -119,8 +119,8 @@ final class FundService
         }
 
         $dates = [
-            'starts_at' => __('start date', 'gratora'),
-            'ends_at'   => __('end date', 'gratora'),
+            'starts_at' => __('start date', 'gratora-donation-platform'),
+            'ends_at'   => __('end date', 'gratora-donation-platform'),
         ];
         foreach ($dates as $field => $label) {
             if (array_key_exists($field, $input)) {
@@ -139,12 +139,12 @@ final class FundService
             if ($next) {
                 $this->assertNotReassigning(
                     (int) $fund->id,
-                    esc_html__('This fund is being reassigned and will be removed when that finishes, so it cannot be reactivated.', 'gratora')
+                    esc_html__('This fund is being reassigned and will be removed when that finishes, so it cannot be reactivated.', 'gratora-donation-platform')
                 );
             }
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'gratora')
+                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'gratora-donation-platform')
                 );
             }
             $fund->is_active = $next;
@@ -169,13 +169,13 @@ final class FundService
             $next = (bool) $input['is_default'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    esc_html__('Set another fund as the default rather than clearing this one.', 'gratora')
+                    esc_html__('Set another fund as the default rather than clearing this one.', 'gratora-donation-platform')
                 );
             }
             if ($next) {
                 $this->assertNotReassigning(
                     (int) $fund->id,
-                    esc_html__('This fund is being reassigned and will be removed when that finishes, so it cannot be made the default.', 'gratora')
+                    esc_html__('This fund is being reassigned and will be removed when that finishes, so it cannot be made the default.', 'gratora-donation-platform')
                 );
             }
             $becomesDefault = $next && ! $fund->is_default;
@@ -217,7 +217,7 @@ final class FundService
     {
         if ($fund->is_default) {
             throw new RuntimeException(
-                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'gratora')
+                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'gratora-donation-platform')
             );
         }
         $hasChildren = $this->hasChildren((int) $fund->id);
@@ -237,19 +237,19 @@ final class FundService
             // FundRepository falls an orphan back to top level.
             if ($hasChildren) {
                 throw new RuntimeException(
-                    esc_html__('Move the sub-funds under this fund to another parent, or delete them, before reassigning and removing it.', 'gratora')
+                    esc_html__('Move the sub-funds under this fund to another parent, or delete them, before reassigning and removing it.', 'gratora-donation-platform')
                 );
             }
 
             $target = $this->funds->findById($reassignTo);
             if (! $target || (int) $target->id === (int) $fund->id) {
                 throw new InvalidArgumentException(
-                    esc_html__('Choose a different, existing fund to reassign donations to.', 'gratora')
+                    esc_html__('Choose a different, existing fund to reassign donations to.', 'gratora-donation-platform')
                 );
             }
             if (! $target->is_active) {
                 throw new InvalidArgumentException(
-                    esc_html__('Reassign donations to an active fund.', 'gratora')
+                    esc_html__('Reassign donations to an active fund.', 'gratora-donation-platform')
                 );
             }
 
@@ -400,7 +400,7 @@ final class FundService
         // enough.
         if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
             throw new InvalidArgumentException(
-                esc_html__('The fund start date must be before its end date.', 'gratora')
+                esc_html__('The fund start date must be before its end date.', 'gratora-donation-platform')
             );
         }
     }
@@ -424,7 +424,7 @@ final class FundService
         }
 
         throw new InvalidArgumentException(
-            esc_html__('The default fund cannot have a schedule. Every donation with no fund chosen goes to the default, so it has to stay open.', 'gratora')
+            esc_html__('The default fund cannot have a schedule. Every donation with no fund chosen goes to the default, so it has to stay open.', 'gratora-donation-platform')
         );
     }
 
@@ -440,25 +440,25 @@ final class FundService
         }
         $parentId = (int) $value;
         if ($selfId !== null && $parentId === $selfId) {
-            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'gratora-donation-platform'));
         }
         $parent = $this->funds->findById($parentId);
         if (! $parent) {
-            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'gratora-donation-platform'));
         }
         if ($parent->parent_fund_id !== null) {
             throw new InvalidArgumentException(
-                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'gratora')
+                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'gratora-donation-platform')
             );
         }
         if ($selfId !== null && $this->hasChildren($selfId)) {
             throw new InvalidArgumentException(
-                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'gratora')
+                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'gratora-donation-platform')
             );
         }
         $this->assertNotReassigning(
             $parentId,
-            esc_html__('That fund is being reassigned and will be removed when that finishes, so it cannot take sub-funds.', 'gratora')
+            esc_html__('That fund is being reassigned and will be removed when that finishes, so it cannot take sub-funds.', 'gratora-donation-platform')
         );
         return $parentId;
     }
@@ -503,7 +503,7 @@ final class FundService
         if ($at === false) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the name of the date field, e.g. "start date". */
-                __('That is not a date the fund %s can be set to.', 'gratora'),
+                __('That is not a date the fund %s can be set to.', 'gratora-donation-platform'),
                 $label
             )));
         }

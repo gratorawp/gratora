@@ -202,7 +202,7 @@ final class BlockEditorIntegration
         }
         array_unshift($categories, [
             'slug'  => 'gratora',
-            'title' => __('Gratora', 'gratora'),
+            'title' => __('Gratora', 'gratora-donation-platform'),
             'icon'  => 'heart',
         ]);
         return $categories;
@@ -222,7 +222,7 @@ final class BlockEditorIntegration
             $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE_EDITOR, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE_EDITOR, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         // Editor-chrome styles (the layout picker's modal). Kept out of
         // campaign-blocks.css, which the front end also loads, and only sent to

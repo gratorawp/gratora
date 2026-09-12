@@ -28,14 +28,14 @@ export default function RolesPanel( { s } ) {
             <div className="gratora-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>
-                        { __( 'Could not load roles.', 'gratora' ) }
+                        { __( 'Could not load roles.', 'gratora-donation-platform' ) }
                     </p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'gratora' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'gratora-donation-platform' ) }</Btn>
                 </Card>
             </div>
         );
     }
-    if ( ! data ) return <p>{ __( 'Loading…', 'gratora' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'gratora-donation-platform' ) }</p>;
 
     // Both come from the server: an add-on registers capabilities through the
     // gratora.capabilities filter, so a list kept here could never include them.
@@ -66,7 +66,7 @@ export default function RolesPanel( { s } ) {
             <Card edited={ s.isDirty }>
                 <div className="gratora-roles-table" style={ { '--gratora-role-count': roles.length } }>
                     <div className="gratora-roles-table__head">
-                        <div className="gratora-roles-table__role-cell">{ __( 'Capability', 'gratora' ) }</div>
+                        <div className="gratora-roles-table__role-cell">{ __( 'Capability', 'gratora-donation-platform' ) }</div>
                         { roles.map( ( r ) => (
                             <div key={ r.slug } className="gratora-roles-table__role">
                                 <strong>{ r.name }</strong>
@@ -77,7 +77,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, true ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'All', 'gratora' ) }
+                                        { __( 'All', 'gratora-donation-platform' ) }
                                     </Btn>
                                     <Btn
                                         variant="ghost"
@@ -85,7 +85,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, false ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'None', 'gratora' ) }
+                                        { __( 'None', 'gratora-donation-platform' ) }
                                     </Btn>
                                 </div>
                             </div>

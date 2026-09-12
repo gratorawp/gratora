@@ -9,12 +9,12 @@ import { BlockIcons } from '../_shared/block-icons';
 const NAME = 'gratora/recurring-toggle';
 
 const FREQ_OPTIONS = [
-    { value: 'one-time',  label: __( 'One-time', 'gratora' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'gratora' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'gratora' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'gratora' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'gratora' ) },
+    { value: 'one-time',  label: __( 'One-time', 'gratora-donation-platform' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'gratora-donation-platform' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora-donation-platform' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'gratora-donation-platform' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'gratora-donation-platform' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'gratora-donation-platform' ) },
 ];
 
 // One-time is not listed: every form accepts a single donation, so the server
@@ -61,33 +61,33 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recurring toggle', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Recurring toggle', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'gratora' ) }
+                        label={ __( 'Help text', 'gratora-donation-platform' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'gratora' ) }
+                        label={ __( 'Style', 'gratora-donation-platform' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'pills', label: __( 'Pills', 'gratora' ) },
-                            { value: 'tabs',  label: __( 'Tabs',  'gratora' ) },
+                            { value: 'pills', label: __( 'Pills', 'gratora-donation-platform' ) },
+                            { value: 'tabs',  label: __( 'Tabs',  'gratora-donation-platform' ) },
                         ] }
                     />
                     <Field
                         group
-                        label={ __( 'Recurring options', 'gratora' ) }
-                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'gratora' ) }
+                        label={ __( 'Recurring options', 'gratora-donation-platform' ) }
+                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'gratora-donation-platform' ) }
                     >
                         <div className="gratora-sidebar-list">
                             { RECURRING_OPTIONS.map( ( f ) => (
@@ -104,11 +104,11 @@ function Edit( { attributes, setAttributes } ) {
                     </Field>
                     { willHide && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'gratora' ) }
+                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'gratora-donation-platform' ) }
                         </Notice>
                     ) }
                     <SelectControl
-                        label={ __( 'Default selection', 'gratora' ) }
+                        label={ __( 'Default selection', 'gratora-donation-platform' ) }
                         value={ defaultFrequency }
                         options={ FREQ_OPTIONS.filter( ( f ) => effectiveFreqs.includes( f.value ) ) }
                         onChange={ ( v ) => setAttributes( { defaultFrequency: v } ) }
@@ -126,7 +126,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__title"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this recurring', 'gratora' ) }
+                    placeholder={ __( 'Make this recurring', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, fontWeight: 500, marginBottom: 6 } }
                 />
@@ -181,7 +181,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="p"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'gratora' ) }
+                        placeholder={ __( 'Help text', 'gratora-donation-platform' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', margin: '6px 0 0', lineHeight: 1.4 } }
                     />
@@ -194,8 +194,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Recurring toggle', 'gratora' ),
-        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'gratora' ),
+        title:      __( 'Recurring toggle', 'gratora-donation-platform' ),
+        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'gratora-donation-platform' ),
         category:   'gratora-amount',
         icon:       BlockIcons[ 'recurring-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

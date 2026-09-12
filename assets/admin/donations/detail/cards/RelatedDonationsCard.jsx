@@ -20,10 +20,10 @@ export default function RelatedDonationsCard( { donor, related } ) {
                     <table className="dd-table">
                         <thead>
                             <tr>
-                                <th>{ __( 'Reference', 'gratora' ) }</th>
-                                <th>{ __( 'Date', 'gratora' ) }</th>
-                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'gratora' ) }</th>
-                                <th>{ __( 'Status', 'gratora' ) }</th>
+                                <th>{ __( 'Reference', 'gratora-donation-platform' ) }</th>
+                                <th>{ __( 'Date', 'gratora-donation-platform' ) }</th>
+                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'gratora-donation-platform' ) }</th>
+                                <th>{ __( 'Status', 'gratora-donation-platform' ) }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,7 +33,7 @@ export default function RelatedDonationsCard( { donor, related } ) {
                                     <tr key={ d.id }>
                                         <td className="ref-cell">
                                             <a href={ donationHref( d.reference ) }>{ d.reference }</a>
-                                            { d.is_self && <span className="muted" style={ { fontFamily: 'inherit', fontSize: 11, marginLeft: 6 } }>{ __( '(this one)', 'gratora' ) }</span> }
+                                            { d.is_self && <span className="muted" style={ { fontFamily: 'inherit', fontSize: 11, marginLeft: 6 } }>{ __( '(this one)', 'gratora-donation-platform' ) }</span> }
                                         </td>
                                         <td>{ formatDate( d.paid_at || d.created_at ) }</td>
                                         <td className="num-cell">{ formatAmount( d.amount_cents, d.currency ) }</td>

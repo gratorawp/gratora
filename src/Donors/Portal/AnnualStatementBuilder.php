@@ -93,7 +93,7 @@ final class AnnualStatementBuilder
         $org      = OrgProfile::load();
         $orgName  = (string) $org['name'];
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'gratora');
+        if ($donorName === '') $donorName = __('Friend', 'gratora-donation-platform');
 
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
             'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
@@ -105,9 +105,9 @@ final class AnnualStatementBuilder
         ]);
 
         return $this->pdf->fromHtml($html, [
-            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'gratora'), $year),
+            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'gratora-donation-platform'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'gratora'),
+            'subject' => __('Annual donation statement', 'gratora-donation-platform'),
         ]);
     }
 }

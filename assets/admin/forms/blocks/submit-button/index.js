@@ -9,10 +9,10 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'gratora/submit-button';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'gratora' ) },
-    { value: 'center', label: __( 'Center', 'gratora' ) },
-    { value: 'right',  label: __( 'Right',  'gratora' ) },
-    { value: 'full',   label: __( 'Full width', 'gratora' ) },
+    { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+    { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
+    { value: 'right',  label: __( 'Right',  'gratora-donation-platform' ) },
+    { value: 'full',   label: __( 'Full width', 'gratora-donation-platform' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -36,15 +36,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Button', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Button', 'gratora-donation-platform' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'gratora' ) }
+                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'gratora-donation-platform' ) }
                     </p>
                 </PanelBody>
             </InspectorControls>
@@ -53,7 +53,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Donate now', 'gratora' ) }
+                    placeholder={ __( 'Donate now', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ {
                         display:       'inline-block',
@@ -75,8 +75,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donate button', 'gratora' ),
-        description: __( 'The button that completes the donation.', 'gratora' ),
+        title:      __( 'Donate button', 'gratora-donation-platform' ),
+        description: __( 'The button that completes the donation.', 'gratora-donation-platform' ),
         category:   'gratora-extras',
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

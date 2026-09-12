@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 ?>
 <div class="gratora-block gratora-block--gateways" data-block="gratora/payment-gateways">
     <fieldset class="gratora-gateways">
-        <legend class="gratora-gateways__legend"><?php esc_html_e('Payment method', 'gratora'); ?></legend>
+        <legend class="gratora-gateways__legend"><?php esc_html_e('Payment method', 'gratora-donation-platform'); ?></legend>
         <?php foreach ($options as $i => $o):
             $id    = (string) ($o['id'] ?? '');
             if ($id === '') continue;

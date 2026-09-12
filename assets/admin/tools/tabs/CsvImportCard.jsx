@@ -15,15 +15,15 @@ import Btn from '../../_shared/components/Btn';
 
 // Why a row did not make it, in the admin's words rather than a code.
 const SKIP_LABELS = {
-    no_email:          __( 'no email address', 'gratora' ),
-    invalid_email:     __( 'the email address is not one', 'gratora' ),
-    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'gratora' ),
-    invalid_date:      __( 'the date is missing or unreadable', 'gratora' ),
-    unknown_status:    __( 'the status is not one this site knows', 'gratora' ),
-    duplicate_in_file: __( 'the same row appears earlier in this file', 'gratora' ),
-    already_imported:  __( 'already imported by an earlier run', 'gratora' ),
-    donor_erased:      __( 'the donor was erased on this site', 'gratora' ),
-    error:             __( 'the row could not be read', 'gratora' ),
+    no_email:          __( 'no email address', 'gratora-donation-platform' ),
+    invalid_email:     __( 'the email address is not one', 'gratora-donation-platform' ),
+    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'gratora-donation-platform' ),
+    invalid_date:      __( 'the date is missing or unreadable', 'gratora-donation-platform' ),
+    unknown_status:    __( 'the status is not one this site knows', 'gratora-donation-platform' ),
+    duplicate_in_file: __( 'the same row appears earlier in this file', 'gratora-donation-platform' ),
+    already_imported:  __( 'already imported by an earlier run', 'gratora-donation-platform' ),
+    donor_erased:      __( 'the donor was erased on this site', 'gratora-donation-platform' ),
+    error:             __( 'the row could not be read', 'gratora-donation-platform' ),
 };
 
 // Two groups, because the second one decides what the import does at all.
@@ -67,7 +67,7 @@ export default function CsvImportCard( { setNotice } ) {
             // a control the admin can change.
             setMapping( res.mapping || {} );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'gratora-donation-platform' ) } );
         } finally {
             setBusy( '' );
         }
@@ -94,11 +94,11 @@ export default function CsvImportCard( { setNotice } ) {
 
             setNotice( {
                 type: landed > 0 ? 'success' : 'error',
-                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'gratora' ),
+                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'gratora-donation-platform' ),
             } );
             if ( landed > 0 ) reset();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'gratora-donation-platform' ) } );
         } finally {
             setBusy( '' );
         }
@@ -138,7 +138,7 @@ export default function CsvImportCard( { setNotice } ) {
                 </th>
                 <td>
                     <select className="gratora-input" value={ chosen } onChange={ setField( field ) }>
-                        <option value="">{ __( 'Not imported', 'gratora' ) }</option>
+                        <option value="">{ __( 'Not imported', 'gratora-donation-platform' ) }</option>
                         { headers.map( ( h ) => (
                             <option key={ h } value={ h }>{ h }</option>
                         ) ) }
@@ -151,8 +151,8 @@ export default function CsvImportCard( { setNotice } ) {
 
     return (
         <Card
-            title={ __( 'Import from a CSV', 'gratora' ) }
-            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'gratora' ) }
+            title={ __( 'Import from a CSV', 'gratora-donation-platform' ) }
+            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'gratora-donation-platform' ) }
         >
             <div className="gratora-advanced-actions">
                 <Btn
@@ -161,11 +161,11 @@ export default function CsvImportCard( { setNotice } ) {
                     disabled={ busy !== '' }
                     isBusy={ busy === 'inspect' }
                 >
-                    { inspected ? __( 'Choose a different file', 'gratora' ) : __( 'Choose a CSV file', 'gratora' ) }
+                    { inspected ? __( 'Choose a different file', 'gratora-donation-platform' ) : __( 'Choose a CSV file', 'gratora-donation-platform' ) }
                 </Btn>
                 { inspected && (
                     <Btn variant="tertiary" onClick={ reset } disabled={ busy !== '' }>
-                        { __( 'Cancel', 'gratora' ) }
+                        { __( 'Cancel', 'gratora-donation-platform' ) }
                     </Btn>
                 ) }
                 <input
@@ -182,29 +182,29 @@ export default function CsvImportCard( { setNotice } ) {
                     <p className="gratora-tools-note">
                         { sprintf(
                             /* translators: 1: number of rows, 2: number of columns. */
-                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'gratora' ),
+                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'gratora-donation-platform' ),
                             inspected.rows,
                             headers.length
                         ) }
                     </p>
 
-                    <h4 className="gratora-csv-map__heading">{ __( 'The donor', 'gratora' ) }</h4>
+                    <h4 className="gratora-csv-map__heading">{ __( 'The donor', 'gratora-donation-platform' ) }</h4>
                     <table className="gratora-csv-map">
                         <thead>
                             <tr>
-                                <th scope="col">{ __( 'Gratora field', 'gratora' ) }</th>
-                                <th scope="col">{ __( 'Column in your file', 'gratora' ) }</th>
-                                <th scope="col">{ __( 'First value', 'gratora' ) }</th>
+                                <th scope="col">{ __( 'Gratora field', 'gratora-donation-platform' ) }</th>
+                                <th scope="col">{ __( 'Column in your file', 'gratora-donation-platform' ) }</th>
+                                <th scope="col">{ __( 'First value', 'gratora-donation-platform' ) }</th>
                             </tr>
                         </thead>
                         <tbody>{ DONOR_FIELDS.map( rowFor ) }</tbody>
                     </table>
 
-                    <h4 className="gratora-csv-map__heading">{ __( 'The donation', 'gratora' ) }</h4>
+                    <h4 className="gratora-csv-map__heading">{ __( 'The donation', 'gratora-donation-platform' ) }</h4>
                     <p className="gratora-tools-note">
-                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'gratora' ) }
-                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'gratora' ) }
-                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'gratora' ) }
+                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'gratora-donation-platform' ) }
+                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'gratora-donation-platform' ) }
+                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'gratora-donation-platform' ) }
                     </p>
                     <table className="gratora-csv-map">
                         <tbody>{ DONATION_FIELDS.map( rowFor ) }</tbody>
@@ -217,7 +217,7 @@ export default function CsvImportCard( { setNotice } ) {
                             disabled={ ! ready || busy !== '' }
                             isBusy={ busy === 'preview' }
                         >
-                            { __( 'Preview', 'gratora' ) }
+                            { __( 'Preview', 'gratora-donation-platform' ) }
                         </Btn>
                         { preview && hasWork( preview ) && (
                             <Btn
@@ -226,7 +226,7 @@ export default function CsvImportCard( { setNotice } ) {
                                 disabled={ busy !== '' }
                                 isBusy={ busy === 'import' }
                             >
-                                { __( 'Import', 'gratora' ) }
+                                { __( 'Import', 'gratora-donation-platform' ) }
                             </Btn>
                         ) }
                     </div>
@@ -234,8 +234,8 @@ export default function CsvImportCard( { setNotice } ) {
                     { ! ready && (
                         <p className="gratora-tools-note">
                             { ! mapping.email
-                                ? __( 'Email has to be mapped before this file can be previewed.', 'gratora' )
-                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'gratora' ) }
+                                ? __( 'Email has to be mapped before this file can be previewed.', 'gratora-donation-platform' )
+                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'gratora-donation-platform' ) }
                         </p>
                     ) }
 
@@ -248,7 +248,7 @@ export default function CsvImportCard( { setNotice } ) {
                                         <li key={ reason }>
                                             { sprintf(
                                                 /* translators: 1: number of rows, 2: the reason. */
-                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'gratora' ),
+                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'gratora-donation-platform' ),
                                                 n,
                                                 SKIP_LABELS[ reason ] || reason
                                             ) }
@@ -264,8 +264,8 @@ export default function CsvImportCard( { setNotice } ) {
                             { preview.dry_run && (
                                 <p className="gratora-tools-note">
                                     { preview.mode === 'donors'
-                                        ? __( 'Nothing has been written yet.', 'gratora' )
-                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'gratora' ) }
+                                        ? __( 'Nothing has been written yet.', 'gratora-donation-platform' )
+                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'gratora-donation-platform' ) }
                                 </p>
                             ) }
                         </div>
@@ -284,13 +284,13 @@ function summarise( res ) {
     const people = res.dry_run
         ? sprintf(
             /* translators: 1: donors to create, 2: donors already here. */
-            __( '%1$d donors would be created and %2$d matched to donors already here.', 'gratora' ),
+            __( '%1$d donors would be created and %2$d matched to donors already here.', 'gratora-donation-platform' ),
             res.donors_created,
             res.donors_matched
         )
         : sprintf(
             /* translators: 1: donors created, 2: donors already here. */
-            __( 'Created %1$d donors and matched %2$d to donors already here.', 'gratora' ),
+            __( 'Created %1$d donors and matched %2$d to donors already here.', 'gratora-donation-platform' ),
             res.donors_created,
             res.donors_matched
         );
@@ -302,12 +302,12 @@ function summarise( res ) {
     const donations = res.dry_run
         ? sprintf(
             /* translators: %d: number of donations. */
-            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'gratora' ),
+            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'gratora-donation-platform' ),
             res.donations_imported
         )
         : sprintf(
             /* translators: %d: number of donations. */
-            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'gratora' ),
+            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'gratora-donation-platform' ),
             res.donations_imported
         );
 

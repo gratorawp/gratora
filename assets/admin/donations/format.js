@@ -22,11 +22,11 @@ export function formatDate( iso, opts = {} ) {
 }
 
 export const STATUS_LABEL = {
-    pending:        __( 'Pending', 'gratora' ),
-    processing:     __( 'Processing', 'gratora' ),
-    paid:           __( 'Paid', 'gratora' ),
-    failed:         __( 'Failed', 'gratora' ),
-    refunded:       __( 'Refunded', 'gratora' ),
-    partial_refund: __( 'Partially refunded', 'gratora' ),
-    disputed:       __( 'Disputed', 'gratora' ),
+    pending:        __( 'Pending', 'gratora-donation-platform' ),
+    processing:     __( 'Processing', 'gratora-donation-platform' ),
+    paid:           __( 'Paid', 'gratora-donation-platform' ),
+    failed:         __( 'Failed', 'gratora-donation-platform' ),
+    refunded:       __( 'Refunded', 'gratora-donation-platform' ),
+    partial_refund: __( 'Partially refunded', 'gratora-donation-platform' ),
+    disputed:       __( 'Disputed', 'gratora-donation-platform' ),
 };

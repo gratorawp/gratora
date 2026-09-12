@@ -14,9 +14,9 @@ export default function CoverImageCard( { id, url, onChange } ) {
         return (
             <div className="gratora-cover-card" style={ { gridTemplateColumns: '1fr' } }>
                 <div>
-                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'gratora' ) }</Btn>
+                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'gratora-donation-platform' ) }</Btn>
                     <div style={ { marginTop: 8, fontSize: 12, color: '#6b7280' } }>
-                        { __( '1600 × 900 (16:9) recommended.', 'gratora' ) }
+                        { __( '1600 × 900 (16:9) recommended.', 'gratora-donation-platform' ) }
                     </div>
                 </div>
             </div>
@@ -29,10 +29,10 @@ export default function CoverImageCard( { id, url, onChange } ) {
             <div className="gratora-cover-card__meta">
                 <AttachmentMeta id={ id } url={ url } />
                 <div className="gratora-cover-card__actions">
-                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'gratora' ) }</Btn>
-                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'gratora' ) }</Btn>
+                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'gratora-donation-platform' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'gratora-donation-platform' ) }</Btn>
                 </div>
-                <span className="gratora-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'gratora' ) }</span>
+                <span className="gratora-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'gratora-donation-platform' ) }</span>
             </div>
         </div>
     );
@@ -73,11 +73,11 @@ function AttachmentMeta( { id, url } ) {
 
     return (
         <>
-            <strong>{ meta.filename || __( 'Cover image', 'gratora' ) }</strong>
+            <strong>{ meta.filename || __( 'Cover image', 'gratora-donation-platform' ) }</strong>
             { parts && <>{ parts }<br /></> }
             { meta.uploaded && sprintf(
                 /* translators: %s: relative time, e.g. "12d ago" */
-                __( 'Uploaded %s', 'gratora' ),
+                __( 'Uploaded %s', 'gratora-donation-platform' ),
                 timeAgo( meta.uploaded ),
             ) }
         </>
@@ -93,12 +93,12 @@ function formatBytes( bytes ) {
 
 function openMediaFrame( { onSelect, currentId } ) {
     if ( ! window.wp?.media ) {
-        notify.error( __( 'Media library not loaded.', 'gratora' ) );
+        notify.error( __( 'Media library not loaded.', 'gratora-donation-platform' ) );
         return;
     }
     const frame = window.wp.media( {
-        title:    __( 'Select campaign cover image', 'gratora' ),
-        button:   { text: __( 'Use this image', 'gratora' ) },
+        title:    __( 'Select campaign cover image', 'gratora-donation-platform' ),
+        button:   { text: __( 'Use this image', 'gratora-donation-platform' ) },
         library:  { type: 'image' },
         multiple: false,
     } );

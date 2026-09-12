@@ -16,31 +16,31 @@ function Edit( { attributes, setAttributes } ) {
 
     // Attributes default to '' and the walker injects these when empty; mirror
     // that in the preview so the canvas is never a nameless field.
-    const labelText       = label || __( 'Add a message', 'gratora' );
-    const placeholderText = placeholder || __( 'Anything you want to share?', 'gratora' );
+    const labelText       = label || __( 'Add a message', 'gratora-donation-platform' );
+    const placeholderText = placeholder || __( 'Anything you want to share?', 'gratora-donation-platform' );
 
     const blockProps = useBlockProps( { className: 'gratora-block-preview' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Comment', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Comment', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
-                        placeholder={ __( 'Add a message', 'gratora' ) }
+                        placeholder={ __( 'Add a message', 'gratora-donation-platform' ) }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'gratora' ) }
+                        label={ __( 'Placeholder', 'gratora-donation-platform' ) }
                         value={ placeholder }
-                        placeholder={ __( 'Anything you want to share?', 'gratora' ) }
+                        placeholder={ __( 'Anything you want to share?', 'gratora-donation-platform' ) }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'gratora' ) }
+                        label={ __( 'Required', 'gratora-donation-platform' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -65,8 +65,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Comment', 'gratora' ),
-        description: __( 'Optional message from the donor to the organization.', 'gratora' ),
+        title:      __( 'Comment', 'gratora-donation-platform' ),
+        description: __( 'Optional message from the donor to the organization.', 'gratora-donation-platform' ),
         category:   'gratora-fields',
         icon:       BlockIcons[ 'comment' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

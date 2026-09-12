@@ -25,7 +25,7 @@ final class SettingsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Settings', 'gratora'),
+            'title'      => __('Settings', 'gratora-donation-platform'),
             'capability' => 'gratora_access_settings',
             'position'   => 90,
             'render'     => [$this, 'render'],
@@ -65,7 +65,7 @@ final class SettingsPage extends HookProvider
             $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

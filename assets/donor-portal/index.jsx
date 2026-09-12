@@ -115,7 +115,7 @@ function api( path, init = {} ) {
         let r = await send( cfg.nonce );
 
         if ( ! r.ok ) {
-            let err = await refusal( r, __( 'Request failed', 'gratora' ) );
+            let err = await refusal( r, __( 'Request failed', 'gratora-donation-platform' ) );
 
             if ( nonceWasRefused( r, err ) ) {
                 r = await send( '' );
@@ -123,7 +123,7 @@ function api( path, init = {} ) {
                 // wasted round trip, and stops the add-on tabs being handed it
                 // through extContext.
                 if ( r.ok ) cfg.nonce = '';
-                else err = await refusal( r, __( 'Request failed', 'gratora' ) );
+                else err = await refusal( r, __( 'Request failed', 'gratora-donation-platform' ) );
             }
 
             if ( ! r.ok ) {
@@ -229,7 +229,7 @@ function completeCardReturn( { clientSecret, planId, publishableKey } ) {
         .then( ( res ) => {
             const intent = res && res.setupIntent;
             const token  = intent && intent.status === 'succeeded' ? intent.payment_method : '';
-            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'gratora' ) );
+            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'gratora-donation-platform' ) );
             return api( `recurring/${ planId }/payment-method/complete`, {
                 method: 'POST',
                 body:   JSON.stringify( { token } ),
@@ -328,7 +328,7 @@ function App() {
                 if ( err && ( err.status === 401 || err.status === 403 ) ) {
                     setMe( null );
                 } else {
-                    setLoadError( err?.message || __( 'Could not load your account.', 'gratora' ) );
+                    setLoadError( err?.message || __( 'Could not load your account.', 'gratora-donation-platform' ) );
                 }
                 return null;
             } )
@@ -341,7 +341,7 @@ function App() {
         if ( ! me ) return undefined;
         onSessionExpired = () => {
             setMe( null );
-            setError( __( 'Your session expired. Please sign in again.', 'gratora' ) );
+            setError( __( 'Your session expired. Please sign in again.', 'gratora-donation-platform' ) );
         };
         return () => { onSessionExpired = null; };
     }, [ me ] );
@@ -391,7 +391,7 @@ function App() {
                     // burns the next link the same way.
                     return loadMe().then( ( who ) => {
                         if ( ! who ) {
-                            setError( __( 'Your sign-in link worked, but this browser did not keep you signed in. Check that the web address here matches the one in your email, and that cookies are allowed for this site, then ask for a new link.', 'gratora' ) );
+                            setError( __( 'Your sign-in link worked, but this browser did not keep you signed in. Check that the web address here matches the one in your email, and that cookies are allowed for this site, then ask for a new link.', 'gratora-donation-platform' ) );
                         }
                     } );
                 } )
@@ -415,20 +415,20 @@ function App() {
         if ( ! me || ! pending ) return;
         pendingCardReturn.current = null;
         completeCardReturn( pending )
-            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'gratora' ) } ) )
+            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'gratora-donation-platform' ) } ) )
             .catch( ( e ) => setCardNotice( {
                 ok:   false,
-                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'gratora' ),
+                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'gratora-donation-platform' ),
             } ) );
     }, [ me ] );
 
-    if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'gratora' ) }</div>;
+    if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'gratora-donation-platform' ) }</div>;
     if ( ! me && loadError ) {
         return (
             <div class="dp-loading">
                 <p class="dp-signin__error">{ loadError }</p>
                 <button type="button" class="dp-link" onClick={ () => { setLoading( true ); loadMe(); } }>
-                    { __( 'Try again', 'gratora' ) }
+                    { __( 'Try again', 'gratora-donation-platform' ) }
                 </button>
             </div>
         );
@@ -444,7 +444,7 @@ function App() {
     return (
         <div class="dp">
             <header class="dp__head">
-                <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'gratora' ), me.first_name || me.name ) }</h1>
+                <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'gratora-donation-platform' ), me.first_name || me.name ) }</h1>
                 <SignOutControls />
             </header>
 
@@ -456,7 +456,7 @@ function App() {
                         class="dp-banner__action"
                         onClick={ () => { setCardNotice( null ); if ( ! cardNotice.ok ) setTab( 'recurring' ); } }
                     >
-                        { cardNotice.ok ? __( 'Dismiss', 'gratora' ) : __( 'Try again', 'gratora' ) }
+                        { cardNotice.ok ? __( 'Dismiss', 'gratora-donation-platform' ) : __( 'Try again', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) }
@@ -464,15 +464,15 @@ function App() {
             { consentsPending > 0 && tab !== 'consents' && (
                 <div class="dp-banner" role="status">
                     <div class="dp-banner__text">
-                        <strong>{ __( 'Your privacy preferences need an update.', 'gratora' ) }</strong>{ ' ' }
-                        { __( "We've revised the terms for some of the things you previously agreed to. Take a moment to review.", 'gratora' ) }
+                        <strong>{ __( 'Your privacy preferences need an update.', 'gratora-donation-platform' ) }</strong>{ ' ' }
+                        { __( "We've revised the terms for some of the things you previously agreed to. Take a moment to review.", 'gratora-donation-platform' ) }
                     </div>
                     <button
                         type="button"
                         class="dp-banner__action"
                         onClick={ () => setTab( 'consents' ) }
                     >
-                        { __( 'Review now', 'gratora' ) }
+                        { __( 'Review now', 'gratora-donation-platform' ) }
                     </button>
                 </div>
             ) }
@@ -490,7 +490,7 @@ function App() {
                             onClick={ () => setTab( t.id ) }
                         >
                             { t.label }
-                            { showDot && <span class="dp__tab-dot" aria-label={ __( 'needs attention', 'gratora' ) } /> }
+                            { showDot && <span class="dp__tab-dot" aria-label={ __( 'needs attention', 'gratora-donation-platform' ) } /> }
                         </button>
                     );
                 } ) }
@@ -521,13 +521,13 @@ function App() {
 }
 
 const TABS = [
-    { id: 'overview',    label: __( 'Overview', 'gratora' ) },
-    { id: 'donations',   label: __( 'Donations', 'gratora' ) },
-    { id: 'recurring',   label: __( 'Recurring', 'gratora' ) },
-    { id: 'receipts',    label: __( 'Receipts & tax', 'gratora' ) },
-    { id: 'preferences', label: __( 'Preferences', 'gratora' ) },
-    { id: 'profile',     label: __( 'Profile', 'gratora' ) },
-    { id: 'consents',    label: __( 'Consents', 'gratora' ) },
+    { id: 'overview',    label: __( 'Overview', 'gratora-donation-platform' ) },
+    { id: 'donations',   label: __( 'Donations', 'gratora-donation-platform' ) },
+    { id: 'recurring',   label: __( 'Recurring', 'gratora-donation-platform' ) },
+    { id: 'receipts',    label: __( 'Receipts & tax', 'gratora-donation-platform' ) },
+    { id: 'preferences', label: __( 'Preferences', 'gratora-donation-platform' ) },
+    { id: 'profile',     label: __( 'Profile', 'gratora-donation-platform' ) },
+    { id: 'consents',    label: __( 'Consents', 'gratora-donation-platform' ) },
 ];
 
 /** Sign out all devices and invalidate unused links; state that scope in the control. */
@@ -536,7 +536,7 @@ function SignOutControls() {
         <div class="dp__signout-group">
             <button type="button" class="dp__signout" onClick={ () => {
                 api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
-            } }>{ __( 'Sign out', 'gratora' ) }</button>
+            } }>{ __( 'Sign out', 'gratora-donation-platform' ) }</button>
         </div>
     );
 }
@@ -591,26 +591,26 @@ function SignInPrompt( { initialError } ) {
     if ( sent ) {
         return (
             <div class="dp-signin">
-                <h2>{ __( 'Check your email', 'gratora' ) }</h2>
+                <h2>{ __( 'Check your email', 'gratora-donation-platform' ) }</h2>
                 <p>{ sprintf(
                     /* translators: %s: action the link performs, either "finish setting up your account" or "sign in" */
-                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'gratora' ),
-                    isRegister ? __( 'finish setting up your account', 'gratora' ) : __( 'sign in', 'gratora' )
+                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'gratora-donation-platform' ),
+                    isRegister ? __( 'finish setting up your account', 'gratora-donation-platform' ) : __( 'sign in', 'gratora-donation-platform' )
                 ) }</p>
                 { /* The server quietly refuses a second request inside its send
                      window, so this copy promises nothing about timing. */ }
-                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'gratora' ) }</p>
+                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'gratora-donation-platform' ) }</p>
                 { /* Anyone can type anyone's address here, so a name typed
                      against an address that is already waiting for a link is
                      dropped rather than believed. Said to everyone, because
                      saying it only when it happened would answer whether that
                      address has a signup waiting. */ }
                 { isRegister && (
-                    <p class="dp-hint">{ __( 'Your name is taken from your first signup for an address. If you have signed up before, you may need to set it again in the portal once you are signed in.', 'gratora' ) }</p>
+                    <p class="dp-hint">{ __( 'Your name is taken from your first signup for an address. If you have signed up before, you may need to set it again in the portal once you are signed in.', 'gratora-donation-platform' ) }</p>
                 ) }
                 <p class="dp-signin__alt">
                     <button type="button" class="dp-link" onClick={ () => { setSent( false ); setError( null ); } }>
-                        { __( 'Use a different email address', 'gratora' ) }
+                        { __( 'Use a different email address', 'gratora-donation-platform' ) }
                     </button>
                 </p>
             </div>
@@ -619,11 +619,11 @@ function SignInPrompt( { initialError } ) {
 
     return (
         <div class="dp-signin">
-            <h2>{ isRegister ? __( 'Create your account', 'gratora' ) : __( 'Donor portal', 'gratora' ) }</h2>
+            <h2>{ isRegister ? __( 'Create your account', 'gratora-donation-platform' ) : __( 'Donor portal', 'gratora-donation-platform' ) }</h2>
             <p>
                 { isRegister
-                    ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'gratora' )
-                    : __( "Enter the email you donated with and we'll send a sign-in link.", 'gratora' ) }
+                    ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'gratora-donation-platform' )
+                    : __( "Enter the email you donated with and we'll send a sign-in link.", 'gratora-donation-platform' ) }
             </p>
             <form class={ isRegister ? 'is-stacked' : null } onSubmit={ submit }>
                 { isRegister && (
@@ -633,8 +633,8 @@ function SignInPrompt( { initialError } ) {
                             required
                             autocomplete="given-name"
                             value={ firstName }
-                            aria-label={ __( 'First name', 'gratora' ) }
-                            placeholder={ __( 'First name', 'gratora' ) }
+                            aria-label={ __( 'First name', 'gratora-donation-platform' ) }
+                            placeholder={ __( 'First name', 'gratora-donation-platform' ) }
                             onInput={ ( e ) => setFirstName( e.target.value ) }
                         />
                         { /* Not required: plenty of people go by one name, and a
@@ -643,8 +643,8 @@ function SignInPrompt( { initialError } ) {
                             type="text"
                             autocomplete="family-name"
                             value={ lastName }
-                            aria-label={ __( 'Last name', 'gratora' ) }
-                            placeholder={ __( 'Last name', 'gratora' ) }
+                            aria-label={ __( 'Last name', 'gratora-donation-platform' ) }
+                            placeholder={ __( 'Last name', 'gratora-donation-platform' ) }
                             onInput={ ( e ) => setLastName( e.target.value ) }
                         />
                     </div>
@@ -654,19 +654,19 @@ function SignInPrompt( { initialError } ) {
                     required
                     autocomplete="email"
                     value={ email }
-                    aria-label={ __( 'Email address', 'gratora' ) }
-                    placeholder={ __( 'Enter your email address', 'gratora' ) }
+                    aria-label={ __( 'Email address', 'gratora-donation-platform' ) }
+                    placeholder={ __( 'Enter your email address', 'gratora-donation-platform' ) }
                     onInput={ ( e ) => setEmail( e.target.value ) }
                 />
                 <button type="submit" disabled={ sending }>
-                    { sending ? __( 'Sending…', 'gratora' ) : ( isRegister ? __( 'Create account', 'gratora' ) : __( 'Send sign-in link', 'gratora' ) ) }
+                    { sending ? __( 'Sending…', 'gratora-donation-platform' ) : ( isRegister ? __( 'Create account', 'gratora-donation-platform' ) : __( 'Send sign-in link', 'gratora-donation-platform' ) ) }
                 </button>
             </form>
             { error && <p class="dp-signin__error">{ error }</p> }
             <p class="dp-signin__alt">
-                { isRegister ? __( 'Already have an account or donated before?', 'gratora' ) : __( 'New here and want to fundraise?', 'gratora' ) }{ ' ' }
+                { isRegister ? __( 'Already have an account or donated before?', 'gratora-donation-platform' ) : __( 'New here and want to fundraise?', 'gratora-donation-platform' ) }{ ' ' }
                 <button type="button" class="dp-link" onClick={ () => { setError( null ); setMode( isRegister ? 'signin' : 'register' ); } }>
-                    { isRegister ? __( 'Sign in', 'gratora' ) : __( 'Create an account', 'gratora' ) }
+                    { isRegister ? __( 'Sign in', 'gratora-donation-platform' ) : __( 'Create an account', 'gratora-donation-platform' ) }
                 </button>
             </p>
         </div>
@@ -677,9 +677,9 @@ function Overview( { me } ) {
     return (
         <div class="dp-overview">
             <div class="dp-kpis">
-                <Kpi label={ __( 'Lifetime giving', 'gratora' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
-                <Kpi label={ __( 'Donations', 'gratora' ) } value={ String( me.donations_count ) } />
-                <Kpi label={ __( 'Donor since', 'gratora' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
+                <Kpi label={ __( 'Lifetime giving', 'gratora-donation-platform' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
+                <Kpi label={ __( 'Donations', 'gratora-donation-platform' ) } value={ String( me.donations_count ) } />
+                <Kpi label={ __( 'Donor since', 'gratora-donation-platform' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
             </div>
             { me.unconverted_count > 0 && (
                 <p class="dp-hint">
@@ -689,25 +689,25 @@ function Overview( { me } ) {
                             'Lifetime giving does not include %d donation you gave in another currency.',
                             'Lifetime giving does not include %d donations you gave in other currencies.',
                             me.unconverted_count,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         me.unconverted_count
                     ) }
                 </p>
             ) }
-            <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'gratora' ) }</p>
+            <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'gratora-donation-platform' ) }</p>
         </div>
     );
 }
 
 function freqLabel( f ) {
     const map = {
-        one_time:  __( 'one time', 'gratora' ),
-        weekly:    __( 'weekly', 'gratora' ),
-        biweekly:  __( 'biweekly', 'gratora' ),
-        monthly:   __( 'monthly', 'gratora' ),
-        quarterly: __( 'quarterly', 'gratora' ),
-        yearly:    __( 'yearly', 'gratora' ),
+        one_time:  __( 'one time', 'gratora-donation-platform' ),
+        weekly:    __( 'weekly', 'gratora-donation-platform' ),
+        biweekly:  __( 'biweekly', 'gratora-donation-platform' ),
+        monthly:   __( 'monthly', 'gratora-donation-platform' ),
+        quarterly: __( 'quarterly', 'gratora-donation-platform' ),
+        yearly:    __( 'yearly', 'gratora-donation-platform' ),
     };
     return map[ f ] || String( f || '' ).replace( '_', ' ' );
 }
@@ -720,7 +720,7 @@ function LoadFailure( { message, onRetry } ) {
     return (
         <p class="dp-error">
             { message }{ ' ' }
-            <button type="button" class="dp-link" onClick={ onRetry }>{ __( 'Try again', 'gratora' ) }</button>
+            <button type="button" class="dp-link" onClick={ onRetry }>{ __( 'Try again', 'gratora-donation-platform' ) }</button>
         </p>
     );
 }
@@ -736,12 +736,12 @@ function Donations( { onOpen } ) {
     useEffect( () => { load(); }, [ load ] );
 
     if ( error )   return <LoadFailure message={ error } onRetry={ load } />;
-    if ( ! page )  return <p>{ __( 'Loading donations…', 'gratora' ) }</p>;
+    if ( ! page )  return <p>{ __( 'Loading donations…', 'gratora-donation-platform' ) }</p>;
 
     const list  = Array.isArray( page.items ) ? page.items : [];
     const total = Number( page.total || list.length );
 
-    if ( ! list.length ) return <p>{ __( 'No donations yet.', 'gratora' ) }</p>;
+    if ( ! list.length ) return <p>{ __( 'No donations yet.', 'gratora-donation-platform' ) }</p>;
 
     return (
         <div class="dp-list">
@@ -749,7 +749,7 @@ function Donations( { onOpen } ) {
                 <p class="dp-list__note">
                     { sprintf(
                         /* translators: 1: how many donations are listed, 2: how many the donor has made in total. */
-                        __( 'Showing your %1$s most recent donations of %2$s. Ask the organization for the rest.', 'gratora' ),
+                        __( 'Showing your %1$s most recent donations of %2$s. Ask the organization for the rest.', 'gratora-donation-platform' ),
                         list.length.toLocaleString(),
                         total.toLocaleString()
                     ) }
@@ -763,17 +763,17 @@ function Donations( { onOpen } ) {
                     tabIndex={ 0 }
                     onClick={ () => onOpen( d.reference ) }
                     onKeyDown={ ( e ) => { if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); onOpen( d.reference ); } } }
-                    aria-label={ sprintf( /* translators: %s: donation reference */ __( 'View donation %s', 'gratora' ), d.reference ) }
+                    aria-label={ sprintf( /* translators: %s: donation reference */ __( 'View donation %s', 'gratora-donation-platform' ), d.reference ) }
                 >
                     <div>
                         <strong>{ formatAmount( d.amount_cents, d.currency ) }</strong>
                         { d.fee_covered_cents > 0 && (
-                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'gratora' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
+                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'gratora-donation-platform' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
                         ) }
                         { d.refunded_cents > 0 && (
-                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s refunded', 'gratora' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
+                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s refunded', 'gratora-donation-platform' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
                         ) }
-                        { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'gratora' ) }</span> }
+                        { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'gratora-donation-platform' ) }</span> }
                         <div class="dp-list__sub">{ formatDate( d.paid_at ) } · { d.reference }</div>
                     </div>
                     <span class={ `dp-pill dp-pill--${ d.frequency }` }>{ freqLabel( d.frequency ) }</span>
@@ -804,19 +804,19 @@ function DonationDetail( { reference, onClose } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'gratora' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'gratora-donation-platform' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'gratora' ) }>×</button>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'gratora-donation-platform' ) }>×</button>
                 { error && <p class="dp-error">{ error }</p> }
-                { ! d ? <p>{ __( 'Loading…', 'gratora' ) }</p> : (
+                { ! d ? <p>{ __( 'Loading…', 'gratora-donation-platform' ) }</p> : (
                     <>
                         <div class="dp-detail__head">
                             <div class="dp-detail__amount">{ formatAmount( d.amount_cents, d.currency ) }</div>
                             <div class="dp-detail__meta">{ formatDate( d.paid_at ) } · { d.reference }</div>
                             { d.refunded_cents > 0 && (
                                 <div class="dp-detail__refund">
-                                    <span>{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s was refunded to you', 'gratora' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
-                                    <strong>{ sprintf( /* translators: %s: formatted amount the organization kept */ __( 'Net %s', 'gratora' ), formatAmount( d.amount_cents - d.refunded_cents, d.currency ) ) }</strong>
+                                    <span>{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s was refunded to you', 'gratora-donation-platform' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
+                                    <strong>{ sprintf( /* translators: %s: formatted amount the organization kept */ __( 'Net %s', 'gratora-donation-platform' ), formatAmount( d.amount_cents - d.refunded_cents, d.currency ) ) }</strong>
                                 </div>
                             ) }
                         </div>
@@ -824,13 +824,13 @@ function DonationDetail( { reference, onClose } ) {
 
                         <dl class="dp-facts">
                             { [
-                                [ __( 'Campaign', 'gratora' ), d.campaign_title ],
-                                [ __( 'Form', 'gratora' ), d.form_title ],
-                                [ __( 'Fund', 'gratora' ), d.fund_name ],
-                                [ __( 'Frequency', 'gratora' ), d.frequency === 'one_time' ? __( 'One-off', 'gratora' ) : d.frequency ],
-                                [ __( 'Paid with', 'gratora' ), d.payment_method ],
-                                [ __( 'Fees you covered', 'gratora' ), d.fee_covered_cents > 0 ? formatAmount( d.fee_covered_cents, d.currency ) : null ],
-                                [ __( 'Your note', 'gratora' ), d.note_to_org ],
+                                [ __( 'Campaign', 'gratora-donation-platform' ), d.campaign_title ],
+                                [ __( 'Form', 'gratora-donation-platform' ), d.form_title ],
+                                [ __( 'Fund', 'gratora-donation-platform' ), d.fund_name ],
+                                [ __( 'Frequency', 'gratora-donation-platform' ), d.frequency === 'one_time' ? __( 'One-off', 'gratora-donation-platform' ) : d.frequency ],
+                                [ __( 'Paid with', 'gratora-donation-platform' ), d.payment_method ],
+                                [ __( 'Fees you covered', 'gratora-donation-platform' ), d.fee_covered_cents > 0 ? formatAmount( d.fee_covered_cents, d.currency ) : null ],
+                                [ __( 'Your note', 'gratora-donation-platform' ), d.note_to_org ],
                             ].filter( ( [ , v ] ) => v ).map( ( [ k, v ] ) => (
                                 <div class="dp-facts__row" key={ k }>
                                     <dt>{ k }</dt>
@@ -842,7 +842,7 @@ function DonationDetail( { reference, onClose } ) {
                         { d.give_again_url && (
                             <div class="dp-detail__section">
                                 <a class="dp-action is-primary" href={ d.give_again_url }>
-                                    { sprintf( /* translators: %s: formatted donation amount */ __( 'Give again (%s)', 'gratora' ), formatAmount( d.amount_cents, d.currency ) ) }
+                                    { sprintf( /* translators: %s: formatted donation amount */ __( 'Give again (%s)', 'gratora-donation-platform' ), formatAmount( d.amount_cents, d.currency ) ) }
                                 </a>
                             </div>
                         ) }
@@ -855,8 +855,8 @@ function DonationDetail( { reference, onClose } ) {
                                     onChange={ ( e ) => toggleAnonymity( e.target.checked ) }
                                 />
                                 <span>
-                                    { __( 'Hide my name from the public list of donors', 'gratora' ) }
-                                    <small class="dp-hint">{ __( 'The organization still sees your name on this donation, and your receipt is unchanged.', 'gratora' ) }</small>
+                                    { __( 'Hide my name from the public list of donors', 'gratora-donation-platform' ) }
+                                    <small class="dp-hint">{ __( 'The organization still sees your name on this donation, and your receipt is unchanged.', 'gratora-donation-platform' ) }</small>
                                 </span>
                             </label>
                         </div>
@@ -889,8 +889,8 @@ function Recurring() {
     useEffect( () => { load(); }, [ load ] );
 
     if ( error )    return <LoadFailure message={ error } onRetry={ load } />;
-    if ( ! list )   return <p>{ __( 'Loading…', 'gratora' ) }</p>;
-    if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'gratora' ) }</p>;
+    if ( ! list )   return <p>{ __( 'Loading…', 'gratora-donation-platform' ) }</p>;
+    if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'gratora-donation-platform' ) }</p>;
 
     return (
         <>
@@ -903,13 +903,13 @@ function Recurring() {
                             tabIndex={ 0 }
                             onClick={ () => setAction( p ) }
                             onKeyDown={ ( e ) => { if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); setAction( p ); } } }
-                            aria-label={ sprintf( /* translators: %d: subscription id */ __( 'View recurring donation %d', 'gratora' ), p.id ) }
+                            aria-label={ sprintf( /* translators: %d: subscription id */ __( 'View recurring donation %d', 'gratora-donation-platform' ), p.id ) }
                         >
                         <div>
                             <strong>{ formatAmount( p.amount_cents, p.currency ) }</strong>
                             <span class="dp-list__pill">{ intervalLabel( p.interval_count, p.interval_unit ) }</span>
                             <div class="dp-list__sub">
-                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'gratora' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
+                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'gratora-donation-platform' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
                             </div>
                         </div>
                         <div class="dp-list__actions">
@@ -954,7 +954,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
         return api( `recurring/${ plan.id }/action`, { method: 'POST', body: JSON.stringify( body ) } )
             .then( onDone )
             .catch( ( e ) => {
-                setErr( e.message || __( 'Something went wrong.', 'gratora' ) );
+                setErr( e.message || __( 'Something went wrong.', 'gratora-donation-platform' ) );
                 // PayPal answers a revision with a link the donor must open.
                 // refusal() hands back the whole REST body, so the payload the
                 // route set sits one level in.
@@ -965,14 +965,14 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage subscription', 'gratora' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage subscription', 'gratora-donation-platform' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'gratora' ) }>×</button>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'gratora-donation-platform' ) }>×</button>
                 { err && <p class="dp-error">{ err }</p> }
                 { approveUrl && (
                     <p class="dp-approve">
                         <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
-                            { __( 'Approve the change', 'gratora' ) }
+                            { __( 'Approve the change', 'gratora-donation-platform' ) }
                         </a>
                     </p>
                 ) }
@@ -993,14 +993,14 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
                         <dl class="dp-facts">
                             { [
-                                [ __( 'Campaign', 'gratora' ), plan.campaign_title ],
-                                [ __( 'Fund', 'gratora' ), plan.fund_name ],
-                                [ __( 'Next charge', 'gratora' ), plan.next_payment_at ? formatDate( plan.next_payment_at ) : null ],
-                                [ __( 'Last charge', 'gratora' ), plan.last_payment_at ? formatDate( plan.last_payment_at ) : null ],
-                                [ __( 'Resumes', 'gratora' ), plan.resume_at ? formatDate( plan.resume_at ) : null ],
-                                [ __( 'Giving since', 'gratora' ), plan.started_at ? formatDate( plan.started_at ) : null ],
-                                [ __( 'Donations made', 'gratora' ), plan.payments_count || null ],
-                                [ __( 'Given in total', 'gratora' ), plan.total_paid_cents ? formatAmount( plan.total_paid_cents, plan.currency ) : null ],
+                                [ __( 'Campaign', 'gratora-donation-platform' ), plan.campaign_title ],
+                                [ __( 'Fund', 'gratora-donation-platform' ), plan.fund_name ],
+                                [ __( 'Next charge', 'gratora-donation-platform' ), plan.next_payment_at ? formatDate( plan.next_payment_at ) : null ],
+                                [ __( 'Last charge', 'gratora-donation-platform' ), plan.last_payment_at ? formatDate( plan.last_payment_at ) : null ],
+                                [ __( 'Resumes', 'gratora-donation-platform' ), plan.resume_at ? formatDate( plan.resume_at ) : null ],
+                                [ __( 'Giving since', 'gratora-donation-platform' ), plan.started_at ? formatDate( plan.started_at ) : null ],
+                                [ __( 'Donations made', 'gratora-donation-platform' ), plan.payments_count || null ],
+                                [ __( 'Given in total', 'gratora-donation-platform' ), plan.total_paid_cents ? formatAmount( plan.total_paid_cents, plan.currency ) : null ],
                             ].filter( ( [ , v ] ) => v ).map( ( [ k, v ] ) => (
                                 <div class="dp-facts__row" key={ k }>
                                     <dt>{ k }</dt>
@@ -1010,11 +1010,11 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                         </dl>
 
                         { ! isTerminalPlan( plan.status ) && (
-                            <h3>{ __( 'Manage subscription', 'gratora' ) }</h3>
+                            <h3>{ __( 'Manage subscription', 'gratora-donation-platform' ) }</h3>
                         ) }
                         { plan.status === 'paused' && (
                             <button class="dp-action is-primary" disabled={ busy } onClick={ () => call( { action: 'resume' } ) }>
-                                { __( 'Resume', 'gratora' ) }
+                                { __( 'Resume', 'gratora-donation-platform' ) }
                             </button>
                         ) }
                         { /* Two shipped gateways handle subscriptions and
@@ -1026,18 +1026,18 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                             <>
                                 { plan.can_pause && plan.status !== 'paused' && (
                                     <>
-                                        <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'gratora' ) }</button>
-                                        <button class="dp-action" disabled={ busy } onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'gratora' ) }</button>
+                                        <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'gratora-donation-platform' ) }</button>
+                                        <button class="dp-action" disabled={ busy } onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'gratora-donation-platform' ) }</button>
                                     </>
                                 ) }
-                                <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'gratora' ) }</button>
+                                <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'gratora-donation-platform' ) }</button>
                                 { plan.can_change_interval && (
-                                    <button class="dp-action" onClick={ () => setStage( 'interval' ) }>{ __( 'Change frequency', 'gratora' ) }</button>
+                                    <button class="dp-action" onClick={ () => setStage( 'interval' ) }>{ __( 'Change frequency', 'gratora-donation-platform' ) }</button>
                                 ) }
                                 { plan.can_update_payment_method && (
-                                    <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'gratora' ) }</button>
+                                    <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'gratora-donation-platform' ) }</button>
                                 ) }
-                                <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel subscription', 'gratora' ) }</button>
+                                <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel subscription', 'gratora-donation-platform' ) }</button>
                             </>
                         ) }
                     </>
@@ -1045,10 +1045,10 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
                 { stage === 'pause' && (
                     <>
-                        <h3>{ __( 'Pause for how long?', 'gratora' ) }</h3>
+                        <h3>{ __( 'Pause for how long?', 'gratora-donation-platform' ) }</h3>
                         { [ 1, 3, 6, 12 ].map( ( m ) => (
                             <button key={ m } class="dp-action" disabled={ busy } onClick={ () => call( { action: 'pause', months: m } ) }>
-                                { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'gratora' ), m ) }
+                                { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'gratora-donation-platform' ), m ) }
                             </button>
                         ) ) }
                     </>
@@ -1120,7 +1120,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
                     el.mount( mountRef.current );
                 } );
             } )
-            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'gratora' ) ); } );
+            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'gratora-donation-platform' ) ); } );
 
         return () => { cancelled = true; };
     }, [ plan.id ] );
@@ -1147,14 +1147,14 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
         clearCardReturn();
 
         if ( error ) {
-            onError( error.message || __( 'That card could not be saved.', 'gratora' ) );
+            onError( error.message || __( 'That card could not be saved.', 'gratora-donation-platform' ) );
             setSaving( false );
             return;
         }
 
         const token = setupIntent && setupIntent.payment_method;
         if ( ! token ) {
-            onError( __( 'That card could not be saved.', 'gratora' ) );
+            onError( __( 'That card could not be saved.', 'gratora-donation-platform' ) );
             setSaving( false );
             return;
         }
@@ -1164,28 +1164,28 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
             body: JSON.stringify( { token } ),
         } )
             .then( onDone )
-            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'gratora' ) ); setSaving( false ); } );
+            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'gratora-donation-platform' ) ); setSaving( false ); } );
     };
 
     if ( mode === 'redirect' ) {
         return (
             <>
-                <h3>{ __( 'Update payment method', 'gratora' ) }</h3>
+                <h3>{ __( 'Update payment method', 'gratora-donation-platform' ) }</h3>
                 <p>
                     { sprintf(
                         /* translators: %s: the payment provider's name, e.g. PayPal. */
-                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'gratora' ),
-                        label || __( 'Your payment provider', 'gratora' )
+                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'gratora-donation-platform' ),
+                        label || __( 'Your payment provider', 'gratora-donation-platform' )
                     ) }
                 </p>
                 <a class="dp-action" href={ redirect } rel="noopener">
                     { label
                         ? sprintf(
                             /* translators: %s: the payment provider's name, e.g. PayPal. */
-                            __( 'Continue to %s', 'gratora' ),
+                            __( 'Continue to %s', 'gratora-donation-platform' ),
                             label
                         )
-                        : __( 'Continue', 'gratora' ) }
+                        : __( 'Continue', 'gratora-donation-platform' ) }
                 </a>
             </>
         );
@@ -1193,12 +1193,12 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
 
     return (
         <>
-            <h3>{ __( 'Update payment method', 'gratora' ) }</h3>
-            <p>{ __( 'Enter the card you would like future donations charged to.', 'gratora' ) }</p>
+            <h3>{ __( 'Update payment method', 'gratora-donation-platform' ) }</h3>
+            <p>{ __( 'Enter the card you would like future donations charged to.', 'gratora-donation-platform' ) }</p>
             <div ref={ mountRef } />
-            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'gratora' ) }</p> }
+            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'gratora-donation-platform' ) }</p> }
             <button class="dp-action" disabled={ ! ready || saving } onClick={ save }>
-                { saving ? __( 'Saving…', 'gratora' ) : __( 'Save card', 'gratora' ) }
+                { saving ? __( 'Saving…', 'gratora-donation-platform' ) : __( 'Save card', 'gratora-donation-platform' ) }
             </button>
         </>
     );
@@ -1213,8 +1213,8 @@ function ChangeAmountForm( { plan, onSubmit, busy } ) {
 
     return (
         <>
-            <h3>{ __( 'Change amount', 'gratora' ) }</h3>
-            <p class="dp-hint">{ __( 'Current:', 'gratora' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
+            <h3>{ __( 'Change amount', 'gratora-donation-platform' ) }</h3>
+            <p class="dp-hint">{ __( 'Current:', 'gratora-donation-platform' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
             { /* No min: AmountInput clamps every keystroke to it, so clearing
                  the box emitted the minimum and left Save live on an amount the
                  donor never typed. */ }
@@ -1222,16 +1222,16 @@ function ChangeAmountForm( { plan, onSubmit, busy } ) {
                 value={ value }
                 onChange={ setValue }
                 currency={ plan.currency }
-                inputProps={ { 'aria-label': __( 'New donation amount', 'gratora' ) } }
+                inputProps={ { 'aria-label': __( 'New donation amount', 'gratora-donation-platform' ) } }
             />
             <p class="dp-hint">
                 { sprintf(
                     /* translators: %s: the smallest amount this donation can be changed to. */
-                    __( 'The smallest amount is %s.', 'gratora' ),
+                    __( 'The smallest amount is %s.', 'gratora-donation-platform' ),
                     formatAmount( floor, plan.currency )
                 ) }
             </p>
-            <button class="dp-action is-primary" disabled={ busy || ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'gratora' ) }</button>
+            <button class="dp-action is-primary" disabled={ busy || ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'gratora-donation-platform' ) }</button>
         </>
     );
 }
@@ -1247,13 +1247,13 @@ function ChangeFrequencyForm( { plan, onSubmit, busy } ) {
 
     return (
         <>
-            <h3>{ __( 'Change frequency', 'gratora' ) }</h3>
-            <p class="dp-hint">{ __( 'Current:', 'gratora' ) } { intervalLabel( plan.interval_count, plan.interval_unit ) }</p>
+            <h3>{ __( 'Change frequency', 'gratora-donation-platform' ) }</h3>
+            <p class="dp-hint">{ __( 'Current:', 'gratora-donation-platform' ) } { intervalLabel( plan.interval_count, plan.interval_unit ) }</p>
             <label class="dp-modal__field">
-                <span>{ __( 'How often', 'gratora' ) }</span>
-                <select value={ value } onChange={ ( e ) => setValue( e.target.value ) } aria-label={ __( 'How often to donate', 'gratora' ) }>
+                <span>{ __( 'How often', 'gratora-donation-platform' ) }</span>
+                <select value={ value } onChange={ ( e ) => setValue( e.target.value ) } aria-label={ __( 'How often to donate', 'gratora-donation-platform' ) }>
                     { current === '' && (
-                        <option value="">{ __( 'Choose a frequency', 'gratora' ) }</option>
+                        <option value="">{ __( 'Choose a frequency', 'gratora-donation-platform' ) }</option>
                     ) }
                     { options.map( ( f ) => (
                         <option key={ f } value={ f }>{ frequencyLabel( f ) }</option>
@@ -1266,14 +1266,14 @@ function ChangeFrequencyForm( { plan, onSubmit, busy } ) {
                 <p class="dp-hint">
                     { sprintf(
                         /* translators: %s: formatted amount, e.g. $120.00 */
-                        __( 'That comes to %s a year.', 'gratora' ),
+                        __( 'That comes to %s a year.', 'gratora-donation-platform' ),
                         formatAmount( plan.amount_cents * perYear, plan.currency )
                     ) }
                 </p>
             ) }
-            <p class="dp-hint">{ __( 'You stay paid up to your current date. The new schedule starts from the charge after that.', 'gratora' ) }</p>
+            <p class="dp-hint">{ __( 'You stay paid up to your current date. The new schedule starts from the charge after that.', 'gratora-donation-platform' ) }</p>
             <button class="dp-action is-primary" disabled={ busy || ! value || value === current } onClick={ () => onSubmit( value ) }>
-                { __( 'Save new frequency', 'gratora' ) }
+                { __( 'Save new frequency', 'gratora-donation-platform' ) }
             </button>
         </>
     );
@@ -1286,35 +1286,35 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel, busy } ) {
     if ( confirmed ) {
         return (
             <>
-                <h3>{ __( 'Cancel subscription?', 'gratora' ) }</h3>
-                <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'gratora' ) }</p>
+                <h3>{ __( 'Cancel subscription?', 'gratora-donation-platform' ) }</h3>
+                <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'gratora-donation-platform' ) }</p>
                 <textarea
-                    placeholder={ __( 'Tell us why (optional, helps the org)', 'gratora' ) }
+                    placeholder={ __( 'Tell us why (optional, helps the org)', 'gratora-donation-platform' ) }
                     rows={ 3 }
                     value={ reason }
                     onInput={ ( e ) => setReason( e.target.value ) }
                 />
-                <button class="dp-action dp-action--danger" disabled={ busy } onClick={ () => onCancel( reason ) }>{ __( 'Cancel subscription', 'gratora' ) }</button>
+                <button class="dp-action dp-action--danger" disabled={ busy } onClick={ () => onCancel( reason ) }>{ __( 'Cancel subscription', 'gratora-donation-platform' ) }</button>
             </>
         );
     }
 
     return (
         <>
-            <h3>{ __( 'Before you cancel…', 'gratora' ) }</h3>
-            <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'gratora' ) }</p>
+            <h3>{ __( 'Before you cancel…', 'gratora-donation-platform' ) }</h3>
+            <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'gratora-donation-platform' ) }</p>
             { /* Offered only where the rail can actually do it. A donor trying
                  NOT to cancel was handed two buttons that both failed, and then
                  cancelled: the deflection sheet was doing the opposite of its
                  job. */ }
             { onPause && (
-                <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'gratora' ) }</button>
+                <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'gratora-donation-platform' ) }</button>
             ) }
             { onSkip && (
-                <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'gratora' ) }</button>
+                <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'gratora-donation-platform' ) }</button>
             ) }
-            <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'gratora' ) }</button>
-            <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'gratora' ) }</button>
+            <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'gratora-donation-platform' ) }</button>
+            <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'gratora-donation-platform' ) }</button>
         </>
     );
 }
@@ -1389,7 +1389,7 @@ function Receipts() {
         try {
             saveBlob( await api( `annual-statement/${ year }` ), `gratora-annual-${ year }.pdf` );
         } catch ( err ) {
-            setDlError( err.message || __( 'Could not generate statement.', 'gratora' ) );
+            setDlError( err.message || __( 'Could not generate statement.', 'gratora-donation-platform' ) );
         } finally {
             setDlBusy( false );
         }
@@ -1399,7 +1399,7 @@ function Receipts() {
     // hand the donor the bytes. A window.open one round trip after the tap is
     // outside the user gesture, and Safari refuses it without a word.
     const downloadReceipt = async ( id, receiptNumber ) => {
-        const generic = __( 'Could not open the receipt. Please try again.', 'gratora' );
+        const generic = __( 'Could not open the receipt. Please try again.', 'gratora-donation-platform' );
         setRowError( { id: 0, message: '' } );
         try {
             const res = await api( `receipts/${ id }/download-url` );
@@ -1420,32 +1420,32 @@ function Receipts() {
     return (
         <>
             <div class="dp-card">
-                <h3>{ __( 'Annual statement', 'gratora' ) }</h3>
-                <p class="dp-hint">{ __( 'One consolidated PDF covering all your donations in a given year.', 'gratora' ) }</p>
+                <h3>{ __( 'Annual statement', 'gratora-donation-platform' ) }</h3>
+                <p class="dp-hint">{ __( 'One consolidated PDF covering all your donations in a given year.', 'gratora-donation-platform' ) }</p>
                 <div class="dp-card__row">
-                    <select value={ year } aria-label={ __( 'Statement year', 'gratora' ) } onChange={ ( e ) => setYear( e.target.value ) }>
+                    <select value={ year } aria-label={ __( 'Statement year', 'gratora-donation-platform' ) } onChange={ ( e ) => setYear( e.target.value ) }>
                         { years.map( ( y ) => (
                             <option key={ y } value={ y }>{ y }</option>
                         ) ) }
                     </select>
                     <button class="dp-action is-primary" onClick={ downloadAnnual } disabled={ dlBusy } aria-busy={ dlBusy }>
-                        { dlBusy ? __( 'Preparing…', 'gratora' ) : __( 'Download statement', 'gratora' ) }
+                        { dlBusy ? __( 'Preparing…', 'gratora-donation-platform' ) : __( 'Download statement', 'gratora-donation-platform' ) }
                     </button>
                 </div>
                 { dlError && <p class="dp-error">{ dlError }</p> }
             </div>
 
-            <h3>{ __( 'Individual receipts', 'gratora' ) }</h3>
+            <h3>{ __( 'Individual receipts', 'gratora-donation-platform' ) }</h3>
             { error    && <p class="dp-error">{ error }</p> }
-            { ! page   && <p>{ __( 'Loading…', 'gratora' ) }</p> }
-            { page && list.length === 0 && <p>{ __( 'No receipts yet.', 'gratora' ) }</p> }
+            { ! page   && <p>{ __( 'Loading…', 'gratora-donation-platform' ) }</p> }
+            { page && list.length === 0 && <p>{ __( 'No receipts yet.', 'gratora-donation-platform' ) }</p> }
             { page && list.length > 0 && (
                 <>
                 { total > list.length && (
                     <p class="dp-list__note">
                         { sprintf(
                             /* translators: 1: how many receipts are listed, 2: how many the donor has in total. */
-                            __( 'Showing your %1$s most recent receipts of %2$s. The annual statement covers a whole year.', 'gratora' ),
+                            __( 'Showing your %1$s most recent receipts of %2$s. The annual statement covers a whole year.', 'gratora-donation-platform' ),
                             list.length.toLocaleString(),
                             total.toLocaleString()
                         ) }
@@ -1461,7 +1461,7 @@ function Receipts() {
                                     <p class="dp-error dp-list__error" role="alert">{ rowError.message }</p>
                                 ) }
                             </div>
-                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id, r.receipt_number ) }>{ __( 'Download', 'gratora' ) }</button>
+                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id, r.receipt_number ) }>{ __( 'Download', 'gratora-donation-platform' ) }</button>
                         </li>
                     ) ) }
                 </ul>
@@ -1481,9 +1481,9 @@ function Profile( { me, onSaved } ) {
     const [ uploading, setUploading ] = useState( false );
     const [ picErr,    setPicErr    ] = useState( '' );
 
-    useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'gratora' ) ) ); }, [] );
+    useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'gratora-donation-platform' ) ) ); }, [] );
 
-    if ( ! form ) return <p>{ err || __( 'Loading…', 'gratora' ) }</p>;
+    if ( ! form ) return <p>{ err || __( 'Loading…', 'gratora-donation-platform' ) }</p>;
 
     const set = ( k ) => ( e ) => setForm( { ...form, [ k ]: e.target.value } );
 
@@ -1499,7 +1499,7 @@ function Profile( { me, onSaved } ) {
                 onSaved && onSaved();
                 setTimeout( () => setSaved( false ), 2500 );
             } )
-            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'gratora' ) ) )
+            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'gratora-donation-platform' ) ) )
             .finally( () => setSaving( false ) );
     };
 
@@ -1515,7 +1515,7 @@ function Profile( { me, onSaved } ) {
         if ( max > 0 && file.size > max ) {
             setPicErr( sprintf(
                 /* translators: %s: file size, e.g. "2 MB". */
-                __( 'That picture is too large. The most this site takes is %s.', 'gratora' ),
+                __( 'That picture is too large. The most this site takes is %s.', 'gratora-donation-platform' ),
                 cfg.avatarMaxLabel || `${ Math.floor( max / 1048576 ) } MB`
             ) );
             return;
@@ -1530,7 +1530,7 @@ function Profile( { me, onSaved } ) {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'gratora' ) ) )
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'gratora-donation-platform' ) ) )
             .finally( () => setUploading( false ) );
     };
 
@@ -1542,7 +1542,7 @@ function Profile( { me, onSaved } ) {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'gratora' ) ) )
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'gratora-donation-platform' ) ) )
             .finally( () => setUploading( false ) );
     };
 
@@ -1556,19 +1556,19 @@ function Profile( { me, onSaved } ) {
                     { uploading && <span class="dp-avatar-field__spinner" aria-hidden="true" /> }
                 </span>
                 <div class="dp-avatar-field__controls">
-                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'gratora' ) }</span>
+                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'gratora-donation-platform' ) }</span>
                     <small>
                         { sprintf(
                             /* translators: %s: file size, e.g. "2 MB". */
-                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'gratora' ),
-                            cfg.avatarMaxLabel || __( '2 MB', 'gratora' )
+                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'gratora-donation-platform' ),
+                            cfg.avatarMaxLabel || __( '2 MB', 'gratora-donation-platform' )
                         ) }
                     </small>
                     <div class="dp-avatar-field__buttons">
                         <label class={ `dp-btn dp-btn--ghost${ uploading ? ' is-disabled' : '' }` }>
                             { uploading
-                                ? __( 'Uploading…', 'gratora' )
-                                : form.avatar_url ? __( 'Replace', 'gratora' ) : __( 'Upload', 'gratora' ) }
+                                ? __( 'Uploading…', 'gratora-donation-platform' )
+                                : form.avatar_url ? __( 'Replace', 'gratora-donation-platform' ) : __( 'Upload', 'gratora-donation-platform' ) }
                             <input
                                 type="file"
                                 accept="image/jpeg,image/png,image/gif,image/webp"
@@ -1579,29 +1579,29 @@ function Profile( { me, onSaved } ) {
                         </label>
                         { form.avatar_url && ! uploading && (
                             <button type="button" class="dp-btn dp-btn--ghost" onClick={ removePicture }>
-                                { __( 'Remove', 'gratora' ) }
+                                { __( 'Remove', 'gratora-donation-platform' ) }
                             </button>
                         ) }
                     </div>
                     { picErr && <span class="dp-error dp-avatar-field__error" role="alert">{ picErr }</span> }
                 </div>
             </div>
-            <label>{ __( 'Email', 'gratora' ) }
+            <label>{ __( 'Email', 'gratora-donation-platform' ) }
                 <input type="email" value={ form.email } disabled readOnly />
-                <small>{ __( 'To change your email, contact the organization.', 'gratora' ) }</small>
+                <small>{ __( 'To change your email, contact the organization.', 'gratora-donation-platform' ) }</small>
             </label>
             <div class="dp-form__row">
-                <label>{ __( 'First name', 'gratora' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
-                <label>{ __( 'Last name', 'gratora' ) }  <input type="text" value={ form.last_name }  onInput={ set( 'last_name' ) } /></label>
+                <label>{ __( 'First name', 'gratora-donation-platform' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
+                <label>{ __( 'Last name', 'gratora-donation-platform' ) }  <input type="text" value={ form.last_name }  onInput={ set( 'last_name' ) } /></label>
             </div>
-            <label>{ __( 'Phone', 'gratora' ) }   <input type="tel" autocomplete="tel" value={ form.phone } onInput={ set( 'phone' ) } /></label>
+            <label>{ __( 'Phone', 'gratora-donation-platform' ) }   <input type="tel" autocomplete="tel" value={ form.phone } onInput={ set( 'phone' ) } /></label>
             <CountryPicker value={ form.country } onChange={ ( code ) => setForm( { ...form, country: code } ) } />
-            <label>{ __( 'Company', 'gratora' ) } <input type="text" value={ form.company } onInput={ set( 'company' ) } /></label>
+            <label>{ __( 'Company', 'gratora-donation-platform' ) } <input type="text" value={ form.company } onInput={ set( 'company' ) } /></label>
             <div class="dp-form__actions">
                 <button class="dp-action is-primary" disabled={ saving } onClick={ save }>
-                    { saving ? __( 'Saving…', 'gratora' ) : __( 'Save', 'gratora' ) }
+                    { saving ? __( 'Saving…', 'gratora-donation-platform' ) : __( 'Save', 'gratora-donation-platform' ) }
                 </button>
-                { saved && <span class="dp-form__saved">{ __( 'Saved.', 'gratora' ) }</span> }
+                { saved && <span class="dp-form__saved">{ __( 'Saved.', 'gratora-donation-platform' ) }</span> }
                 { err && <span class="dp-error">{ err }</span> }
             </div>
             <PrivacyActions me={ me } />
@@ -1646,7 +1646,7 @@ function PrivacyActions( { me } ) {
 
             let r = await send( cfg.nonce );
             if ( ! r.ok ) {
-                const why = await refusal( r, __( 'Export failed.', 'gratora' ) );
+                const why = await refusal( r, __( 'Export failed.', 'gratora-donation-platform' ) );
                 if ( nonceWasRefused( r, why ) ) {
                     r = await send( '' );
                     if ( r.ok ) cfg.nonce = '';
@@ -1655,11 +1655,11 @@ function PrivacyActions( { me } ) {
                 }
             }
             if ( ! r.ok ) {
-                throw await refusal( r, __( 'Export failed.', 'gratora' ) );
+                throw await refusal( r, __( 'Export failed.', 'gratora-donation-platform' ) );
             }
             saveBlob( await r.blob(), 'my-data.json' );
         } catch ( e ) {
-            setError( e.message || __( 'Export failed.', 'gratora' ) );
+            setError( e.message || __( 'Export failed.', 'gratora-donation-platform' ) );
         } finally {
             setExporting( false );
         }
@@ -1672,7 +1672,7 @@ function PrivacyActions( { me } ) {
             await api( 'forget', { method: 'POST', body: JSON.stringify( { confirm: 'DELETE' } ) } );
             window.location.reload();
         } catch ( e ) {
-            setError( e.message || __( 'Deletion failed.', 'gratora' ) );
+            setError( e.message || __( 'Deletion failed.', 'gratora-donation-platform' ) );
             setDeleting( false );
         }
     };
@@ -1680,24 +1680,24 @@ function PrivacyActions( { me } ) {
     if ( ! allowed.export && ! allowed.remove ) return null;
 
     const note = allowed.export && allowed.remove
-        ? __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'gratora' )
+        ? __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'gratora-donation-platform' )
         : allowed.export
-            ? __( 'Download returns a JSON copy of everything we hold on you.', 'gratora' )
-            : __( "Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'gratora' );
+            ? __( 'Download returns a JSON copy of everything we hold on you.', 'gratora-donation-platform' )
+            : __( "Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'gratora-donation-platform' );
 
     return (
         <div class="dp-privacy">
-            <h4>{ __( 'Your data', 'gratora' ) }</h4>
+            <h4>{ __( 'Your data', 'gratora-donation-platform' ) }</h4>
             { error && <p class="dp-error">{ error }</p> }
             <div class="dp-privacy__actions">
                 { allowed.export && (
                     <button class="dp-action" disabled={ exporting } onClick={ downloadData }>
-                        { exporting ? __( 'Preparing…', 'gratora' ) : __( 'Download my data', 'gratora' ) }
+                        { exporting ? __( 'Preparing…', 'gratora-donation-platform' ) : __( 'Download my data', 'gratora-donation-platform' ) }
                     </button>
                 ) }
                 { allowed.remove && (
                     <button class="dp-action is-destructive" disabled={ deleting } onClick={ () => { setError( null ); setConfirmOpen( true ); } }>
-                        { deleting ? __( 'Deleting…', 'gratora' ) : __( 'Delete my account', 'gratora' ) }
+                        { deleting ? __( 'Deleting…', 'gratora-donation-platform' ) : __( 'Delete my account', 'gratora-donation-platform' ) }
                     </button>
                 ) }
             </div>
@@ -1727,15 +1727,15 @@ function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'gratora' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'gratora-donation-platform' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'gratora' ) }>×</button>
-                <h3>{ __( 'Delete my account', 'gratora' ) }</h3>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'gratora-donation-platform' ) }>×</button>
+                <h3>{ __( 'Delete my account', 'gratora-donation-platform' ) }</h3>
                 { error && <p class="dp-error">{ error }</p> }
-                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'gratora' ) }</p>
+                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'gratora-donation-platform' ) }</p>
                 <div class="dp-form">
                     <label>
-                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'gratora' ), 'DELETE' ) }
+                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'gratora-donation-platform' ), 'DELETE' ) }
                         <input
                             ref={ inputRef }
                             type="text"
@@ -1748,9 +1748,9 @@ function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
                     </label>
                 </div>
                 <button class="dp-action dp-action--danger" disabled={ deleting || ! matches } onClick={ onConfirm }>
-                    { deleting ? __( 'Deleting…', 'gratora' ) : __( 'Delete my account', 'gratora' ) }
+                    { deleting ? __( 'Deleting…', 'gratora-donation-platform' ) : __( 'Delete my account', 'gratora-donation-platform' ) }
                 </button>
-                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'gratora' ) }</button>
+                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'gratora-donation-platform' ) }</button>
             </div>
         </div>
     );
@@ -1826,7 +1826,7 @@ function CountryPicker( { value, onChange } ) {
 
     return (
         <label class="dp-country" for={ id }>
-            { __( 'Country', 'gratora' ) }
+            { __( 'Country', 'gratora-donation-platform' ) }
             <div class="dp-country__wrap">
                 <input
                     id={ id }
@@ -1837,7 +1837,7 @@ function CountryPicker( { value, onChange } ) {
                     aria-controls={ open ? `${ id }-list` : undefined }
                     aria-activedescendant={ open && visible[ active ] ? `${ id }-opt-${ visible[ active ].code }` : undefined }
                     value={ query }
-                    placeholder={ __( 'Search country…', 'gratora' ) }
+                    placeholder={ __( 'Search country…', 'gratora-donation-platform' ) }
                     onFocus={ () => setOpen( true ) }
                     onBlur={ () => setTimeout( () => {
                         setOpen( false );
@@ -1883,7 +1883,7 @@ function Consents( { onResolved } ) {
     const load = useCallback( () => {
         setErr( '' );
 
-        return api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'gratora' ) ) );
+        return api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'gratora-donation-platform' ) ) );
     }, [] );
     useEffect( () => { load(); }, [ load ] );
     useEffect( () => {
@@ -1900,12 +1900,12 @@ function Consents( { onResolved } ) {
 
     if ( ! list ) return err
         ? <LoadFailure message={ err } onRetry={ load } />
-        : <p>{ __( 'Loading…', 'gratora' ) }</p>;
+        : <p>{ __( 'Loading…', 'gratora-donation-platform' ) }</p>;
     if ( ! list.length ) return (
         <div class="dp-consents">
             <div class="dp-empty">
-                <p>{ __( 'No consent purposes are defined yet.', 'gratora' ) }</p>
-                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'gratora' ) }</p>
+                <p>{ __( 'No consent purposes are defined yet.', 'gratora-donation-platform' ) }</p>
+                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'gratora-donation-platform' ) }</p>
             </div>
             { sections }
         </div>
@@ -1928,7 +1928,7 @@ function Consents( { onResolved } ) {
                     onResolved( fresh.filter( ( p ) => p.stale ).length );
                 }
             } )
-            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'gratora' ) ); load(); } )
+            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'gratora-donation-platform' ) ); load(); } )
             .finally( () => setSaving( false ) );
     };
 
@@ -1954,12 +1954,12 @@ function Consents( { onResolved } ) {
             { err && <p class="dp-error">{ err }</p> }
             { staleCount > 0 && (
                 <div class="dp-consents__notice" role="status">
-                    <strong>{ sprintf( /* translators: %d: number of consent items that were updated */ _n( '%d updated.', '%d updated.', staleCount, 'gratora' ), staleCount ) }</strong>{ ' ' }
-                    { __( 'The items marked below have new terms since you last reviewed them. Confirm or change each one.', 'gratora' ) }
+                    <strong>{ sprintf( /* translators: %d: number of consent items that were updated */ _n( '%d updated.', '%d updated.', staleCount, 'gratora-donation-platform' ), staleCount ) }</strong>{ ' ' }
+                    { __( 'The items marked below have new terms since you last reviewed them. Confirm or change each one.', 'gratora-donation-platform' ) }
                 </div>
             ) }
             { staleCount === 0 && (
-                <p class="dp-hint">{ __( 'Toggle each subscription below. Every change is logged for your records.', 'gratora' ) }</p>
+                <p class="dp-hint">{ __( 'Toggle each subscription below. Every change is logged for your records.', 'gratora-donation-platform' ) }</p>
             ) }
             { list.map( ( p ) => (
                 <label
@@ -1974,11 +1974,11 @@ function Consents( { onResolved } ) {
                     />
                     <div>
                         <strong>{ p.label }</strong>
-                        { p.required && <span class="dp-consent__required">{ __( 'required', 'gratora' ) }</span> }
-                        { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'gratora' ) }</span> }
+                        { p.required && <span class="dp-consent__required">{ __( 'required', 'gratora-donation-platform' ) }</span> }
+                        { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'gratora-donation-platform' ) }</span> }
                         { p.description && <p class="dp-consent__desc">{ p.description }</p> }
                         { p.has_record && p.occurred_at && (
-                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'gratora' ), formatDate( p.occurred_at ) ) }</p>
+                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'gratora-donation-platform' ), formatDate( p.occurred_at ) ) }</p>
                         ) }
                         { p.stale && (
                             <button
@@ -1986,14 +1986,14 @@ function Consents( { onResolved } ) {
                                 class="dp-consent__confirm"
                                 onClick={ () => confirmStale( p.key ) }
                             >
-                                { __( 'Keep as is', 'gratora' ) }
+                                { __( 'Keep as is', 'gratora-donation-platform' ) }
                             </button>
                         ) }
                     </div>
                 </label>
             ) ) }
-            { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'gratora' ) }</p> }
-            { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'gratora' ) }</p> }
+            { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'gratora-donation-platform' ) }</p> }
+            { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'gratora-donation-platform' ) }</p> }
             { sections }
         </div>
     );
@@ -2007,7 +2007,7 @@ function Preferences() {
 
     const load = useCallback( () => {
         setErr( '' );
-        api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'gratora' ) ) );
+        api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'gratora-donation-platform' ) ) );
     }, [] );
 
     useEffect( () => { load(); }, [ load ] );
@@ -2019,7 +2019,7 @@ function Preferences() {
 
     if ( ! p ) return err
         ? <LoadFailure message={ err } onRetry={ load } />
-        : <p>{ __( 'Loading…', 'gratora' ) }</p>;
+        : <p>{ __( 'Loading…', 'gratora-donation-platform' ) }</p>;
 
     const save = () => {
         setSaving( true );
@@ -2027,24 +2027,24 @@ function Preferences() {
         setSaved( false );
         api( 'preferences', { method: 'POST', body: JSON.stringify( p ) } )
             .then( ( fresh ) => { setP( fresh ); setSaved( true ); } )
-            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'gratora' ) ) )
+            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'gratora-donation-platform' ) ) )
             .finally( () => setSaving( false ) );
     };
 
     return (
         <div class="dp-prefs">
             <div class="dp-prefs__col">
-                <h4>{ __( 'Privacy', 'gratora' ) }</h4>
+                <h4>{ __( 'Privacy', 'gratora-donation-platform' ) }</h4>
                 <label>
                     <input type="checkbox" checked={ p.always_anonymous } onChange={ ( e ) => setP( { ...p, always_anonymous: e.target.checked } ) } />
                     <span>
-                        { __( 'Hide my name from the public list of donors', 'gratora' ) }
-                        <small class="dp-hint">{ __( 'Applies to every future donation. The organization still sees your name, and your receipts are unchanged.', 'gratora' ) }</small>
+                        { __( 'Hide my name from the public list of donors', 'gratora-donation-platform' ) }
+                        <small class="dp-hint">{ __( 'Applies to every future donation. The organization still sees your name, and your receipts are unchanged.', 'gratora-donation-platform' ) }</small>
                     </span>
                 </label>
             </div>
-            <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'gratora' ) : __( 'Save preferences', 'gratora' ) }</button>
-            { ! saving && saved && <span class="dp-form__saved" role="status">{ __( 'Saved.', 'gratora' ) }</span> }
+            <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'gratora-donation-platform' ) : __( 'Save preferences', 'gratora-donation-platform' ) }</button>
+            { ! saving && saved && <span class="dp-form__saved" role="status">{ __( 'Saved.', 'gratora-donation-platform' ) }</span> }
             { err && <p class="dp-error">{ err }</p> }
         </div>
     );
@@ -2079,11 +2079,11 @@ export function formatDate( iso ) {
 }
 
 const FREQUENCY_LABELS = {
-    weekly:    __( 'Every week', 'gratora' ),
-    biweekly:  __( 'Every 2 weeks', 'gratora' ),
-    monthly:   __( 'Every month', 'gratora' ),
-    quarterly: __( 'Every 3 months', 'gratora' ),
-    yearly:    __( 'Every year', 'gratora' ),
+    weekly:    __( 'Every week', 'gratora-donation-platform' ),
+    biweekly:  __( 'Every 2 weeks', 'gratora-donation-platform' ),
+    monthly:   __( 'Every month', 'gratora-donation-platform' ),
+    quarterly: __( 'Every 3 months', 'gratora-donation-platform' ),
+    yearly:    __( 'Every year', 'gratora-donation-platform' ),
 };
 
 const FREQUENCY_PER_YEAR = { weekly: 52, biweekly: 26, monthly: 12, quarterly: 4, yearly: 1 };
@@ -2094,11 +2094,11 @@ function frequencyLabel( frequency ) {
 
 function intervalLabel( count, unit ) {
     const n = Number( count ) || 1;
-    const u = unit === 'year' ? _n( 'year', 'years', n, 'gratora' )
-        : unit === 'week'     ? _n( 'week', 'weeks', n, 'gratora' )
-        :                       _n( 'month', 'months', n, 'gratora' );
+    const u = unit === 'year' ? _n( 'year', 'years', n, 'gratora-donation-platform' )
+        : unit === 'week'     ? _n( 'week', 'weeks', n, 'gratora-donation-platform' )
+        :                       _n( 'month', 'months', n, 'gratora-donation-platform' );
     /* translators: 1: count, 2: interval unit (e.g. months) */
-    return sprintf( __( 'Every %1$d %2$s', 'gratora' ), n, u );
+    return sprintf( __( 'Every %1$d %2$s', 'gratora-donation-platform' ), n, u );
 }
 
 const mount = document.getElementById( 'gratora-donor-portal' );

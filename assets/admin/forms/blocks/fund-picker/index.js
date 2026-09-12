@@ -22,9 +22,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
     if ( funds.length === 0 ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'gratora' ) }
+                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'gratora-donation-platform' ) }
                 {' '}
-                <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'gratora' ) }</a>
+                <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'gratora-donation-platform' ) }</a>
             </Notice>
         );
     }
@@ -56,7 +56,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                     } }
                 >
                     <span style={ { fontSize: 13, fontWeight: 600 } }>
-                        { emptyLabel || __( 'No specific fund', 'gratora' ) }
+                        { emptyLabel || __( 'No specific fund', 'gratora-donation-platform' ) }
                     </span>
                     { showDescriptions && emptyDescription && (
                         <span style={ { fontSize: 11, lineHeight: 1.3 } }>
@@ -182,8 +182,8 @@ function Edit( { attributes, setAttributes } ) {
     // Offer only funds this block actually shows; a restricted set must not let
     // the admin preselect a fund the donor can't pick.
     const preselectChoices = [
-        { value: '', label: __( 'Auto (form, campaign, then org default)', 'gratora' ) },
-        ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'gratora' ) } ] : [] ),
+        { value: '', label: __( 'Auto (form, campaign, then org default)', 'gratora-donation-platform' ) },
+        ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'gratora-donation-platform' ) } ] : [] ),
         ...visible.map( ( f ) => ( {
             value:    f.selectable ? String( f.id ) : `g:${ f.id }`,
             label:    f.depth ? `- ${ f.label }` : f.label,
@@ -194,51 +194,51 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Fund picker', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Fund picker', 'gratora-donation-platform' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Direct my donation to', 'gratora' ) }
-                        help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'gratora' ) }
+                        placeholder={ __( 'Direct my donation to', 'gratora-donation-platform' ) }
+                        help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <p style={ { margin: '8px 0 20px' } }>
                         <ExternalLink href={ FUNDS_ADMIN_URL }>
-                            { __( 'Manage funds', 'gratora' ) }
+                            { __( 'Manage funds', 'gratora-donation-platform' ) }
                         </ExternalLink>
                     </p>
                     <SelectControl
-                        label={ __( 'Preselected fund', 'gratora' ) }
+                        label={ __( 'Preselected fund', 'gratora-donation-platform' ) }
                         value={ defaultId }
                         options={ preselectChoices }
                         onChange={ ( v ) => setAttributes( { defaultId: v } ) }
-                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'gratora' ) }
+                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <div style={ { display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 } }>
                         <ToggleControl
-                            label={ __( 'Show fund descriptions', 'gratora' ) }
+                            label={ __( 'Show fund descriptions', 'gratora-donation-platform' ) }
                             checked={ showDescriptions }
                             onChange={ ( v ) => setAttributes( { showDescriptions: v } ) }
-                            help={ __( 'Descriptions come from Donations → Funds. Turn this off to show fund names only.', 'gratora' ) }
+                            help={ __( 'Descriptions come from Donations → Funds. Turn this off to show fund names only.', 'gratora-donation-platform' ) }
                             __nextHasNoMarginBottom
                         />
                         <ToggleControl
-                            label={ __( 'Allow "no specific fund"', 'gratora' ) }
+                            label={ __( 'Allow "no specific fund"', 'gratora-donation-platform' ) }
                             checked={ allowEmpty }
                             onChange={ ( v ) => setAttributes( { allowEmpty: v } ) }
-                            help={ __( 'Adds a tile letting donors skip choosing a fund.', 'gratora' ) }
+                            help={ __( 'Adds a tile letting donors skip choosing a fund.', 'gratora-donation-platform' ) }
                             __nextHasNoMarginBottom
                         />
                     </div>
                     { list.length > 0 && (
                         <div style={ { marginTop: 16, marginBottom: 24 } }>
                             <strong style={ { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.04em', color: '#6b7280' } }>
-                                { __( 'Restrict to funds', 'gratora' ) }
+                                { __( 'Restrict to funds', 'gratora-donation-platform' ) }
                             </strong>
                             <p style={ { margin: '4px 0 8px', fontSize: 12, color: '#6b7280' } }>
-                                { __( 'Pick which funds this block offers. Leave all unchecked to show every active fund.', 'gratora' ) }
+                                { __( 'Pick which funds this block offers. Leave all unchecked to show every active fund.', 'gratora-donation-platform' ) }
                             </p>
                             <div style={ { display: 'flex', flexDirection: 'column', gap: 4 } }>
                                 { list.filter( ( f ) => f.selectable ).map( ( f ) => (
@@ -257,18 +257,18 @@ function Edit( { attributes, setAttributes } ) {
                     { allowEmpty && (
                         <div style={ { display: 'flex', flexDirection: 'column', gap: 16 } }>
                             <TextControl
-                                label={ __( 'No-specific-fund label', 'gratora' ) }
+                                label={ __( 'No-specific-fund label', 'gratora-donation-platform' ) }
                                 value={ emptyLabel }
                                 onChange={ ( v ) => setAttributes( { emptyLabel: v } ) }
-                                placeholder={ __( 'No specific fund', 'gratora' ) }
+                                placeholder={ __( 'No specific fund', 'gratora-donation-platform' ) }
                                 __nextHasNoMarginBottom
                             />
                             { showDescriptions && (
                                 <TextControl
-                                    label={ __( 'No-specific-fund description', 'gratora' ) }
+                                    label={ __( 'No-specific-fund description', 'gratora-donation-platform' ) }
                                     value={ emptyDescription }
                                     onChange={ ( v ) => setAttributes( { emptyDescription: v } ) }
-                                    help={ __( 'Optional. Shown under the label on that tile.', 'gratora' ) }
+                                    help={ __( 'Optional. Shown under the label on that tile.', 'gratora-donation-platform' ) }
                                     __nextHasNoMarginBottom
                                 />
                             ) }
@@ -286,7 +286,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Direct my donation to', 'gratora' ) }
+                    placeholder={ __( 'Direct my donation to', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
                 <FundTiles
@@ -306,8 +306,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Fund picker', 'gratora' ),
-        description: __( 'Tile-style picker that lets donors choose which fund or designation their donation goes to.', 'gratora' ),
+        title:       __( 'Fund picker', 'gratora-donation-platform' ),
+        description: __( 'Tile-style picker that lets donors choose which fund or designation their donation goes to.', 'gratora-donation-platform' ),
         category:    'gratora-extras',
         icon:        BlockIcons[ 'fund-picker' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

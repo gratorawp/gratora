@@ -172,7 +172,7 @@ final class AntiSpamGuard
 
         return new WP_Error(
             'gratora_invalid_submission',
-            __('Please refresh the page and try again.', 'gratora'),
+            __('Please refresh the page and try again.', 'gratora-donation-platform'),
             ['status' => 403]
         );
     }
@@ -197,7 +197,7 @@ final class AntiSpamGuard
     public function checkHoneypot(string $value): ?WP_Error
     {
         if ($value === '') return null;
-        return new WP_Error('gratora_invalid_submission', __('Submission rejected.', 'gratora'), ['status' => 400]);
+        return new WP_Error('gratora_invalid_submission', __('Submission rejected.', 'gratora-donation-platform'), ['status' => 400]);
     }
 
     /**
@@ -224,7 +224,7 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     private function check(string $token, string $scope): ?WP_Error
     {
-        $generic = new WP_Error('gratora_invalid_submission', __('Please refresh the page and try again.', 'gratora'), ['status' => 400]);
+        $generic = new WP_Error('gratora_invalid_submission', __('Please refresh the page and try again.', 'gratora-donation-platform'), ['status' => 400]);
 
         $parts = explode('.', $token, 2);
         if (count($parts) !== 2) return $generic;
@@ -323,7 +323,7 @@ final class AntiSpamGuard
 
         return new WP_Error(
             'gratora_rate_limited',
-            __('Too many attempts. Please try again in a few minutes.', 'gratora'),
+            __('Too many attempts. Please try again in a few minutes.', 'gratora-donation-platform'),
             ['status' => 429]
         );
     }
@@ -348,7 +348,7 @@ final class AntiSpamGuard
 
         return new WP_Error(
             'gratora_rate_limited',
-            __('Too many recent attempts for this email. Please try again later.', 'gratora'),
+            __('Too many recent attempts for this email. Please try again later.', 'gratora-donation-platform'),
             ['status' => 429]
         );
     }
@@ -563,7 +563,7 @@ final class AntiSpamGuard
             return new WP_Error(
                 'gratora_amount_too_low',
                 /* translators: %s: minimum donation amount formatted */
-                sprintf(__('Minimum donation is %s.', 'gratora'), Money::format($min)),
+                sprintf(__('Minimum donation is %s.', 'gratora-donation-platform'), Money::format($min)),
                 ['status' => 400]
             );
         }

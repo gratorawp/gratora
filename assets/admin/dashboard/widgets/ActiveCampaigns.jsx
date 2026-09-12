@@ -10,8 +10,8 @@ export default function ActiveCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No active campaigns', 'gratora' ) }
-                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'gratora' ) }
+                title={ __( 'No active campaigns', 'gratora-donation-platform' ) }
+                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'gratora-donation-platform' ) }
             />
         );
     }
@@ -45,14 +45,14 @@ export default function ActiveCampaigns( { rows = [] } ) {
                                 { target > 0 ? (
                                     sprintf(
                                         /* translators: 1: raised value, 2: target value, 3: percent */
-                                        __( '%1$s of %2$s · %3$d%%', 'gratora' ),
+                                        __( '%1$s of %2$s · %3$d%%', 'gratora-donation-platform' ),
                                         fmt( current ), fmt( target ), pct
                                     )
                                 ) : fmt( current ) }
                             </span>
                             { c.last_donation_at && (
                                 <span className="gratora-active-campaigns__when">
-                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'gratora' ), timeAgo( c.last_donation_at ) ) }
+                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'gratora-donation-platform' ), timeAgo( c.last_donation_at ) ) }
                                 </span>
                             ) }
                         </div>

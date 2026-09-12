@@ -100,7 +100,7 @@ final class StripeKeysController
         if (! $this->applePay->isFileReady()) {
             return new WP_Error(
                 'gratora_apple_pay_no_file',
-                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'gratora'),
+                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'gratora-donation-platform'),
                 ['status' => 400]
             );
         }
@@ -186,7 +186,7 @@ final class StripeKeysController
                 'gratora_stripe_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'gratora'),
+                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'gratora-donation-platform'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -197,7 +197,7 @@ final class StripeKeysController
                 'gratora_stripe_key_rejected',
                 sprintf(
                     /* translators: %s: error message from Stripe */
-                    __('Stripe rejected that secret key: %s', 'gratora'),
+                    __('Stripe rejected that secret key: %s', 'gratora-donation-platform'),
                     $e->getMessage()
                 ),
                 ['status' => 400]
@@ -252,23 +252,23 @@ final class StripeKeysController
         $bad = static fn (string $msg): WP_Error => new WP_Error('gratora_stripe_bad_key', $msg, ['status' => 400]);
 
         if (! preg_match('/^(sk|rk)_(test|live)_/', $secret)) {
-            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'gratora'));
+            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'gratora-donation-platform'));
         }
         if (! str_starts_with($publishable, 'pk_')) {
-            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'gratora'));
+            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'gratora-donation-platform'));
         }
 
         $secretIsTest      = str_contains($secret, '_test_');
         $publishableIsTest = str_starts_with($publishable, 'pk_test_');
 
         if ($secretIsTest !== $publishableIsTest) {
-            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'gratora'));
+            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'gratora-donation-platform'));
         }
         if ($secretIsTest !== $test) {
             return $bad(
                 $test
-                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'gratora')
-                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'gratora')
+                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'gratora-donation-platform')
+                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'gratora-donation-platform')
             );
         }
         return null;

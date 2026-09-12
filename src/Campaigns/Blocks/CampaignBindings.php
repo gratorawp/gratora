@@ -44,17 +44,17 @@ final class CampaignBindings extends HookProvider
     public static function fields(): array
     {
         return [
-            'title'           => __('Title', 'gratora'),
-            'description'     => __('Short description', 'gratora'),
-            'image'           => __('Cover image', 'gratora'),
-            'image_alt'       => __('Cover image description', 'gratora'),
-            'url'             => __('Page link', 'gratora'),
-            'raised'          => __('Raised', 'gratora'),
-            'goal'            => __('Goal', 'gratora'),
-            'percent_label'   => __('Percent of goal', 'gratora'),
-            'donors_count'    => __('Donors', 'gratora'),
-            'donations_count' => __('Donations', 'gratora'),
-            'days_left'       => __('Days left', 'gratora'),
+            'title'           => __('Title', 'gratora-donation-platform'),
+            'description'     => __('Short description', 'gratora-donation-platform'),
+            'image'           => __('Cover image', 'gratora-donation-platform'),
+            'image_alt'       => __('Cover image description', 'gratora-donation-platform'),
+            'url'             => __('Page link', 'gratora-donation-platform'),
+            'raised'          => __('Raised', 'gratora-donation-platform'),
+            'goal'            => __('Goal', 'gratora-donation-platform'),
+            'percent_label'   => __('Percent of goal', 'gratora-donation-platform'),
+            'donors_count'    => __('Donors', 'gratora-donation-platform'),
+            'donations_count' => __('Donations', 'gratora-donation-platform'),
+            'days_left'       => __('Days left', 'gratora-donation-platform'),
         ];
     }
 
@@ -82,7 +82,7 @@ final class CampaignBindings extends HookProvider
         if (! function_exists('register_block_bindings_source')) return;
 
         register_block_bindings_source('gratora/campaign', [
-            'label'              => __('Gratora campaign', 'gratora'),
+            'label'              => __('Gratora campaign', 'gratora-donation-platform'),
             'get_value_callback' => [$this, 'resolve'],
             'uses_context'       => ['postId'],
         ]);

@@ -52,8 +52,8 @@ final class CampaignPageTemplate extends HookProvider
             return;
         }
         register_block_template('gratora//' . self::SLUG, [
-            'title'       => __('Campaign page', 'gratora'),
-            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'gratora'),
+            'title'       => __('Campaign page', 'gratora-donation-platform'),
+            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'gratora-donation-platform'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
                 . '<!-- wp:group {"tagName":"main","layout":{"type":"constrained","contentSize":"' . self::MEASURE . '","wideSize":"' . self::MEASURE . '"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'

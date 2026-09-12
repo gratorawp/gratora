@@ -93,7 +93,7 @@ final class WebhookController
 
         if (! $gateway) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('gratora_unknown_gateway', sprintf(__('Unknown gateway: %s', 'gratora'), $gatewayId), ['status' => 404]);
+            return new WP_Error('gratora_unknown_gateway', sprintf(__('Unknown gateway: %s', 'gratora-donation-platform'), $gatewayId), ['status' => 404]);
         }
 
         // Asked before the handler, because the handler is the expensive part.
@@ -102,7 +102,7 @@ final class WebhookController
             || $this->spam->peek($failKey . ':unverifiable', self::FAIL_WINDOW) >= self::UNVERIFIABLE_MAX) {
             return new WP_Error(
                 'gratora_webhook_rejected',
-                __('Too many rejected deliveries. Please try again shortly.', 'gratora'),
+                __('Too many rejected deliveries. Please try again shortly.', 'gratora-donation-platform'),
                 ['status' => 429]
             );
         }
@@ -146,14 +146,14 @@ final class WebhookController
                 set_transient(self::REJECT_NOTICE_KEY . $gatewayId, 1, self::REJECT_NOTICE_TTL);
                 ErrorLog::record(
                     'webhook.' . $gatewayId,
-                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'gratora'),
+                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'gratora-donation-platform'),
                     ['gateway' => $gatewayId, 'event_type' => $outcome->event_type ?? 'unknown']
                 );
             }
 
             return new WP_Error(
                 'gratora_webhook_rejected',
-                $outcome->error ?? __('Webhook rejected.', 'gratora'),
+                $outcome->error ?? __('Webhook rejected.', 'gratora-donation-platform'),
                 ['status' => $outcome->http_status]
             );
         }

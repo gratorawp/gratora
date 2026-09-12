@@ -11,7 +11,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'donations',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'gratora' ),
+                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'gratora-donation-platform' ),
                 today.donations_count
             ),
         } );
@@ -26,7 +26,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'notes',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'gratora' ),
+                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'gratora-donation-platform' ),
                 today.notes_count
             ),
         } );
@@ -36,7 +36,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'refunds',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'gratora' ),
+                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'gratora-donation-platform' ),
                 today.refunds_count
             ),
             tone: 'warn',
@@ -46,7 +46,7 @@ export default function TodayStrip( { today } ) {
     if ( chips.length === 0 ) {
         return (
             <p className="gratora-today__empty">
-                { __( 'Quiet so far today.', 'gratora' ) }
+                { __( 'Quiet so far today.', 'gratora-donation-platform' ) }
             </p>
         );
     }
@@ -54,7 +54,7 @@ export default function TodayStrip( { today } ) {
     return (
         <div className="gratora-today">
             <span className="gratora-today__pulse" aria-hidden="true" />
-            <span className="gratora-today__label">{ __( 'Last 24 hours', 'gratora' ) }</span>
+            <span className="gratora-today__label">{ __( 'Last 24 hours', 'gratora-donation-platform' ) }</span>
             <ul className="gratora-today__chips">
                 { chips.map( ( c ) => (
                     <li key={ c.key } className={ `gratora-today__chip${ c.tone ? ' is-' + c.tone : '' }${ c.strong ? ' is-strong' : '' }` }>

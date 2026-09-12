@@ -14,10 +14,10 @@ import Btn from '../_shared/components/Btn';
 
 // The offline gateway's own list. Anything else is rejected server-side.
 const METHODS = [
-    { value: 'cheque',        label: __( 'Check', 'gratora' ) },
-    { value: 'cash',          label: __( 'Cash', 'gratora' ) },
-    { value: 'bank_transfer', label: __( 'Bank transfer', 'gratora' ) },
-    { value: 'other',         label: __( 'Other', 'gratora' ) },
+    { value: 'cheque',        label: __( 'Check', 'gratora-donation-platform' ) },
+    { value: 'cash',          label: __( 'Cash', 'gratora-donation-platform' ) },
+    { value: 'bank_transfer', label: __( 'Bank transfer', 'gratora-donation-platform' ) },
+    { value: 'other',         label: __( 'Other', 'gratora-donation-platform' ) },
 ];
 
 function today() {
@@ -62,7 +62,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         apiFetch( { path: '/gratora/v1/admin/donations/fund-options' } )
             .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
                 /* translators: %s: fund name. */
-                const isDefault = __( '%s (default)', 'gratora' );
+                const isDefault = __( '%s (default)', 'gratora-donation-platform' );
                 const name = f.depth ? `- ${ f.name }` : f.name;
                 return {
                     value: String( f.id ),
@@ -81,7 +81,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     label: c.archived
                         ? sprintf(
                             /* translators: %s: campaign title. */
-                            __( '%s (archived)', 'gratora' ),
+                            __( '%s (archived)', 'gratora-donation-platform' ),
                             c.title
                         )
                         : c.title,
@@ -160,7 +160,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             if ( e?.code === 'gratora_duplicate_donation' ) {
                 setDuplicate( e?.data?.reference || '?' );
             } else {
-                setError( e?.message || __( 'Could not record this donation.', 'gratora' ) );
+                setError( e?.message || __( 'Could not record this donation.', 'gratora-donation-platform' ) );
             }
             setSaving( false );
         }
@@ -175,25 +175,25 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 isBusy={ saving }
             >
                 { saving
-                    ? __( 'Recording…', 'gratora' )
+                    ? __( 'Recording…', 'gratora-donation-platform' )
                     : duplicate !== ''
-                        ? __( 'Record it anyway', 'gratora' )
-                        : __( 'Record donation', 'gratora' ) }
+                        ? __( 'Record it anyway', 'gratora-donation-platform' )
+                        : __( 'Record donation', 'gratora-donation-platform' ) }
             </Btn>
             <Btn variant="ghost" onClick={ onClose } disabled={ saving }>
-                { __( 'Cancel', 'gratora' ) }
+                { __( 'Cancel', 'gratora-donation-platform' ) }
             </Btn>
         </div>
     );
 
     return (
         <Dialog
-            title={ __( 'Record a donation', 'gratora' ) }
+            title={ __( 'Record a donation', 'gratora-donation-platform' ) }
             onClose={ saving ? undefined : onClose }
             foot={ foot }
         >
             <p className="gratora-dialog__help">
-                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'gratora' ) }
+                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'gratora-donation-platform' ) }
             </p>
             <div className="gratora-rd">
                 { error !== '' && (
@@ -204,13 +204,13 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     <Notice status="warning" isDismissible={ false }>
                         { sprintf(
                             /* translators: %s: the reference of the donation already on the books. */
-                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'gratora' ),
+                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'gratora-donation-platform' ),
                             duplicate
                         ) }
                     </Notice>
                 ) }
 
-                <Field label={ __( 'Donor email', 'gratora' ) } help={ __( 'Matches an existing donor, or creates one.', 'gratora' ) }>
+                <Field label={ __( 'Donor email', 'gratora-donation-platform' ) } help={ __( 'Matches an existing donor, or creates one.', 'gratora-donation-platform' ) }>
                     <input
                         className="gratora-input"
                         type="email"
@@ -221,30 +221,30 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <div className="gratora-rd__row">
-                    <Field label={ __( 'First name', 'gratora' ) }>
+                    <Field label={ __( 'First name', 'gratora-donation-platform' ) }>
                         <input className="gratora-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
                     </Field>
-                    <Field label={ __( 'Last name', 'gratora' ) }>
+                    <Field label={ __( 'Last name', 'gratora-donation-platform' ) }>
                         <input className="gratora-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
                     </Field>
                 </div>
 
-                <Field label={ __( 'Amount', 'gratora' ) }>
+                <Field label={ __( 'Amount', 'gratora-donation-platform' ) }>
                     <AmountInput value={ amount } onChange={ edited( setAmount ) } currency={ currency } placeholder="0" />
                 </Field>
 
                 <Field
-                    label={ __( 'Date received', 'gratora' ) }
-                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'gratora' ) }
+                    label={ __( 'Date received', 'gratora-donation-platform' ) }
+                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'gratora-donation-platform' ) }
                 >
                     <DateField
                         value={ receivedAt }
                         onChange={ ( next ) => edited( setReceived )( next || '' ) }
-                        ariaLabel={ __( 'Date received', 'gratora' ) }
+                        ariaLabel={ __( 'Date received', 'gratora-donation-platform' ) }
                     />
                 </Field>
 
-                <Field label={ __( 'How it arrived', 'gratora' ) }>
+                <Field label={ __( 'How it arrived', 'gratora-donation-platform' ) }>
                     <select className="gratora-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
                         { METHODS.map( ( m ) => (
                             <option key={ m.value } value={ m.value }>{ m.label }</option>
@@ -253,63 +253,63 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <Field
-                    label={ __( 'Campaign', 'gratora' ) }
+                    label={ __( 'Campaign', 'gratora-donation-platform' ) }
                     help={ campaignsFailed
-                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'gratora' )
-                        : __( 'Optional. Leave empty for a general donation.', 'gratora' ) }
+                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'gratora-donation-platform' )
+                        : __( 'Optional. Leave empty for a general donation.', 'gratora-donation-platform' ) }
                 >
                     <SearchableSelect
                         value={ campaignId }
                         onChange={ ( next ) => { setCampaign( next ); setAttributedTo( '' ); } }
                         options={ campaigns }
                         placeholder={ campaignsFailed
-                            ? __( 'Unavailable', 'gratora' )
-                            : __( 'No campaign', 'gratora' ) }
+                            ? __( 'Unavailable', 'gratora-donation-platform' )
+                            : __( 'No campaign', 'gratora-donation-platform' ) }
                     />
                 </Field>
 
                 { attributions.length > 0 && (
                     <Field
-                        label={ __( 'Credit to', 'gratora' ) }
-                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'gratora' ) }
+                        label={ __( 'Credit to', 'gratora-donation-platform' ) }
+                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'gratora-donation-platform' ) }
                     >
                         <SearchableSelect
                             value={ attributedTo }
                             onChange={ setAttributedTo }
                             options={ attributions }
-                            placeholder={ __( 'The campaign itself', 'gratora' ) }
+                            placeholder={ __( 'The campaign itself', 'gratora-donation-platform' ) }
                         />
                     </Field>
                 ) }
 
                 { funds.length > 0 && (
                     <Field
-                        label={ __( 'Fund', 'gratora' ) }
-                        help={ __( 'Optional. Leave empty to use the default fund.', 'gratora' ) }
+                        label={ __( 'Fund', 'gratora-donation-platform' ) }
+                        help={ __( 'Optional. Leave empty to use the default fund.', 'gratora-donation-platform' ) }
                     >
                         <SearchableSelect
                             value={ fundId }
                             onChange={ setFund }
                             options={ funds }
-                            placeholder={ __( 'Default fund', 'gratora' ) }
+                            placeholder={ __( 'Default fund', 'gratora-donation-platform' ) }
                         />
                     </Field>
                 ) }
 
-                <Field label={ __( 'Note', 'gratora' ) } help={ __( 'Only your team sees this.', 'gratora' ) }>
+                <Field label={ __( 'Note', 'gratora-donation-platform' ) } help={ __( 'Only your team sees this.', 'gratora-donation-platform' ) }>
                     <textarea className="gratora-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
                 </Field>
 
                 { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop */ }
                 <label className="gratora-rd__receipt">
-                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'gratora' ) } />
+                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'gratora-donation-platform' ) } />
                     <span className="gratora-rd__receipt-txt">
                         <strong>{ sendReceipt
-                            ? __( 'Email a receipt', 'gratora' )
-                            : __( 'Do not email the donor', 'gratora' ) }</strong>
+                            ? __( 'Email a receipt', 'gratora-donation-platform' )
+                            : __( 'Do not email the donor', 'gratora-donation-platform' ) }</strong>
                         <span>{ sendReceipt
-                            ? __( 'The donor gets a receipt for this donation.', 'gratora' )
-                            : __( 'Nothing is sent, not even a receipt.', 'gratora' ) }</span>
+                            ? __( 'The donor gets a receipt for this donation.', 'gratora-donation-platform' )
+                            : __( 'Nothing is sent, not even a receipt.', 'gratora-donation-platform' ) }</span>
                     </span>
                 </label>
             </div>

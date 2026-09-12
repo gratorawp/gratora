@@ -158,20 +158,20 @@ final class DonorExporter
     public static function labels(): array
     {
         return [
-            'first_name'      => __('First name', 'gratora'),
-            'last_name'       => __('Last name', 'gratora'),
-            'email'           => __('Email', 'gratora'),
-            'phone'           => __('Phone', 'gratora'),
-            'address'         => __('Address', 'gratora'),
-            'company'         => __('Company', 'gratora'),
-            'country'         => __('Country', 'gratora'),
-            'donor_type'      => __('Type', 'gratora'),
-            'donations_count' => __('Donations', 'gratora'),
-            'total_donated'   => __('Total donated', 'gratora'),
-            'first_donation'  => __('First donation', 'gratora'),
-            'last_donation'   => __('Last donation', 'gratora'),
-            'created_at'      => __('Donor since', 'gratora'),
-            'donor_id'        => __('Donor ID', 'gratora'),
+            'first_name'      => __('First name', 'gratora-donation-platform'),
+            'last_name'       => __('Last name', 'gratora-donation-platform'),
+            'email'           => __('Email', 'gratora-donation-platform'),
+            'phone'           => __('Phone', 'gratora-donation-platform'),
+            'address'         => __('Address', 'gratora-donation-platform'),
+            'company'         => __('Company', 'gratora-donation-platform'),
+            'country'         => __('Country', 'gratora-donation-platform'),
+            'donor_type'      => __('Type', 'gratora-donation-platform'),
+            'donations_count' => __('Donations', 'gratora-donation-platform'),
+            'total_donated'   => __('Total donated', 'gratora-donation-platform'),
+            'first_donation'  => __('First donation', 'gratora-donation-platform'),
+            'last_donation'   => __('Last donation', 'gratora-donation-platform'),
+            'created_at'      => __('Donor since', 'gratora-donation-platform'),
+            'donor_id'        => __('Donor ID', 'gratora-donation-platform'),
         ];
     }
 
@@ -233,7 +233,7 @@ final class DonorExporter
     /** @since 1.0.0 */
     private function donorIdsForCampaign(int $campaignId): array
     {
-        $q = DonationQueries::donationsOnly(DB::table('gratora_donations'))
+        $q = DonationQueries::notTrashed(DonationQueries::donationsOnly(DB::table('gratora_donations')))
             ->select('donor_id')
             ->distinct()
             ->whereNotNull('donor_id')

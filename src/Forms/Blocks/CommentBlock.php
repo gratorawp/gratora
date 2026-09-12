@@ -29,8 +29,8 @@ final class CommentBlock implements Block
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/comment', [
-            'label'       => (string) ($attrs['label']       ?? '') ?: __('Add a message', 'gratora'),
-            'placeholder' => (string) ($attrs['placeholder'] ?? '') ?: __('Anything you want to share?', 'gratora'),
+            'label'       => (string) ($attrs['label']       ?? '') ?: __('Add a message', 'gratora-donation-platform'),
+            'placeholder' => (string) ($attrs['placeholder'] ?? '') ?: __('Anything you want to share?', 'gratora-donation-platform'),
             'required'    => (bool)   ($attrs['required']    ?? false),
         ]);
     }

@@ -32,7 +32,7 @@ function Edit( { attributes, setAttributes } ) {
     const {
         percent   = 2.9,
         fixed     = 30,
-        label     = __( 'I\'d like to help cover the transaction fee', 'gratora' ),
+        label     = __( 'I\'d like to help cover the transaction fee', 'gratora-donation-platform' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
@@ -42,24 +42,24 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Cover the fees', 'gratora' ) } initialOpen>
+                <PanelBody title={ __( 'Cover the fees', 'gratora-donation-platform' ) } initialOpen>
                     <DecimalControl
-                        label={ __( 'Percent fee', 'gratora' ) }
-                        help={ __( 'e.g. 2.9 for Stripe', 'gratora' ) }
+                        label={ __( 'Percent fee', 'gratora-donation-platform' ) }
+                        help={ __( 'e.g. 2.9 for Stripe', 'gratora-donation-platform' ) }
                         display={ String( percent ) }
                         onCommit={ ( n ) => setAttributes( { percent: n } ) }
                     />
                     <DecimalControl
-                        label={ __( 'Fixed fee', 'gratora' ) }
-                        help={ __( 'e.g. 0.30 for Stripe', 'gratora' ) }
+                        label={ __( 'Fixed fee', 'gratora-donation-platform' ) }
+                        help={ __( 'e.g. 0.30 for Stripe', 'gratora-donation-platform' ) }
                         display={ ( fixed / 100 ).toFixed( 2 ) }
                         onCommit={ ( n ) => setAttributes( { fixed: Math.round( n * 100 ) } ) }
                     />
                     <ToggleControl
-                        label={ __( 'Default checked', 'gratora' ) }
+                        label={ __( 'Default checked', 'gratora-donation-platform' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Best practice: leave off so donors opt in.', 'gratora' ) }
+                        help={ __( 'Best practice: leave off so donors opt in.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -83,7 +83,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'gratora' ) }
+                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -95,8 +95,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Cover the fees', 'gratora' ),
-        description: __( 'Lets the donor opt to cover the payment processing fee.', 'gratora' ),
+        title:      __( 'Cover the fees', 'gratora-donation-platform' ),
+        description: __( 'Lets the donor opt to cover the payment processing fee.', 'gratora-donation-platform' ),
         category:   'gratora-amount',
         icon:       BlockIcons[ 'cover-fees' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

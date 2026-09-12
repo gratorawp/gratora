@@ -23,7 +23,7 @@ final class BrandPresetLabelsTest extends IntegrationTestCase
         delete_option('gratora_org_brand');
 
         add_filter('gettext', function ($translated, $text, $domain) {
-            if (! $this->french || $domain !== 'gratora') return $translated;
+            if (! $this->french || $domain !== 'gratora-donation-platform') return $translated;
 
             return $text === 'Classic' ? 'Classique' : $translated;
         }, 10, 3);

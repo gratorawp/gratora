@@ -66,7 +66,7 @@ export default function BrandPanel( { s } ) {
         if ( ! source ) return;
         const label   = presetLabel( source );
         const newId   = generateId( label, presets );
-        const newName = `${ label } ${ __( '(copy)', 'gratora' ) }`;
+        const newName = `${ label } ${ __( '(copy)', 'gratora-donation-platform' ) }`;
         const next    = [ ...presets, {
             id:      newId,
             name:    newName,
@@ -78,10 +78,10 @@ export default function BrandPanel( { s } ) {
     };
 
     const addPreset = () => {
-        const newId = generateId( __( 'Custom', 'gratora' ), presets );
+        const newId = generateId( __( 'Custom', 'gratora-donation-platform' ), presets );
         const next  = [ ...presets, {
             id:      newId,
-            name:    __( 'New preset', 'gratora' ),
+            name:    __( 'New preset', 'gratora-donation-platform' ),
             tokens:  {},
             builtin: false,
         } ];
@@ -93,8 +93,8 @@ export default function BrandPanel( { s } ) {
         const p = presets.find( ( x ) => x.id === id );
         if ( ! p || p.builtin ) return;
         setConfirm( {
-            title:       __( 'Delete preset', 'gratora' ),
-            message:     __( 'Delete this brand preset? This cannot be undone.', 'gratora' ),
+            title:       __( 'Delete preset', 'gratora-donation-platform' ),
+            message:     __( 'Delete this brand preset? This cannot be undone.', 'gratora-donation-platform' ),
             destructive: true,
             onConfirm:   () => {
                 const next = presets.filter( ( x ) => x.id !== id );
@@ -111,8 +111,8 @@ export default function BrandPanel( { s } ) {
             <div className="gratora-brand-layout">
                 <div className="gratora-brand-layout__main">
                     <Card
-                        title={ __( 'Brand presets', 'gratora' ) }
-                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'gratora' ) }
+                        title={ __( 'Brand presets', 'gratora-donation-platform' ) }
+                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'gratora-donation-platform' ) }
                         edited={ s.isDirty }
                     >
                         <div className="gratora-preset-mgr">
@@ -142,7 +142,7 @@ export default function BrandPanel( { s } ) {
                                                 { isDefault && (
                                                     <span className="gratora-preset-mgr__default">
                                                         <Icon name="check" size={ 12 } />
-                                                        { __( 'Default', 'gratora' ) }
+                                                        { __( 'Default', 'gratora-donation-platform' ) }
                                                     </span>
                                                 ) }
                                             </span>
@@ -155,7 +155,7 @@ export default function BrandPanel( { s } ) {
                                     onClick={ addPreset }
                                     icon={ PlusIcon }
                                 >
-                                    { __( 'Add preset', 'gratora' ) }
+                                    { __( 'Add preset', 'gratora-donation-platform' ) }
                                 </Button>
                             </div>
 
@@ -176,11 +176,11 @@ export default function BrandPanel( { s } ) {
                                     <EmptyState
                                         compact
                                         icon={ <Palette size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No presets yet', 'gratora' ) }
-                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'gratora' ) }
+                                        title={ __( 'No presets yet', 'gratora-donation-platform' ) }
+                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'gratora-donation-platform' ) }
                                         action={
                                             <Btn variant="secondary" onClick={ addPreset }>
-                                                { __( 'Add preset', 'gratora' ) }
+                                                { __( 'Add preset', 'gratora-donation-platform' ) }
                                             </Btn>
                                         }
                                     />
@@ -191,7 +191,7 @@ export default function BrandPanel( { s } ) {
                 </div>
 
                 <aside className="gratora-brand-layout__rail">
-                    <Card title={ __( 'Live preview', 'gratora' ) }>
+                    <Card title={ __( 'Live preview', 'gratora-donation-platform' ) }>
                         { active && (
                             <StylePreview
                                 // Floor the preview with the built-in baseline so a
@@ -222,16 +222,16 @@ export function PresetEditor( { preset, resetDefaults, base, isDefault, onRename
                     className="gratora-input gratora-preset-editor__name"
                     value={ preset.name }
                     onChange={ ( e ) => onRename( e.target.value ) }
-                    placeholder={ __( 'Preset name', 'gratora' ) }
+                    placeholder={ __( 'Preset name', 'gratora-donation-platform' ) }
                 />
                 <div className="gratora-preset-editor__actions">
                     { ! isDefault && (
                         <Button variant="secondary" size="small" onClick={ onMakeDefault }>
-                            { __( 'Make default', 'gratora' ) }
+                            { __( 'Make default', 'gratora-donation-platform' ) }
                         </Button>
                     ) }
                     <Button variant="tertiary" size="small" icon={ CloneIcon } onClick={ onClone }>
-                        { __( 'Clone', 'gratora' ) }
+                        { __( 'Clone', 'gratora-donation-platform' ) }
                     </Button>
                     { ! preset.builtin && (
                         <Button
@@ -241,7 +241,7 @@ export function PresetEditor( { preset, resetDefaults, base, isDefault, onRename
                             isDestructive
                             onClick={ onDelete }
                         >
-                            { __( 'Delete', 'gratora' ) }
+                            { __( 'Delete', 'gratora-donation-platform' ) }
                         </Button>
                     ) }
                 </div>
@@ -276,10 +276,10 @@ export function PresetEditor( { preset, resetDefaults, base, isDefault, onRename
  * ground on their own, so this is the one choice the org has to make itself.
  */
 const GROUNDS = [
-    [ 'gratora-bg',      () => __( 'Background', 'gratora' ) ],
-    [ 'gratora-bg-soft', () => __( 'Soft background', 'gratora' ) ],
-    [ 'gratora-field-bg', () => __( 'Field background', 'gratora' ) ],
-    [ 'gratora-accent',  () => __( 'Accent', 'gratora' ) ],
+    [ 'gratora-bg',      () => __( 'Background', 'gratora-donation-platform' ) ],
+    [ 'gratora-bg-soft', () => __( 'Soft background', 'gratora-donation-platform' ) ],
+    [ 'gratora-field-bg', () => __( 'Field background', 'gratora-donation-platform' ) ],
+    [ 'gratora-accent',  () => __( 'Accent', 'gratora-donation-platform' ) ],
 ];
 
 function ContrastNotice( { tokens } ) {
@@ -295,7 +295,7 @@ function ContrastNotice( { tokens } ) {
                 <li key={ g.label }>
                     { sprintf(
                         /* translators: 1: colour name, e.g. Background, 2: the hex the admin picked, 3: the contrast it reaches, e.g. 4.0 */
-                        __( '%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker.', 'gratora' ),
+                        __( '%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker.', 'gratora-donation-platform' ),
                         g.label,
                         String( g.value ).toUpperCase(),
                         g.best.toFixed( 1 )

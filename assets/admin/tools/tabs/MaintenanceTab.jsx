@@ -9,12 +9,12 @@ import Btn from '../../_shared/components/Btn';
 import { userCan } from '../../_shared/caps';
 
 const COUNT_LABELS = {
-    donors:              __( 'Donors', 'gratora' ),
-    funds:               __( 'Funds', 'gratora' ),
-    campaigns:           __( 'Campaigns', 'gratora' ),
-    forms:               __( 'Forms', 'gratora' ),
-    converted_donations: __( 'Donations given a value in your base currency', 'gratora' ),
-    converted_plans:     __( 'Recurring plans given a value in your base currency', 'gratora' ),
+    donors:              __( 'Donors', 'gratora-donation-platform' ),
+    funds:               __( 'Funds', 'gratora-donation-platform' ),
+    campaigns:           __( 'Campaigns', 'gratora-donation-platform' ),
+    forms:               __( 'Forms', 'gratora-donation-platform' ),
+    converted_donations: __( 'Donations given a value in your base currency', 'gratora-donation-platform' ),
+    converted_plans:     __( 'Recurring plans given a value in your base currency', 'gratora-donation-platform' ),
 };
 
 // Typed verbatim, so it is a placeholder rather than a word a translator can
@@ -36,7 +36,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
-        : [ { value: 'all', label: __( 'Everything', 'gratora' ) } ];
+        : [ { value: 'all', label: __( 'Everything', 'gratora-donation-platform' ) } ];
 
     // Tabs are hidden rather than unmounted. Saving a currency on another
     // screen changes which donations are stranded, so refetch on each visit.
@@ -51,12 +51,12 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
             setNotice( {
                 type: 'success',
                 text: left > 0
-                    ? __( 'Progress made. There is more to do, run it again.', 'gratora' )
-                    : __( 'Data updates finished.', 'gratora' ),
+                    ? __( 'Progress made. There is more to do, run it again.', 'gratora-donation-platform' )
+                    : __( 'Data updates finished.', 'gratora-donation-platform' ),
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'gratora-donation-platform' ) } );
         } finally {
             setUpgrading( false );
         }
@@ -89,16 +89,16 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 } );
 
                 if ( ! done ) {
-                    setNotice( { type: 'info', text: __( 'Still recomputing. Leave this open.', 'gratora' ) } );
+                    setNotice( { type: 'info', text: __( 'Still recomputing. Leave this open.', 'gratora-donation-platform' ) } );
                 }
             }
 
             setNotice( done
-                ? { type: 'success', text: __( 'Aggregates recomputed.', 'gratora' ) }
-                : { type: 'warning', text: __( 'Progress made. There is more to do, run it again.', 'gratora' ) } );
+                ? { type: 'success', text: __( 'Aggregates recomputed.', 'gratora-donation-platform' ) }
+                : { type: 'warning', text: __( 'Progress made. There is more to do, run it again.', 'gratora-donation-platform' ) } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'gratora-donation-platform' ) } );
         } finally {
             setRecalcRunning( false );
         }
@@ -118,7 +118,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 type: 'success',
                 text: sprintf(
                     /* translators: 1: donations removed, 2: recurring plans removed, 3: donors removed */
-                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'gratora' ),
+                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'gratora-donation-platform' ),
                     res?.donations || 0,
                     res?.recurring_plans || 0,
                     res?.donors || 0,
@@ -126,7 +126,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'gratora' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'gratora-donation-platform' ) } );
         } finally {
             setPurging( false );
         }
@@ -139,19 +139,19 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
         <div className="gratora-panel">
             { infoError && (
                 <Card
-                    title={ __( 'Could not check this site', 'gratora' ) }
-                    sub={ __( 'The checks behind this screen did not run, so it cannot say whether data updates are outstanding, whether completed donations are missing from your totals, or whether test data is still here. Nothing below is a clean bill of health until it does.', 'gratora' ) }
+                    title={ __( 'Could not check this site', 'gratora-donation-platform' ) }
+                    sub={ __( 'The checks behind this screen did not run, so it cannot say whether data updates are outstanding, whether completed donations are missing from your totals, or whether test data is still here. Nothing below is a clean bill of health until it does.', 'gratora-donation-platform' ) }
                 >
                     <Btn variant="secondary" onClick={ loadInfo }>
-                        { __( 'Check again', 'gratora' ) }
+                        { __( 'Check again', 'gratora-donation-platform' ) }
                     </Btn>
                 </Card>
             ) }
 
             { userCan( 'manage_options' ) && info?.pending_upgrades?.length > 0 && (
                 <Card
-                    title={ __( 'Data updates are outstanding', 'gratora' ) }
-                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'gratora' ) }
+                    title={ __( 'Data updates are outstanding', 'gratora-donation-platform' ) }
+                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'gratora-donation-platform' ) }
                 >
                     <ul className="gratora-advanced-cron">
                         { info.pending_upgrades.map( ( u ) => (
@@ -165,7 +165,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                                 'Stopped with: %1$s (failed %2$d time)',
                                                 'Stopped with: %1$s (failed %2$d times)',
                                                 u.failure.attempts,
-                                                'gratora'
+                                                'gratora-donation-platform'
                                             ),
                                             u.failure.message,
                                             u.failure.attempts
@@ -177,7 +177,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                     </ul>
                     <div className="gratora-advanced-actions" style={ { marginTop: 12 } }>
                         <Btn variant="primary" onClick={ doRunUpgrades } disabled={ upgrading } isBusy={ upgrading }>
-                            { upgrading ? __( 'Working…', 'gratora' ) : __( 'Run them now', 'gratora' ) }
+                            { upgrading ? __( 'Working…', 'gratora-donation-platform' ) : __( 'Run them now', 'gratora-donation-platform' ) }
                         </Btn>
                     </div>
                 </Card>
@@ -185,11 +185,11 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
             { info?.unconverted_donations?.length > 0 && (
                 <Card
-                    title={ __( 'Donations missing from your totals', 'gratora' ) }
+                    title={ __( 'Donations missing from your totals', 'gratora-donation-platform' ) }
                     sub={
                         info.unconverted_donations.some( ( row ) => row.needs_rate )
-                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'gratora' )
-                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'gratora' )
+                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'gratora-donation-platform' )
+                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'gratora-donation-platform' )
                     }
                 >
                     <ul className="gratora-advanced-cron">
@@ -199,14 +199,14 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                 { ' ' }
                                 { sprintf(
                                     /* translators: 1: how many donations, 2: their total in that currency. */
-                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'gratora' ),
+                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'gratora-donation-platform' ),
                                     row.count,
                                     formatAmount( row.amount_cents, row.currency )
                                 ) }
                                 { ! row.needs_rate && (
                                     <>
                                         { ' ' }
-                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'gratora' ) }</em>
+                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'gratora-donation-platform' ) }</em>
                                     </>
                                 ) }
                             </li>
@@ -216,12 +216,12 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
             ) }
 
             <Card
-                title={ __( 'Recalculate aggregates', 'gratora' ) }
-                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'gratora' ) }
+                title={ __( 'Recalculate aggregates', 'gratora-donation-platform' ) }
+                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'gratora-donation-platform' ) }
             >
                 <div className="gratora-advanced-actions">
                     <label className="gratora-tools-field">
-                        { __( 'Scope', 'gratora' ) }
+                        { __( 'Scope', 'gratora-donation-platform' ) }
                         <select
                             className="gratora-select"
                             value={ recalcScope }
@@ -234,7 +234,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                         </select>
                     </label>
                     <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
-                        { recalcRunning ? __( 'Recalculating…', 'gratora' ) : __( 'Recalculate', 'gratora' ) }
+                        { recalcRunning ? __( 'Recalculating…', 'gratora-donation-platform' ) : __( 'Recalculate', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
                 { recalcResult && (
@@ -245,7 +245,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                 <li key={ k }>
                                     { sprintf(
                                         /* translators: 1: what was recomputed (Donors, Funds, ...), 2: how many */
-                                        __( '%1$s: %2$d synced', 'gratora' ),
+                                        __( '%1$s: %2$d synced', 'gratora-donation-platform' ),
                                         countLabel( k ),
                                         n
                                     ) }
@@ -262,7 +262,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                 '%1$d donation is still missing from your totals: there is no exchange rate for %2$s.',
                                 '%1$d donations are still missing from your totals: there is no exchange rate for %2$s.',
                                 recalcResult.stillUnconvertible,
-                                'gratora'
+                                'gratora-donation-platform'
                             ),
                             recalcResult.stillUnconvertible,
                             ( recalcResult.currencies || [] ).join( ', ' )
@@ -273,15 +273,15 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
             { userCan( 'manage_options' ) && testTotal > 0 && (
                 <Card
-                    title={ __( 'Test data', 'gratora' ) }
-                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'gratora' ) }
+                    title={ __( 'Test data', 'gratora-donation-platform' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'gratora-donation-platform' ) }
                 >
                     <ul className="gratora-advanced-cron">
                         { testData.donations > 0 && (
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test donations */
-                                    _n( '%d test donation', '%d test donations', testData.donations, 'gratora' ),
+                                    _n( '%d test donation', '%d test donations', testData.donations, 'gratora-donation-platform' ),
                                     testData.donations
                                 ) }
                             </li>
@@ -290,7 +290,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test recurring plans */
-                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'gratora' ),
+                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'gratora-donation-platform' ),
                                     testData.recurring_plans
                                 ) }
                             </li>
@@ -303,7 +303,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                         '%d donor, who would have nothing left on record',
                                         '%d donors, who would have nothing left on record',
                                         testData.donors,
-                                        'gratora'
+                                        'gratora-donation-platform'
                                     ),
                                     testData.donors
                                 ) }
@@ -314,7 +314,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                         <label className="gratora-tools-field">
                             { sprintf(
                                 /* translators: %s: the literal confirmation keyword to type (DELETE) */
-                                __( 'Type %s to confirm.', 'gratora' ),
+                                __( 'Type %s to confirm.', 'gratora-donation-platform' ),
                                 CONFIRM_WORD
                             ) }
                             <input
@@ -331,19 +331,19 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                             disabled={ purging || purgeText.trim().toUpperCase() !== CONFIRM_WORD }
                             isBusy={ purging }
                         >
-                            { purging ? __( 'Removing…', 'gratora' ) : __( 'Delete test data', 'gratora' ) }
+                            { purging ? __( 'Removing…', 'gratora-donation-platform' ) : __( 'Delete test data', 'gratora-donation-platform' ) }
                         </Btn>
                     </div>
                 </Card>
             ) }
 
             <Card
-                title={ __( 'Setup wizard', 'gratora' ) }
-                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'gratora' ) }
+                title={ __( 'Setup wizard', 'gratora-donation-platform' ) }
+                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'gratora-donation-platform' ) }
             >
                 <div className="gratora-advanced-actions">
                     <Btn variant="secondary" href="admin.php?page=gratora-onboarding">
-                        { __( 'Open setup wizard', 'gratora' ) }
+                        { __( 'Open setup wizard', 'gratora-donation-platform' ) }
                     </Btn>
                 </div>
             </Card>

@@ -29,7 +29,7 @@ echo get_block_wrapper_attributes(array_filter([
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
                 class="gratora-donation-form__editor-preview"
-                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'gratora'));
+                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'gratora-donation-platform'));
 ?>"
                 loading="lazy"
                 style="width:100%;border:0;display:block;min-height:520px"
@@ -40,7 +40,7 @@ echo get_block_wrapper_attributes(array_filter([
             <div class="gratora-donation-form__placeholder">
                 <strong><?php echo esc_html($formTitle ?? '');
 ?></strong>
-                <span><?php esc_html_e('Donation form - shown to visitors here.', 'gratora');
+                <span><?php esc_html_e('Donation form - shown to visitors here.', 'gratora-donation-platform');
 ?></span>
             </div>
         <?php endif; ?>
