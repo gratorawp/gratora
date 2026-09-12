@@ -105,6 +105,10 @@ export function DonorsApp( { toggleSlot } ) {
     const [ error, setError ]     = useState( null );
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
+    // Per-donor reasons live in a persistent notice rather than a toast: the
+    // reason is a sentence naming what to do next, and a toast that takes
+    // itself away is no place to read one.
+    const [ refusals, setRefusals ] = useState( [] );
 
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
 
@@ -305,12 +309,27 @@ export function DonorsApp( { toggleSlot } ) {
             // cannot stand in for it: they are live and paid only, so they say
             // nothing about a donor held by a receipt or a subscription signup
             // and nothing about one whose only donation was refunded.
-            isEligible:    ( item ) => userCan( 'redact_donors' ) && !! item.deletable,
+            //
+            // A donor the gate refuses is offered it as well, because the
+            // answer names what to do about it and the row is the only place
+            // that sentence can be read. Dropping the action instead shows a
+            // row with no delete and nothing saying why.
+            isEligible:    ( item ) => userCan( 'redact_donors' )
+                && ( !! item.deletable || !! item.delete_blocked ),
             // DataViews hands a bulk callback the whole selection, not the
             // eligible subset, so isEligible only decides whether the button is
             // drawn. Without re-filtering, the count in the sentence is wrong
             // and the requests reach donors the gate exists to exclude.
             callback: ( selection ) => {
+                const blocked = selection.filter( ( i ) => ! i.deletable && !! i.delete_blocked );
+                if ( blocked.length ) {
+                    setRefusals( blocked.map( ( i ) => ( {
+                        id:     i.id,
+                        who:    i.email || i.name || `#${ i.id }`,
+                        reason: i.delete_blocked,
+                    } ) ) );
+                }
+
                 const items = selection.filter( ( i ) => !! i.deletable );
                 if ( ! items.length ) return;
                 const n = items.length;
@@ -342,6 +361,22 @@ export function DonorsApp( { toggleSlot } ) {
                             method: 'DELETE',
                             data:   { confirmation: 'DELETE' },
                         } ) ) );
+
+                        // The server refuses with a sentence naming the plan
+                        // and the processor, or the receipt and the refund
+                        // that withdraws it. A count throws away the only
+                        // part an operator can act on.
+                        setRefusals(
+                            results.flatMap( ( r, at ) => r.status === 'rejected'
+                                ? [ {
+                                    id:     items[ at ].id,
+                                    who:    items[ at ].email || items[ at ].name || `#${ items[ at ].id }`,
+                                    reason: r.reason?.message
+                                        || __( 'The server refused without saying why. The reason is in the log under Tools.', 'gratora-donation-platform' ),
+                                } ]
+                                : []
+                            )
+                        );
 
                         report(
                             results,
@@ -443,6 +478,18 @@ export function DonorsApp( { toggleSlot } ) {
 
             { error && (
                 <Notice status="error" onRemove={ () => setError( null ) }>{ error }</Notice>
+            ) }
+
+            { refusals.length > 0 && (
+                <Notice status="warning" onRemove={ () => setRefusals( [] ) }>
+                    <ul style={ { margin: 0, paddingLeft: 18 } }>
+                        { refusals.map( ( r ) => (
+                            <li key={ r.id }>
+                                <code>{ r.who }</code>{ ': ' }{ r.reason }
+                            </li>
+                        ) ) }
+                    </ul>
+                </Notice>
             ) }
 
             <KpiStrip items={ donorKpis( stats ) } loading={ loading && ! stats } />

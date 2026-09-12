@@ -813,6 +813,10 @@ final class DonorsController
                 'created_at'          => $d->created_at,
                 'redacted'            => $d->redacted_at !== null,
                 'deletable'           => ($undeletable[(int) $d->id] ?? null) === null,
+                // The sentence, not just the verdict. The screen is the only
+                // place it can be read, and a row with no delete on it and no
+                // reason beside it reads as a missing feature.
+                'delete_blocked'      => $undeletable[(int) $d->id] ?? null,
                 'avatar_url'          => $this->avatars->adminUrl($d),
             ],
             $result['items'],

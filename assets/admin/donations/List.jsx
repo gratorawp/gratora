@@ -477,8 +477,25 @@ export default function List() {
             // trashed goes that way first, because trashing is what stops its
             // payment, and a reference removed without that could still be
             // paid by hand.
-            isEligible:    ( item ) => userCan( 'delete_donations' ) && !! item.deletable && ! item.trashed,
+            //
+            // A row the server refuses is offered it too, because the refusal
+            // names what to do about it and this menu is the only place that
+            // sentence can be read. Dropping the action instead leaves a row
+            // that looks like the feature was never built. A row with no
+            // reason is not offered it: that one wants the bin, and Trash is
+            // already sitting beside it.
+            isEligible:    ( item ) => userCan( 'delete_donations' )
+                && ! item.trashed
+                && ( !! item.deletable || !! item.delete_blocked ),
             callback: ( items ) => {
+                const blocked = items.filter( ( i ) => ! i.deletable && !! i.delete_blocked );
+                if ( blocked.length ) {
+                    setRefusals( blocked.map( ( i ) => ( {
+                        reference: i.reference,
+                        reason:    i.delete_blocked,
+                    } ) ) );
+                }
+
                 const targets = items.filter( ( i ) => !! i.deletable && ! i.trashed );
                 if ( ! targets.length ) return;
                 const n = targets.length;

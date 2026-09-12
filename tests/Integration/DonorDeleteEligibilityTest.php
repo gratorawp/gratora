@@ -8,6 +8,7 @@ use Gratora\Donations\Donation;
 use Gratora\Donors\Donor;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
 use WP_REST_Request;
 
 /**
@@ -91,6 +92,42 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
 
         $this->assertTrue($this->listRows()[(int) $donor->id]['deletable']);
         $this->assertSame(200, $this->deleteStatus((int) $donor->id));
+    }
+
+    /**
+     * The gate's answer is a sentence, and the screen is the only place it can
+     * be read. Sending the boolean alone leaves an operator looking at a row
+     * with no delete on it and nothing at all saying why, which is
+     * indistinguishable from the feature not existing.
+     */
+    public function test_a_row_that_cannot_be_deleted_carries_the_reason(): void
+    {
+        $donor    = $this->donorWithDonation('rae.receipted@example.org', 'paid');
+        $donation = Donation::query()->where('donor_id', (int) $donor->id)->get();
+
+        $r = Receipt::make();
+        $r->donation_id    = (int) $donation->id;
+        $r->renderer_id    = 'receipt';
+        $r->receipt_number = 'R-' . bin2hex(random_bytes(3));
+        $r->locale         = 'en_US';
+        $r->voided         = false;
+        $r->issued_at      = gmdate('Y-m-d H:i:s');
+        $r->save();
+
+        $row = $this->listRows()[(int) $donor->id];
+
+        $this->assertFalse($row['deletable']);
+        $this->assertStringContainsString('receipt', strtolower((string) ($row['delete_blocked'] ?? '')));
+    }
+
+    public function test_a_row_that_can_be_deleted_carries_no_reason(): void
+    {
+        $donor = $this->donors()->findOrCreate('rae.clear@example.org', ['first_name' => 'Rae']);
+
+        $row = $this->listRows()[(int) $donor->id];
+
+        $this->assertTrue($row['deletable']);
+        $this->assertNull($row['delete_blocked']);
     }
 
     public function test_a_donor_with_no_donation_row_at_all_is_offered_delete_and_deletes(): void
