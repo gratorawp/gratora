@@ -363,14 +363,23 @@ final class ToolsController
             }
         }
 
+        $message = $who !== ''
+            /* translators: %s: who performed the action, a staff name or "donor". */
+            ? sprintf(__('Recorded by %s.', 'gratora-donation-platform'), $who)
+            : '';
+
+        // An add-on's own audit type: core cannot phrase what it means, and
+        // the fallback below claims nothing was recorded on a row whose
+        // payload is in this very response. Filtered at read time rather than
+        // stored, so the sentence follows the reader's language and not
+        // whatever was set when the row was written.
+        $message = (string) apply_filters('gratora.audit.message', $message, (string) $e->type, $payload);
+
         return [
             'id'      => (int) $e->id,
             'kind'    => 'audit',
             'source'  => (string) $e->type,
-            'message' => $who !== ''
-                /* translators: %s: who performed the action, a staff name or "donor". */
-                ? sprintf(__('Recorded by %s.', 'gratora-donation-platform'), $who)
-                : __('No detail recorded.', 'gratora-donation-platform'),
+            'message' => $message !== '' ? $message : __('No detail recorded.', 'gratora-donation-platform'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];

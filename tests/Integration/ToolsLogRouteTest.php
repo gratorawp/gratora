@@ -44,6 +44,63 @@ final class ToolsLogRouteTest extends IntegrationTestCase
         return (array) $res->get_data();
     }
 
+    /**
+     * An add-on's own audit type. Core cannot phrase what it means, and the
+     * fallback claims nothing was recorded on a row whose payload is sitting
+     * right there in the same response, so the one line an operator reads is
+     * false about the one thing the row exists to say.
+     */
+    public function test_an_add_on_can_say_what_its_own_audit_row_means(): void
+    {
+        $e = Event::make();
+        $e->type        = 'donor.thing_destroyed';
+        $e->payload     = ['count' => 3];
+        $e->occurred_at = gmdate('Y-m-d H:i:s');
+        $e->save();
+
+        $describe = static function ($message, string $type, array $payload) {
+            return $type === 'donor.thing_destroyed'
+                ? sprintf('Destroyed %d things.', (int) ($payload['count'] ?? 0))
+                : $message;
+        };
+        add_filter('gratora.audit.message', $describe, 10, 3);
+
+        try {
+            $items = (array) $this->fetch()['items'];
+        } finally {
+            remove_filter('gratora.audit.message', $describe, 10);
+        }
+
+        $row = null;
+        foreach ($items as $item) {
+            if (($item['source'] ?? '') === 'donor.thing_destroyed') {
+                $row = $item;
+                break;
+            }
+        }
+
+        $this->assertNotNull($row, 'the row is in the log');
+        $this->assertSame('Destroyed 3 things.', $row['message']);
+    }
+
+    /** Nothing described and nothing recorded still reads as nothing. */
+    public function test_an_undescribed_row_with_no_actor_still_says_so(): void
+    {
+        $e = Event::make();
+        $e->type        = 'donor.undescribed';
+        $e->occurred_at = gmdate('Y-m-d H:i:s');
+        $e->save();
+
+        foreach ((array) $this->fetch()['items'] as $item) {
+            if (($item['source'] ?? '') === 'donor.undescribed') {
+                $this->assertSame('No detail recorded.', $item['message']);
+                return;
+            }
+        }
+
+        $this->fail('the row is in the log');
+    }
+
     public function test_failures_and_deliveries_arrive_in_the_same_list(): void
     {
         ErrorLog::record('gateway.intent', 'PayPal has no live credentials.');
