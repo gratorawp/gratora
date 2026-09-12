@@ -180,6 +180,23 @@ final class DeleteRecurringDonationTest extends IntegrationTestCase
         $this->assertSame(2500, (int) $after->total_paid_cents);
     }
 
+    /**
+     * A ticket order's charge is not core's to refuse. Core was telling the
+     * operator to manage it from the order, and the add-on that owns orders
+     * has no way to remove one: the refusal named nothing anybody could do.
+     * The add-on takes the order when the charge goes, and refuses through
+     * its own filter if it ever has a reason to.
+     */
+    public function test_a_ticket_order_payment_is_not_refused_by_core(): void
+    {
+        $donation = $this->payment(null, ['kind' => 'order', 'frequency' => 'one_time', 'gateway' => 'stripe']);
+        $id       = (int) $donation->id;
+
+        $this->deleter()->delete($donation, null, false);
+
+        $this->assertNull(Donation::query()->find('id', $id));
+    }
+
     /** A one-off donation is not touched by any of this. */
     public function test_a_one_off_donation_records_no_subscription(): void
     {

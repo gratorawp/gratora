@@ -173,15 +173,34 @@ final class DonationTrasherTest extends IntegrationTestCase
         $this->assertSame('nothing_was_open_to_close', (string) $fresh->payment_stopped_reason);
     }
 
-    public function test_a_ticket_order_payment_is_refused_by_name(): void
+    /**
+     * Core has no opinion about a kind it does not own. It used to refuse a
+     * ticket order payment and say to manage it from the order, and the
+     * add-on that owns orders has no way to remove one, so the refusal named
+     * nothing anybody could do. An add-on with a reason refuses through its
+     * own filter.
+     */
+    public function test_a_ticket_order_payment_is_not_refused_by_core(): void
     {
         $donation = $this->pending('offline', ['kind' => 'order']);
 
-        $outcome = $this->trasher()->trash($donation);
+        $this->assertSame(TrashOutcome::TRASHED, $this->trasher()->trash($donation)->outcome);
+    }
 
-        $this->assertSame(TrashOutcome::REFUSED, $outcome->outcome);
-        $this->assertStringContainsString('order', strtolower((string) $outcome->reason));
-        $this->assertNull($this->fresh($donation)->trashed_at);
+    public function test_an_add_on_can_still_refuse_a_kind_it_owns(): void
+    {
+        $donation = $this->pending('offline', ['kind' => 'order']);
+
+        add_filter('gratora.donation.untrashable_reason', static fn () => 'Manage it from the order.');
+
+        try {
+            $outcome = $this->trasher()->trash($donation);
+            $this->assertSame(TrashOutcome::REFUSED, $outcome->outcome);
+            $this->assertStringContainsString('order', strtolower((string) $outcome->reason));
+            $this->assertNull($this->fresh($donation)->trashed_at);
+        } finally {
+            remove_all_filters('gratora.donation.untrashable_reason');
+        }
     }
 
     public function test_a_row_on_a_plan_that_is_still_billing_is_refused(): void

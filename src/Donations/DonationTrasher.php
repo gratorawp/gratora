@@ -102,10 +102,6 @@ final class DonationTrasher
      */
     private function structuralReason(Donation $donation): ?string
     {
-        if ((string) $donation->kind !== 'donation') {
-            return __('This is a ticket order payment. Manage it from the order.', 'gratora-donation-platform');
-        }
-
         // Only while the mandate is still billing. The message asks for a
         // cancel, so a cancel has to be enough: a refusal that repeats itself
         // after the operator has done the thing it named is a dead end wearing
@@ -122,6 +118,7 @@ final class DonationTrasher
                 );
             }
         }
+
         if (str_starts_with((string) ($donation->gateway_intent_id ?? ''), 'pending_subscription_')) {
             return __('This is a recurring signup that has not finished. Cancel it at the gateway first.', 'gratora-donation-platform');
         }
