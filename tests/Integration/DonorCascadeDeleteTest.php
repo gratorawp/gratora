@@ -14,6 +14,7 @@ use Gratora\Donors\Consent;
 use Gratora\Donors\Donor;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 use InvalidArgumentException;
 use WP_REST_Request;
 
@@ -140,6 +141,44 @@ final class DonorCascadeDeleteTest extends IntegrationTestCase
      * attempt was the whole of, the cascade removes them, and removing a donor
      * removes every donation they have.
      */
+    /**
+     * The cascade is the tail of a request whose donations are already gone,
+     * so a donor it cannot delete is skipped. Throwing would answer a batch
+     * that half succeeded with a 500 and abandon every donor after this one.
+     */
+    public function test_a_mandate_that_cannot_be_stopped_does_not_take_the_batch_down(): void
+    {
+        $donation = $this->stoppedAttempt();
+        $donorId  = (int) $donation->donor_id;
+
+        $now = gmdate('Y-m-d H:i:s');
+        $p = RecurringPlan::make();
+        $p->donor_id                = $donorId;
+        $p->gateway                 = 'stripe';
+        $p->gateway_subscription_id = 'sub_' . uniqid();
+        $p->status                  = 'active';
+        $p->amount_cents            = 2500;
+        $p->currency                = 'USD';
+        $p->interval_unit           = 'month';
+        $p->interval_count          = 1;
+        $p->started_at              = $now;
+        $p->created_at              = $now;
+        $p->updated_at              = $now;
+        $p->save();
+
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/donations/delete');
+        $request->set_param('references', [(string) $donation->reference]);
+        $request->set_param('confirmation', 'DELETE');
+        $request->set_param('delete_donors', true);
+
+        $response = rest_do_request($request);
+
+        $this->assertSame(200, $response->get_status());
+        $this->assertNull(Donation::query()->find('id', (int) $donation->id), 'the donation it named is gone');
+        $this->assertNotNull(Donor::query()->find('id', $donorId), 'and the donor it could not stop billing stayed');
+        $this->assertSame([], $response->get_data()['donors_deleted'] ?? []);
+    }
+
     public function test_deleting_one_binned_attempt_spares_the_donors_other_binned_attempts(): void
     {
         $email  = 'cascade-pair-' . uniqid() . '@example.test';

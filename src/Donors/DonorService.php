@@ -15,6 +15,7 @@ use Gratora\Foundation\Identity\IdentityHasher;
 use Gratora\Foundation\Maintenance\AbandonedPendingReaper;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Time\Clock;
+use Gratora\Recurring\GatewayUnreachable;
 use Gratora\Recurring\RecurringCanceller;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
@@ -381,25 +382,12 @@ final class DonorService
                 ->pluck('donor_id'),
         ));
 
-        // Any plan at all. A local 'cancelled' is not proof the mandate is
-        // dead: an importer writes it over statuses it has no state for, and
-        // deleting the row takes the gateway handle needed to stop the billing.
-        $withPlans = $ids === [] ? [] : array_flip(array_map(
-            'intval',
-            RecurringPlan::query()->whereIn('donor_id', $ids)->distinct()->pluck('donor_id'),
-        ));
-
         $out = [];
         foreach ($donors as $donor) {
             $id = (int) $donor->id;
 
             if (isset($withDonations[$id])) {
                 $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'gratora-donation-platform');
-                continue;
-            }
-
-            if (isset($withPlans[$id])) {
-                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'gratora-donation-platform');
                 continue;
             }
 
@@ -412,6 +400,7 @@ final class DonorService
 
     /**
      * @throws InvalidArgumentException when the donor must be kept.
+     * @throws GatewayUnreachable when a mandate of theirs cannot be stopped.
      *
      * @since 1.0.0
      */
@@ -444,6 +433,12 @@ final class DonorService
         //
         // Resolved from the container rather than held, because the gateway
         // registry it reaches is built from services that reach back here.
+        // First, because a plan row is the only handle that can stop the
+        // billing: taking it without asking the processor leaves the card
+        // charged every month with nothing here able to reach it. A processor
+        // that will not answer refuses the whole delete.
+        $this->stopRecurringBefore($donor, __('The donor was deleted.', 'gratora-donation-platform'), true);
+
         $deleter   = Plugin::instance()->container->get(DonationDeleter::class);
         $donations = $dids === [] ? [] : Donation::query()->whereIn('id', $dids)->getAll();
         foreach ($donations as $donation) {
@@ -491,6 +486,20 @@ final class DonorService
                 DB::table('gratora_refunds')->whereIn('donation_id', $dids)->delete();
             }
 
+            // Stopped at the processor above, so what goes here is the record
+            // of a mandate that is no longer billing anything. The events go
+            // by plan as well as by donor: a renewal event carries the plan it
+            // renewed, and the donor column on it is not guaranteed.
+            $planIds = array_map('intval', RecurringPlan::query()->where('donor_id', $id)->pluck('id'));
+            if ($planIds !== []) {
+                DB::table('gratora_events')
+                    ->where('type', 'donor.%', 'NOT LIKE')
+                    ->whereNotIn('type', DonationAudit::TYPES)
+                    ->whereIn('recurring_plan_id', $planIds)
+                    ->delete();
+                RecurringPlan::query()->where('donor_id', $id)->delete();
+            }
+
             Consent::query()->where('donor_id', $id)->delete();
             DonorNote::query()->where('donor_id', $id)->delete();
             MagicLinkToken::query()->where('donor_id', $id)->delete();
@@ -520,6 +529,7 @@ final class DonorService
                     'actor_name'        => self::actorName(),
                     'was_redacted'      => $donor->redacted_at !== null,
                     'donations_deleted' => count($dids),
+                    'plans_stopped'     => count($planIds),
                 ],
             ]);
 
@@ -549,7 +559,7 @@ final class DonorService
         // email back into the webhook log.
         $who = self::actor($actor);
 
-        $this->stopRecurringBefore($donor);
+        $this->stopRecurringBefore($donor, __('The donor asked for their data to be erased.', 'gratora-donation-platform'));
 
         $request = $this->erasureRequest($donor);
 
@@ -625,14 +635,25 @@ final class DonorService
      * Resolved from the container rather than injected: RecurringCanceller
      * reaches DonationService, which reaches back here.
      *
+     * @throws GatewayUnreachable when the processor holding a mandate cannot
+     *                            be reached, so nothing here can stop it.
+     *
      * @since 1.0.0
      */
-    private function stopRecurringBefore(Donor $donor): void
+    private function stopRecurringBefore(Donor $donor, string $reason, bool $everyPlan = false): void
     {
-        $plans = RecurringPlan::query()
-            ->where('donor_id', (int) $donor->id)
-            ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
-            ->getAll();
+        $query = RecurringPlan::query()->where('donor_id', (int) $donor->id);
+
+        // A delete takes the row, so it asks about every plan the donor has.
+        // A local 'cancelled' is not proof the mandate is dead: an importer
+        // writes it over statuses it has no state for, and cancelSubscription
+        // is idempotent per its contract, so the cost of asking twice is a
+        // round trip and the cost of not asking is a card still being charged.
+        if (! $everyPlan) {
+            $query->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES);
+        }
+
+        $plans = $query->getAll();
 
         if ($plans === []) {
             return;
@@ -644,7 +665,7 @@ final class DonorService
 
         foreach ($plans as $plan) {
             try {
-                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'gratora-donation-platform'));
+                $canceller->cancel($plan, $reason);
                 $cancelled[] = (int) $plan->id;
             } catch (Throwable $e) {
                 // The erasure stops here, so the caller has to be told which
@@ -652,7 +673,7 @@ final class DonorService
                 ErrorLog::record(
                     'donor.erasure.recurring',
                     sprintf(
-                        'Plan %d could not be cancelled, so the erasure was abandoned: %s',
+                        'Plan %d could not be cancelled, so the request was abandoned: %s',
                         (int) $plan->id,
                         $e->getMessage()
                     ),

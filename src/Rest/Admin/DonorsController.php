@@ -14,6 +14,7 @@ use Gratora\Donors\DonorRepository;
 use Gratora\Donors\DonorService;
 use Gratora\Donors\EmailAlreadyAssignedException;
 use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Recurring\GatewayUnreachable;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
 use Gratora\Rest\Paging;
@@ -623,6 +624,11 @@ final class DonorsController
 
         try {
             $this->donorService->delete($donor);
+        } catch (GatewayUnreachable $e) {
+            // Carries the plan and the processor, which is what the operator
+            // needs to go and stop the billing by hand. Swallowing it for the
+            // generic message would send them to a log to find that out.
+            return new WP_Error('gratora_donor_not_deletable', $e->getMessage(), ['status' => 409]);
         } catch (InvalidArgumentException $e) {
             // The receipt and refund guards run inside the transaction, where
             // the pre-check cannot see them, and they mean the same thing to

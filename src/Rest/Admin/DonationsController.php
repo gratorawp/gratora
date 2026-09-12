@@ -31,6 +31,7 @@ use Gratora\Funds\Fund;
 use Gratora\Funds\FundRepository;
 use Gratora\Gateways\ClosesUnsettledPayment;
 use Gratora\Gateways\GatewayManager;
+use Gratora\Recurring\GatewayUnreachable;
 use Gratora\Gateways\PayPal\PayPalHoldReason;
 use Gratora\Receipts\OrgProfile;
 use Gratora\Receipts\Receipt;
@@ -1457,6 +1458,14 @@ final class DonationsController
             try {
                 $this->donorService->delete($donor);
                 $deleted[] = $id;
+            } catch (GatewayUnreachable $e) {
+                // The donations are already deleted, so throwing here would
+                // abort the donors after this one and answer a batch that
+                // half succeeded with a 500. The plan row is still there to
+                // stop the billing with, and this is the only record of why
+                // the donor stayed.
+                ErrorLog::record('admin.donation.cascade', $e->getMessage(), ['donor_id' => $id]);
+                continue;
             } catch (InvalidArgumentException $e) {
                 // The gate changed under us, which is the same answer as a
                 // refusal: the donor stays and the donations are still gone.

@@ -104,7 +104,13 @@ final class DonorDeleteTest extends IntegrationTestCase
         );
     }
 
-    public function test_a_donor_on_a_recurring_plan_cannot_be_removed(): void
+    /**
+     * Stripe registers only while its credentials are stored, so a plan on an
+     * absent gateway is a live mandate nothing here can stop. The refusal has
+     * to name the processor and the plan, because stopping it by hand is the
+     * only way out.
+     */
+    public function test_a_mandate_that_cannot_be_stopped_refuses_the_delete(): void
     {
         $donor = $this->donor('planned-' . uniqid() . '@example.test');
 
@@ -122,8 +128,16 @@ final class DonorDeleteTest extends IntegrationTestCase
         $plan->updated_at              = gmdate('Y-m-d H:i:s');
         $plan->save();
 
-        $this->assertSame(409, $this->deleteViaRest((int) $donor->id)->get_status());
+        $res = $this->deleteViaRest((int) $donor->id);
+
+        $this->assertSame(409, $res->get_status());
+        $this->assertStringContainsString('stripe', (string) ($res->get_data()['message'] ?? ''));
         $this->assertTrue($this->exists((int) $donor->id));
+        $this->assertSame(
+            1,
+            (int) RecurringPlan::query()->where('donor_id', (int) $donor->id)->count(),
+            'the handle that can still stop the billing is kept'
+        );
     }
 
     public function test_an_add_on_can_refuse(): void

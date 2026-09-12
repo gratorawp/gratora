@@ -113,11 +113,13 @@ final class DonorDeleteGateTest extends IntegrationTestCase
     }
 
     /**
-     * Any plan at all, whatever its local status. A cancelled row still holds
-     * the gateway handle, and an importer writes 'cancelled' over statuses it
-     * has no state for, which may still be billing.
+     * A plan is not a refusal. The mandate is stopped by the delete itself, so
+     * the gate stays quiet and the button is offered; what refuses, when it
+     * refuses, is a processor that will not answer.
+     *
+     * @see DonorDeleteStopsMandateTest
      */
-    public function test_any_recurring_plan_blocks_whatever_its_status(): void
+    public function test_a_recurring_plan_does_not_refuse_the_delete_by_itself(): void
     {
         foreach (['cancelled', 'active', 'pending', 'paused', 'past_due'] as $status) {
             $donor = $this->donor();
@@ -137,7 +139,7 @@ final class DonorDeleteGateTest extends IntegrationTestCase
             $p->updated_at              = $now;
             $p->save();
 
-            $this->assertNotNull($this->reason($donor), "a {$status} plan must keep its donor");
+            $this->assertNull($this->reason($donor), "a {$status} plan must not be its own refusal");
         }
     }
 }

@@ -318,12 +318,12 @@ export function DonorsApp( { toggleSlot } ) {
                 setConfirm( {
                     title:        _n( 'Delete donor', 'Delete donors', n, 'gratora-donation-platform' ),
                     message: n === 1
-                        ? __( 'Delete this donor? Their record, and any attempt that never took money, go for good.', 'gratora-donation-platform' )
+                        ? __( 'Delete this donor? Their record, and any attempt that never took money, go for good. A recurring donation of theirs is cancelled at the processor first, and the delete stops if the processor cannot be reached.', 'gratora-donation-platform' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
-                                'Delete %d donor? Their record, and any attempt that never took money, go for good.',
-                                'Delete %d donors? Their records, and any attempts that never took money, go for good.',
+                                'Delete %d donor? Their record, and any attempt that never took money, go for good. A recurring donation of theirs is cancelled at the processor first, and the delete stops if the processor cannot be reached.',
+                                'Delete %d donors? Their records, and any attempts that never took money, go for good. Recurring donations are cancelled at the processor first, and a donor whose processor cannot be reached is left alone.',
                                 n,
                                 'gratora-donation-platform'
                             ),
