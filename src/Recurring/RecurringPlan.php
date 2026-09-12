@@ -17,7 +17,7 @@ use Gratora\Vendor\Queryable\Schema\Table;
 final class RecurringPlan extends Model
 {
     protected string $table = 'gratora_recurring_plans';
-    protected string $version = '1.0.2';
+    protected string $version = '1.0.0';
 
     public int $id;
     public int $donor_id;

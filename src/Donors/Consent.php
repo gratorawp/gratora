@@ -23,7 +23,7 @@ use Gratora\Vendor\Queryable\Schema\Table;
 final class Consent extends Model
 {
     protected string $table = 'gratora_consents';
-    protected string $version = '1.0.1';
+    protected string $version = '1.0.0';
 
     public int $id;
     public int $donor_id;

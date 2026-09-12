@@ -20,7 +20,7 @@ use Gratora\Vendor\Queryable\Schema\Table;
 final class Receipt extends Model
 {
     protected string $table = 'gratora_receipts';
-    protected string $version = '1.0.1';
+    protected string $version = '1.0.0';
 
     public int $id;
     public int $donation_id;
