@@ -55,6 +55,9 @@ final class Donor extends Model
     public ?string $notes_encrypted = null;
     public ?int $avatar_attachment_id = null;
     public ?string $public_hidden_at = null;
+    /** Off the working list, reversibly. Nothing about the person changes. */
+    public ?string $trashed_at = null;
+    public ?int $trashed_by = null;
     public ?array $flags = null;
     public string $created_at;
     public string $updated_at;
@@ -87,6 +90,10 @@ Donor::schema(function (Table $t): void {
     // touching the donation history the org still has to account for.
     // Redaction is the only other lever and it destroys the record.
     $t->datetime('public_hidden_at')->nullable();
+    // The bin selects on this column and reads newest first, so one index
+    // serves the filter and the order together.
+    $t->datetime('trashed_at')->nullable()->index();
+    $t->bigInteger('trashed_by')->unsigned()->nullable();
     $t->json('flags')->nullable();
     $t->datetime('created_at');
     $t->datetime('updated_at');

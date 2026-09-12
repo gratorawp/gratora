@@ -6,6 +6,7 @@ namespace Gratora\Tests\Integration;
 
 use Gratora\Donors\MagicLinkToken;
 use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\MigrationLock;
 
 /**
  * A column that only exists after a wipe is not shipped. Both paths an install
@@ -111,6 +112,11 @@ final class ReviewW6SchemaApplyTest extends IntegrationTestCase
                 remove_action('wp_loaded', $fn, $priority);
             }
         }
+
+        // A previous test's gate run can leave this claimed: dbDelta's DDL
+        // commits the row, while the release that follows is rolled back with
+        // the test. A held lock makes the gate return without migrating.
+        MigrationLock::release();
 
         try {
             do_action('wp_loaded');
