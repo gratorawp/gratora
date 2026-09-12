@@ -468,6 +468,73 @@ export default function List() {
                 } );
             },
         },
+        {
+            id:            'delete-permanently',
+            label:         __( 'Delete permanently', 'gratora-donation-platform' ),
+            isDestructive: true,
+            supportsBulk:  true,
+            // Only for a row with no bin to pass through. Anything that can be
+            // trashed goes that way first, because trashing is what stops its
+            // payment, and a reference removed without that could still be
+            // paid by hand.
+            isEligible:    ( item ) => userCan( 'delete_donations' ) && !! item.deletable && ! item.trashed,
+            callback: ( items ) => {
+                const targets = items.filter( ( i ) => !! i.deletable && ! i.trashed );
+                if ( ! targets.length ) return;
+                const n = targets.length;
+
+                setConfirm( {
+                    title:       __( 'Delete permanently', 'gratora-donation-platform' ),
+                    destructive: true,
+                    requireText: 'DELETE',
+                    message: n === 1
+                        ? __( 'This removes the donation and everything describing it. Money already recorded against it comes out of your totals. It cannot be undone.', 'gratora-donation-platform' )
+                        : sprintf(
+                            /* translators: %d: number of donations */
+                            _n(
+                                'This removes %d donation and everything describing it. Money already recorded against them comes out of your totals. It cannot be undone.',
+                                'This removes %d donations and everything describing them. Money already recorded against them comes out of your totals. It cannot be undone.',
+                                n,
+                                'gratora-donation-platform'
+                            ),
+                            n
+                        ),
+                    confirmLabel: __( 'Delete permanently', 'gratora-donation-platform' ),
+                    onConfirm: async () => {
+                        try {
+                            const result = await postBatch( 'delete', targets.map( ( i ) => i.reference ), {
+                                confirmation:  'DELETE',
+                                // The donor is kept: these rows have money on
+                                // them, so the donor is never left with nothing.
+                                delete_donors: false,
+                            } );
+
+                            const done = result.done.length + result.already.length;
+                            if ( done > 0 ) {
+                                notify.success( sprintf(
+                                    /* translators: %d: number of donations */
+                                    _n( '%d donation deleted.', '%d donations deleted.', done, 'gratora-donation-platform' ),
+                                    done
+                                ) );
+                            }
+
+                            setRefusals( result.refused );
+                            if ( result.refused.length > 0 ) {
+                                notify.error( sprintf(
+                                    /* translators: %d: number of donations */
+                                    _n( '%d donation could not be deleted.', '%d donations could not be deleted.', result.refused.length, 'gratora-donation-platform' ),
+                                    result.refused.length
+                                ) );
+                            }
+                        } catch ( err ) {
+                            notify.error( err?.message || __( 'Could not delete. Refresh and try again.', 'gratora-donation-platform' ) );
+                        }
+
+                        refetch();
+                    },
+                } );
+            },
+        },
     ], [] );
 
     return (

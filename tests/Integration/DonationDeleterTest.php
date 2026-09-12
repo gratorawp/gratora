@@ -162,29 +162,29 @@ final class DonationDeleterTest extends IntegrationTestCase
         $this->assertFalse($this->exists($donation));
     }
 
-    public function test_a_paid_row_is_refused_and_survives(): void
+    /**
+     * What stops a removal is a receipt still standing, not the status. See
+     * DeleteSettledDonationTest for that boundary in both directions.
+     */
+    public function test_a_standing_receipt_refuses_the_delete(): void
     {
         $donation = $this->attempt('offline', ['status' => 'paid', 'paid_at' => gmdate('Y-m-d H:i:s')]);
 
-        $this->expectException(InvalidArgumentException::class);
-
-        try {
-            $this->deleter()->delete($donation, null, false);
-        } finally {
-            $this->assertTrue($this->exists($donation), 'money that moved is never removed');
-        }
-    }
-
-    public function test_a_row_that_saw_money_is_refused(): void
-    {
-        $donation = $this->attempt('offline', ['gateway_txn_id' => 'ch_real']);
+        $receipt = \Gratora\Receipts\Receipt::make();
+        $receipt->donation_id    = (int) $donation->id;
+        $receipt->renderer_id    = 'receipt';
+        $receipt->receipt_number = 'R-' . bin2hex(random_bytes(3));
+        $receipt->locale         = 'en_US';
+        $receipt->voided         = false;
+        $receipt->issued_at      = gmdate('Y-m-d H:i:s');
+        $receipt->save();
 
         $this->expectException(InvalidArgumentException::class);
 
         try {
             $this->deleter()->delete($donation, null, false);
         } finally {
-            $this->assertTrue($this->exists($donation));
+            $this->assertTrue($this->exists($donation), 'a document an auditor can ask for still stands');
         }
     }
 

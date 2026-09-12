@@ -15,12 +15,12 @@ use InvalidArgumentException;
 defined('ABSPATH') || exit;
 
 /**
- * Remove an attempt that never took money, and everything describing it.
+ * Remove a donation and everything describing it.
  *
- * Every stored total sums paid and partial_refund rows, and the eligibility set
- * admits neither, so nothing here moves a figure. That is the invariant the
- * whole design rests on rather than a happy accident, and a behaviour test
- * pins it.
+ * A row that took money can go once its receipt is voided, which a refund
+ * does, so the figures it fed are recomputed here rather than left describing
+ * something that no longer exists. A row that never took money feeds nothing
+ * and skips that work.
  *
  * The reference counter is never rolled back. The audit row carries the
  * reference so the gap in the numbering can be explained afterwards.
@@ -33,12 +33,13 @@ final class DonationDeleter
     public function __construct(
         private DonationTrasher $rules,
         private Clock $clock,
+        private AggregateSyncer $aggregates,
     ) {
     }
 
     /**
      * Why each of these rows cannot be permanently deleted, or null where it
-     * can. The same rules trash applies, asked under the delete filter.
+     * can. Wider than the trash rules: see DonationTrasher::undeletableReasons.
      *
      * @param list<Donation> $donations
      * @return array<int, ?string> keyed by donation id
@@ -47,7 +48,7 @@ final class DonationDeleter
      */
     public function undeletableReasons(array $donations): array
     {
-        return $this->rules->eligibilityReasons($donations, 'gratora.donation.undeletable_reason');
+        return $this->rules->undeletableReasons($donations);
     }
 
     /**
@@ -72,7 +73,14 @@ final class DonationDeleter
     {
         $id = (int) $donation->id;
 
-        if ($requireTrashed && $donation->trashed_at === null) {
+        // Through the bin where a bin exists. A row that can be trashed has to
+        // be, because trashing is what stops its payment, and removing it
+        // without that leaves a reference a donor could still pay by hand. A
+        // settled row has nothing left to stop and no bin to pass through, so
+        // the typed confirmation is the whole of its ceremony.
+        if ($requireTrashed
+            && $donation->trashed_at === null
+            && ($this->rules->untrashableReasons([$donation])[$id] ?? null) === null) {
             throw new InvalidArgumentException(esc_html__('Move this donation to the trash before deleting it permanently.', 'gratora-donation-platform'));
         }
 
@@ -85,8 +93,12 @@ final class DonationDeleter
             $this->closeFor($donation);
         }
 
-        $snapshot   = $this->snapshot($donation);
-        $deleted    = false;
+        $snapshot = $this->snapshot($donation);
+        // Asked before the row goes. A row that never reached money feeds no
+        // stored total, so it skips the recompute entirely.
+        $carriedMoney = $donation->paid_at !== null
+            || in_array((string) $donation->status, ['paid', 'partial_refund', 'refunded', 'disputed'], true);
+        $deleted = false;
 
         DB::transaction(function () use ($id, $note, $requireTrashed, $cascade, $snapshot, &$deleted): void {
             if (! $this->lockRow($id)) {
@@ -101,7 +113,9 @@ final class DonationDeleter
             // Trash widens the gap between the close and the delete from
             // seconds to weeks, so re-running the rules here matters more than
             // it would on an immediate action, not less.
-            if ($requireTrashed && $locked->trashed_at === null) {
+            if ($requireTrashed
+                && $locked->trashed_at === null
+                && ($this->rules->untrashableReasons([$locked])[$id] ?? null) === null) {
                 throw new InvalidArgumentException(esc_html__('This donation left the trash while you were looking at it.', 'gratora-donation-platform'));
             }
             if ($this->undeletableReasons([$locked])[$id] !== null) {
@@ -142,6 +156,10 @@ final class DonationDeleter
 
         if (! $deleted) {
             return;
+        }
+
+        if ($carriedMoney) {
+            $this->recompute($snapshot);
         }
 
         do_action('gratora.donation.deleted', $snapshot);
@@ -195,6 +213,27 @@ final class DonationDeleter
      *
      * @return array<string,mixed>
      */
+    /**
+     * Put the stored totals back in step with the rows that remain.
+     *
+     * @param array<string,mixed> $snapshot
+     */
+    private function recompute(array $snapshot): void
+    {
+        if ((int) $snapshot['donor_id'] > 0) {
+            $this->aggregates->syncDonor((int) $snapshot['donor_id']);
+        }
+        if ($snapshot['campaign_id'] !== null) {
+            $this->aggregates->syncCampaign((int) $snapshot['campaign_id']);
+        }
+        if ($snapshot['fund_id'] !== null) {
+            $this->aggregates->syncFund((int) $snapshot['fund_id']);
+        }
+        if ($snapshot['form_id'] !== null) {
+            $this->aggregates->syncForm((int) $snapshot['form_id']);
+        }
+    }
+
     private function snapshot(Donation $donation): array
     {
         $id = (int) $donation->id;

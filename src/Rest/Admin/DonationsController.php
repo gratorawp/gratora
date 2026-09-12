@@ -2195,7 +2195,11 @@ final class DonationsController
             'untrashable_reason' => $untrashable,
             // Permanent delete is offered only from the Trash view, so a row
             // that has left the bin has left the ceremony that authorised it.
-            'deletable'          => $d->trashed_at !== null && $undeletable === null,
+            // Offered from the bin, and directly for a row that has no bin to
+            // pass through: a settled donation cannot be trashed, so requiring
+            // it would make the wider delete unreachable.
+            'deletable'          => $undeletable === null
+                && ($d->trashed_at !== null || $untrashable !== null),
             'delete_blocked'     => $undeletable,
 
             // Whether trashing this would actually close something. False where

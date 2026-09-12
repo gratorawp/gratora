@@ -62,11 +62,10 @@ final class DonationTrasher
     }
 
     /**
-     * The one rule set, asked under whichever name the caller answers to.
-     *
-     * Trash accepts exactly the rows permanent delete accepts. Two rule sets
-     * would drift, and the drift would be a row that can be hidden but never
-     * removed, or removed without ever having been stopped.
+     * The trash rules. Delete has its own, wider set in undeletableReasons:
+     * the two share their structural refusals and part company over money,
+     * because stopping a payment and removing a record are different questions
+     * about the same row.
      *
      * @param list<Donation> $donations
      * @return array<int, ?string> keyed by donation id
@@ -95,11 +94,13 @@ final class DonationTrasher
      * @param array<int,true> $withReceipt
      * @param array<int,true> $withRefund
      */
-    private function localReason(Donation $donation, array $withReceipt, array $withRefund, string $filterHook): ?string
+    /**
+     * The refusals that hold whatever is being asked, because they are about
+     * something still live somewhere else rather than about money already
+     * taken.
+     */
+    private function structuralReason(Donation $donation): ?string
     {
-        $id     = (int) $donation->id;
-        $status = (string) $donation->status;
-
         if ((string) $donation->kind !== 'donation') {
             return __('This is a ticket order payment. Manage it from the order.', 'gratora-donation-platform');
         }
@@ -116,6 +117,98 @@ final class DonationTrasher
         }
         if (str_starts_with((string) ($donation->gateway_intent_id ?? ''), 'pending_subscription_')) {
             return __('This is a recurring signup that has not finished. Cancel it at the gateway first.', 'gratora-donation-platform');
+        }
+
+        return null;
+    }
+
+    /**
+     * Why each of these rows cannot be removed for good, or null where it can.
+     *
+     * Wider than trash, deliberately. Trash exists to stop a payment that is
+     * still open, which is meaningless for one that settled, and its promise
+     * that no total moves holds only while the bin cannot hold money. Removing
+     * the record is a different question, and the one thing that must not
+     * happen is a gap in a receipt sequence a tax authority reads as complete.
+     * A refund voids the receipt, which leaves a row explaining the number, so
+     * the rule is not "never" but "not while a receipt still stands".
+     *
+     * @param list<Donation> $donations
+     * @return array<int, ?string> keyed by donation id
+     *
+     * @since 1.0.0
+     */
+    public function undeletableReasons(array $donations): array
+    {
+        $ids = array_values(array_filter(array_map(
+            static fn (Donation $d): int => (int) $d->id,
+            $donations
+        )));
+
+        $standing = $this->idsWithStandingReceipt($ids);
+
+        $out = [];
+        foreach ($donations as $donation) {
+            $id     = (int) $donation->id;
+            $reason = $this->structuralReason($donation);
+
+            if ($reason === null && isset($standing[$id])) {
+                $reason = __('A receipt was issued for this donation. Refund it first, which voids the receipt, or the numbering has a gap nobody can explain.', 'gratora-donation-platform');
+            }
+
+            if ($reason === null) {
+                /** @var ?string $filtered */
+                $filtered = apply_filters('gratora.donation.undeletable_reason', null, $donation);
+                $reason   = is_string($filtered) && $filtered !== '' ? $filtered : null;
+            }
+
+            $out[$id] = $reason;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Rows whose receipt has not been voided.
+     *
+     * @param list<int> $ids
+     * @return array<int,true>
+     */
+    private function idsWithStandingReceipt(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $out = [];
+        $rows = DB::table('gratora_receipts')
+            ->select('donation_id')
+            ->whereIn('donation_id', $ids)
+            ->where('voided', 0)
+            ->getAll();
+
+        foreach ($rows as $row) {
+            $donationId = (int) ((array) $row)['donation_id'];
+            if ($donationId > 0) {
+                $out[$donationId] = true;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param array<int,true> $withReceipt
+     * @param array<int,true> $withRefund
+     */
+    private function localReason(Donation $donation, array $withReceipt, array $withRefund, string $filterHook): ?string
+    {
+        $id     = (int) $donation->id;
+        $status = (string) $donation->status;
+
+        $structural = $this->structuralReason($donation);
+        if ($structural !== null) {
+            return $structural;
         }
 
         if (in_array($status, self::SETTLED, true)) {

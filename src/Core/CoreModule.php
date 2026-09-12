@@ -946,7 +946,8 @@ final class CoreModule implements GratoraModule
 
         $c->bind(DonationDeleter::class, fn (Container $c) => new DonationDeleter(
             $c->get(DonationTrasher::class),
-            $c->get(Clock::class)
+            $c->get(Clock::class),
+            $c->get(AggregateSyncer::class)
         ));
 
         // Bound after domain services and before RestProvider so the command endpoint shares this instance.
