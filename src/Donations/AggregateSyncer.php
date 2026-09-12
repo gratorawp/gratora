@@ -53,6 +53,37 @@ final class AggregateSyncer
         });
     }
 
+    /**
+     * A plan's counters are written by increments as the renewals land, never
+     * by a sum, so nothing recomputes them when a payment is removed. Derived
+     * the same way they were built: every payment that landed counts, a later
+     * refund having never taken one back off.
+     *
+     * @since 1.0.0
+     */
+    public function syncRecurringPlan(int $planId): void
+    {
+        if ($planId <= 0) return;
+
+        DB::transaction(function () use ($planId): void {
+            if (! $this->lockRow('gratora_recurring_plans', $planId)) return;
+
+            $row = DB::table('gratora_donations')
+                ->where('recurring_plan_id', $planId)
+                ->whereIsNotNull('paid_at')
+                ->selectRaw('COUNT(*) AS payments, COALESCE(SUM(amount_cents), 0) AS paid')
+                ->get();
+
+            DB::table('gratora_recurring_plans')
+                ->where('id', $planId)
+                ->update([
+                    'payments_count'   => (int) ($row['payments'] ?? 0),
+                    'total_paid_cents' => (int) ($row['paid']     ?? 0),
+                    'updated_at'       => gmdate('Y-m-d H:i:s'),
+                ]);
+        });
+    }
+
     /** @since 1.0.0 */
     public function syncFund(int $fundId): void
     {

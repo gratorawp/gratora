@@ -13,6 +13,7 @@ use Gratora\Donations\DonationTrasher;
 use Gratora\Donations\TrashOutcome;
 use Gratora\Foundation\Plugin;
 use Gratora\Gateways\GatewayManager;
+use Gratora\Recurring\RecurringPlan;
 use Gratora\Gateways\Stripe\StripeAccount;
 use Gratora\Gateways\Stripe\StripeGateway;
 
@@ -183,14 +184,46 @@ final class DonationTrasherTest extends IntegrationTestCase
         $this->assertNull($this->fresh($donation)->trashed_at);
     }
 
-    public function test_a_row_carrying_a_plan_is_refused(): void
+    public function test_a_row_on_a_plan_that_is_still_billing_is_refused(): void
     {
-        $donation = $this->pending('offline', ['recurring_plan_id' => 4242]);
+        $donation = $this->pending('offline', ['recurring_plan_id' => (int) $this->plan('active')->id]);
 
         $outcome = $this->trasher()->trash($donation);
 
         $this->assertSame(TrashOutcome::REFUSED, $outcome->outcome);
-        $this->assertStringContainsString('plan', strtolower((string) $outcome->reason));
+        $this->assertStringContainsString('subscription', strtolower((string) $outcome->reason));
+    }
+
+    /**
+     * A plan id pointing at nothing is not a mandate. The row survived its
+     * plan, so the billing was stopped when the plan went, and holding it for
+     * a cancel nobody can perform refuses forever.
+     */
+    public function test_a_row_whose_plan_no_longer_exists_is_not_refused_for_it(): void
+    {
+        $donation = $this->pending('offline', ['recurring_plan_id' => 999999]);
+
+        $this->assertSame(TrashOutcome::TRASHED, $this->trasher()->trash($donation)->outcome);
+    }
+
+    private function plan(string $status): RecurringPlan
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $p = RecurringPlan::make();
+        $p->donor_id                = 1;
+        $p->gateway                 = 'offline';
+        $p->gateway_subscription_id = 'sub_' . bin2hex(random_bytes(3));
+        $p->status                  = $status;
+        $p->amount_cents            = 2500;
+        $p->currency                = 'USD';
+        $p->interval_unit           = 'month';
+        $p->interval_count          = 1;
+        $p->started_at              = $now;
+        $p->created_at              = $now;
+        $p->updated_at              = $now;
+        $p->save();
+
+        return $p;
     }
 
     public function test_a_paid_row_is_refused_and_pointed_at_refund(): void

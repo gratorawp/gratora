@@ -11,7 +11,8 @@ use Gratora\Gateways\ClosesUnsettledPayment;
 use Gratora\Gateways\CloseUnsettledResult;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\SettlesOutOfBand;
-use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use Gratora\Vendor\Queryable\DB;
 
 defined('ABSPATH') || exit;
@@ -105,15 +106,21 @@ final class DonationTrasher
             return __('This is a ticket order payment. Manage it from the order.', 'gratora-donation-platform');
         }
 
+        // Only while the mandate is still billing. The message asks for a
+        // cancel, so a cancel has to be enough: a refusal that repeats itself
+        // after the operator has done the thing it named is a dead end wearing
+        // the clothes of advice. Cancelling goes through the gateway, so the
+        // status is the site's own record of having asked.
         if ($donation->recurring_plan_id !== null) {
-            return __('This donation belongs to a recurring plan. Cancel the plan first.', 'gratora-donation-platform');
-        }
-
-        // PayPal takes the first payment the moment the donor approves, and with
-        // the row gone nothing on the site can show or cancel the subscription.
-        if ((string) $donation->gateway === 'paypal'
-            && FrequencyMap::isRecurring((string) $donation->frequency)) {
-            return __('This is a PayPal recurring signup. Cancel it at PayPal first.', 'gratora-donation-platform');
+            $plan = RecurringPlan::query()->find('id', (int) $donation->recurring_plan_id);
+            if ($plan !== null
+                && in_array((string) $plan->status, RecurringPlanRepository::CANCELLABLE_STATUSES, true)) {
+                return sprintf(
+                    /* translators: %d: the recurring plan's id. */
+                    __('This payment belongs to subscription #%d, which is still billing. Cancel it first, or the card keeps being charged for something with no record here.', 'gratora-donation-platform'),
+                    (int) $plan->id
+                );
+            }
         }
         if (str_starts_with((string) ($donation->gateway_intent_id ?? ''), 'pending_subscription_')) {
             return __('This is a recurring signup that has not finished. Cancel it at the gateway first.', 'gratora-donation-platform');

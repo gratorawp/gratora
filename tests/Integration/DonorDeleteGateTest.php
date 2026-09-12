@@ -137,20 +137,35 @@ final class DonorDeleteGateTest extends IntegrationTestCase
     }
 
     /**
-     * PayPal charges the moment the donor approves, so this row is the only
-     * thing that can show or cancel the subscription it started.
+     * A payment on a subscription that is still billing keeps its donor, since
+     * deleting a donor cancels their plans and this one is somebody else's.
      */
-    public function test_a_paypal_recurring_signup_keeps_its_donor(): void
+    public function test_a_payment_on_someone_elses_live_plan_keeps_its_donor(): void
     {
         $donor = $this->donor();
+        $now   = gmdate('Y-m-d H:i:s');
+
+        $p = RecurringPlan::make();
+        $p->donor_id                = (int) $this->donor()->id;
+        $p->gateway                 = 'offline';
+        $p->gateway_subscription_id = 'sub_' . uniqid();
+        $p->status                  = 'active';
+        $p->amount_cents            = 1000;
+        $p->currency                = 'EUR';
+        $p->interval_unit           = 'month';
+        $p->interval_count          = 1;
+        $p->created_at              = $now;
+        $p->updated_at              = $now;
+        $p->save();
+
         $this->donation((int) $donor->id, [
-            'status'    => 'paid',
-            'paid_at'   => $this->longAgo(),
-            'gateway'   => 'paypal',
-            'frequency' => 'monthly',
+            'status'            => 'paid',
+            'paid_at'           => $this->longAgo(),
+            'frequency'         => 'monthly',
+            'recurring_plan_id' => (int) $p->id,
         ]);
 
-        $this->assertStringContainsString('PayPal', (string) $this->reason($donor));
+        $this->assertStringContainsString('subscription', strtolower((string) $this->reason($donor)));
     }
 
     /**

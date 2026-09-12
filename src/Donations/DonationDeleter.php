@@ -9,6 +9,7 @@ use Gratora\Analytics\Event;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Gateways\ChargeLock;
 use Gratora\Gateways\CloseUnsettledResult;
+use Gratora\Recurring\FrequencyMap;
 use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 
@@ -299,6 +300,9 @@ final class DonationDeleter
         if ($snapshot['form_id'] !== null) {
             $this->aggregates->syncForm((int) $snapshot['form_id']);
         }
+        if ($snapshot['recurring_plan_id'] !== null) {
+            $this->aggregates->syncRecurringPlan((int) $snapshot['recurring_plan_id']);
+        }
     }
 
     private function snapshot(Donation $donation): array
@@ -322,6 +326,7 @@ final class DonationDeleter
             'kind'               => (string) $donation->kind,
             'gateway'            => (string) $donation->gateway,
             'is_test'            => (bool) $donation->is_test,
+            'recurring_plan_id'  => $donation->recurring_plan_id !== null ? (int) $donation->recurring_plan_id : null,
             'consent_ids'        => $consentIds,
         ];
     }
@@ -384,6 +389,18 @@ final class DonationDeleter
             'receipts'    => $documents['receipts'],
             'refunds'     => $documents['refunds'],
         ];
+
+        // A subscription payment was the site's only trace of the mandate, so
+        // the trace moves here rather than being the reason the row can never
+        // go. It names the handle somebody would need at the processor.
+        if (FrequencyMap::isRecurring((string) $donation->frequency)) {
+            $payload['subscription'] = [
+                'frequency'         => (string) $donation->frequency,
+                'recurring_plan_id' => $donation->recurring_plan_id !== null ? (int) $donation->recurring_plan_id : null,
+                'gateway_txn_id'    => $donation->gateway_txn_id !== null ? (string) $donation->gateway_txn_id : null,
+                'gateway_intent_id' => $donation->gateway_intent_id !== null ? (string) $donation->gateway_intent_id : null,
+            ];
+        }
 
         $trimmed = is_string($note) ? trim($note) : '';
         if ($trimmed !== '') {
