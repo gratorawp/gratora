@@ -2202,19 +2202,24 @@ final class DonationsController
 
             'trashable'          => $d->trashed_at === null && $untrashable === null,
             'untrashable_reason' => $untrashable,
-            // Permanent delete is offered only from the Trash view, so a row
-            // that has left the bin has left the ceremony that authorised it.
-            // Offered from the bin, and directly for a row that has no bin to
-            // pass through: a settled donation cannot be trashed, so requiring
-            // it would make the wider delete unreachable.
+            // Permanent delete is offered from the bin, and directly for a row
+            // the bin would do nothing for. Trashing is what stops an open
+            // payment, so a row that has one has to pass through it; a settled
+            // row may be binned and often should be, but requiring it would be
+            // ceremony for its own sake.
             'deletable'          => $undeletable === null
-                && ($d->trashed_at !== null || $untrashable !== null),
+                && ($d->trashed_at !== null
+                    || $untrashable !== null
+                    || DonationTrasher::carriedMoney($d)),
             'delete_blocked'     => $undeletable,
 
             // Whether trashing this would actually close something. False where
             // the gateway settles out of band, so the dialog can say that an
-            // emailed reference can still be paid by hand.
-            'stops_payment'      => $this->gateways->get((string) $d->gateway) instanceof ClosesUnsettledPayment,
+            // emailed reference can still be paid by hand, and false on a row
+            // whose money already moved: the bin takes those now and there is
+            // nothing left open on them to stop.
+            'stops_payment'      => ! DonationTrasher::carriedMoney($d)
+                && $this->gateways->get((string) $d->gateway) instanceof ClosesUnsettledPayment,
         ];
     }
 

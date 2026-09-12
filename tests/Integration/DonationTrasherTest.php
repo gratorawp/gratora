@@ -245,31 +245,46 @@ final class DonationTrasherTest extends IntegrationTestCase
         return $p;
     }
 
-    public function test_a_paid_row_is_refused_and_pointed_at_refund(): void
+    /**
+     * The bin takes money now. It used to refuse a paid row and point at
+     * Refund, which left the reversible action unavailable on exactly the rows
+     * the irreversible one was offered for. Nothing moves: the aggregates
+     * filter on is_test and never on trashed_at, so a row keeps counting from
+     * inside the bin.
+     */
+    public function test_a_paid_row_is_taken_and_nothing_is_stopped(): void
     {
         $donation = $this->pending('offline', ['status' => 'paid', 'paid_at' => gmdate('Y-m-d H:i:s')]);
 
         $outcome = $this->trasher()->trash($donation);
 
-        $this->assertSame(TrashOutcome::REFUSED, $outcome->outcome);
-        $this->assertStringContainsString('refund', strtolower((string) $outcome->reason));
-    }
+        $this->assertSame(TrashOutcome::TRASHED, $outcome->outcome, (string) $outcome->reason);
 
-    public function test_a_row_that_saw_money_is_refused_even_while_pending(): void
-    {
-        $donation = $this->pending('offline', ['gateway_txn_id' => 'ch_real_money']);
-
-        $outcome = $this->trasher()->trash($donation);
-
-        $this->assertSame(TrashOutcome::REFUSED, $outcome->outcome);
-        $this->assertNull($this->fresh($donation)->trashed_at);
+        $fresh = $this->fresh($donation);
+        $this->assertNotNull($fresh->trashed_at);
+        $this->assertNull($fresh->payment_stopped_at, 'there was no open payment to stop');
+        $this->assertNull($fresh->payment_stopped_reason);
     }
 
     /**
-     * A retried parent is superseded, which hides it from every list. Trash the
-     * child without clearing that and the parent is in no screen at all: still
-     * payable, and unreachable.
+     * A transaction id on a row that never reached paid used to be its own
+     * refusal. It is not one any more, and the close still runs: what the row
+     * saw is a reconciliation question, and the bin is not where that is
+     * answered either way.
      */
+    public function test_a_pending_row_that_saw_money_is_taken_and_still_closed(): void
+    {
+        $donation = $this->pending('offline', ['gateway_txn_id' => 'ch_seen']);
+
+        $outcome = $this->trasher()->trash($donation);
+
+        $this->assertSame(TrashOutcome::TRASHED, $outcome->outcome, (string) $outcome->reason);
+        $this->assertNotNull(
+            $this->fresh($donation)->payment_stopped_at,
+            'it never settled, so the payment was still the bin\'s to close'
+        );
+    }
+
     public function test_trashing_a_retry_child_returns_its_parent_to_the_list(): void
     {
         $parent = $this->pending('offline');

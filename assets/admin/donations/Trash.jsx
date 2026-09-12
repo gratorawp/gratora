@@ -125,11 +125,24 @@ export default function Trash() {
                     const result = await postBatch( 'restore', items.map( ( i ) => i.reference ) );
                     report(
                         result,
-                        ( n ) => sprintf(
-                            /* translators: %d: number of donations */
-                            _n( '%d donation restored. Its payment is still stopped.', '%d donations restored. Their payments are still stopped.', n, 'gratora-donation-platform' ),
-                            n
-                        ),
+                        ( n ) => {
+                            // Only the rows that actually had a payment closed:
+                            // the bin takes settled donations now, and nothing
+                            // was ever stopped on those.
+                            const stopped = result.done.filter( ( r ) => r.payment_stopped ).length;
+
+                            return stopped === 0
+                                ? sprintf(
+                                    /* translators: %d: number of donations */
+                                    _n( '%d donation restored.', '%d donations restored.', n, 'gratora-donation-platform' ),
+                                    n
+                                )
+                                : sprintf(
+                                    /* translators: %d: number of donations */
+                                    _n( '%d donation restored. Its payment is still stopped.', '%d donations restored. Their payments are still stopped.', stopped, 'gratora-donation-platform' ),
+                                    n
+                                );
+                        },
                         ( n ) => sprintf(
                             /* translators: %d: number of donations */
                             _n( '%d donation could not be restored.', '%d donations could not be restored.', n, 'gratora-donation-platform' ),
@@ -238,7 +251,7 @@ export default function Trash() {
             </div>
 
             <Notice status="info" isDismissible={ false }>
-                { __( 'Nothing here has been deleted, and nothing is ever deleted on a schedule. No money total, report or export changes, because a donation that can be trashed never took money. The donation counts on this screen and the dashboard do change.', 'gratora-donation-platform' ) }
+                { __( 'Nothing here has been deleted, and nothing is ever deleted on a schedule. No money total, report or export changes: a donation goes on counting from in here, because the bin holds a decision to remove something rather than a change to your books. Deleting is what moves them.', 'gratora-donation-platform' ) }
             </Notice>
 
             { fetchError && (

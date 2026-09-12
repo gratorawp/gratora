@@ -270,13 +270,106 @@ final class DeleteSettledDonationTest extends IntegrationTestCase
     }
 
     /** Trash stops a payment. A settled one has nothing left to stop. */
-    public function test_a_paid_donation_still_cannot_be_binned(): void
+    /**
+     * The bin takes a paid row now. It used to refuse and point at Refund,
+     * which left the gentle reversible action unavailable on exactly the rows
+     * the irreversible one was offered for.
+     */
+    public function test_a_paid_donation_can_be_binned(): void
     {
         $donation = $this->paid();
 
         $outcome = Plugin::instance()->container->get(DonationTrasher::class)->trash($donation);
 
-        $this->assertNotSame(TrashOutcome::TRASHED, $outcome->outcome);
-        $this->assertNull(Donation::query()->find('id', (int) $donation->id)->trashed_at);
+        $this->assertSame(TrashOutcome::TRASHED, $outcome->outcome, (string) $outcome->reason);
+        $this->assertNotNull(Donation::query()->find('id', (int) $donation->id)->trashed_at);
+    }
+
+    /**
+     * And the bin stays inert. The aggregates filter on is_test alone, never
+     * on trashed_at, so binning cannot move a total; that is what lets the bin
+     * hold money at all. A reversible action that changed reported income
+     * would be worse than a row the list hides.
+     */
+    public function test_binning_a_paid_donation_moves_no_money(): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $c = Campaign::make();
+        $c->title           = 'Bin fixture';
+        $c->slug            = 'bin-fixture-' . uniqid();
+        $c->status          = 'active';
+        $c->campaign_type   = 'standard';
+        $c->goal_type       = 'amount';
+        $c->currency        = 'USD';
+        $c->raised_cents    = 0;
+        $c->donations_count = 0;
+        $c->donors_count    = 0;
+        $c->created_at      = $now;
+        $c->updated_at      = $now;
+        $c->save();
+
+        $donation = $this->paid(['campaign_id' => (int) $c->id]);
+        Plugin::instance()->container->get(AggregateSyncer::class)->syncCampaign((int) $c->id);
+
+        $before = Campaign::query()->find('id', (int) $c->id);
+        $this->assertSame(5000, (int) $before->raised_cents, 'the fixture has to start from the truth');
+
+        Plugin::instance()->container->get(DonationTrasher::class)->trash($donation);
+
+        $after = Campaign::query()->find('id', (int) $c->id);
+        $this->assertSame(5000, (int) $after->raised_cents, 'the bin does not touch the books');
+        $this->assertSame(1, (int) $after->donations_count, 'nor the count');
+    }
+
+    /**
+     * Nothing is in flight on a settled row, so the bin must not ask the
+     * processor to stop anything. This fixture is on stripe with no
+     * credentials stored, which is what turns that question into a refusal.
+     */
+    public function test_binning_a_settled_row_does_not_ask_the_processor_to_stop_it(): void
+    {
+        $donation = $this->paid();
+
+        $outcome = Plugin::instance()->container->get(DonationTrasher::class)->trash($donation);
+
+        $this->assertSame(TrashOutcome::TRASHED, $outcome->outcome, (string) $outcome->reason);
+        $this->assertNull(
+            Donation::query()->find('id', (int) $donation->id)->payment_stopped_at,
+            'there was no open payment to stop'
+        );
+    }
+
+    public function test_a_refunded_donation_can_be_binned(): void
+    {
+        $donation = $this->paid(['status' => 'refunded']);
+
+        $outcome = Plugin::instance()->container->get(DonationTrasher::class)->trash($donation);
+
+        $this->assertSame(TrashOutcome::TRASHED, $outcome->outcome, (string) $outcome->reason);
+    }
+
+    /** Still refused: the outcome is unknown and the money may yet arrive. */
+    public function test_a_settling_payment_is_still_refused(): void
+    {
+        $donation = $this->paid(['status' => 'processing', 'paid_at' => null, 'gateway_txn_id' => null]);
+
+        $outcome = Plugin::instance()->container->get(DonationTrasher::class)->trash($donation);
+
+        $this->assertSame(TrashOutcome::REFUSED, $outcome->outcome);
+        $this->assertStringContainsString('settling', strtolower((string) $outcome->reason));
+    }
+
+    /**
+     * The bin is now open to a settled row, which must not make it compulsory.
+     * requireTrashed exists because trashing is what stops an open payment,
+     * and a settled row has none, so it keeps its direct route.
+     */
+    public function test_a_paid_donation_can_still_be_deleted_without_the_bin(): void
+    {
+        $donation = $this->paid();
+
+        $this->deleter()->delete($donation, null, true);
+
+        $this->assertNull(Donation::query()->find('id', (int) $donation->id));
     }
 }

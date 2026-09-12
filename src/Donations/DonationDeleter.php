@@ -74,13 +74,15 @@ final class DonationDeleter
     {
         $id = (int) $donation->id;
 
-        // Through the bin where a bin exists. A row that can be trashed has to
-        // be, because trashing is what stops its payment, and removing it
-        // without that leaves a reference a donor could still pay by hand. A
-        // settled row has nothing left to stop and no bin to pass through, so
-        // the typed confirmation is the whole of its ceremony.
+        // Through the bin where the bin does something. A row with an open
+        // payment has to be trashed first, because trashing is what stops that
+        // payment, and removing it without that leaves a reference a donor
+        // could still pay by hand. A settled row has nothing left to stop: the
+        // bin will take it, and may, but the typed confirmation is the whole of
+        // its ceremony.
         if ($requireTrashed
             && $donation->trashed_at === null
+            && ! DonationTrasher::carriedMoney($donation)
             && ($this->rules->untrashableReasons([$donation])[$id] ?? null) === null) {
             throw new InvalidArgumentException(esc_html__('Move this donation to the trash before deleting it permanently.', 'gratora-donation-platform'));
         }
@@ -90,7 +92,7 @@ final class DonationDeleter
             throw new InvalidArgumentException(esc_html($reason));
         }
 
-        $carriedMoney = self::carriedMoney($donation);
+        $carriedMoney = DonationTrasher::carriedMoney($donation);
 
         if (! $cascade) {
             $this->closeFor($donation);
@@ -114,6 +116,7 @@ final class DonationDeleter
             // it would on an immediate action, not less.
             if ($requireTrashed
                 && $locked->trashed_at === null
+                && ! DonationTrasher::carriedMoney($locked)
                 && ($this->rules->untrashableReasons([$locked])[$id] ?? null) === null) {
                 throw new InvalidArgumentException(esc_html__('This donation left the trash while you were looking at it.', 'gratora-donation-platform'));
             }
@@ -197,19 +200,6 @@ final class DonationDeleter
      *
      * @since 1.0.0
      */
-    /**
-     * Whether this row is one a total was ever built from, which decides both
-     * that there is no payment left to close and that a stored total has to be
-     * recomputed once it goes.
-     *
-     * @since 1.0.0
-     */
-    private static function carriedMoney(Donation $donation): bool
-    {
-        return $donation->paid_at !== null
-            || in_array((string) $donation->status, ['paid', 'partial_refund', 'refunded', 'disputed'], true);
-    }
-
     public function closeFor(Donation $donation): void
     {
         // Nothing is in flight on a row that already settled, so there is
@@ -217,7 +207,7 @@ final class DonationDeleter
         // this site holds no credentials for it comes back a refusal about
         // stopping a payment that finished months ago, which would block the
         // delete on the money having moved: the thing the caller accepted.
-        if (self::carriedMoney($donation)) {
+        if (DonationTrasher::carriedMoney($donation)) {
             return;
         }
 

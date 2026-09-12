@@ -99,6 +99,36 @@ beforeEach( () => {
     apiFetch.mockReset();
 } );
 
+test( 'a restore says nothing about stopped payments when none were stopped', async () => {
+    // The bin takes settled donations now, and nothing was ever stopped on
+    // those, so the old sentence promised a state the row was never in.
+    seedApi( () => Promise.resolve( {
+        done:    [ { reference: 'DON-1', payment_stopped: false } ],
+        already: [],
+        refused: [],
+    } ) );
+
+    await mount();
+    await actionById( 'restore' ).callback( rows );
+    await settle();
+
+    expect( notify.success ).toHaveBeenCalledWith( '1 donation restored.' );
+} );
+
+test( 'and says so when one actually was', async () => {
+    seedApi( () => Promise.resolve( {
+        done:    [ { reference: 'DON-1', payment_stopped: true } ],
+        already: [],
+        refused: [],
+    } ) );
+
+    await mount();
+    await actionById( 'restore' ).callback( rows );
+    await settle();
+
+    expect( notify.success ).toHaveBeenCalledWith( '1 donation restored. Its payment is still stopped.' );
+} );
+
 test( 'a refused restore says the rows could not be restored', async () => {
     seedApi( refusing( 'It settled after it was trashed.' ) );
 

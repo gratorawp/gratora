@@ -154,12 +154,13 @@ final class DonationTrashRoutesTest extends IntegrationTestCase
      */
     public function test_a_mixed_batch_answers_per_row_and_leaves_refusals_alone(): void
     {
-        $spam = $this->attempt();
-        $paid = $this->attempt(['status' => 'paid', 'paid_at' => gmdate('Y-m-d H:i:s')]);
+        $spam     = $this->attempt();
+        // Still refused: the outcome is unknown and the money may yet arrive.
+        $settling = $this->attempt(['status' => 'processing']);
 
         $this->asRoleWith([self::VIEW, self::CHARGE]);
 
-        $res  = $this->post('trash', ['references' => [(string) $spam->reference, (string) $paid->reference]]);
+        $res  = $this->post('trash', ['references' => [(string) $spam->reference, (string) $settling->reference]]);
         $data = (array) $res->get_data();
 
         $this->assertSame(200, $res->get_status());
@@ -167,10 +168,10 @@ final class DonationTrashRoutesTest extends IntegrationTestCase
 
         $refused = (array) $data['refused'];
         $this->assertCount(1, $refused);
-        $this->assertSame((string) $paid->reference, $refused[0]['reference']);
+        $this->assertSame((string) $settling->reference, $refused[0]['reference']);
         $this->assertNotSame('', (string) $refused[0]['reason'], 'a refusal says why');
 
-        $this->assertNull($this->fresh($paid)->trashed_at, 'and the row it refused is untouched');
+        $this->assertNull($this->fresh($settling)->trashed_at, 'and the row it refused is untouched');
     }
 
     public function test_an_unbounded_selection_is_rejected(): void
@@ -188,8 +189,8 @@ final class DonationTrashRoutesTest extends IntegrationTestCase
      */
     public function test_the_row_flags_agree_with_what_the_call_does(): void
     {
-        $spam = $this->attempt();
-        $paid = $this->attempt(['status' => 'paid', 'paid_at' => gmdate('Y-m-d H:i:s')]);
+        $spam     = $this->attempt();
+        $settling = $this->attempt(['status' => 'processing']);
 
         $this->asRoleWith([self::VIEW, self::CHARGE]);
 
@@ -199,19 +200,19 @@ final class DonationTrashRoutesTest extends IntegrationTestCase
         }
 
         $this->assertTrue((bool) $rows[(string) $spam->reference]['trashable']);
-        $this->assertFalse((bool) $rows[(string) $paid->reference]['trashable']);
-        $this->assertNotNull($rows[(string) $paid->reference]['untrashable_reason']);
+        $this->assertFalse((bool) $rows[(string) $settling->reference]['trashable']);
+        $this->assertNotNull($rows[(string) $settling->reference]['untrashable_reason']);
 
         // Neither is deletable yet: permanent delete is offered only from the
         // Trash view, so nothing on the live list carries it.
         $this->assertFalse((bool) $rows[(string) $spam->reference]['deletable']);
 
         $data = (array) $this->post('trash', [
-            'references' => [(string) $spam->reference, (string) $paid->reference],
+            'references' => [(string) $spam->reference, (string) $settling->reference],
         ])->get_data();
 
         $this->assertSame([(string) $spam->reference], array_column((array) $data['done'], 'reference'));
-        $this->assertSame([(string) $paid->reference], array_column((array) $data['refused'], 'reference'));
+        $this->assertSame([(string) $settling->reference], array_column((array) $data['refused'], 'reference'));
     }
 
     public function test_the_trash_is_its_own_list_and_carries_its_own_count(): void

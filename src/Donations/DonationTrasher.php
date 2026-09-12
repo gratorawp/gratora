@@ -38,6 +38,22 @@ final class DonationTrasher
     private const SETTLED = ['paid', 'partial_refund'];
     private const FINAL   = ['refunded', 'disputed'];
 
+    /** Every status the bin will take. Anything else is refused by name. */
+    private const BINNABLE = ['pending', 'failed', 'paid', 'partial_refund', 'refunded', 'disputed'];
+
+    /**
+     * Whether the money on this row has already moved, which is the one
+     * question behind three rules: there is no payment left to stop, no bin to
+     * be made compulsory, and a stored total to put back when it goes.
+     *
+     * @since 1.0.0
+     */
+    public static function carriedMoney(Donation $donation): bool
+    {
+        return $donation->paid_at !== null
+            || in_array((string) $donation->status, [...self::SETTLED, ...self::FINAL], true);
+    }
+
     /** @since 1.0.0 */
     public function __construct(
         private GatewayManager $gateways,
@@ -75,17 +91,9 @@ final class DonationTrasher
      */
     public function eligibilityReasons(array $donations, string $filterHook): array
     {
-        $ids = array_values(array_filter(array_map(
-            static fn (Donation $d): int => (int) $d->id,
-            $donations
-        )));
-
-        $withReceipt = $this->idsPresentIn('gratora_receipts', $ids);
-        $withRefund  = $this->idsPresentIn('gratora_refunds', $ids);
-
         $out = [];
         foreach ($donations as $donation) {
-            $out[(int) $donation->id] = $this->localReason($donation, $withReceipt, $withRefund, $filterHook);
+            $out[(int) $donation->id] = $this->localReason($donation, $filterHook);
         }
 
         return $out;
@@ -201,13 +209,8 @@ final class DonationTrasher
         return $out;
     }
 
-    /**
-     * @param array<int,true> $withReceipt
-     * @param array<int,true> $withRefund
-     */
-    private function localReason(Donation $donation, array $withReceipt, array $withRefund, string $filterHook): ?string
+    private function localReason(Donation $donation, string $filterHook): ?string
     {
-        $id     = (int) $donation->id;
         $status = (string) $donation->status;
 
         $structural = $this->structuralReason($donation);
@@ -215,31 +218,21 @@ final class DonationTrasher
             return $structural;
         }
 
-        if (in_array($status, self::SETTLED, true)) {
-            return __('This donation was paid. Refund it instead.', 'gratora-donation-platform');
-        }
-
-        if (in_array($status, self::FINAL, true)) {
-            return __('This donation is the record of money that moved, so it stays.', 'gratora-donation-platform');
-        }
-
+        // A payment still in flight is the one thing the bin will not take: its
+        // outcome is unknown, so neither trashing nor keeping it is the right
+        // answer until the processor says which.
         if ($status === 'processing') {
             return __('This payment is still settling and can still arrive.', 'gratora-donation-platform');
         }
 
-        if (! in_array($status, ['pending', 'failed'], true)) {
+        // Money that has already moved is no longer a bar. The bin cannot
+        // change a figure: the aggregates filter on is_test and never on
+        // trashed_at, so a row keeps counting from inside it, and what the bin
+        // holds is a decision to remove something rather than a change to the
+        // books.
+        if (! in_array($status, self::BINNABLE, true)) {
             /* translators: %s: the donation's current status. */
             return sprintf(__('A %s donation cannot be moved to the trash.', 'gratora-donation-platform'), $status);
-        }
-
-        // Anything that saw money leaves one of these behind, even on a row
-        // that never reached paid.
-        if ($donation->paid_at !== null
-            || (string) ($donation->gateway_txn_id ?? '') !== ''
-            || (int) $donation->refunded_cents > 0
-            || isset($withReceipt[$id])
-            || isset($withRefund[$id])) {
-            return __('Something was recorded against this donation, so it is a reconciliation question rather than litter.', 'gratora-donation-platform');
         }
 
         /** @var ?string $filtered */
@@ -248,26 +241,6 @@ final class DonationTrasher
         return is_string($filtered) && $filtered !== '' ? $filtered : null;
     }
 
-    /**
-     * @param list<int> $ids
-     * @return array<int,true>
-     */
-    private function idsPresentIn(string $table, array $ids): array
-    {
-        if ($ids === []) {
-            return [];
-        }
-
-        $out = [];
-        foreach (DB::table($table)->select('donation_id')->whereIn('donation_id', $ids)->getAll() as $row) {
-            $donationId = (int) ((array) $row)['donation_id'];
-            if ($donationId > 0) {
-                $out[$donationId] = true;
-            }
-        }
-
-        return $out;
-    }
 
     /**
      * Stop the payment, then take the row off the list.
@@ -296,12 +269,18 @@ final class DonationTrasher
             return TrashOutcome::refused((string) $close->reason);
         }
 
-        $stoppedReason = $this->stopReasonFor($donation);
+        // A settled row had nothing open, so it gets no stop record. Stamping
+        // one would claim a payment was closed that finished by itself, and
+        // the donor gate and the deleter both read that stamp as proof
+        // somebody acted on an open payment.
+        $settled       = self::carriedMoney($donation);
+        $stoppedAt     = $settled ? null : $this->clock->now()->format('Y-m-d H:i:s');
+        $stoppedReason = $settled ? null : $this->stopReasonFor($donation);
         $now           = $this->clock->now()->format('Y-m-d H:i:s');
         $actor         = get_current_user_id();
         $applied       = 0;
 
-        DB::transaction(function () use ($donation, $now, $actor, $stoppedReason, $reasonNote, &$applied): void {
+        DB::transaction(function () use ($donation, $now, $actor, $stoppedAt, $stoppedReason, $reasonNote, &$applied): void {
             // Claim the row before re-reading it: between the gateway call and
             // this write it may have settled, and a plain read inside the
             // transaction is served from its own snapshot.
@@ -326,7 +305,7 @@ final class DonationTrasher
                 ->update([
                     'trashed_at'             => $now,
                     'trashed_by'             => $actor,
-                    'payment_stopped_at'     => $now,
+                    'payment_stopped_at'     => $stoppedAt,
                     'payment_stopped_reason' => $stoppedReason,
                     'updated_at'             => $now,
                 ])
@@ -338,7 +317,7 @@ final class DonationTrasher
 
             $donation->trashed_at             = $now;
             $donation->trashed_by             = $actor;
-            $donation->payment_stopped_at     = $now;
+            $donation->payment_stopped_at     = $stoppedAt;
             $donation->payment_stopped_reason = $stoppedReason;
 
             // A parent whose retry this was is superseded, which hides it from
@@ -406,6 +385,14 @@ final class DonationTrasher
      */
     public function closePaymentFor(Donation $donation): CloseUnsettledResult
     {
+        // Nothing is open on a row whose money already moved, so there is
+        // nothing to ask for. Asking anyway comes back a refusal on any
+        // gateway this site holds no credentials for, about stopping a payment
+        // that finished months ago.
+        if (self::carriedMoney($donation)) {
+            return CloseUnsettledResult::closed();
+        }
+
         $gateway = $this->gateways->get((string) $donation->gateway);
 
         if ($gateway instanceof SettlesOutOfBand) {
