@@ -8,12 +8,16 @@ use Gratora\Donations\Donation;
 use Gratora\Donors\Donor;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
 use Gratora\Recurring\RecurringPlan;
 
 /**
- * A donor is kept while any donation of theirs could still become money. The
- * gate reads the same window the abandon sweep uses, so a row it has retired
- * is a row this releases.
+ * What keeps a donor is a donation that cannot be deleted, asked of the rules
+ * that own that answer rather than of a window of this gate's own. Whether a
+ * donation took money is not one of those rules: the delete closes the payment
+ * at the processor first and takes the money back out of the totals, so the
+ * refusals left are the ones somebody outside the organisation would feel,
+ * a receipt an authority can ask for and a signup whose row is the mandate.
  */
 final class DonorDeleteGateTest extends IntegrationTestCase
 {
@@ -72,15 +76,21 @@ final class DonorDeleteGateTest extends IntegrationTestCase
         $this->assertNull($this->reason($donor), 'a failed checkout past the window is litter, not a record');
     }
 
-    public function test_a_paid_donation_still_blocks(): void
+    /**
+     * Money already taken is not a refusal. It comes back out of the totals
+     * when the row goes, and the audit row keeps what it was, which is the
+     * whole of what a delete can honestly promise.
+     */
+    public function test_a_paid_donation_does_not_keep_its_donor(): void
     {
         $donor = $this->donor();
         $this->donation((int) $donor->id, ['status' => 'paid', 'paid_at' => $this->longAgo(), 'created_at' => $this->longAgo()]);
 
-        $this->assertNotNull($this->reason($donor));
+        $this->assertNull($this->reason($donor));
     }
 
-    public function test_a_cheque_still_in_the_post_blocks(): void
+    /** Nor does a payment still on its way, or the age of one. */
+    public function test_neither_does_a_cheque_still_in_the_post(): void
     {
         $donor = $this->donor();
         $this->donation((int) $donor->id, [
@@ -89,10 +99,10 @@ final class DonorDeleteGateTest extends IntegrationTestCase
             'created_at' => $this->longAgo(),
         ]);
 
-        $this->assertNotNull($this->reason($donor), 'a pending donation is never litter, whatever its age');
+        $this->assertNull($this->reason($donor));
     }
 
-    public function test_a_failed_row_that_took_money_still_blocks(): void
+    public function test_neither_does_a_failure_that_left_a_transaction_id(): void
     {
         $donor = $this->donor();
         $this->donation((int) $donor->id, [
@@ -101,15 +111,65 @@ final class DonorDeleteGateTest extends IntegrationTestCase
             'created_at'     => $this->longAgo(),
         ]);
 
-        $this->assertNotNull($this->reason($donor), 'a transaction id is a reconciliation question');
+        $this->assertNull($this->reason($donor));
     }
 
-    public function test_a_recent_failure_still_blocks(): void
+    /**
+     * A receipt that still stands is a document an authority can ask for, and
+     * the numbering it sits in has to stay gap free. Refunding the donation
+     * withdraws it, which is the way out.
+     */
+    public function test_a_receipt_that_still_stands_keeps_its_donor(): void
+    {
+        $donor    = $this->donor();
+        $donation = $this->donation((int) $donor->id, ['status' => 'paid', 'paid_at' => $this->longAgo()]);
+
+        $r = Receipt::make();
+        $r->donation_id    = (int) $donation->id;
+        $r->renderer_id    = 'receipt';
+        $r->receipt_number = 'R-' . bin2hex(random_bytes(3));
+        $r->locale         = 'en_US';
+        $r->voided         = false;
+        $r->issued_at      = gmdate('Y-m-d H:i:s');
+        $r->save();
+
+        $this->assertStringContainsString('receipt', strtolower((string) $this->reason($donor)));
+    }
+
+    /**
+     * PayPal charges the moment the donor approves, so this row is the only
+     * thing that can show or cancel the subscription it started.
+     */
+    public function test_a_paypal_recurring_signup_keeps_its_donor(): void
     {
         $donor = $this->donor();
-        $this->donation((int) $donor->id, ['status' => 'failed']);
+        $this->donation((int) $donor->id, [
+            'status'    => 'paid',
+            'paid_at'   => $this->longAgo(),
+            'gateway'   => 'paypal',
+            'frequency' => 'monthly',
+        ]);
 
-        $this->assertNotNull($this->reason($donor), 'inside the window a retry is still expected');
+        $this->assertStringContainsString('PayPal', (string) $this->reason($donor));
+    }
+
+    /**
+     * The rules that own the answer are asked for it, so an add-on that
+     * refuses one donation refuses the donor here rather than inside the
+     * transaction, after the payments have already been closed.
+     */
+    public function test_an_add_on_refusing_one_donation_keeps_the_donor(): void
+    {
+        $donor = $this->donor();
+        $this->donation((int) $donor->id, ['status' => 'failed', 'created_at' => $this->longAgo()]);
+
+        add_filter('gratora.donation.undeletable_reason', static fn () => 'An add-on still needs this.');
+
+        try {
+            $this->assertStringContainsString('An add-on still needs this.', (string) $this->reason($donor));
+        } finally {
+            remove_all_filters('gratora.donation.undeletable_reason');
+        }
     }
 
     /**

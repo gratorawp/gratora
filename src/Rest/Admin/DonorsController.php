@@ -794,8 +794,8 @@ final class DonorsController
         );
 
         // The delete gate's own answer, asked once for the page. The screen
-        // cannot work it out: a donation the counters ignore, a refunded one or
-        // an abandoned attempt, still keeps the donor.
+        // cannot work it out: what keeps a donor is a donation that cannot be
+        // deleted, and the counters here say nothing about that.
         $undeletable = $this->donorService->undeletableReasons($result['items']);
 
         $shaped = array_map(

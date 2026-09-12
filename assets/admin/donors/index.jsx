@@ -301,11 +301,10 @@ export function DonorsApp( { toggleSlot } ) {
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            // A donor with any donation row has a financial record attached and
-            // is redacted instead. The row carries the delete gate's own
-            // answer: the counters here are live and paid only, so they say yes
-            // to a donor whose only donation is a rehearsal, a refund or an
-            // attempt that never completed, and the server would 409.
+            // The row carries the gate's own answer, because the counters here
+            // cannot stand in for it: they are live and paid only, so they say
+            // nothing about a donor held by a receipt or a subscription signup
+            // and nothing about one whose only donation was refunded.
             isEligible:    ( item ) => userCan( 'redact_donors' ) && !! item.deletable,
             // DataViews hands a bulk callback the whole selection, not the
             // eligible subset, so isEligible only decides whether the button is
@@ -318,12 +317,12 @@ export function DonorsApp( { toggleSlot } ) {
                 setConfirm( {
                     title:        _n( 'Delete donor', 'Delete donors', n, 'gratora-donation-platform' ),
                     message: n === 1
-                        ? __( 'Delete this donor? Their record, and any attempt that never took money, go for good. A recurring donation of theirs is cancelled at the processor first, and the delete stops if the processor cannot be reached.', 'gratora-donation-platform' )
+                        ? __( 'Delete this donor? Their record and every donation they made go for good, and money already recorded against them comes out of your totals. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.', 'gratora-donation-platform' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
-                                'Delete %d donor? Their record, and any attempt that never took money, go for good. A recurring donation of theirs is cancelled at the processor first, and the delete stops if the processor cannot be reached.',
-                                'Delete %d donors? Their records, and any attempts that never took money, go for good. Recurring donations are cancelled at the processor first, and a donor whose processor cannot be reached is left alone.',
+                                'Delete %d donor? Their record and every donation they made go for good, and money already recorded against them comes out of your totals. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.',
+                                'Delete %d donors? Their records and every donation they made go for good, and money already recorded against them comes out of your totals. Recurring donations are cancelled at the processor first, and a donor whose processor cannot be reached is left alone.',
                                 n,
                                 'gratora-donation-platform'
                             ),

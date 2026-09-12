@@ -12,6 +12,7 @@ use Gratora\Donors\MagicLinkToken;
 use Gratora\Donors\PendingSignup;
 use Gratora\Foundation\Identity\IdentityHasher;
 use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
 use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
@@ -81,27 +82,48 @@ final class DonorDeleteTest extends IntegrationTestCase
         $this->assertFalse($this->exists((int) $donor->id));
     }
 
-    public function test_a_donor_who_gave_cannot_be_removed(): void
+    public function test_a_donor_who_gave_is_removed_with_what_they_gave(): void
     {
         $donor = $this->donor('gave-' . uniqid() . '@example.test');
         $this->gave($donor);
 
         $res = $this->deleteViaRest((int) $donor->id);
 
-        $this->assertSame(409, $res->get_status());
-        $this->assertTrue($this->exists((int) $donor->id), 'the record stays');
+        $this->assertSame(200, $res->get_status());
+        $this->assertFalse($this->exists((int) $donor->id));
+        $this->assertSame(
+            0,
+            (int) Donation::query()->where('donor_id', (int) $donor->id)->count(),
+            'the donations go with them rather than pointing at nobody'
+        );
     }
 
-    /** And it says where to go instead rather than only declining. */
-    public function test_the_refusal_points_at_erasure(): void
+    /**
+     * The one refusal that still stands on money says where to go instead
+     * rather than only declining, because a receipt is withdrawn by refunding
+     * and erasing is the answer when the record has to be kept.
+     */
+    public function test_the_receipt_refusal_points_at_the_way_out(): void
     {
         $donor = $this->donor('pointed-' . uniqid() . '@example.test');
         $this->gave($donor);
 
-        $this->assertStringContainsString(
-            'rase',
-            (string) ($this->deleteViaRest((int) $donor->id)->get_data()['message'] ?? '')
-        );
+        $donation = Donation::query()->where('donor_id', (int) $donor->id)->get();
+
+        $r = Receipt::make();
+        $r->donation_id    = (int) $donation->id;
+        $r->renderer_id    = 'receipt';
+        $r->receipt_number = 'R-' . bin2hex(random_bytes(3));
+        $r->locale         = 'en_US';
+        $r->voided         = false;
+        $r->issued_at      = gmdate('Y-m-d H:i:s');
+        $r->save();
+
+        $message = (string) ($this->deleteViaRest((int) $donor->id)->get_data()['message'] ?? '');
+
+        $this->assertStringContainsString('efund', $message);
+        $this->assertStringContainsString('rase', $message);
+        $this->assertTrue($this->exists((int) $donor->id), 'the record stays');
     }
 
     /**

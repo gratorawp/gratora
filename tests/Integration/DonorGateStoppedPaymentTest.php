@@ -15,13 +15,12 @@ use Gratora\Foundation\Plugin;
 use InvalidArgumentException;
 
 /**
- * The donor gate, and a payment somebody already stopped.
+ * Deleting a donor, and the payments their donations were holding open.
  *
- * The gate asks whether a donor still has a donation that could become money.
- * A trashed spam attempt is pending, which the status test reads as live, so
- * without the stop record the donor who exists only because of that attempt is
- * held for the whole abandon window. That is precisely the case this feature
- * was built for, so the gate has to be able to see the stop.
+ * Nothing is refused for having taken money. What refuses is a payment still
+ * in flight that this site cannot reach the processor to stop, because letting
+ * the row go would leave a charge landing with nothing to attach it to and
+ * nobody able to say it was ever expected.
  */
 final class DonorGateStoppedPaymentTest extends IntegrationTestCase
 {
@@ -31,13 +30,13 @@ final class DonorGateStoppedPaymentTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 
-    private function attempt(): Donation
+    private function attempt(string $gateway = 'offline'): Donation
     {
         return Plugin::instance()->container->get(DonationService::class)->createPending(new DonationIntent(
             email:        'gate-' . uniqid() . '@example.test',
             amount_cents: 2500,
             currency:     'USD',
-            gateway:      'offline',
+            gateway:      $gateway,
             frequency:    'one_time',
         ))['donation'];
     }
@@ -52,25 +51,9 @@ final class DonorGateStoppedPaymentTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonorService::class);
     }
 
-    public function test_a_live_attempt_still_holds_its_donor(): void
-    {
-        $donation = $this->attempt();
-
-        $this->expectException(InvalidArgumentException::class);
-
-        try {
-            $this->donors()->delete($this->donorFor($donation));
-        } finally {
-            $this->assertNotNull(
-                Donor::query()->find('id', (int) $donation->donor_id),
-                'a checkout the donor may still be finishing is not spam'
-            );
-        }
-    }
-
     /**
-     * The headline case. One trashed attempt, stopped at the gateway, and the
-     * donor goes in one action rather than in thirty days.
+     * One trashed attempt, stopped at the gateway, and the donor goes in one
+     * action rather than in thirty days.
      */
     public function test_a_stopped_attempt_releases_its_donor_at_once(): void
     {
@@ -86,25 +69,55 @@ final class DonorGateStoppedPaymentTest extends IntegrationTestCase
         $this->assertNull(Donation::query()->find('id', (int) $donation->id), 'and so does the attempt');
     }
 
-    /**
-     * The escape hatch that keeps this narrow. Stopping a payment says nothing
-     * about one that already moved, so a row carrying either mark money leaves
-     * behind still holds its donor however stopped it looks.
-     */
-    public function test_a_stopped_row_that_saw_money_still_holds_its_donor(): void
+    /** A checkout that can be closed is closed, and then the donor goes. */
+    public function test_a_live_attempt_is_closed_and_the_donor_goes_with_it(): void
     {
         $donation = $this->attempt();
-        $donation->updateColumns([
-            'payment_stopped_at' => gmdate('Y-m-d H:i:s'),
-            'gateway_txn_id'     => 'ch_it_actually_charged',
-        ]);
+        $donorId  = (int) $donation->donor_id;
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->donors()->delete($this->donorFor($donation));
+
+        $this->assertNull(Donor::query()->find('id', $donorId));
+        $this->assertNull(Donation::query()->find('id', (int) $donation->id));
+    }
+
+    /**
+     * A processor this site holds no credentials for cannot be asked to stop
+     * anything, and the row is too young for the abandon rule to speak for it.
+     */
+    public function test_a_payment_nothing_here_can_stop_refuses_the_delete(): void
+    {
+        $donation = $this->attempt('razorpay');
 
         try {
             $this->donors()->delete($this->donorFor($donation));
-        } finally {
-            $this->assertNotNull(Donor::query()->find('id', (int) $donation->donor_id));
+            $this->fail('a payment in flight that cannot be stopped must refuse the delete');
+        } catch (InvalidArgumentException $e) {
+            $this->assertStringContainsString('razorpay', $e->getMessage());
         }
+
+        $this->assertNotNull(Donor::query()->find('id', (int) $donation->donor_id));
+    }
+
+    /**
+     * Nothing is in flight on a row that already settled, so there is nothing
+     * to ask the processor for. Asking anyway refuses every donor who ever
+     * gave through a gateway this site is no longer connected to, with a
+     * message about stopping a payment that finished months ago.
+     */
+    public function test_a_settled_donation_is_not_asked_to_stop_anything(): void
+    {
+        $donation = $this->attempt('razorpay');
+        $donation->updateColumns([
+            'status'         => 'paid',
+            'paid_at'        => gmdate('Y-m-d H:i:s'),
+            'gateway_txn_id' => 'ch_it_settled',
+        ]);
+
+        $donorId = (int) $donation->donor_id;
+        $this->donors()->delete($this->donorFor($donation));
+
+        $this->assertNull(Donor::query()->find('id', $donorId));
+        $this->assertNull(Donation::query()->find('id', (int) $donation->id));
     }
 }

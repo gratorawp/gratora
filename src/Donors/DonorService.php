@@ -8,11 +8,11 @@ use Gratora\Analytics\ErrorLog;
 use Gratora\Analytics\EventRecorder;
 use Gratora\Donations\Donation;
 use Gratora\Donations\DonationDeleter;
+use Gratora\Donations\DonationTrasher;
 use Gratora\Donors\Erasure\ErasureRegistry;
 use Gratora\Donors\Erasure\ErasureRequest;
 use Gratora\Foundation\Crypto\Crypto;
 use Gratora\Foundation\Identity\IdentityHasher;
-use Gratora\Foundation\Maintenance\AbandonedPendingReaper;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Recurring\GatewayUnreachable;
@@ -350,44 +350,46 @@ final class DonorService
             array_map(static fn (Donor $d): int => (int) $d->id, $donors),
         )));
 
-        $days   = AbandonedPendingReaper::abandonAfterDays();
-        $before = $this->clock->now()->modify("-{$days} days")->format('Y-m-d H:i:s');
+        // Asked of the rules that own the answer, not re-derived here. Whether
+        // the donation took money is not among them: the delete closes the
+        // payment at the processor and takes the amount back out of every
+        // total, so what is left refusing is a receipt somebody can ask for
+        // and a signup whose row is the only handle on the mandate.
+        //
+        // The donations are loaded rather than reduced to SQL because the
+        // add-on veto in those rules is a filter, and a donation an add-on
+        // still needs has to refuse the donor here, before the payments are
+        // closed, rather than inside the transaction afterwards.
+        $byDonor = [];
+        if ($ids !== []) {
+            $rules     = Plugin::instance()->container->get(DonationTrasher::class);
+            $donations = Donation::query()->whereIn('donor_id', $ids)->getAll();
+            $reasons   = $rules->undeletableReasons($donations);
 
-        // Not "has donations" but "has a donation that could still become
-        // money". A row is spent only once it is failed, carries neither of the
-        // marks money leaves behind, and is past the window the abandon sweep
-        // gives a checkout to settle. A pending cheque is none of those.
-        $withDonations = $ids === [] ? [] : array_flip(array_map(
-            'intval',
-            Donation::query()
-                ->whereIn('donor_id', $ids)
-                ->where(static function ($q) use ($before): void {
-                    $q->where('status', 'failed', '<>')
-                        ->orWhereIsNotNull('paid_at')
-                        ->orWhereIsNotNull('gateway_txn_id')
-                        ->orWhere('created_at', $before, '>=');
-                })
-                // A payment an admin stopped cannot become money, whatever the
-                // status and the age say. Narrower than it looks: both marks
-                // money leaves behind still disqualify the row, so this admits
-                // only rows that were closed at the gateway and stayed empty.
-                // Without it a stopped spam attempt blocks its donor for the
-                // full abandon window, which is exactly the case this is for.
-                ->where(static function ($q): void {
-                    $q->whereIsNull('payment_stopped_at')
-                        ->orWhereIsNotNull('paid_at')
-                        ->orWhereIsNotNull('gateway_txn_id');
-                })
-                ->distinct()
-                ->pluck('donor_id'),
-        ));
+            foreach ($donations as $donation) {
+                $donorId = (int) $donation->donor_id;
+                $reason  = $reasons[(int) $donation->id] ?? null;
+                if ($reason !== null && ! isset($byDonor[$donorId])) {
+                    // Composed rather than rewritten: the donation rules own
+                    // the way out of their own refusal, and this screen has a
+                    // second one they know nothing about. Erasing keeps the
+                    // record and takes the person out of it, which is what an
+                    // operator refused here usually wanted.
+                    $byDonor[$donorId] = sprintf(
+                        /* translators: %s: why one of this donor's donations cannot be deleted. */
+                        __('One of this donor\'s donations has to be kept. %s Erase the donor instead to remove their details and leave the record standing.', 'gratora-donation-platform'),
+                        $reason
+                    );
+                }
+            }
+        }
 
         $out = [];
         foreach ($donors as $donor) {
             $id = (int) $donor->id;
 
-            if (isset($withDonations[$id])) {
-                $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'gratora-donation-platform');
+            if (isset($byDonor[$id])) {
+                $out[$id] = $byDonor[$id];
                 continue;
             }
 

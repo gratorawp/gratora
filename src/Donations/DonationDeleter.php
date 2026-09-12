@@ -89,16 +89,9 @@ final class DonationDeleter
             throw new InvalidArgumentException(esc_html($reason));
         }
 
-        // Asked before anything else, because it decides both whether there is
-        // a payment to close and whether a stored total has to be recomputed.
-        $carriedMoney = $donation->paid_at !== null
-            || in_array((string) $donation->status, ['paid', 'partial_refund', 'refunded', 'disputed'], true);
+        $carriedMoney = self::carriedMoney($donation);
 
-        // Nothing to stop on a row that already settled. Asking anyway is
-        // meaningless, and on a gateway this site cannot reach it comes back a
-        // refusal that would block the delete on the money having moved, which
-        // is the thing the caller already accepted.
-        if (! $cascade && ! $carriedMoney) {
+        if (! $cascade) {
             $this->closeFor($donation);
         }
 
@@ -203,8 +196,30 @@ final class DonationDeleter
      *
      * @since 1.0.0
      */
+    /**
+     * Whether this row is one a total was ever built from, which decides both
+     * that there is no payment left to close and that a stored total has to be
+     * recomputed once it goes.
+     *
+     * @since 1.0.0
+     */
+    private static function carriedMoney(Donation $donation): bool
+    {
+        return $donation->paid_at !== null
+            || in_array((string) $donation->status, ['paid', 'partial_refund', 'refunded', 'disputed'], true);
+    }
+
     public function closeFor(Donation $donation): void
     {
+        // Nothing is in flight on a row that already settled, so there is
+        // nothing to ask for. Asking anyway is meaningless, and on a gateway
+        // this site holds no credentials for it comes back a refusal about
+        // stopping a payment that finished months ago, which would block the
+        // delete on the money having moved: the thing the caller accepted.
+        if (self::carriedMoney($donation)) {
+            return;
+        }
+
         if ($donation->payment_stopped_at !== null) {
             $lock = new ChargeLock((string) $donation->gateway);
             if (! $lock->claim($donation)) {

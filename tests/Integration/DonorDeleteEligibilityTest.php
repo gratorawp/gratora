@@ -12,9 +12,10 @@ use WP_REST_Request;
 
 /**
  * The donors list offers Delete on a row and the route decides whether it
- * happens. The two have to ask the same question: the stored counters are paid
- * money only, so a donor left behind by an abandoned or refunded attempt looks
- * empty on the screen and is undeletable to the server.
+ * happens. The two have to ask the same question, and the stored counters are
+ * not that question: they are paid money only, so a donor left behind by an
+ * abandoned or refunded attempt looks empty on the screen whatever the answer
+ * turns out to be.
  */
 final class DonorDeleteEligibilityTest extends IntegrationTestCase
 {
@@ -72,24 +73,24 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
         return rest_do_request($request)->get_status();
     }
 
-    public function test_a_donor_whose_only_donation_never_completed_is_not_offered_delete(): void
+    public function test_a_donor_left_by_an_unfinished_checkout_is_offered_delete_and_deletes(): void
     {
         $donor = $this->donorWithDonation('rae.pending@example.org', 'pending');
 
         $row = $this->listRows()[(int) $donor->id];
-        $this->assertSame(0, (int) $row['donations_count'], 'the counters see nothing, which is what made this row look deletable');
+        $this->assertSame(0, (int) $row['donations_count'], 'the counters see nothing, whatever the gate says');
         $this->assertFalse($row['is_test_only'], 'the donation is live, so the test badge does not cover it either');
-        $this->assertFalse($row['deletable'], 'the row must not offer an action that can only fail');
+        $this->assertTrue($row['deletable'], 'the row offers what the route will do');
 
-        $this->assertSame(409, $this->deleteStatus((int) $donor->id), 'and the route agrees');
+        $this->assertSame(200, $this->deleteStatus((int) $donor->id), 'and the route agrees');
     }
 
-    public function test_a_donor_whose_only_donation_was_refunded_is_not_offered_delete(): void
+    public function test_a_donor_whose_only_donation_was_refunded_is_offered_delete_and_deletes(): void
     {
         $donor = $this->donorWithDonation('rae.refunded@example.org', 'refunded');
 
-        $this->assertFalse($this->listRows()[(int) $donor->id]['deletable']);
-        $this->assertSame(409, $this->deleteStatus((int) $donor->id));
+        $this->assertTrue($this->listRows()[(int) $donor->id]['deletable']);
+        $this->assertSame(200, $this->deleteStatus((int) $donor->id));
     }
 
     public function test_a_donor_with_no_donation_row_at_all_is_offered_delete_and_deletes(): void
