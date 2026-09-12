@@ -94,7 +94,14 @@ final class DonorPurge
         $donor->flags        = null;
         $donor->household_id = null;
         $donor->updated_at   = $now;
-        $donor->save();
+
+        $donor->updateColumns([
+            'email_hash'   => $donor->email_hash,
+            'purged_at'    => $donor->purged_at,
+            'flags'        => $donor->flags,
+            'household_id' => $donor->household_id,
+            'updated_at'   => $donor->updated_at,
+        ]);
     }
 
     /**

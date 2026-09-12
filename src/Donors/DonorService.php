@@ -87,10 +87,11 @@ final class DonorService
                 if (! $reactivateIfRedacted) {
                     return $existing;
                 }
-                $existing->email_encrypted = $this->crypto->encrypt($email);
-                $existing->redacted_at     = null;
-                $existing->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
-                $existing->save();
+                $existing->updateColumns([
+                    'email_encrypted' => $this->crypto->encrypt($email),
+                    'redacted_at'     => null,
+                    'updated_at'      => $this->clock->now()->format('Y-m-d H:i:s'),
+                ]);
             }
             return $this->refreshProfile($existing, $profileOnlyOnCreate ? [] : $profile);
         }
@@ -264,7 +265,16 @@ final class DonorService
 
         if ($changed) {
             $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
-            $donor->save();
+            $donor->updateColumns([
+                'first_name'        => $donor->first_name,
+                'last_name'         => $donor->last_name,
+                'country'           => $donor->country,
+                'locale'            => $donor->locale,
+                'company'           => $donor->company,
+                'phone_encrypted'   => $donor->phone_encrypted,
+                'address_encrypted' => $donor->address_encrypted,
+                'updated_at'        => $donor->updated_at,
+            ]);
             do_action('gratora.donor.updated', $donor);
         }
 
@@ -293,10 +303,11 @@ final class DonorService
         }
 
         $oldHash = $donor->email_hash;
-        $donor->email_hash      = $newHash;
-        $donor->email_encrypted = $this->crypto->encrypt($normalized);
-        $donor->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
-        $donor->save();
+        $donor->updateColumns([
+            'email_hash'      => $newHash,
+            'email_encrypted' => $this->crypto->encrypt($normalized),
+            'updated_at'      => $this->clock->now()->format('Y-m-d H:i:s'),
+        ]);
 
         do_action('gratora.donor.email_changed', $donor, [
             'old_hash' => $oldHash,
@@ -561,7 +572,20 @@ final class DonorService
         $donor->updated_at         = $donor->redacted_at;
 
         DB::transaction(function () use ($donor, $request, $who) {
-            $donor->save();
+            $donor->updateColumns([
+                'email_encrypted'      => $donor->email_encrypted,
+                'avatar_attachment_id' => $donor->avatar_attachment_id,
+                'first_name'           => $donor->first_name,
+                'last_name'            => $donor->last_name,
+                'address_encrypted'    => $donor->address_encrypted,
+                'phone_encrypted'      => $donor->phone_encrypted,
+                'tax_id_encrypted'     => $donor->tax_id_encrypted,
+                'notes_encrypted'      => $donor->notes_encrypted,
+                'company'              => $donor->company,
+                'country'              => $donor->country,
+                'redacted_at'          => $donor->redacted_at,
+                'updated_at'           => $donor->updated_at,
+            ]);
 
             // Inside this transaction: a handler that cannot finish its part
             // rolls the whole thing back rather than leaving the donor marked
@@ -842,10 +866,11 @@ final class DonorService
             return false;
         }
 
-        $donor->email_encrypted = $this->crypto->encrypt($email);
-        $donor->redacted_at     = null;
-        $donor->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
-        $donor->save();
+        $donor->updateColumns([
+            'email_encrypted' => $this->crypto->encrypt($email),
+            'redacted_at'     => null,
+            'updated_at'      => $this->clock->now()->format('Y-m-d H:i:s'),
+        ]);
 
         return true;
     }
