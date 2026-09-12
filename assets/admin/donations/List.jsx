@@ -55,6 +55,44 @@ const readTestPref = () => {
     }
 };
 
+/**
+ * What the bin is about to do, said differently once it can hold money.
+ *
+ * "Attempt" was the only thing it ever took, and a settled donation is not
+ * one. The totals sentence changes with it: the campaign figures and the
+ * exports are untouched, but the summary above the list is scoped to the list
+ * and so leaves out whatever is in the bin.
+ */
+function trashMessage( n, anySettled ) {
+    if ( anySettled ) {
+        return n === 1
+            ? __( 'Take this donation off the list? Nothing is deleted, and your campaign totals, reports and exports do not change. The summary above this list leaves out what is in the bin, so it will read lower.', 'gratora-donation-platform' )
+            : sprintf(
+                /* translators: %d: number of donations */
+                _n(
+                    'Take %d donation off the list? Nothing is deleted, and your campaign totals, reports and exports do not change. The summary above this list leaves out what is in the bin, so it will read lower.',
+                    'Take %d donations off the list? Nothing is deleted, and your campaign totals, reports and exports do not change. The summary above this list leaves out what is in the bin, so it will read lower.',
+                    n,
+                    'gratora-donation-platform'
+                ),
+                n
+            );
+    }
+
+    return n === 1
+        ? __( 'Take this attempt off the list? Nothing is deleted, and no money total changes.', 'gratora-donation-platform' )
+        : sprintf(
+            /* translators: %d: number of donations */
+            _n(
+                'Take %d attempt off the list? Nothing is deleted, and no money total changes.',
+                'Take %d attempts off the list? Nothing is deleted, and no money totals change.',
+                n,
+                'gratora-donation-platform'
+            ),
+            n
+        );
+}
+
 export default function List() {
     const [ includeTest, setIncludeTest ] = useState( readTestPref );
 
@@ -376,22 +414,20 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n        = targets.length;
                 const stopping = targets.filter( ( i ) => i.stops_payment ).length;
+                // The bin takes settled donations now, so "attempt" stops
+                // being the right word for what is in the selection, and the
+                // note about a reference that could still be paid by hand is
+                // about an open payment, which these do not have.
+                const settled = targets.filter( ( i ) => i.status === 'paid'
+                    || i.status === 'partial_refund'
+                    || i.status === 'refunded'
+                    || i.status === 'disputed' ).length;
+                const anySettled = settled > 0;
 
                 setConfirm( {
                     title:       __( 'Move to trash', 'gratora-donation-platform' ),
                     destructive: true,
-                    message: n === 1
-                        ? __( 'Take this attempt off the list? Nothing is deleted, and no money total changes.', 'gratora-donation-platform' )
-                        : sprintf(
-                            /* translators: %d: number of donations */
-                            _n(
-                                'Take %d attempt off the list? Nothing is deleted, and no money total changes.',
-                                'Take %d attempts off the list? Nothing is deleted, and no money totals change.',
-                                n,
-                                'gratora-donation-platform'
-                            ),
-                            n
-                        ),
+                    message: trashMessage( n, anySettled ),
                     // The row cannot know the outcome in advance, so the dialog
                     // says what will be attempted and the result says what
                     // happened.
@@ -408,7 +444,9 @@ export default function List() {
                                     ),
                                     stopping
                                 )
-                                : __( 'There is nothing to close at the gateway for these, so a reference already emailed to a donor could still be paid by hand.', 'gratora-donation-platform' ) }
+                                : ( anySettled
+                                    ? __( 'Nothing is open at the gateway for these: the money has already moved and the bin does not touch it.', 'gratora-donation-platform' )
+                                    : __( 'There is nothing to close at the gateway for these, so a reference already emailed to a donor could still be paid by hand.', 'gratora-donation-platform' ) ) }
                         </p>
                     ),
                     confirmLabel: __( 'Move to trash', 'gratora-donation-platform' ),
