@@ -760,10 +760,11 @@ export default function List() {
      * A single row keeps the per-plan dialog, which carries the reason and the
      * notify choice a batch cannot ask once and mean for everybody.
      */
-    const runOverSelection = ( action, plans, { title, message, confirmLabel, destructive, extra, done } ) => {
+    const runOverSelection = ( action, plans, { title, message, body, confirmLabel, destructive, extra, done } ) => {
         setConfirm( {
             title,
             message,
+            body,
             confirmLabel,
             destructive: !! destructive,
             onConfirm: async () => {
@@ -790,17 +791,7 @@ export default function List() {
         copySubscriptionIdAction(),
         {
             id:    'retry',
-            // The tooltip is the only thing the icon says before it is used,
-            // so on a row the gateway will not collect it named an action it
-            // was never going to take.
-            label: ( items ) => ( items.length > 0 && items.every( ( i ) => !! retryRefusalFor( i ) )
-                ? _n(
-                    'Why this cannot be retried',
-                    'Why these cannot be retried',
-                    items.length,
-                    'gratora-donation-platform'
-                )
-                : __( 'Retry payment', 'gratora-donation-platform' ) ),
+            label: __( 'Retry payment', 'gratora-donation-platform' ),
             // DataViews draws a primary action as an icon button, so one with
             // no icon renders as nothing at all -- and being primary, it is
             // left out of the row menu too, taking the action out of reach.
@@ -816,12 +807,17 @@ export default function List() {
                 // One sentence per cause, not per row: a selection of twenty
                 // Stripe plans has one thing wrong with it.
                 const blocked = [ ...new Set( items.map( retryRefusalFor ).filter( Boolean ) ) ];
-                if ( blocked.length ) setRefusals( blocked );
-
                 const targets = items.filter( ( i ) => !! retryActionFor( i ) );
-                if ( ! targets.length ) return;
 
-                if ( targets.length === 1 ) {
+                // The answer belongs where the control was used. Put on the
+                // page behind the row instead, it is a sentence the admin has
+                // to go and find after a click that looked like it did nothing.
+                if ( ! targets.length ) {
+                    setDialog( { plan: items[ 0 ], action: 'retry', blocked } );
+                    return;
+                }
+
+                if ( targets.length === 1 && ! blocked.length ) {
                     setDialog( { plan: targets[ 0 ], action: 'retry' } );
                     return;
                 }
@@ -833,6 +829,13 @@ export default function List() {
                         _n( 'Ask the gateway to take %d payment again now?', 'Ask the gateway to take %d payments again now?', targets.length, 'gratora-donation-platform' ),
                         targets.length
                     ),
+                    // Carried into the same dialog, so a selection is not part
+                    // acted on and part silently dropped.
+                    body: blocked.map( ( why ) => (
+                        <div key={ why } style={ { marginTop: 12 } }>
+                            <Notice status="warning" isDismissible={ false }>{ why }</Notice>
+                        </div>
+                    ) ),
                     confirmLabel: __( 'Retry', 'gratora-donation-platform' ),
                     done:         ( n ) => sprintf(
                         /* translators: %d: number of subscriptions. */
@@ -1083,6 +1086,7 @@ export default function List() {
                 <PlanActionDialog
                     plan={ dialog.plan }
                     action={ dialog.action }
+                    blocked={ dialog.blocked || [] }
                     onClose={ () => setDialog( null ) }
                     onDone={ () => { load(); loadStats(); } }
                 />

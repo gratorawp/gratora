@@ -93,6 +93,9 @@ async function mount( Component, props, rows ) {
 const subscriptionsList = ( rows ) =>
     mount( require( '../../assets/admin/subscriptions/List' ).default, {}, rows );
 
+/** The modal the control answers in, whatever it has to say. */
+const dialog = () => document.querySelector( '.gratora-dialog, [role="dialog"]' );
+
 const donorProfile = ( rows ) =>
     mount(
         require( '../../assets/admin/donors/profile/tabs/RecurringTab' ).default,
@@ -111,29 +114,7 @@ beforeEach( () => {
     };
 } );
 
-/** DataViews resolves a function label against the rows it would act on. */
-const labelOf = ( action, items ) =>
-    ( typeof action.label === 'string' ? action.label : action.label( items ) );
-
 describe( 'the subscriptions list, which has nothing else to say it', () => {
-    it( 'does not name an action it will not take', async () => {
-        const retry = await subscriptionsList( [ BLOCKED ] );
-
-        expect( labelOf( retry, [ BLOCKED ] ) ).toBe( 'Why this cannot be retried' );
-    } );
-
-    it( 'still names the action on a plan it can collect', async () => {
-        const retry = await subscriptionsList( [ RETRYABLE ] );
-
-        expect( labelOf( retry, [ RETRYABLE ] ) ).toBe( 'Retry payment' );
-    } );
-
-    /** A selection with one collectable row in it is still a retry. */
-    it( 'names the action when only some of a selection are blocked', async () => {
-        const retry = await subscriptionsList( [ BLOCKED ] );
-
-        expect( labelOf( retry, [ BLOCKED, RETRYABLE ] ) ).toBe( 'Retry payment' );
-    } );
 
     it( 'still offers the control on a plan it cannot collect', async () => {
         const retry = await subscriptionsList( [ BLOCKED ] );
@@ -141,13 +122,37 @@ describe( 'the subscriptions list, which has nothing else to say it', () => {
         expect( retry.isEligible( BLOCKED ) ).toBe( true );
     } );
 
-    it( 'reads the reason out when that control is used', async () => {
+    it( 'reads the reason out in a dialog when that control is used', async () => {
         const retry = await subscriptionsList( [ BLOCKED ] );
 
         retry.callback( [ BLOCKED ] );
         await settle();
 
-        expect( document.body.textContent ).toContain( WHY );
+        expect( dialog() ).not.toBeNull();
+        expect( dialog().textContent ).toContain( WHY );
+    } );
+
+    /** Where the click was, not on the page the admin has to go back to. */
+    it( 'says it in the dialog rather than behind it', async () => {
+        const retry = await subscriptionsList( [ BLOCKED ] );
+
+        retry.callback( [ BLOCKED ] );
+        await settle();
+
+        const outside = document.body.textContent.replace( dialog().textContent, '' );
+
+        expect( outside ).not.toContain( WHY );
+    } );
+
+    /** A selection part collectable is not part acted on and part dropped. */
+    it( 'carries the reason into the confirmation for a mixed selection', async () => {
+        const retry = await subscriptionsList( [ BLOCKED ] );
+
+        retry.callback( [ BLOCKED, RETRYABLE ] );
+        await settle();
+
+        expect( dialog().textContent ).toContain( WHY );
+        expect( dialog().textContent ).toMatch( CONFIRMATION );
     } );
 
     /** The reason instead of the request: nothing is put to the gateway. */

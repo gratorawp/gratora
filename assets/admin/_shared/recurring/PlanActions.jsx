@@ -170,7 +170,7 @@ const CONFIRM_LABELS = {
     cancel: __( 'Cancel subscription', 'gratora-donation-platform' ),
 };
 
-export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
+export default function PlanActionDialog( { plan, action, blocked = [], onClose, onDone } ) {
     const [ busy, setBusy ]     = useState( false );
     const [ error, setError ]   = useState( null );
     // Retry is the one action whose answer is not the end of the story: the
@@ -240,6 +240,33 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             } )
             .finally( () => setBusy( false ) );
     };
+
+    // Nothing here is a decision to take, so the dialog carries the reason and
+    // a way out and no confirm beside it.
+    if ( blocked.length > 0 ) {
+        return (
+            <Dialog
+                title={ _n(
+                    'This payment cannot be retried',
+                    'These payments cannot be retried',
+                    blocked.length,
+                    'gratora-donation-platform'
+                ) }
+                onClose={ onClose }
+                foot={
+                    <Btn variant="primary" onClick={ onClose }>
+                        { __( 'Close', 'gratora-donation-platform' ) }
+                    </Btn>
+                }
+            >
+                { blocked.map( ( why ) => (
+                    <Notice key={ why } status="warning" isDismissible={ false }>
+                        { why }
+                    </Notice>
+                ) ) }
+            </Dialog>
+        );
+    }
 
     return (
         <Dialog
