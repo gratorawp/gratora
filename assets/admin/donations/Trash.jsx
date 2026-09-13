@@ -202,12 +202,13 @@ export default function Trash() {
                         </label>
                     ),
                     confirmLabel: __( 'Delete permanently', 'gratora-donation-platform' ),
-                    onConfirm: async () => {
+                    busyLabel:    __( 'Deleting…', 'gratora-donation-platform' ),
+                    onConfirm: async ( onProgress ) => {
                         try {
                             const result = await postBatch( 'delete', targets.map( ( i ) => i.reference ), {
                                 confirmation:  'DELETE',
                                 delete_donors: deleteDonors.current,
-                            } );
+                            }, onProgress );
                             report(
                                 result,
                                 ( count ) => sprintf(

@@ -558,14 +558,15 @@ export default function List() {
                             n
                         ),
                     confirmLabel: __( 'Delete permanently', 'gratora-donation-platform' ),
-                    onConfirm: async () => {
+                    busyLabel:    __( 'Deleting…', 'gratora-donation-platform' ),
+                    onConfirm: async ( onProgress ) => {
                         try {
                             const result = await postBatch( 'delete', targets.map( ( i ) => i.reference ), {
                                 confirmation:  'DELETE',
                                 // The donor is kept: these rows have money on
                                 // them, so the donor is never left with nothing.
                                 delete_donors: false,
-                            } );
+                            }, onProgress );
 
                             const done = result.done.length + result.already.length;
                             if ( done > 0 ) {

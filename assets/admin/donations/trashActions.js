@@ -25,8 +25,10 @@ export function chunked( references ) {
  * Every row gets its own outcome, so the caller can say what happened to each
  * rather than reducing a mixed batch to one verdict.
  */
-export async function postBatch( route, references, extra = {} ) {
+export async function postBatch( route, references, extra = {}, onProgress = null ) {
     const merged = { done: [], already: [], refused: [] };
+    const total  = references.length;
+    let answered = 0;
 
     for ( const batch of chunked( references ) ) {
         const res = await apiFetch( {
@@ -38,6 +40,12 @@ export async function postBatch( route, references, extra = {} ) {
         merged.done.push( ...( res?.done || [] ) );
         merged.already.push( ...( res?.already || [] ) );
         merged.refused.push( ...( res?.refused || [] ) );
+
+        // Counted from the rows sent rather than the rows answered for: a
+        // refused row is still a row this has finished with, and a bar that
+        // stalled on every refusal would be reporting the wrong thing.
+        answered += batch.length;
+        if ( onProgress ) onProgress( answered, total );
     }
 
     return merged;
