@@ -33,7 +33,7 @@ export default function OverviewCard( { donation } ) {
                     </KvRow>
 
                     <KvRow label={ __( 'Gateway', 'gratora-donation-platform' ) }>
-                        <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>
+                        <span>{ donation.gateway_label || donation.gateway }</span>
                     </KvRow>
 
                     { donation.payment_method_brand && donation.payment_method_last4 && (

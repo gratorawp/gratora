@@ -156,12 +156,11 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
             label:    __( 'Gateway', 'gratora-donation-platform' ),
             elements: gatewayOptions,
             filterBy: { operators: [ 'is' ] },
+            // The row carries its own name, so this reads the same before the
+            // filter options have arrived as it does after.
             render: ( { item } ) => {
                 if ( ! item.gateway ) return <span>-</span>;
-                const named = gatewayOptions.find( ( g ) => g.value === item.gateway );
-                return named
-                    ? <span>{ named.label }</span>
-                    : <span style={ { textTransform: 'capitalize' } }>{ item.gateway }</span>;
+                return <span>{ item.gateway_label || item.gateway }</span>;
             },
         },
         {

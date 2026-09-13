@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Recurring;
 
 use Gratora\Foundation\Helpers\Money;
+use Gratora\Gateways\GatewayLabels;
 use Gratora\Vendor\Queryable\DB;
 use Gratora\Vendor\Queryable\QueryBuilder;
 
@@ -438,7 +439,7 @@ final class RecurringPlanRepository
             if ($slug === '') {
                 continue;
             }
-            $out[] = ['value' => $slug, 'label' => ucfirst($slug)];
+            $out[] = ['value' => $slug, 'label' => GatewayLabels::for($slug)];
         }
 
         return $out;

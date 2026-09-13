@@ -694,7 +694,7 @@ export default function List() {
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 <div>
-                    <div style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
+                    <div>{ item.gateway_label || item.gateway }</div>
                     { item.gateway_subscription_id
                         ? <code className="gratora-row__sub gratora-row__sub--mono">{ item.gateway_subscription_id }</code>
                         : <span className="gratora-row__sub">{ __( 'Not linked', 'gratora-donation-platform' ) }</span> }

@@ -29,6 +29,7 @@ use Gratora\Foundation\Helpers\Csv;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Funds\Fund;
 use Gratora\Funds\FundRepository;
+use Gratora\Gateways\GatewayLabels;
 use Gratora\Gateways\ClosesUnsettledPayment;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Recurring\GatewayUnreachable;
@@ -2155,6 +2156,7 @@ final class DonationsController
             'base_currency'     => $d->base_currency,
             'status'       => $d->status,
             'gateway'      => $d->gateway,
+            'gateway_label' => GatewayLabels::for((string) $d->gateway),
             'frequency'    => $d->frequency,
             'is_test'      => (bool) $d->is_test,
             // Left out of the list by default, so a row that does appear needs
@@ -2321,40 +2323,10 @@ final class DonationsController
         return new WP_REST_Response(array_map(
             static fn (string $slug): array => [
                 'value' => $slug,
-                'label' => self::gatewayLabel($slug),
+                'label' => GatewayLabels::for($slug),
             ],
             $slugs
         ), 200);
-    }
-
-    /**
-     * Admin-facing display name for a gateway slug. Core names what it ships
-     * plus the slugs the Give importer writes; add-ons name their own through
-     * the filter; an unnamed slug still gets a usable option rather than being
-     * dropped.
-     *
-     * @since 1.0.0
-     */
-    public static function gatewayLabel(string $slug): string
-    {
-        $known = [
-            'stripe'  => __('Stripe', 'gratora-donation-platform'),
-            'paypal'  => __('PayPal', 'gratora-donation-platform'),
-            'offline' => __('Offline', 'gratora-donation-platform'),
-            'sandbox' => __('Test donation', 'gratora-donation-platform'),
-            'manual'  => __('Manually entered', 'gratora-donation-platform'),
-        ];
-
-        if (isset($known[$slug])) {
-            return $known[$slug];
-        }
-
-        $added = (array) apply_filters('gratora.gateway_admin_labels', []);
-        $label = $added[$slug] ?? null;
-
-        return is_string($label) && $label !== ''
-            ? $label
-            : ucwords(str_replace(['-', '_'], ' ', $slug));
     }
 
     /** @since 1.0.0 */

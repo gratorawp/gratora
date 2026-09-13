@@ -59,7 +59,7 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                             </>
                         ) }
                         <span className="dot-sep">·</span>
-                        <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>
+                        <span>{ donation.gateway_label || donation.gateway }</span>
                         { donation.paid_at && (
                             <>
                                 <span className="dot-sep">·</span>

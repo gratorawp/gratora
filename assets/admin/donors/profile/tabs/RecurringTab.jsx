@@ -141,7 +141,7 @@ export default function RecurringTab( { recurring, onChange } ) {
             enableGlobalSearch: true,
             getValue: ( { item } ) => item.gateway || '',
             render: ( { item } ) => (
-                <span style={ { textTransform: 'capitalize' } }>{ item.gateway }</span>
+                <span>{ item.gateway_label || item.gateway }</span>
             ),
         },
         {

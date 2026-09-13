@@ -9,6 +9,7 @@ defined('ABSPATH') || exit;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Analytics\Event;
 use Gratora\Donations\Donation;
+use Gratora\Gateways\GatewayLabels;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\Sandbox\SandboxGateway;
 use Gratora\Gateways\SupportsPaymentRetry;
@@ -76,6 +77,7 @@ final class PlanRow
         return [
             'id'                      => (int) $p->id,
             'gateway'                 => (string) $p->gateway,
+            'gateway_label'           => GatewayLabels::for((string) $p->gateway),
             'gateway_subscription_id' => (string) $p->gateway_subscription_id,
             'amount_cents'            => (int) $p->amount_cents,
             'currency'                => (string) $p->currency,

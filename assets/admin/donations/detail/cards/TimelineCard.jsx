@@ -41,8 +41,8 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             dot:   'is-ok',
             title: __( 'Payment captured', 'gratora-donation-platform' ),
             sub:   donation.gateway_intent_id
-                ? <><span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>{ ' · ' }<span className="mono">{ donation.gateway_intent_id }</span></>
-                : <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>,
+                ? <><span>{ donation.gateway_label || donation.gateway }</span>{ ' · ' }<span className="mono">{ donation.gateway_intent_id }</span></>
+                : <span>{ donation.gateway_label || donation.gateway }</span>,
         } );
     }
     if ( donation.status === 'failed' ) {
