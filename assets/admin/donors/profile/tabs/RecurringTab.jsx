@@ -5,8 +5,7 @@ import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { RotateCw } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
-import Notice from '../../../_shared/components/Notice';
-import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor, retryRefusalFor } from '../../../_shared/recurring/PlanActions';
+import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../../../_shared/recurring/PlanActions';
 import PlanDetailDialog from '../../../subscriptions/PlanDetailDialog';
 import {
     cadenceLabel,
@@ -34,7 +33,6 @@ export default function RecurringTab( { recurring, onChange } ) {
     const plans = useMemo( () => recurring?.plans || [], [ recurring ] );
     const [ dialog, setDialog ] = useState( null );
     const [ detail, setDetail ] = useState( null );
-    const [ refusal, setRefusal ] = useState( null );
 
     const [ view, setView ] = useState( {
         type:    'table',
@@ -195,18 +193,11 @@ export default function RecurringTab( { recurring, onChange } ) {
             // the menu.
             isPrimary:  true,
             icon:       () => <RotateCw size={ 16 } strokeWidth={ 1.75 } />,
-            // Offered on a row it cannot collect as well, so the reason has
-            // somewhere to be read. A failing row with no control beside it
-            // reads as a feature that was never built.
-            isEligible: ( item ) => !! retryActionFor( item ) || !! retryRefusalFor( item ),
-            callback:   ( items ) => {
-                const why = retryRefusalFor( items[ 0 ] );
-                if ( why ) {
-                    setRefusal( why );
-                    return;
-                }
-                setDialog( { plan: items[ 0 ], action: 'retry' } );
-            },
+            // Only where it can work. A profile whose plan the gateway will
+            // not collect carries the reason in its own banner, so a second
+            // copy here would be the same sentence twice on one screen.
+            isEligible: ( item ) => !! retryActionFor( item ),
+            callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'retry' } ),
         },
         {
             id:         'pause',
@@ -255,10 +246,6 @@ export default function RecurringTab( { recurring, onChange } ) {
 
     return (
         <div className="gratora-dataviews dp-recurring-dv">
-            { refusal && (
-                <Notice status="warning" onRemove={ () => setRefusal( null ) }>{ refusal }</Notice>
-            ) }
-
             <DataViews
                 data={ rows }
                 isLoading={ false }
