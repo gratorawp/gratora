@@ -116,6 +116,12 @@ $bar-radius:    6px;
         font-size: 11px;
         color: $text-muted;
         text-align: center;
+        // The column centres its children, which sizes them to their content
+        // rather than to the column, so the two widest ranges grew past their
+        // bucket and ran into each other. Stretched, the text is bounded by
+        // the bucket it belongs to and wraps at the hyphen between the two
+        // amounts, which is the only place a range reads well broken.
+        align-self: stretch;
     }
 }
 
