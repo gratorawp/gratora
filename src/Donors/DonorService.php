@@ -37,6 +37,9 @@ final class DonorService
      */
     public const SEARCH_MATCH_CAP = 1000;
 
+    /** Words a name search will take before it stops adding LIKE pairs. */
+    private const SEARCH_WORD_CAP = 4;
+
     /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
@@ -1023,6 +1026,24 @@ final class DonorService
                 $q->whereLike('first_name', $term)
                   ->orWhereLike('last_name', $term)
                   ->orWhere('email_hash', $hash);
+
+                // A name is two fields and the screens print it as one, so the
+                // whole of what is on a row never matches either half. Every
+                // word has to land on one name or the other, which keeps the
+                // order free and makes typing more narrow the result rather
+                // than widen it. Bounded because each word is another pair of
+                // LIKEs, and nobody searches by five.
+                $words = preg_split('/\s+/', $term, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+                if (count($words) > 1 && count($words) <= self::SEARCH_WORD_CAP) {
+                    $q->orWhere(function ($all) use ($words): void {
+                        foreach ($words as $word) {
+                            $all->where(function ($either) use ($word): void {
+                                $either->whereLike('first_name', $word)
+                                       ->orWhereLike('last_name', $word);
+                            });
+                        }
+                    });
+                }
 
                 if (ctype_digit($term)) {
                     $q->orWhere('id', (int) $term);
