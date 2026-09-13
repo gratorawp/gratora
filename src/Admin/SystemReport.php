@@ -7,6 +7,7 @@ namespace Gratora\Admin;
 use Gratora\Foundation\Config\SystemSetting;
 use Gratora\Foundation\Http\ClientIp;
 use Gratora\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Uninstall\DataEraser;
 use Gratora\Gateways\GatewayManager;
 
 /**
@@ -20,17 +21,6 @@ use Gratora\Gateways\GatewayManager;
  */
 final class SystemReport
 {
-    private const COUNTED = [
-        'gratora_donations',
-        'gratora_donors',
-        'gratora_campaigns',
-        'gratora_forms',
-        'gratora_recurring_plans',
-        'gratora_funds',
-        'gratora_refunds',
-        'gratora_receipts',
-    ];
-
     private const EXTENSIONS = [
         'curl', 'mbstring', 'openssl', 'json', 'intl', 'bcmath', 'sodium', 'zip', 'gd', 'dom',
     ];
@@ -105,7 +95,92 @@ final class SystemReport
             );
         }
 
-        return $rows ?: [self::row(__('Installed', 'gratora-donation-platform'), __('None', 'gratora-donation-platform'))];
+        foreach (self::dormantAddOns() as $row) {
+            $rows[] = $row;
+        }
+
+        return $rows ?: [self::row(__('Add-ons', 'gratora-donation-platform'), __('None', 'gratora-donation-platform'))];
+    }
+
+    /**
+     * Gratora add-ons on disk that are switched off.
+     *
+     * A deactivated add-on registers no module, so the registry cannot see it,
+     * yet the scheduled jobs it left behind are on this same screen and the
+     * data it wrote is still in the database. Whether one is switched off is
+     * usually the answer to the ticket this report is pasted into.
+     *
+     * Recognised by text domain: the add-ons deliberately do not declare
+     * Requires Plugins, because that header also stops WordPress deactivating
+     * core while one of them is on.
+     *
+     * @return list<array{label:string, value:string}>
+     *
+     * @since 1.0.0
+     */
+    private static function dormantAddOns(): array
+    {
+        // The folder, not plugin_basename(): that returns an absolute path for
+        // a checkout outside the plugin directory, and would match nothing.
+        $here   = basename(dirname(GRATORA_FILE));
+        $active = self::activePluginFiles();
+
+        $rows = [];
+
+        foreach (self::installedPlugins() as $file => $data) {
+            $file = (string) $file;
+
+            if (dirname($file) === $here || in_array($file, $active, true)) {
+                continue;
+            }
+
+            if (! str_starts_with((string) ($data['TextDomain'] ?? ''), 'gratora-')) {
+                continue;
+            }
+
+            $version = (string) ($data['Version'] ?? '');
+
+            $rows[] = self::row(
+                (string) ($data['Name'] ?? $file),
+                sprintf(
+                    /* translators: %s: the add-on's version, or "unknown" when its header carries none */
+                    __('%s (installed, switched off)', 'gratora-donation-platform'),
+                    $version !== '' ? $version : __('unknown', 'gratora-donation-platform')
+                )
+            );
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     *
+     * @since 1.0.0
+     */
+    private static function installedPlugins(): array
+    {
+        if (! function_exists('get_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        return get_plugins();
+    }
+
+    /**
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    private static function activePluginFiles(): array
+    {
+        $active = (array) get_option('active_plugins', []);
+
+        if (is_multisite()) {
+            $active = array_merge($active, array_keys((array) get_site_option('active_sitewide_plugins', [])));
+        }
+
+        return array_values(array_map('strval', $active));
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -213,6 +288,12 @@ final class SystemReport
         // The one place the query builder cannot answer: server metadata, and
         // whether a table this plugin expects is actually there. A missing table
         // is invisible everywhere else until something fails on a donor.
+        //
+        // Read off the migrations core registers rather than a list kept here,
+        // so a table added to the schema is checked without this file being
+        // touched. The schema notice only fires while the version stamp is
+        // behind, so a table lost after a clean install is reported nowhere
+        // else.
         // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $version = (string) $wpdb->get_var('SELECT VERSION()');
 
@@ -223,9 +304,11 @@ final class SystemReport
             self::row(__('Table prefix', 'gratora-donation-platform'), (string) $wpdb->prefix),
         ];
 
-        foreach (self::COUNTED as $base) {
+        foreach ((new DataEraser())->coreTables() as $base) {
             $table  = $wpdb->prefix . $base;
-            $exists = (string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table;
+            $exists = (string) $wpdb->get_var(
+                $wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table))
+            ) === $table;
 
             $rows[] = self::row(
                 $table,
@@ -233,7 +316,7 @@ final class SystemReport
                     ? sprintf(
                         /* translators: %s: a row count */
                         __('%s rows', 'gratora-donation-platform'),
-                        number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a constant in this file, never from input.
+                        number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a name declared by a registered model, never from input.
                     )
                     : __('MISSING', 'gratora-donation-platform')
             );
@@ -246,15 +329,8 @@ final class SystemReport
     /** @return list<array{label:string, value:string}> */
     private function plugins(): array
     {
-        if (! function_exists('get_plugins')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
-        $all    = get_plugins();
-        $active = (array) get_option('active_plugins', []);
-        if (is_multisite()) {
-            $active = array_merge($active, array_keys((array) get_site_option('active_sitewide_plugins', [])));
-        }
+        $all    = self::installedPlugins();
+        $active = self::activePluginFiles();
 
         $rows = [];
         foreach ($active as $file) {
