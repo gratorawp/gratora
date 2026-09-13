@@ -149,7 +149,8 @@ final class DonationAuditTrailTest extends IntegrationTestCase
         $req->set_param('source', 'donation.trashed');
         $res = rest_do_request($req);
 
-        $this->assertSame(0, (int) ((array) $res->get_data())['deleted']);
+        $this->assertSame(409, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertSame('gratora_log_not_clearable', ((array) $res->get_data())['code'] ?? '');
         $this->assertTrue($this->exists($audit));
     }
 

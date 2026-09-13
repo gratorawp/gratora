@@ -135,12 +135,13 @@ export default function LogsTab( { active, setNotice } ) {
             } );
             setView( ( v ) => ( { ...v, page: 1 } ) );
             load();
+            const deleted = Number( res?.deleted ) || 0;
             setNotice( {
-                type: 'success',
+                type: deleted > 0 ? 'success' : 'info',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'gratora-donation-platform' ),
-                    Number( res?.deleted ) || 0
+                    _n( '%d entry cleared.', '%d entries cleared.', deleted, 'gratora-donation-platform' ),
+                    deleted
                 ),
             } );
         } catch ( err ) {
@@ -150,8 +151,6 @@ export default function LogsTab( { active, setNotice } ) {
         }
     };
 
-    // Named for what it removes: filtered to a source it clears that source
-    // only, and the delivery history goes with the failures either way.
     // Named for what it removes: filtered to a source it clears that source
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
@@ -175,6 +174,11 @@ export default function LogsTab( { active, setNotice } ) {
     const filtered  = !! source || !! status;
 
     const sources = useMemo( () => log?.sources || [], [ log ] );
+
+    // Whether Clear log will touch what is on screen, decided by the route that
+    // performs the delete rather than by a second copy of its rule here. Absent
+    // reads as not blocked, which is what every source but the audit ones is.
+    const clearBlocked = log?.clear_blocked || null;
 
     const fields = useMemo( () => [
         {
@@ -252,11 +256,17 @@ export default function LogsTab( { active, setNotice } ) {
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
                     { __( 'Refresh', 'gratora-donation-platform' ) }
                 </Btn>
+                { userCan( 'manage_options' ) && clearBlocked && (
+                    <p className="gratora-tools-logbar__note">{ clearBlocked }</p>
+                ) }
                 { userCan( 'manage_options' ) && (
                     <Btn
                         variant="secondary"
                         onClick={ askClear }
-                        disabled={ clearing || total === 0 }
+                        // Also while a load is in flight: the verdict describes
+                        // the response on screen, and a filter just changed
+                        // still has the previous one's answer.
+                        disabled={ clearing || loading || total === 0 || !! clearBlocked }
                         isBusy={ clearing }
                     >
                         { __( 'Clear log', 'gratora-donation-platform' ) }

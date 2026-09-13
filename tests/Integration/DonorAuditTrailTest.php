@@ -154,10 +154,12 @@ final class DonorAuditTrailTest extends IntegrationTestCase
         $req->set_param('source', 'donor.');
         $res = rest_do_request($req);
 
-        $this->assertSame(200, $res->get_status(), 'the route exists, or this asserts nothing');
+        // Refused rather than answered with nothing: on the screen a 200 with
+        // no deletions reads as a job done.
+        $this->assertSame(409, $res->get_status(), (string) wp_json_encode($res->get_data()));
         $this->assertNotSame([], $this->auditRows(), 'Clear log must not reach the audit');
         // Nor may asking for the audit clear what the admin did not ask about.
         $this->assertNotNull(Event::query()->find('id', (int) $noise->id), 'a refused source deletes nothing');
-        $this->assertSame(0, (int) $res->get_data()['deleted']);
+        $this->assertNotSame('', trim((string) ((array) $res->get_data())['message']), 'and it says why');
     }
 }

@@ -232,12 +232,18 @@ final class ToolsController
             ->offset(($page - 1) * $perPage)
             ->getAll();
 
+        // Computed from the sanitised source, which is the same value the
+        // delete route will sanitise the same way.
+        $clearBlocked = self::clearBlockedReason($source);
+
         return new WP_REST_Response([
             'items'          => array_map([self::class, 'logRow'], $rows),
             'total'          => $total,
             'page'           => $page,
             'per_page'       => $perPage,
             'sources'        => self::logSources(),
+            'clearable'      => $clearBlocked === null,
+            'clear_blocked'  => $clearBlocked,
             'retention_days' => self::retentionDays(),
         ], 200);
     }
@@ -248,7 +254,7 @@ final class ToolsController
      *
      * @since 1.0.0
      */
-    public function clearLog(\WP_REST_Request $request): WP_REST_Response
+    public function clearLog(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         // Diagnostics only. The rest of this table is the record of what
         // happened to people's money: the donor timelines read from it, so do
@@ -259,12 +265,14 @@ final class ToolsController
                 ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
         });
 
-        $source = self::logSource((string) $request['source']);
-        if ($source !== '') {
-            if (! self::isDiagnostic($source)) {
-                return new WP_REST_Response(['ok' => true, 'deleted' => 0], 200);
-            }
+        $source  = self::logSource((string) $request['source']);
+        $blocked = self::clearBlockedReason($source);
 
+        if ($blocked !== null) {
+            return new \WP_Error('gratora_log_not_clearable', $blocked, ['status' => 409]);
+        }
+
+        if ($source !== '') {
             $query = Event::query()->whereLike('type', $source . '%');
         }
 
@@ -286,6 +294,27 @@ final class ToolsController
     {
         return str_starts_with($source, ErrorLog::PREFIX)
             || str_starts_with($source, self::WEBHOOK_PREFIX);
+    }
+
+    /**
+     * Why Clear log will not touch the source on screen, or null when it will.
+     *
+     * The one place the rule is phrased: the list route sends this sentence to
+     * the screen and the delete route refuses with it, so what an admin is told
+     * beforehand and what the route does cannot come apart.
+     *
+     * @since 1.0.0
+     */
+    private static function clearBlockedReason(string $source): ?string
+    {
+        if ($source === '' || self::isDiagnostic($source)) {
+            return null;
+        }
+
+        return __(
+            'Entries like these are the record of what was done to your donors and their donations, so they are kept. Clear log removes recorded errors and gateway deliveries.',
+            'gratora-donation-platform'
+        );
     }
 
     /**
