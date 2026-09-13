@@ -25,6 +25,21 @@ use Gratora\Gateways\SupportsPaymentRetry;
 final class DeclinedRenewal
 {
     /**
+     * A plan with a renewal the gateway has not collected. The counter is
+     * reset on collection, so it counts what is outstanding now.
+     *
+     * @since 1.0.0
+     */
+    public static function isOutstanding(RecurringPlan $plan): bool
+    {
+        if (in_array((string) $plan->status, RecurringPlanActions::TERMINAL, true)) {
+            return false;
+        }
+
+        return (int) $plan->failed_renewals_count > 0 || (string) $plan->status === 'past_due';
+    }
+
+    /**
      * Null when the gateway takes a retry instruction: there the control is
      * the answer and a sentence beside it would only be in the way.
      *

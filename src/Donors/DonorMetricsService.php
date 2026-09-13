@@ -399,9 +399,12 @@ final class DonorMetricsService
         if ($donor->redacted_at !== null) {
             $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'gratora-donation-platform')];
         }
+        // Counted declines and not yet past due is where a plan sits for the
+        // whole of a gateway's retry window, and the table complains about it
+        // there, so the banner has to speak for it there too.
         $pastDuePlan = null;
         foreach ($recurringPlans as $p) {
-            if ($p->status === 'past_due') { $pastDuePlan = $p; break; }
+            if (DeclinedRenewal::isOutstanding($p)) { $pastDuePlan = $p; break; }
         }
         if ($pastDuePlan) {
             $gateway = $this->gateways->get((string) $pastDuePlan->gateway);

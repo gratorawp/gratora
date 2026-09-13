@@ -24,7 +24,7 @@ use InvalidArgumentException;
 final class RecurringPlanActions
 {
     /** A plan in one of these states accepts no further changes. */
-    private const TERMINAL = ['cancelled', 'expired'];
+    public const TERMINAL = ['cancelled', 'expired'];
 
     /** @since 1.0.0 */
     public function __construct(
