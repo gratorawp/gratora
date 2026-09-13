@@ -65,14 +65,15 @@ export default function LogsTab( { active, setNotice } ) {
         page:    1,
         sort:    { field: 'occurred_at', direction: 'desc' },
         filters: [],
-        fields:  [ 'occurred_at', 'source', 'message', 'outcome' ],
+        // Outcome is not among them: it reads beside the delivery it belongs
+        // to. It stays a field because that is what a filter hangs on.
+        fields:  [ 'occurred_at', 'source', 'message' ],
         // Key widths by field ID and let Message absorb spare table width.
         layout:  {
             styles: {
                 occurred_at: { width: '160px' },
                 source:      { width: '170px' },
                 message:     { width: 'auto', minWidth: '280px' },
-                outcome:     { width: '140px' },
             },
         },
     } );
@@ -175,6 +176,10 @@ export default function LogsTab( { active, setNotice } ) {
 
     const sources = useMemo( () => log?.sources || [], [ log ] );
 
+    // DataViews offers every field as a column, so Outcome can be switched
+    // back on. The pill moves there when it is, rather than appearing twice.
+    const outcomeColumn = ( view.fields || [] ).includes( 'outcome' );
+
     // Whether Clear log will touch what is on screen, decided by the route that
     // performs the delete rather than by a second copy of its rule here. Absent
     // reads as not blocked, which is what every source but the audit ones is.
@@ -205,7 +210,12 @@ export default function LogsTab( { active, setNotice } ) {
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
                 <div className="gratora-log__message">
-                    <div>{ item.message }</div>
+                    <div className="gratora-log__message-line">
+                        { item.kind === 'webhook' && ! outcomeColumn && (
+                            <Pill { ...deliveryOutcome( item ) } />
+                        ) }
+                        <span>{ item.message }</span>
+                    </div>
                     { item.kind === 'webhook' && item.error && (
                         <div className="gratora-row__sub gratora-log__message-sub">{ item.error }</div>
                     ) }
@@ -220,16 +230,14 @@ export default function LogsTab( { active, setNotice } ) {
             // is ordinary traffic an org reads by scanning, not by filtering.
             elements:      [ { value: 'failed', label: __( 'Problems only', 'gratora-donation-platform' ) } ],
             filterBy:      { operators: [ 'is' ] },
-            render: ( { item } ) => {
-                if ( item.kind === 'webhook' ) {
-                    return <Pill { ...deliveryOutcome( item ) } />;
-                }
-                // An error is a failure by definition: a pill on every one of
-                // them says nothing the source has not already said.
-                return null;
-            },
+            // Off by default, and empty here for anything but a delivery: an
+            // error is a failure by definition, and what was done to a donor
+            // is not an outcome at all.
+            render: ( { item } ) => (
+                item.kind === 'webhook' ? <Pill { ...deliveryOutcome( item ) } /> : null
+            ),
         },
-    ], [ sources ] );
+    ], [ sources, outcomeColumn ] );
 
     const actions = useMemo( () => [
         {
