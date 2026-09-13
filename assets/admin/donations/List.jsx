@@ -5,7 +5,7 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX, Trash2, FlameKindling } from 'lucide-react';
+import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX, Trash2 } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import { useTableView } from '../_shared/useTableView';
@@ -509,8 +509,7 @@ export default function List() {
         {
             id:            'delete-permanently',
             label:         __( 'Delete permanently', 'gratora-donation-platform' ),
-            // Deliberately not the bin: that one is reversible and this is not.
-            icon:          () => <FlameKindling size={ 16 } strokeWidth={ 1.75 } />,
+            icon:          () => <Trash2 size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             // One row at a time here. Deleting in bulk belongs to the trash,
             // where every row has already been through a decision to remove it.

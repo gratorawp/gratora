@@ -9,7 +9,7 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Trash2, SearchX, Undo2, FlameKindling } from 'lucide-react';
+import { Trash2, SearchX, Undo2 } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import Notice from '../_shared/components/Notice';
@@ -164,7 +164,7 @@ export default function Trash() {
         {
             id:            'delete-permanently',
             label:         __( 'Delete permanently', 'gratora-donation-platform' ),
-            icon:          () => <FlameKindling size={ 16 } strokeWidth={ 1.75 } />,
+            icon:          () => <Trash2 size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
             isEligible:    ( item ) => userCan( 'delete_donations' ) && ! item.delete_blocked,
