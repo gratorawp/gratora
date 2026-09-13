@@ -150,9 +150,18 @@ final class FxBackfill
 
                 // No base_currency column here: a plan is always valued in the
                 // org base, and the rate it was struck at is the audit trail.
-                $plan->fx_rate           = sprintf('%.8F', $rate);
-                $plan->base_amount_cents = (int) round((int) $plan->amount_cents * $rate);
-                $plan->save();
+                //
+                // Named columns, as the donations pass above does. A whole-row
+                // save() rebuilds the UPDATE from the copy loaded with the
+                // chunk, so anything a gateway committed while the pass was
+                // working through it goes back to what it was: a cancellation
+                // becomes active again, taking its money back into MRR and out
+                // of churn for good, since no webhook comes twice for a
+                // subscription already ended.
+                $plan->updateColumns([
+                    'fx_rate'           => sprintf('%.8F', $rate),
+                    'base_amount_cents' => (int) round((int) $plan->amount_cents * $rate),
+                ]);
                 $converted++;
             }
         }

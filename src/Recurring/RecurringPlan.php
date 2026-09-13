@@ -6,6 +6,7 @@ namespace Gratora\Recurring;
 
 defined('ABSPATH') || exit;
 
+use Gratora\Foundation\Database\UpdatesColumns;
 use Gratora\Vendor\Queryable\Model;
 use Gratora\Vendor\Queryable\Schema\Table;
 
@@ -16,6 +17,8 @@ use Gratora\Vendor\Queryable\Schema\Table;
  */
 final class RecurringPlan extends Model
 {
+    use UpdatesColumns;
+
     protected string $table = 'gratora_recurring_plans';
     protected string $version = '1.0.0';
 
