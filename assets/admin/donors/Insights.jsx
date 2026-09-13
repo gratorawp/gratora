@@ -21,17 +21,38 @@ const SEGMENT_META = {
     other:       { label: __( 'Other',        'gratora-donation-platform' ), color: 'var(--gratora-seg-other, #6b7280)',       hint: __( 'Uncategorised',               'gratora-donation-platform' ) },
 };
 
-function formatBucketLabel( min, max ) {
-    if ( max === null ) return `> ${ formatAmountCompact( min - 1 ) }`;
-    if ( min === 1 ) return `${ formatAmountCompact( 0 ) }-${ formatAmountCompact( max ) }`;
-    return `${ formatAmountCompact( min - 1 ) }-${ formatAmountCompact( max ) }`;
+/**
+ * A bucket is narrower than the widest range it has to label, so the label has
+ * to break somewhere. Left to the browser it breaks inside a number, because
+ * the hyphen between two amounts is not a break opportunity when digits sit on
+ * both sides of it. The explicit one puts the break where a range reads.
+ */
+function BucketLabel( { min, max } ) {
+    if ( max === null ) {
+        return <>{ `> ${ formatAmountCompact( min - 1 ) }` }</>;
+    }
+
+    const from = formatAmountCompact( min === 1 ? 0 : min - 1 );
+
+    return (
+        <>
+            { `${ from }-` }
+            <wbr />
+            { formatAmountCompact( max ) }
+        </>
+    );
 }
 
 function LifecycleKpis( { kpi } ) {
     return (
         <div className="gratora-overview__metrics">
+            { /* Not "Total donors": the donors list header carries that name
+                 over every row in the table, and this counts only the ones
+                 with a donation on record, which is the population every
+                 figure on this screen is cut from. Two numbers under one
+                 name on two views of the same page read as a contradiction. */ }
             <MetricCard
-                label={ __( 'Total donors', 'gratora-donation-platform' ) }
+                label={ __( 'Giving donors', 'gratora-donation-platform' ) }
                 value={ String( kpi.total ) }
                 sub={ kpi.new ? `+${ kpi.new } ${ __( 'new (30d)', 'gratora-donation-platform' ) }` : __( 'no new donors', 'gratora-donation-platform' ) }
                 icon={ <IconUsers /> }
@@ -135,7 +156,7 @@ function LtvHistogram( { buckets } ) {
                             <div className="gratora-ltv-hist__bar" style={ { height: `${ Math.max( h, 2 ) }%` } } />
                         </div>
                         <div className="gratora-ltv-hist__count">{ b.donor_count }</div>
-                        <div className="gratora-ltv-hist__label">{ formatBucketLabel( b.min_cents, b.max_cents ) }</div>
+                        <div className="gratora-ltv-hist__label"><BucketLabel min={ b.min_cents } max={ b.max_cents } /></div>
                     </div>
                 );
             } ) }
