@@ -93,7 +93,10 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
 
             { banners?.map( ( b ) => (
                 <Banner
-                    key={ b.kind }
+                    // Two subscriptions failing on two processors are two
+                    // banners of the same kind, and the sentence is what tells
+                    // them apart.
+                    key={ `${ b.kind }:${ b.message }` }
                     kind={ b.kind }
                     message={ b.message }
                     onAction={ b.kind === 'past_due' && onTabSwitch ? () => onTabSwitch( 'recurring' ) : null }

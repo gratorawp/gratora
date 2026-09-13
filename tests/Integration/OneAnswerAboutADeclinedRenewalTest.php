@@ -10,6 +10,7 @@ use Gratora\Foundation\Plugin;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Recurring\PlanRow;
 use Gratora\Recurring\RecurringPlan;
+use Gratora\Tests\Support\RetryableGateway;
 
 /**
  * The donor profile and the subscriptions table both answer "a renewal was
@@ -22,15 +23,23 @@ use Gratora\Recurring\RecurringPlan;
  */
 final class OneAnswerAboutADeclinedRenewalTest extends IntegrationTestCase
 {
+    private function donor(): int
+    {
+        return (int) Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('declined-' . uniqid() . '@example.test', ['first_name' => 'Ada'])->id;
+    }
+
     private function plan(string $gateway, array $overrides = []): RecurringPlan
     {
-        $donor = Plugin::instance()->container->get(DonorService::class)
-            ->findOrCreate('declined-' . uniqid() . '@example.test', ['first_name' => 'Ada']);
+        return $this->planFor($this->donor(), $gateway, $overrides);
+    }
 
+    private function planFor(int $donorId, string $gateway, array $overrides = []): RecurringPlan
+    {
         $now = gmdate('Y-m-d H:i:s');
 
         $p = RecurringPlan::make();
-        $p->donor_id                = (int) $donor->id;
+        $p->donor_id                = $donorId;
         $p->gateway                 = $gateway;
         $p->gateway_subscription_id = 'sub_' . uniqid();
         $p->amount_cents            = 2000;
@@ -52,18 +61,25 @@ final class OneAnswerAboutADeclinedRenewalTest extends IntegrationTestCase
         return $p;
     }
 
-    private function banner(RecurringPlan $plan): string
+    /** @return list<string> */
+    private function banners(int $donorId): array
     {
         $profile = Plugin::instance()->container->get(DonorMetricsService::class)
-            ->profile((int) $plan->donor_id);
+            ->profile($donorId);
 
+        $out = [];
         foreach ((array) ($profile['banners'] ?? []) as $banner) {
             if (($banner['kind'] ?? '') === 'past_due') {
-                return (string) ($banner['message'] ?? '');
+                $out[] = (string) ($banner['message'] ?? '');
             }
         }
 
-        return '';
+        return $out;
+    }
+
+    private function banner(RecurringPlan $plan): string
+    {
+        return $this->banners((int) $plan->donor_id)[0] ?? '';
     }
 
     private function refusal(RecurringPlan $plan): ?string
@@ -126,6 +142,80 @@ final class OneAnswerAboutADeclinedRenewalTest extends IntegrationTestCase
         $plan = $this->plan('stripe', ['status' => 'cancelled']);
 
         $this->assertSame('', $this->banner($plan));
+    }
+
+    /**
+     * Two processors failing at once are two different things to go and do,
+     * and the banner used to stop at the first plan it found.
+     */
+    public function test_each_cause_gets_its_own_line(): void
+    {
+        $this->makeOfflinePayable();
+
+        $donorId = $this->donor();
+        $stripe  = $this->planFor($donorId, 'stripe');
+        $offline = $this->planFor($donorId, 'offline');
+
+        $said = $this->banners($donorId);
+
+        $this->assertCount(2, $said);
+        $this->assertTrue(
+            $this->somethingSays($said, (string) $this->refusal($stripe)),
+            'the processor this site holds no keys for is named'
+        );
+        $this->assertTrue(
+            $this->somethingSays($said, (string) $this->refusal($offline)),
+            'and so is the one that keeps its own schedule'
+        );
+    }
+
+    /** The lines count causes, not plans: one processor is one thing to do. */
+    public function test_two_plans_failing_the_same_way_share_a_line(): void
+    {
+        $donorId = $this->donor();
+        $this->planFor($donorId, 'stripe');
+        $this->planFor($donorId, 'stripe');
+
+        $this->assertCount(1, $this->banners($donorId));
+    }
+
+    /**
+     * A retryable plan's line promises a control on the Recurring tab. Beside
+     * a plan that has no such control, saying only that sends the admin to
+     * look for it on the wrong row.
+     */
+    public function test_a_collectable_plan_does_not_speak_for_one_that_is_not(): void
+    {
+        Plugin::instance()->container->get(GatewayManager::class)
+            ->register(new RetryableGateway());
+
+        $donorId = $this->donor();
+        $this->planFor($donorId, 'retryable');
+        $blocked = $this->planFor($donorId, 'stripe');
+
+        $said = $this->banners($donorId);
+
+        $this->assertCount(2, $said);
+        $this->assertTrue(
+            $this->somethingSays($said, 'Open the Recurring tab'),
+            'the one that can be collected still says so'
+        );
+        $this->assertTrue(
+            $this->somethingSays($said, (string) $this->refusal($blocked)),
+            'and the one that cannot is not left to it'
+        );
+    }
+
+    /** @param list<string> $said */
+    private function somethingSays(array $said, string $needle): bool
+    {
+        foreach ($said as $line) {
+            if (str_contains($line, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** And it is the gateway's own name in both, not its slug. */

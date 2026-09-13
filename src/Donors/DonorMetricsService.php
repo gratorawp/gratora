@@ -402,19 +402,32 @@ final class DonorMetricsService
         // Counted declines and not yet past due is where a plan sits for the
         // whole of a gateway's retry window, and the table complains about it
         // there, so the banner has to speak for it there too.
-        $pastDuePlan = null;
+        //
+        // A donor can be failing on two processors at once, and what to do
+        // about one is no guide to the other: one is waiting on keys this site
+        // does not hold, the other on a schedule nobody here controls. Keyed
+        // by the sentence, so plans sharing a cause share a line and the count
+        // of lines is the count of different things to go and do.
+        $declined = [];
         foreach ($recurringPlans as $p) {
-            if (DeclinedRenewal::isOutstanding($p)) { $pastDuePlan = $p; break; }
-        }
-        if ($pastDuePlan) {
-            $gateway = $this->gateways->get((string) $pastDuePlan->gateway);
-            $advice  = DeclinedRenewal::whatCanBeDone($gateway, (string) $pastDuePlan->gateway);
+            if (! DeclinedRenewal::isOutstanding($p)) {
+                continue;
+            }
+
+            $advice = DeclinedRenewal::whatCanBeDone(
+                $this->gateways->get((string) $p->gateway),
+                (string) $p->gateway
+            );
 
             $message = $advice === null
                 ? __('A renewal was declined. Open the Recurring tab to collect it again.', 'gratora-donation-platform')
                 : __('A renewal was declined.', 'gratora-donation-platform') . ' ' . $advice;
 
-            $banners[] = ['kind' => 'past_due', 'message' => $message];
+            $declined[$message] = true;
+        }
+
+        foreach (array_keys($declined) as $message) {
+            $banners[] = ['kind' => 'past_due', 'message' => (string) $message];
         }
 
         // Never minted here. This is a read, and issuing a token from a read
