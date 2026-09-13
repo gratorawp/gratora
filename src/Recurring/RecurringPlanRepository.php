@@ -580,8 +580,19 @@ final class RecurringPlanRepository
             ->count();
 
         $activeCount = (int) ($active['cnt'] ?? 0);
-        $churnBase   = $activeCount + $churnedCount;
-        $churnPct    = $churnBase > 0 ? round(($churnedCount / $churnBase) * 100, 1) : 0.0;
+
+        // Everyone who was there to cancel, which is every plan the gateway
+        // may still collect on and not only the ones collecting cleanly. A
+        // base of active plans alone left the paused and the past due out of
+        // the denominator while counting their cancellations in the numerator,
+        // so a month reported more churn than the donors had done.
+        $liveCount = (int) self::statsQuery($includeTest)
+            ->whereIn('status', self::LIVE_STATUSES)
+            ->where('interval_count', 0, '>')
+            ->count();
+
+        $churnBase = $liveCount + $churnedCount;
+        $churnPct  = $churnBase > 0 ? round(($churnedCount / $churnBase) * 100, 1) : 0.0;
 
         return [
             'active_count'             => $activeCount,
