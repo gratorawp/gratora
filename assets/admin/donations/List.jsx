@@ -744,6 +744,10 @@ export default function List() {
                         paginationInfo={ paginationInfo }
                         defaultLayouts={ { table: {}, list: {} } }
                         getItemId={ ( item ) => String( item.id ) }
+                        // Emails are stored encrypted and matched by hash, so
+                        // half an address finds nobody and reads as no such
+                        // donation.
+                        searchLabel={ __( 'Search by reference or name, or a whole email address', 'gratora-donation-platform' ) }
                     />
 
                     { ! loading && data.length === 0 && filtered && (

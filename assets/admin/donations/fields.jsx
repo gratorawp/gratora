@@ -23,10 +23,15 @@ export const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, lab
  */
 export function frequencyLabel( frequency ) {
     switch ( frequency ) {
-        case 'monthly':   return __( 'Monthly', 'gratora-donation-platform' );
-        case 'yearly':    return __( 'Yearly', 'gratora-donation-platform' );
+        // A donation that happened once is not a cadence, and falling through
+        // to the recurring default called it one on any screen that asked this
+        // rather than testing for it first.
+        case 'one_time':  return __( 'One time', 'gratora-donation-platform' );
         case 'weekly':    return __( 'Weekly', 'gratora-donation-platform' );
+        case 'biweekly':  return __( 'Every 2 weeks', 'gratora-donation-platform' );
+        case 'monthly':   return __( 'Monthly', 'gratora-donation-platform' );
         case 'quarterly': return __( 'Quarterly', 'gratora-donation-platform' );
+        case 'yearly':    return __( 'Yearly', 'gratora-donation-platform' );
         default:          return __( 'Recurring', 'gratora-donation-platform' );
     }
 }
@@ -39,6 +44,7 @@ export const FREQUENCY_OPTIONS = [
     { value: 'monthly',   label: __( 'Monthly', 'gratora-donation-platform' ) },
     { value: 'yearly',    label: __( 'Yearly', 'gratora-donation-platform' ) },
     { value: 'weekly',    label: __( 'Weekly', 'gratora-donation-platform' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora-donation-platform' ) },
     { value: 'quarterly', label: __( 'Quarterly', 'gratora-donation-platform' ) },
 ];
 

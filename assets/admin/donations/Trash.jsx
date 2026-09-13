@@ -276,7 +276,7 @@ export default function Trash() {
                 <EmptyState
                     icon={ <Trash2 size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'The trash is empty', 'gratora-donation-platform' ) }
-                    body={ __( 'Attempts you take off the donations list appear here, with their payments stopped, until you delete them.', 'gratora-donation-platform' ) }
+                    body={ __( 'Donations you take off the list appear here, with their payments stopped, until you delete them.', 'gratora-donation-platform' ) }
                 />
             ) : (
                 <div className={ `gratora-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>

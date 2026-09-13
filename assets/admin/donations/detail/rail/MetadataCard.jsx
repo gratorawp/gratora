@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 
 import { formatDateTime } from '../helpers';
+import { frequencyLabel } from '../../fields';
 import { countryName } from '../../../../_shared/countries';
 
 export default function MetadataCard( { donation } ) {
@@ -17,8 +18,8 @@ export default function MetadataCard( { donation } ) {
                 { donation.frequency && (
                     <div className="dd-rail-stat">
                         <span className="dd-rail-stat__lbl">{ __( 'Frequency', 'gratora-donation-platform' ) }</span>
-                        <span className="dd-rail-stat__val" style={ { textTransform: 'capitalize' } }>
-                            { donation.frequency.replace( '_', ' ' ) }
+                        <span className="dd-rail-stat__val">
+                            { frequencyLabel( donation.frequency ) }
                         </span>
                     </div>
                 ) }
