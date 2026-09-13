@@ -1,6 +1,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { Spinner } from '@wordpress/components';
 
 import Btn from '../components/Btn';
 import Dialog from '../components/Dialog';
@@ -172,6 +173,11 @@ const CONFIRM_LABELS = {
 export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     const [ busy, setBusy ]     = useState( false );
     const [ error, setError ]   = useState( null );
+    // Retry is the one action whose answer is not the end of the story: the
+    // gateway takes the instruction and its webhook confirms the money later,
+    // so closing on the 200 left an admin with no word either way about the
+    // thing they came here to do. The others report by the row changing.
+    const [ asked, setAsked ]   = useState( false );
     const [ approveUrl, setApproveUrl ] = useState( null );
     // Telling the donor is the default: the change was not theirs.
     const [ notify, setNotify ] = useState( true );
@@ -183,6 +189,9 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     // would retime the donor to it.
     const currentFrequency = plan.frequency || '';
     const [ frequency, setFrequency ] = useState( currentFrequency );
+
+    const isRetry = action === 'retry';
+    const gateway = plan.gateway_label || plan.gateway || '';
 
     const submit = () => {
         const body = { action, notify_donor: notify };
@@ -214,7 +223,14 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         setError( null );
         setApproveUrl( null );
         apiFetch( { path: `/gratora/v1/admin/recurring/${ plan.id }/action`, method: 'POST', data: body } )
-            .then( () => { onClose(); if ( onDone ) onDone(); } )
+            .then( () => {
+                if ( onDone ) onDone();
+                if ( isRetry ) {
+                    setAsked( true );
+                    return;
+                }
+                onClose();
+            } )
             .catch( ( e ) => {
                 setError( e?.message || __( 'That change could not be made.', 'gratora-donation-platform' ) );
                 // PayPal answers a revision with a link the donor has to open.
@@ -230,21 +246,27 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             title={ TITLES[ action ] || __( 'Change this donation', 'gratora-donation-platform' ) }
             onClose={ () => ( busy ? null : onClose() ) }
             foot={
-                <>
-                    <Btn variant="secondary" onClick={ onClose } disabled={ busy }>
+                asked ? (
+                    <Btn variant="primary" onClick={ onClose }>
                         { __( 'Close', 'gratora-donation-platform' ) }
                     </Btn>
-                    <Btn
-                        variant={ action === 'cancel' ? 'danger' : 'primary' }
-                        onClick={ submit }
-                        isBusy={ busy }
-                        disabled={ busy }
-                    >
-                        { busy
-                            ? __( 'Working…', 'gratora-donation-platform' )
-                            : ( CONFIRM_LABELS[ action ] ?? __( 'Apply change', 'gratora-donation-platform' ) ) }
-                    </Btn>
-                </>
+                ) : (
+                    <>
+                        <Btn variant="secondary" onClick={ onClose } disabled={ busy }>
+                            { __( 'Close', 'gratora-donation-platform' ) }
+                        </Btn>
+                        <Btn
+                            variant={ action === 'cancel' ? 'danger' : 'primary' }
+                            onClick={ submit }
+                            isBusy={ busy }
+                            disabled={ busy }
+                        >
+                            { busy
+                                ? __( 'Working…', 'gratora-donation-platform' )
+                                : ( CONFIRM_LABELS[ action ] ?? __( 'Apply change', 'gratora-donation-platform' ) ) }
+                        </Btn>
+                    </>
+                )
             }
         >
             { action === 'change_amount' && (
@@ -328,10 +350,45 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                 </p>
             ) }
 
-            { action === 'retry' && (
+            { isRetry && ! busy && ! asked && (
                 <p>
                     { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'gratora-donation-platform' ) }
                 </p>
+            ) }
+
+            { /* The round trip is to the processor, so it is long enough to
+                 look like nothing happened. */ }
+            { isRetry && busy && (
+                <div
+                    aria-live="polite"
+                    style={ { display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0' } }
+                >
+                    <Spinner />
+                    <div>
+                        { gateway
+                            ? sprintf(
+                                /* translators: %s: the payment gateway's name, such as PayPal. */
+                                __( 'Asking %s to collect it…', 'gratora-donation-platform' ),
+                                gateway
+                            )
+                            : __( 'Asking the gateway to collect it…', 'gratora-donation-platform' ) }
+                    </div>
+                </div>
+            ) }
+
+            { /* Taken, not paid: the gateway confirms a collection by webhook,
+                 and calling its 200 a payment would report money that has not
+                 arrived. */ }
+            { asked && (
+                <Notice status="success" isDismissible={ false }>
+                    { gateway
+                        ? sprintf(
+                            /* translators: %s: the payment gateway's name, such as PayPal. */
+                            __( '%s has been asked to collect it. If it goes through, the donation appears on this plan within a few moments.', 'gratora-donation-platform' ),
+                            gateway
+                        )
+                        : __( 'The gateway has been asked to collect it. If it goes through, the donation appears on this plan within a few moments.', 'gratora-donation-platform' ) }
+                </Notice>
             ) }
 
             { action === 'skip_next' && (
