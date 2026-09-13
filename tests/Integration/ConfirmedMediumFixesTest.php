@@ -222,7 +222,15 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->assertStringNotContainsString('could not stop your recurring donation', $out['message']);
     }
 
-    public function test_a_plan_that_could_not_be_stopped_still_says_so(): void
+    /**
+     * The cancellation runs over every status a gateway may still collect on,
+     * so the question afterwards has to be asked of the same set. Asked of a
+     * narrower one, a pending PayPal subscription that failed to cancel was
+     * reported to the donor as stopped, and it is already against their card.
+     *
+     * @dataProvider stillBilling
+     */
+    public function test_a_plan_that_could_not_be_stopped_still_says_so(string $status): void
     {
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('forget-blocked-' . uniqid() . '@example.test', ['first_name' => 'Ada']);
@@ -236,7 +244,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $plan->currency                = 'USD';
         $plan->interval_unit           = 'month';
         $plan->interval_count          = 1;
-        $plan->status                  = 'active';
+        $plan->status                  = $status;
         $plan->started_at              = $now;
         $plan->created_at              = $now;
         $plan->updated_at              = $now;
@@ -246,6 +254,17 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
         $this->assertSame('gratora_erasure_blocked', $out['code']);
         $this->assertSame(409, $out['status']);
+    }
+
+    /** @return array<string, array{0:string}> */
+    public static function stillBilling(): array
+    {
+        return [
+            'collecting'               => ['active'],
+            'suspended at the gateway' => ['past_due'],
+            'approved but not started' => ['pending'],
+            'stopped by the donor'     => ['paused'],
+        ];
     }
 
 

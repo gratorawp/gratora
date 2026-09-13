@@ -8,6 +8,7 @@ import Notice from '../components/Notice';
 import { Switch } from '../components/Switch';
 import AmountInput from '../components/AmountInput';
 import { userCan } from '../caps';
+import { isPlanUnstarted } from '../statuses';
 
 /**
  * The five plan actions, in one place.
@@ -115,6 +116,16 @@ export function actionsFor( plan ) {
     if ( ! canManagePlans() ) return [];
     if ( isTerminal( plan.status ) ) return [];
 
+    const cancel = { id: 'cancel', label: __( 'Cancel subscription', 'gratora-donation-platform' ), destructive: true };
+
+    // A subscription the gateway has not started has no schedule to pause,
+    // skip or re-price, and the routes behind those refuse it. Ending it is
+    // the one thing that can be done, and it has to stay available: the donor
+    // approved it, so it is already against their card.
+    if ( isPlanUnstarted( plan.status ) ) {
+        return [ cancel ];
+    }
+
     const actions = [];
     if ( plan.status === 'paused' ) {
         actions.push( { id: 'resume', label: __( 'Resume', 'gratora-donation-platform' ) } );
@@ -128,7 +139,7 @@ export function actionsFor( plan ) {
     if ( plan.can_change_interval ) {
         actions.push( { id: 'change_interval', label: __( 'Change schedule', 'gratora-donation-platform' ) } );
     }
-    actions.push( { id: 'cancel', label: __( 'Cancel subscription', 'gratora-donation-platform' ), destructive: true } );
+    actions.push( cancel );
 
     return actions;
 }

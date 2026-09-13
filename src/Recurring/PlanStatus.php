@@ -34,6 +34,20 @@ final class PlanStatus
      */
     public const TERMINAL = ['cancelled', 'expired'];
 
+    /**
+     * A plan the gateway may still take money on, which is the lifecycle less
+     * the two that have ended.
+     *
+     * pending belongs here and is the reason this is stated once: PayPal
+     * charges the moment a donor approves, so a subscription still waiting on
+     * activation is already against their card. Lists written without it have
+     * reported such a plan as stopped, swept its donor up for erasure, and
+     * described the donor as lapsed.
+     *
+     * @var list<string>
+     */
+    public const LIVE = ['active', 'pending', 'past_due', 'paused'];
+
     /** @since 1.0.0 */
     public static function label(string $status): string
     {
@@ -64,9 +78,36 @@ final class PlanStatus
     }
 
     /**
+     * A subscription the gateway has not started. It can be cancelled and
+     * nothing else: there is no schedule yet to pause, skip or re-price.
+     *
+     * @since 1.0.0
+     */
+    public static function isUnstarted(string $status): bool
+    {
+        return $status === 'pending';
+    }
+
+    /**
+     * The statuses as a SQL list, for the queries that ask which donors hold
+     * a mandate.
+     *
+     * @param list<string> $statuses
+     *
+     * @since 1.0.0
+     */
+    public static function sqlList(array $statuses): string
+    {
+        return implode(',', array_map(
+            static fn (string $status): string => "'" . $status . "'",
+            $statuses
+        ));
+    }
+
+    /**
      * The whole vocabulary, for a screen that offers them all as a filter.
      *
-     * @return list<array{value:string, label:string, variant:string}>
+     * @return list<array{value:string, label:string, variant:string, terminal:bool, unstarted:bool}>
      *
      * @since 1.0.0
      */
@@ -74,9 +115,11 @@ final class PlanStatus
     {
         return array_map(
             static fn (string $status): array => [
-                'value'   => $status,
-                'label'   => self::label($status),
-                'variant' => self::variant($status),
+                'value'     => $status,
+                'label'     => self::label($status),
+                'variant'   => self::variant($status),
+                'terminal'  => self::isTerminal($status),
+                'unstarted' => self::isUnstarted($status),
             ],
             self::LIFECYCLE
         );

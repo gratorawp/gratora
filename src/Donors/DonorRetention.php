@@ -7,6 +7,7 @@ namespace Gratora\Donors;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Async\AsyncDispatcher;
 use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Recurring\PlanStatus;
 use Gratora\Vendor\Queryable\DB;
 use Throwable;
 
@@ -73,6 +74,9 @@ final class DonorRetention
 
         $prefix    = DB::getPrefix();
         $liveDonor = DonorQueries::notRedactedPredicate('d');
+        // A donor holding a mandate is not lapsed, and erasing them cancels it
+        // as a side effect of a sweep they never asked for.
+        $live      = PlanStatus::sqlList(PlanStatus::LIVE);
         $cutoff = self::cutoff($years);
         $cursor = self::cursor();
 
@@ -87,7 +91,7 @@ final class DonorRetention
                        AND NOT EXISTS (
                            SELECT 1 FROM {$prefix}gratora_recurring_plans p
                            WHERE p.donor_id = d.id
-                             AND p.status IN ('active', 'paused')
+                             AND p.status IN ({$live})
                        )
                      ORDER BY id ASC
                      LIMIT %d",
@@ -245,6 +249,9 @@ final class DonorRetention
     {
         $prefix    = DB::getPrefix();
         $liveDonor = DonorQueries::notRedactedPredicate('d');
+        // A donor holding a mandate is not lapsed, and erasing them cancels it
+        // as a side effect of a sweep they never asked for.
+        $live      = PlanStatus::sqlList(PlanStatus::LIVE);
 
         $rows = DB::raw(
             "SELECT COUNT(*) AS n FROM {$prefix}gratora_donors d
@@ -253,7 +260,7 @@ final class DonorRetention
                AND NOT EXISTS (
                    SELECT 1 FROM {$prefix}gratora_recurring_plans p
                    WHERE p.donor_id = d.id
-                     AND p.status IN ('active', 'paused')
+                     AND p.status IN ({$live})
                )",
             [$cutoff]
         )['rows'] ?? [];

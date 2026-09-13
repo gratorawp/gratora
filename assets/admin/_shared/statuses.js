@@ -68,6 +68,23 @@ export function planStatusMeta( status ) {
     return found ? { variant: found.variant, label: found.label } : statusMeta( status );
 }
 
+/**
+ * A plan that has ended, and one the gateway has not started. Both are the
+ * server's rules: a screen deciding for itself is how a subscription waiting
+ * on PayPal came to be offered a pause.
+ */
+export function isPlanTerminal( status ) {
+    const found = shipped().find( ( s ) => s.value === status );
+
+    return found ? !! found.terminal : ( status === 'cancelled' || status === 'expired' );
+}
+
+export function isPlanUnstarted( status ) {
+    const found = shipped().find( ( s ) => s.value === status );
+
+    return found ? !! found.unstarted : status === 'pending';
+}
+
 /** The plan lifecycle as a DataViews filter offers it. */
 export function planStatusOptions() {
     return shipped().map( ( { value, label } ) => ( { value, label } ) );

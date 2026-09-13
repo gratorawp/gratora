@@ -469,15 +469,21 @@ final class RecurringPlanRepository
 
         $out = [];
         foreach (array_chunk($ids, 1000) as $chunk) {
+            // A plan nobody has a bucket for produces no verdict at all, and
+            // the donor is described by date arithmetic as though they had
+            // never subscribed.
+            $live       = PlanStatus::sqlList(PlanStatus::LIVE);
+            $collecting = PlanStatus::sqlList(array_values(array_diff(PlanStatus::LIVE, ['paused'])));
+
             $rows = DB::table('gratora_recurring_plans')
                 ->whereIn('donor_id', $chunk)
                 ->where('is_test', 0)
                 ->selectRaw("
                     donor_id,
                     MAX(CASE WHEN failed_renewals_count > 0
-                              AND status IN ('active','past_due','paused') THEN 1 ELSE 0 END) AS failing,
+                              AND status IN ({$live}) THEN 1 ELSE 0 END) AS failing,
                     MAX(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) AS paused,
-                    MAX(CASE WHEN status IN ('active','past_due') THEN 1 ELSE 0 END) AS live,
+                    MAX(CASE WHEN status IN ({$collecting}) THEN 1 ELSE 0 END) AS live,
                     MAX(CASE WHEN status = 'cancelled' THEN cancelled_at END) AS cancelled_at
                 ")
                 ->groupByRaw('donor_id')

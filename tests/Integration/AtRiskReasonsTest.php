@@ -96,6 +96,33 @@ final class AtRiskReasonsTest extends IntegrationTestCase
         $this->assertSame(AtRiskReason::PLAN_PAUSED, $this->rowFor((int) $donor->id)['risk_reason']);
     }
 
+    /**
+     * The verdict is read from buckets, not from the status string, so a
+     * status no bucket names produces no plan verdict at all and the donor is
+     * described by date arithmetic instead: a PayPal subscriber waiting on
+     * activation read as a lapsed one-off donor.
+     */
+    public function test_a_subscription_waiting_on_the_gateway_is_not_called_lapsed(): void
+    {
+        $donor = $this->atRiskDonor();
+        $this->planFor($donor, 'pending');
+
+        $reason = $this->rowFor((int) $donor->id)['risk_reason'];
+
+        $this->assertNotSame(AtRiskReason::PAST_GAP, $reason);
+        $this->assertNotSame(AtRiskReason::WELL_PAST_GAP, $reason);
+        $this->assertSame(AtRiskReason::PLAN_ACTIVE, $reason, 'the gateway is going to collect on this one');
+    }
+
+    /** A declining plan is named as declining whatever status it declined in. */
+    public function test_a_subscription_declining_before_it_started_reads_as_failing(): void
+    {
+        $donor = $this->atRiskDonor();
+        $this->planFor($donor, 'pending', failed: 2);
+
+        $this->assertSame(AtRiskReason::PLAN_FAILING, $this->rowFor((int) $donor->id)['risk_reason']);
+    }
+
     public function test_a_recent_cancellation_is_named(): void
     {
         $donor = $this->atRiskDonor();

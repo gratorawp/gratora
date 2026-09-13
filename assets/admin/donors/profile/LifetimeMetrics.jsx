@@ -42,14 +42,23 @@ export default function LifetimeMetrics( { lifetime } ) {
         mrr_cents, mrr_unconverted, active_plan_count, plan_counts, next_payment_at, sparkline,
     } = lifetime;
 
-    // Disclose missing FX conversions and distinguish paused/past-due plans from no
-    // subscriptions.
+    // Disclose missing FX conversions and distinguish a plan that is not
+    // collecting today from no subscription at all. Each status is named here
+    // rather than read from the vocabulary, because the sentence wants a
+    // lowercase noun phrase and a label is not one.
     const dormant = [];
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of plans the gateway could not collect. */
             _n( '%d past due', '%d past due', plan_counts.past_due, 'gratora-donation-platform' ),
             plan_counts.past_due
+        ) );
+    }
+    if ( plan_counts?.pending > 0 ) {
+        dormant.push( sprintf(
+            /* translators: %d: number of plans the gateway has not started yet. */
+            _n( '%d pending', '%d pending', plan_counts.pending, 'gratora-donation-platform' ),
+            plan_counts.pending
         ) );
     }
     if ( plan_counts?.paused > 0 ) {

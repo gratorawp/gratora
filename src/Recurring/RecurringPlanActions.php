@@ -7,6 +7,7 @@ namespace Gratora\Recurring;
 use Gratora\Analytics\EventRecorder;
 use Gratora\Currency\Currency;
 use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\GatewayLabels;
 use Gratora\Gateways\SubscriptionAware;
 use Gratora\Gateways\SupportsPaymentRetry;
 use Gratora\Gateways\SupportsScheduleChange;
@@ -52,6 +53,7 @@ final class RecurringPlanActions
         $resumesAt = self::resumeDate($resumesAt);
 
         $this->assertChangeable($plan);
+        $this->assertStarted($plan);
         $this->assertGatewayReachable($plan, 'pause', 'it would go on being charged');
 
         $this->subscription($plan)?->pauseSubscription($plan, $resumesAt);
@@ -119,6 +121,7 @@ final class RecurringPlanActions
     public function resume(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertStarted($plan);
         // After the reachability check, not before: an active plan on an absent
         // gateway must still answer GatewayUnreachable.
         $this->assertGatewayReachable($plan, 'resume', 'it would stay paused at the processor');
@@ -150,6 +153,7 @@ final class RecurringPlanActions
     public function skipNext(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertStarted($plan);
         $this->assertGatewayReachable($plan, 'skip a payment on', 'that payment would still be taken on its date');
 
         if (! $plan->next_payment_at) {
@@ -201,6 +205,7 @@ final class RecurringPlanActions
     public function changeAmount(RecurringPlan $plan, int $amountCents, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        $this->assertStarted($plan);
         $this->assertGatewayReachable($plan, 'change the amount of', 'the old amount would keep being charged');
 
         if ($amountCents < 50) {
@@ -311,6 +316,7 @@ final class RecurringPlanActions
         }
 
         $this->assertChangeable($plan);
+        $this->assertStarted($plan);
         $this->assertGatewayReachable($plan, 'change the schedule of', 'it would keep to its current schedule');
 
         [$unit, $count] = FrequencyMap::toStripe($frequency);
@@ -371,6 +377,23 @@ final class RecurringPlanActions
         if (PlanStatus::isTerminal((string) $plan->status)) {
             throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'gratora-donation-platform'));
         }
+    }
+
+    /**
+     * Cancelling is the exception: a subscription the donor has approved is
+     * already against their card, so ending it has to stay available.
+     */
+    private function assertStarted(RecurringPlan $plan): void
+    {
+        if (! PlanStatus::isUnstarted((string) $plan->status)) {
+            return;
+        }
+
+        throw new PlanChangeRefused(esc_html(sprintf(
+            /* translators: %s: the payment gateway's name, such as PayPal. */
+            __('%s has not started this subscription yet, so there is no schedule to change. It can be cancelled, and the rest becomes available once the first payment is collected.', 'gratora-donation-platform'),
+            GatewayLabels::for((string) $plan->gateway)
+        )));
     }
 
     /**

@@ -8,7 +8,8 @@ import { cadenceLabel } from '../../../_shared/recurring/planColumns';
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
 }
-import { formatAmount, formatDateTime, formatDate, timeAgo, donationStatusPill, eventMeta } from '../helpers';
+import { formatAmount, formatDateTime, formatDate, timeAgo, donationStatusPill, planStatusPill, eventMeta } from '../helpers';
+import { isPlanTerminal } from '../../../_shared/statuses';
 import {
     IconCheck, IconAlert, IconRotate, IconNote, IconClock, IconRefund, IconFile,
 } from '../icons';
@@ -205,19 +206,20 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
 }
 
 function ActivePlanCard( { plans } ) {
-    const active = plans.find( ( p ) => p.status === 'active' || p.status === 'past_due' );
+    // Every plan that has not ended, not only the two that are collecting
+    // today: a paused one is a subscription the donor still holds, and saying
+    // there is none contradicts the Lifetime card above this one.
+    const active = plans.find( ( p ) => ! isPlanTerminal( p.status ) );
     if ( ! active ) {
         return (
             <div className="dp-card">
                 <div className="dp-card__body" style={ { padding: '14px 18px' } }>
-                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'gratora-donation-platform' ) }</p>
+                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No recurring plan on file.', 'gratora-donation-platform' ) }</p>
                 </div>
             </div>
         );
     }
-    const pill = active.status === 'past_due'
-        ? { cls: 'is-warn', label: __( 'Past due', 'gratora-donation-platform' ) }
-        : { cls: 'is-ok',   label: __( 'Active', 'gratora-donation-platform' ) };
+    const pill = planStatusPill( active.status );
     return (
         <div className="dp-card">
             <div className="dp-card__body" style={ { padding: '14px 18px' } }>

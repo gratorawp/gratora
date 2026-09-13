@@ -37,6 +37,7 @@ use Gratora\Receipts\Receipt;
 use Gratora\Recurring\FrequencyMap;
 use Gratora\Recurring\GatewayUnreachable;
 use Gratora\Recurring\PlanChangeRefused;
+use Gratora\Recurring\PlanStatus;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanActions;
 use Gratora\Recurring\RecurringPlanChange;
@@ -1749,7 +1750,7 @@ final class PortalController
             // been stopped.
             $stillBilling = RecurringPlan::query()
                 ->where('donor_id', (int) $donor->id)
-                ->whereIn('status', ['active', 'paused', 'past_due'])
+                ->whereIn('status', PlanStatus::LIVE)
                 ->exists();
 
             if ($stillBilling) {
