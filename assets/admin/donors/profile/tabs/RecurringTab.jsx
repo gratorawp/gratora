@@ -222,7 +222,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'gratora-donation-platform' ),
+            label:         __( 'Cancel subscription', 'gratora-donation-platform' ),
             isDestructive: true,
             isEligible:    ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             callback:      ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),

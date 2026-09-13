@@ -884,7 +884,17 @@ export default function List() {
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'gratora-donation-platform' ),
+            // Names the act, not the way out of a toolbar. The bulk bar is
+            // icon-only and DataViews puts its own "Cancel" beside this one to
+            // drop the selection, so a button called Cancel sat next to a
+            // button called Cancel and only one of them ended subscriptions.
+            label: ( items ) => ( items.length === 1
+                ? __( 'Cancel subscription', 'gratora-donation-platform' )
+                : sprintf(
+                    /* translators: %d: number of subscriptions. */
+                    _n( 'Cancel %d subscription', 'Cancel %d subscriptions', items.length, 'gratora-donation-platform' ),
+                    items.length
+                ) ),
             icon:          () => <Ban size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
