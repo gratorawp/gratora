@@ -149,10 +149,19 @@ final class DonorRepository
         $perPage = max(1, min(100, (int) ($args['per_page'] ?? 25)));
         $offset  = ($page - 1) * $perPage;
 
-        $allowedSort = ['last_donation_at', 'total_donated_cents', 'donations_count', 'created_at', 'last_name'];
-        $orderBy = in_array($args['orderby'] ?? '', $allowedSort, true)
-            ? $args['orderby']
-            : 'last_donation_at';
+        // Keyed by what a caller may ask for, valued by the column. "name" is
+        // what the list shows and therefore what it asks for; it was not here,
+        // so the request fell through to last_donation_at and the screen drew
+        // a sort arrow over an order it was not in.
+        $sortColumns = [
+            'last_donation_at'    => 'last_donation_at',
+            'total_donated_cents' => 'total_donated_cents',
+            'donations_count'     => 'donations_count',
+            'created_at'          => 'created_at',
+            'last_name'           => 'last_name',
+            'name'                => 'last_name',
+        ];
+        $orderBy = $sortColumns[(string) ($args['orderby'] ?? '')] ?? 'last_donation_at';
         $order   = strtoupper((string) ($args['order'] ?? 'desc')) === 'ASC' ? 'ASC' : 'DESC';
 
         $ids = array_values(array_unique(array_map('intval', (array) ($args['matching_ids'] ?? []))));

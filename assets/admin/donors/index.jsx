@@ -31,6 +31,27 @@ import './donors.scss';
 // which live in that file rather than in a shared partial.
 import '../campaigns/campaigns.scss';
 
+/**
+ * What to ask the server to order by.
+ *
+ * A saved view outlives the column it names. One holding a field nothing can
+ * sort was sent all the same, and the server quietly ordered by something
+ * else, so the table drew an arrow over an order it was not in. Anything not
+ * on this list goes back to the default rather than travelling as a request
+ * that cannot be honoured.
+ */
+const SORT_COLUMNS = {
+    name:             'name',
+    donations_count:  'donations_count',
+    total_donated:    'total_donated_cents',
+    last_donation_at: 'last_donation_at',
+    created_at:       'created_at',
+};
+
+export function sortField( field ) {
+    return SORT_COLUMNS[ field ] || 'last_donation_at';
+}
+
 function initials( name ) {
     if ( ! name ) return '?';
     const parts = String( name ).trim().split( /\s+/ ).slice( 0, 2 );
@@ -225,9 +246,7 @@ export function DonorsApp( { toggleSlot } ) {
             path: addQueryArgs( '/gratora/v1/admin/donors', {
                 page:       view.page,
                 per_page:   view.perPage,
-                orderby:    view.sort?.field === 'total_donated'
-                    ? 'total_donated_cents'
-                    : view.sort?.field || 'last_donation_at',
+                orderby:    sortField( view.sort?.field ),
                 order:      view.sort?.direction || 'desc',
                 search:     view.search || undefined,
                 country:    filterValue( 'country' )    || undefined,
@@ -279,8 +298,9 @@ export function DonorsApp( { toggleSlot } ) {
             ),
         },
         {
-            id:    'name',
-            label: __( 'Name', 'gratora-donation-platform' ),
+            id:            'name',
+            label:         __( 'Name', 'gratora-donation-platform' ),
+            enableSorting: true,
             render: ( { item } ) => {
                 const name = item.name || __( '(no name)', 'gratora-donation-platform' );
                 return (
