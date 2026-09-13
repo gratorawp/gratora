@@ -6,6 +6,7 @@ namespace Gratora\Foundation\Transfer;
 
 use Gratora\Foundation\Crypto\Crypto;
 use Gratora\Settings\SecretRedactor;
+use Gratora\Settings\SettingsService;
 use Gratora\Vendor\Queryable\DB;
 
 /**
@@ -88,21 +89,8 @@ final class DataExporter
         'gratora_donations'      => ['custom_data' => false],
     ];
 
-    private const SETTINGS_OPTIONS = [
-        'gratora_org_profile',
-        'gratora_currency_locale',
-        'gratora_org_brand',
-        'gratora_gateway_config',
-        'gratora_privacy',
-        'gratora_roles',
-        'gratora_consents',
-        'gratora_receipt_settings',
-        'gratora_email_settings',
-        'gratora_reference_settings',
-    ];
-
     /** @since 1.0.0 */
-    public function __construct(private Crypto $crypto)
+    public function __construct(private Crypto $crypto, private SettingsService $settings)
     {
     }
 
@@ -226,7 +214,7 @@ final class DataExporter
     private function settings(): array
     {
         $out = [];
-        foreach (self::SETTINGS_OPTIONS as $opt) {
+        foreach ($this->settings->optionNames() as $opt) {
             $value = get_option($opt, null);
             if ($value === null) continue;
 

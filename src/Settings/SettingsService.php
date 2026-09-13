@@ -210,6 +210,31 @@ final class SettingsService
         return $this->groupsCache;
     }
 
+    /**
+     * The option each registered group stores itself in.
+     *
+     * What a settings export carries and an import writes. Asked of the
+     * registry so a group an add-on registers travels with the rest, the way
+     * an add-on's tables already do.
+     *
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    public function optionNames(): array
+    {
+        $names = [];
+
+        foreach ($this->groups() as $cfg) {
+            $option = is_array($cfg) ? (string) ($cfg['option'] ?? '') : '';
+            if ($option !== '' && ! in_array($option, $names, true)) {
+                $names[] = $option;
+            }
+        }
+
+        return $names;
+    }
+
     /** @since 1.0.0 */
     public function knows(string $group): bool
     {

@@ -483,7 +483,10 @@ final class CoreModule implements GratoraModule
             $c->get(CampaignService::class)->onPagePublished((string) $new, (string) $old, $post);
         }, 10, 3);
 
-        $c->bind(DataExporter::class, fn (Container $c) => new DataExporter($c->get(Crypto::class)));
+        $c->bind(DataExporter::class, fn (Container $c) => new DataExporter(
+            $c->get(Crypto::class),
+            $c->get(SettingsService::class)
+        ));
 
         $c->bind(CsvImporter::class, fn (Container $c) => new CsvImporter(
             $c->get(DonorService::class),

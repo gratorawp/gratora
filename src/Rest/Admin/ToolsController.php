@@ -907,19 +907,6 @@ final class ToolsController
     /** How many ids to hold at once while walking a table. */
     private const RECALC_CHUNK = 500;
 
-    private const SETTINGS_OPTIONS = [
-        'gratora_org_profile',
-        'gratora_currency_locale',
-        'gratora_org_brand',
-        'gratora_gateway_config',
-        'gratora_privacy',
-        'gratora_roles',
-        'gratora_consents',
-        'gratora_receipt_settings',
-        'gratora_email_settings',
-        'gratora_reference_settings',
-    ];
-
     /**
      * Served straight to the client rather than through WP_REST_Response: the
      * body is built a page at a time, and handing it back as one string would
@@ -952,7 +939,7 @@ final class ToolsController
             'version'     => defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown',
             'settings'    => [],
         ];
-        foreach (self::SETTINGS_OPTIONS as $opt) {
+        foreach ((new SettingsService())->optionNames() as $opt) {
             $value = get_option($opt, null);
             if ($value === null) {
                 continue;
@@ -1046,7 +1033,14 @@ final class ToolsController
         $refused = [];
         $locked  = false;
 
-        foreach (self::SETTINGS_OPTIONS as $opt) {
+        // The registry's order first, so what a file restores does not depend
+        // on the order its keys happen to sit in, then whatever else the file
+        // carries: a group this site has no add-on for has to be reported, not
+        // passed over in silence.
+        $known   = $writer->optionNames();
+        $carried = array_merge($known, array_values(array_diff(array_keys($settings), $known)));
+
+        foreach ($carried as $opt) {
             if (! array_key_exists($opt, $settings)) {
                 continue;
             }
