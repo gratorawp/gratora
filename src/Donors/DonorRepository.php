@@ -134,8 +134,15 @@ final class DonorRepository
         // donations_count leads because it decides for almost every donor, but
         // it cannot replace the subquery: a live donation the counter does not
         // count, a ticket order, still has to satisfy this.
+        //
+        // The statuses are the ones the counter itself accepts. A row alone is
+        // not enough: a donor whose only donation was charged back satisfied
+        // "has a donation" and appeared among the giving, holding a place in
+        // the headline and in none of the bands under it, which key on a date
+        // a disputed donation never sets.
         return "({$prefix}gratora_donors.donations_count > 0 OR EXISTS (SELECT 1 FROM {$prefix}gratora_donations d "
-            . "WHERE d.donor_id = {$prefix}gratora_donors.id AND d.is_test = 0 AND d.trashed_at IS NULL))";
+            . "WHERE d.donor_id = {$prefix}gratora_donors.id AND d.is_test = 0 AND d.trashed_at IS NULL "
+            . "AND d.status IN ('paid', 'partial_refund')))";
     }
 
     /**

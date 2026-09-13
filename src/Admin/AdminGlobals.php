@@ -12,6 +12,7 @@ use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
 use Gratora\Foundation\Http\ClientIp;
+use Gratora\Donors\DonorType;
 use Gratora\Foundation\License\LicenseService;
 use Gratora\Recurring\PlanStatus;
 use Gratora\Settings\SettingsService;
@@ -90,6 +91,7 @@ final class AdminGlobals extends HookProvider
             // The plan lifecycle in words, so a screen filtering or labelling one
             // is not keeping its own copy of the statuses this side writes.
             'plan_statuses' => PlanStatus::all(),
+            'donor_types'   => DonorType::all(),
             // Detect proxy defaults for the spam-protection settings.
             'detectedProxy' => ClientIp::undeclaredProxy(),
         ];

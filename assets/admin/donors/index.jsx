@@ -26,6 +26,7 @@ import { localizedCountries } from '../../_shared/countries';
 import Insights from './Insights';
 import DonorProfile from './DonorProfile';
 import { userCan } from '../_shared/caps';
+import { donorTypeLabel, donorTypeOptions } from '../_shared/statuses';
 import './donors.scss';
 // Restores the template picker, the KPI strip and the shared field styles,
 // which live in that file rather than in a shared partial.
@@ -327,8 +328,8 @@ export function DonorsApp( { toggleSlot } ) {
                                 ) }
                             </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
-                                <div className="gratora-row__sub" style={ { textTransform: 'capitalize' } }>
-                                    { item.donor_type }
+                                <div className="gratora-row__sub">
+                                    { donorTypeLabel( item.donor_type ) }
                                 </div>
                             ) }
                         </div>
@@ -366,16 +367,12 @@ export function DonorsApp( { toggleSlot } ) {
             id:    'donor_type',
             enableSorting: false,
             label: __( 'Donor type', 'gratora-donation-platform' ),
-            elements: [
-                { value: 'individual',   label: __( 'Individual', 'gratora-donation-platform' ) },
-                { value: 'organization', label: __( 'Organization', 'gratora-donation-platform' ) },
-                { value: 'household',    label: __( 'Household', 'gratora-donation-platform' ) },
-            ],
+            elements: donorTypeOptions(),
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
             render:   ( { item } ) => (
-                <span className="gratora-row__sub" style={ { textTransform: 'capitalize' } }>
-                    { item.donor_type || 'individual' }
+                <span className="gratora-row__sub">
+                    { donorTypeLabel( item.donor_type || 'individual' ) }
                 </span>
             ),
         },
@@ -647,6 +644,10 @@ export function DonorsApp( { toggleSlot } ) {
                         paginationInfo={ paginationInfo }
                         defaultLayouts={ { table: {}, list: {} } }
                         getItemId={ ( item ) => String( item.id ) }
+                        // Emails are stored encrypted and matched by hash, so
+                        // half an address finds nobody. A box labelled only
+                        // Search let that read as no such donor.
+                        searchLabel={ __( 'Search by name, or a whole email address', 'gratora-donation-platform' ) }
                     />
 
                     { ! loading && data.length === 0 && filtered && (

@@ -76,6 +76,42 @@ final class DonorMetricsService
             ->count();
     }
 
+    /**
+     * Percentages that add up to 100, by largest remainder: every share is
+     * floored, and the points left over go to the ones that lost the most in
+     * the flooring.
+     *
+     * @param  array<string,int> $counts
+     * @return array<string,int>
+     */
+    private static function wholeShares(array $counts): array
+    {
+        $total = array_sum($counts);
+        if ($total <= 0) {
+            return array_map(static fn (): int => 0, $counts);
+        }
+
+        $exact  = array_map(static fn (int $n): float => ($n / $total) * 100, $counts);
+        $shares = array_map('intval', $exact);
+        $left   = 100 - array_sum($shares);
+
+        $remainders = [];
+        foreach ($exact as $key => $value) {
+            $remainders[$key] = $value - (int) $value;
+        }
+        arsort($remainders);
+
+        foreach (array_keys($remainders) as $key) {
+            if ($left <= 0) {
+                break;
+            }
+            $shares[$key]++;
+            $left--;
+        }
+
+        return $shares;
+    }
+
     public function insights(): array
     {
         $today = $this->clock->now()->format('Y-m-d');
@@ -87,11 +123,18 @@ final class DonorMetricsService
         $retention = $this->donors->donorCohortRetention(12, 12);
         $recurring = $this->recurring->recurringStats($today);
 
-        $total = max(1, $kpi['total']); // avoid division by zero
-        $kpi['active_pct']  = (int) round(($kpi['active']  / $total) * 100);
-        $kpi['at_risk_pct'] = (int) round(($kpi['at_risk'] / $total) * 100);
-        $kpi['lapsed_pct']  = (int) round(($kpi['lapsed']  / $total) * 100);
-        $kpi['lost_pct']    = (int) round(($kpi['lost']    / $total) * 100);
+        // Over the donors the bands actually describe, and rounded so they
+        // total what a whole is. Four independent roundings of 97.7, 1.74 and
+        // 0.53 came to 101%, which is a strip of cards claiming more than all
+        // of them.
+        $shares = self::wholeShares([
+            'active_pct'  => (int) $kpi['active'],
+            'at_risk_pct' => (int) $kpi['at_risk'],
+            'lapsed_pct'  => (int) $kpi['lapsed'],
+            'lost_pct'    => (int) $kpi['lost'],
+        ]);
+
+        $kpi = array_merge($kpi, $shares);
 
         return [
             // Insights cannot be made test-inclusive the way the dashboard can.

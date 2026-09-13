@@ -7,6 +7,7 @@ namespace Gratora\Exports;
 use Gratora\Donations\DonationQueries;
 use Gratora\Donors\Donor;
 use Gratora\Donors\DonorQueries;
+use Gratora\Donors\DonorType;
 use Gratora\Donors\DonorRepository;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Helpers\Csv;
@@ -216,7 +217,7 @@ final class DonorExporter
                 'address'         => (string) ($this->donors->decryptAddress($donor) ?? ''),
                 'company'         => (string) ($donor->company ?? ''),
                 'country'         => (string) ($donor->country ?? ''),
-                'donor_type'      => (string) $donor->donor_type,
+                'donor_type'      => DonorType::label((string) $donor->donor_type),
                 'donations_count' => (string) (int) $donor->donations_count,
                 // The raw major-unit number, not a formatted one: a currency
                 // symbol makes the column text in every spreadsheet.

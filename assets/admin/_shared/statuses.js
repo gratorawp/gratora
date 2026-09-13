@@ -85,6 +85,27 @@ export function isPlanUnstarted( status ) {
     return found ? !! found.unstarted : status === 'pending';
 }
 
+/**
+ * What kind of donor a record is, in the words the server sent. The column,
+ * its own filter, the profile badge and the CSV all used to spell it their
+ * own way, which on a translated site is three of them in English.
+ */
+function shippedTypes() {
+    const list = window.gratora?.donor_types;
+
+    return Array.isArray( list ) ? list : [];
+}
+
+export function donorTypeOptions() {
+    return shippedTypes();
+}
+
+export function donorTypeLabel( type ) {
+    const found = shippedTypes().find( ( t ) => t.value === type );
+
+    return found ? found.label : String( type || '' ).replace( /_/g, ' ' );
+}
+
 /** The plan lifecycle as a DataViews filter offers it. */
 export function planStatusOptions() {
     return shipped().map( ( { value, label } ) => ( { value, label } ) );
