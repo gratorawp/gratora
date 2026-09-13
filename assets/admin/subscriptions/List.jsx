@@ -793,8 +793,9 @@ export default function List() {
             id:    'retry',
             label: __( 'Retry payment', 'gratora-donation-platform' ),
             // DataViews draws a primary action as an icon button, so one with
-            // no icon renders as nothing at all -- and being primary, it is
-            // left out of the row menu too, taking the action out of reach.
+            // no icon renders as nothing at all. It is offered in the row menu
+            // as well: the dropdown is handed every eligible action, primaries
+            // included.
             isPrimary:  true,
             icon:       () => <RotateCw size={ 16 } strokeWidth={ 1.75 } />,
             // A row that cannot be retried is offered it too, because the
@@ -813,7 +814,7 @@ export default function List() {
                 // page behind the row instead, it is a sentence the admin has
                 // to go and find after a click that looked like it did nothing.
                 if ( ! targets.length ) {
-                    setDialog( { plan: items[ 0 ], action: 'retry', blocked } );
+                    setDialog( { plan: items[ 0 ], action: 'retry', blocked, blockedCount: items.length } );
                     return;
                 }
 
@@ -1087,6 +1088,7 @@ export default function List() {
                     plan={ dialog.plan }
                     action={ dialog.action }
                     blocked={ dialog.blocked || [] }
+                    blockedCount={ dialog.blockedCount || 0 }
                     onClose={ () => setDialog( null ) }
                     onDone={ () => { load(); loadStats(); } }
                 />

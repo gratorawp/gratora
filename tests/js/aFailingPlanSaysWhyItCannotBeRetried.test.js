@@ -144,6 +144,16 @@ describe( 'the subscriptions list, which has nothing else to say it', () => {
         expect( outside ).not.toContain( WHY );
     } );
 
+    /** One cause can speak for a selection, and the title counts the rows. */
+    it( 'names how many payments it is refusing, not how many reasons', async () => {
+        const retry = await subscriptionsList( [ BLOCKED ] );
+
+        retry.callback( [ BLOCKED, { ...BLOCKED, id: 9 } ] );
+        await settle();
+
+        expect( dialog().textContent ).toContain( 'These payments cannot be retried' );
+    } );
+
     /** A selection part collectable is not part acted on and part dropped. */
     it( 'carries the reason into the confirmation for a mixed selection', async () => {
         const retry = await subscriptionsList( [ BLOCKED ] );

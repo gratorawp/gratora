@@ -4,6 +4,7 @@ import { addQueryArgs } from '@wordpress/url';
 import Dialog from '../_shared/components/Dialog';
 import Btn from '../_shared/components/Btn';
 import StatusBadge from '../_shared/components/StatusBadge';
+import { planStatusMeta } from '../_shared/statuses';
 import { formatAmount, formatDate } from '../donations/format';
 import { actionsFor } from '../_shared/recurring/PlanActions';
 import { cadenceLabel } from '../_shared/recurring/planColumns';
@@ -42,7 +43,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
 
     // Named after the provider, because the dialog title is also a subscription
     // id and the two never match.
-    const gatewayName = plan.gateway ? plan.gateway.charAt( 0 ).toUpperCase() + plan.gateway.slice( 1 ) : '';
+    const gatewayName = plan.gateway_label || plan.gateway || '';
     let providerIdLabel = __( 'Provider ID', 'gratora-donation-platform' );
     if ( gatewayName ) {
         /* translators: %s: payment gateway name, e.g. Stripe. */
@@ -79,7 +80,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                         { ' / ' }{ cadenceLabel( plan ) }
                     </span>
                 </div>
-                <StatusBadge status={ plan.status } />
+                <StatusBadge status={ plan.status } { ...planStatusMeta( plan.status ) } />
             </div>
 
             { plan.donor?.name && (
@@ -138,7 +139,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             <Section
                 title={ __( 'Payment provider', 'gratora-donation-platform' ) }
                 rows={ [
-                    { label: __( 'Gateway', 'gratora-donation-platform' ), value: <span className="sd-cap">{ plan.gateway }</span> },
+                    { label: __( 'Gateway', 'gratora-donation-platform' ), value: gatewayName },
                     {
                         label: providerIdLabel,
                         value: plan.gateway_subscription_id
