@@ -509,12 +509,11 @@ export default function List() {
         {
             id:            'delete-permanently',
             label:         __( 'Delete permanently', 'gratora-donation-platform' ),
-            // The bulk bar draws icon-only buttons and drops any action
-            // without one, so this is what puts it on the screen at all.
             // Deliberately not the bin: that one is reversible and this is not.
             icon:          () => <FlameKindling size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
-            supportsBulk:  true,
+            // One row at a time here. Deleting in bulk belongs to the trash,
+            // where every row has already been through a decision to remove it.
             // Only for a row with no bin to pass through. Anything that can be
             // trashed goes that way first, because trashing is what stops its
             // payment, and a reference removed without that could still be

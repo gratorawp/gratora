@@ -255,10 +255,6 @@ export default function Trash() {
                 </div>
             </div>
 
-            <Notice status="info" isDismissible={ false }>
-                { __( 'Nothing here has been deleted, and nothing is ever deleted on a schedule. No money total, report or export changes: a donation goes on counting from in here, because the bin holds a decision to remove something rather than a change to your books. Deleting is what moves them.', 'gratora-donation-platform' ) }
-            </Notice>
-
             { fetchError && (
                 <Notice status="error" isDismissible={ false }>{ fetchError }</Notice>
             ) }
