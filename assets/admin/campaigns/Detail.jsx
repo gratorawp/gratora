@@ -1055,7 +1055,7 @@ function GatewayBreakdown( { rows, currency } ) {
                     return (
                         <li key={ r.gateway }>
                             <span className="gratora-gateway__dot" style={ { background: colors[ i % colors.length ] } } />
-                            <span className="gratora-gateway__label">{ r.gateway }</span>
+                            <span className="gratora-gateway__label">{ r.gateway_label || r.gateway }</span>
                             <span className="gratora-gateway__value">{ formatAmount( r.amount_cents, currency ) }</span>
                             <span className="gratora-gateway__pct">{ pct }%</span>
                         </li>

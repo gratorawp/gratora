@@ -519,7 +519,9 @@ $card-radius:   $radius-lg;
     }
 
     &__dot { width: 10px; height: 10px; border-radius: 50%; }
-    &__label { text-transform: capitalize; color: $text; }
+    // No capitalize: the label arrives cased by the side that owns the
+    // gateway names, and a rule here would upper-case the middle of one.
+    &__label { color: $text; }
     &__value { font-variant-numeric: tabular-nums; color: $text; font-weight: 500; }
     &__pct {
         color: $text-muted;

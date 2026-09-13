@@ -152,6 +152,23 @@ final class CampaignRepository
                 ->where('ends_at', $now, '<');
         }
 
+        // The complement of the three above: published, inside its schedule,
+        // and not closed on a goal it has reached. The KPI counted the stored
+        // status alone, so the strip said five were active over a table whose
+        // own badge called one of them Ended.
+        if ($status === 'accepting') {
+            return $q->where('status', 'published')
+                ->where(function ($g) use ($now): void {
+                    $g->whereIsNull('starts_at')->orWhere('starts_at', $now, '<=');
+                })
+                ->where(function ($g) use ($now): void {
+                    $g->whereIsNull('ends_at')->orWhere('ends_at', $now, '>=');
+                })
+                ->where(function ($g): void {
+                    $g->whereRaw(self::notClosedOnItsGoalPredicate());
+                });
+        }
+
         if ($status === 'goal_met') {
             return $q->where('status', 'published')
                 ->where('close_at_goal', 1)
@@ -179,6 +196,27 @@ final class CampaignRepository
         }
 
         return $q->where('status', $status);
+    }
+
+    /**
+     * A campaign that is not shut by its own goal: either it was never set to
+     * close on one, or the goal it measures has not been reached.
+     *
+     * Raw because it is the negation of the goal_met branch above, and the two
+     * have to stay each other's opposite: a campaign both filters admit, or
+     * neither, is one the strip and the badge disagree about.
+     *
+     * @since 1.0.0
+     */
+    private static function notClosedOnItsGoalPredicate(): string
+    {
+        $t = DB::getPrefix() . 'gratora_campaigns';
+
+        return "({$t}.close_at_goal = 0 OR NOT ("
+            . "({$t}.goal_type = 'amount' AND {$t}.goal_cents > 0 AND {$t}.raised_cents >= {$t}.goal_cents)"
+            . " OR ({$t}.goal_type = 'donations' AND {$t}.goal_count > 0 AND {$t}.donations_count >= {$t}.goal_count)"
+            . " OR ({$t}.goal_type = 'donors' AND {$t}.goal_count > 0 AND {$t}.donors_count >= {$t}.goal_count)"
+            . "))";
     }
 
     /**
@@ -252,7 +290,7 @@ final class CampaignRepository
         $base = fn () => DB::table('gratora_campaigns');
 
         $totalCount  = (int) $applyFilters($base())->count();
-        $activeCount = (int) $applyFilters($base())->where('status', 'published')->count();
+        $activeCount = (int) $this->whereStatus($applyFilters($base()), 'accepting')->count();
 
         $sumsRow = $applyFilters($base())
             ->selectRaw('COALESCE(SUM(raised_cents),0) AS raised, COALESCE(SUM(donations_count),0) AS donations')

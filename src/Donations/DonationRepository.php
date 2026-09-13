@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Donations;
 
+use Gratora\Gateways\GatewayLabels;
 use Gratora\Receipts\Receipt;
 use Gratora\Vendor\Queryable\DB;
 use Gratora\Vendor\Queryable\QueryBuilder;
@@ -501,7 +502,7 @@ final class DonationRepository
     }
 
     /**
-     * @return array<array{gateway:string, amount_cents:int, donations_count:int}>
+     * @return array<array{gateway:string, gateway_label:string, amount_cents:int, donations_count:int}>
      *
      * @since 1.0.0
      */
@@ -514,8 +515,11 @@ final class DonationRepository
             ->orderByRaw('amount DESC')
             ->getAll();
 
+        // The word goes with the slug. Left to the screen, the panel put a
+        // capital on the stored key and spelled PayPal wrong.
         return array_map(static fn ($r) => [
             'gateway'         => (string) ($r['gateway'] ?? ''),
+            'gateway_label'   => GatewayLabels::for((string) ($r['gateway'] ?? '')),
             'amount_cents'    => (int) $r['amount'],
             'donations_count' => (int) $r['cnt'],
         ], $rows);
