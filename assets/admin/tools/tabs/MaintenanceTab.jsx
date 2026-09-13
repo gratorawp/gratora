@@ -33,6 +33,8 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
     const [ upgrading, setUpgrading ]         = useState( false );
     const [ purgeText, setPurgeText ]         = useState( '' );
     const [ purging, setPurging ]             = useState( false );
+    const [ orphanText, setOrphanText ]       = useState( '' );
+    const [ clearingOrphans, setClearing ]    = useState( false );
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
@@ -41,6 +43,34 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
     // Tabs are hidden rather than unmounted. Saving a currency on another
     // screen changes which donations are stranded, so refetch on each visit.
     useEffect( () => { if ( active ) loadInfo(); }, [ active, loadInfo ] );
+
+    const doClearOrphans = async () => {
+        setClearing( true );
+        setNotice( null );
+        try {
+            const res   = await apiFetch( {
+                path:   '/gratora/v1/admin/tools/clear-orphans',
+                method: 'POST',
+                data:   { confirmation: orphanText },
+            } );
+            const total = ( res?.removed || [] ).reduce( ( n, r ) => n + ( parseInt( r.count, 10 ) || 0 ), 0 );
+
+            setNotice( {
+                type: 'success',
+                text: sprintf(
+                    /* translators: %d: how many stranded rows were removed */
+                    _n( '%d stranded record removed.', '%d stranded records removed.', total, 'gratora-donation-platform' ),
+                    total
+                ),
+            } );
+            setOrphanText( '' );
+            loadInfo();
+        } catch ( err ) {
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear them.', 'gratora-donation-platform' ) } );
+        } finally {
+            setClearing( false );
+        }
+    };
 
     const doRunUpgrades = async () => {
         setUpgrading( true );
@@ -332,6 +362,49 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                             isBusy={ purging }
                         >
                             { purging ? __( 'Removing…', 'gratora-donation-platform' ) : __( 'Delete test data', 'gratora-donation-platform' ) }
+                        </Btn>
+                    </div>
+                </Card>
+            ) }
+
+            { ( info?.orphans?.length > 0 ) && (
+                <Card
+                    title={ __( 'Records left behind', 'gratora-donation-platform' ) }
+                    sub={ __( 'An add-on clears its own records when you delete a campaign, a donation or a donor, which it can only do while it is switched on. These were left behind by something deleted while the add-on was off, and no other screen can show them: the screens that would are reached through the very thing that was deleted.', 'gratora-donation-platform' ) }
+                >
+                    <ul className="gratora-tools-list">
+                        { info.orphans.map( ( row ) => (
+                            <li key={ row.key }>
+                                <strong>{ row.count }</strong>
+                                { ' ' }
+                                { row.label }
+                            </li>
+                        ) ) }
+                    </ul>
+                    <div className="gratora-advanced-actions" style={ { marginTop: 12 } }>
+                        <label className="gratora-tools-field">
+                            { sprintf(
+                                /* translators: %s: the literal confirmation keyword to type (DELETE) */
+                                __( 'Type %s to confirm.', 'gratora-donation-platform' ),
+                                CONFIRM_WORD
+                            ) }
+                            <input
+                                type="text"
+                                className="gratora-input"
+                                value={ orphanText }
+                                onChange={ ( e ) => setOrphanText( e.target.value ) }
+                                disabled={ clearingOrphans }
+                            />
+                        </label>
+                        <Btn
+                            variant="danger"
+                            onClick={ doClearOrphans }
+                            disabled={ clearingOrphans || orphanText.trim().toUpperCase() !== CONFIRM_WORD }
+                            isBusy={ clearingOrphans }
+                        >
+                            { clearingOrphans
+                                ? __( 'Removing…', 'gratora-donation-platform' )
+                                : __( 'Remove them', 'gratora-donation-platform' ) }
                         </Btn>
                     </div>
                 </Card>

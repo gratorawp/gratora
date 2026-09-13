@@ -7,6 +7,7 @@ namespace Gratora\Rest\Admin;
 use Gratora\Rest\Paging;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRecorder;
 use Gratora\Async\AsyncDispatcher;
 use Gratora\Currency\BaseCurrencyLocked;
 use Gratora\Currency\FxBackfill;
@@ -14,6 +15,7 @@ use Gratora\Donations\AggregateSyncer;
 use Gratora\Donors\DonorRetention;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Maintenance\TestDataPurger;
+use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Transfer\CsvImporter;
 use Gratora\Foundation\Transfer\DataExporter;
 use Gratora\Foundation\Transfer\DataImporter;
@@ -118,6 +120,17 @@ final class ToolsController
             // the ledger.
             'permission_callback' => [$this, 'canManage'],
             'callback'            => [$this, 'purgeTestData'],
+            'args'                => [
+                'confirmation' => ['type' => 'string', 'default' => ''],
+            ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/tools/clear-orphans', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            // manage_options for the same reason purge-test-data asks for it:
+            // this deletes rows, and nobody can look at them first.
+            'permission_callback' => [$this, 'canManage'],
+            'callback'            => [$this, 'clearOrphans'],
             'args'                => [
                 'confirmation' => ['type' => 'string', 'default' => ''],
             ],
@@ -1129,6 +1142,88 @@ final class ToolsController
     }
 
     /** @since 1.0.0 */
+    /**
+     * Rows an add-on stranded while it was switched off.
+     *
+     * Every add-on clears its own rows by listening to a core action, so
+     * nothing is cleared while it is not booted, and what survives is then
+     * unreachable: the screens that could show it are reached through the very
+     * thing that was deleted. Core cannot know what any of it is, so it asks,
+     * and it only clears when somebody types the word.
+     *
+     * @since 1.0.0
+     */
+    public function clearOrphans(\WP_REST_Request $request): WP_REST_Response|\WP_Error
+    {
+        if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
+            return new \WP_Error(
+                'gratora_confirmation_required',
+                sprintf(
+                    /* translators: %s: the literal confirmation keyword to type (DELETE) */
+                    __('Type %s to confirm.', 'gratora-donation-platform'),
+                    'DELETE'
+                ),
+                ['status' => 400]
+            );
+        }
+
+        /**
+         * Each add-on clears its own and says what went.
+         *
+         * @param list<array{key:string,label:string,count:int}> $removed
+         */
+        $removed = self::orphanRows((array) apply_filters('gratora.orphans.clear', []));
+
+        if ($removed !== []) {
+            // A donor.* type so the row outlives the donors whose rows these
+            // may have been, and carries counts rather than anything naming
+            // them. Removing what nobody could see is not a silent act.
+            $byKey = [];
+            foreach ($removed as $row) {
+                $byKey[$row['key']] = $row['count'];
+            }
+
+            Plugin::instance()->container->get(EventRecorder::class)->record('donor.orphans_cleared', [
+                'user_id' => get_current_user_id() ?: null,
+                'payload' => [
+                    'actor_name' => wp_get_current_user()->display_name ?: '',
+                    'removed'    => $byKey,
+                ],
+            ]);
+        }
+
+        return new WP_REST_Response(['removed' => $removed], 200);
+    }
+
+    /**
+     * What an add-on reported, with the noise taken out: a key, a sentence and
+     * a count above zero. Nothing else reaches the screen.
+     *
+     * @param array<array-key,mixed> $reported
+     * @return list<array{key:string,label:string,count:int}>
+     */
+    private static function orphanRows(array $reported): array
+    {
+        $out = [];
+        foreach ($reported as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $key   = trim((string) ($row['key'] ?? ''));
+            $label = trim((string) ($row['label'] ?? ''));
+            $count = (int) ($row['count'] ?? 0);
+
+            if ($key === '' || $label === '' || $count <= 0) {
+                continue;
+            }
+
+            $out[] = ['key' => $key, 'label' => $label, 'count' => $count];
+        }
+
+        return $out;
+    }
+
     public function purgeTestData(\WP_REST_Request $request): WP_REST_Response|\WP_Error
     {
         // Typed, not clicked: the button is one keystroke away from a ledger
@@ -1258,6 +1353,14 @@ final class ToolsController
             'rest_root' => esc_url_raw(rest_url('gratora/v1/')),
             'site_url'  => site_url(),
             'cron'      => $cronEvents,
+            /**
+             * Rows an add-on stranded while it was switched off. Empty on a
+             * healthy site, which is what makes the card worth reading when it
+             * is not.
+             *
+             * @param list<array{key:string,label:string,count:int}> $found
+             */
+            'orphans' => self::orphanRows((array) apply_filters('gratora.orphans.report', [])),
             // Real payments sitting outside every total because no rate exists
             // for their currency. Empty on a healthy site, which is why the
             // screen only says anything when it is not.
