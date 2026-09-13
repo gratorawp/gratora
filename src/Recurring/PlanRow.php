@@ -100,6 +100,10 @@ final class PlanRow
             // PayPal owns its own retry schedule and exposes no endpoint for it,
             // so the action is offered per gateway rather than per status.
             'can_retry'               => $gateway instanceof SupportsPaymentRetry,
+            // And when it is not offered, why. A row reading "Past due, 3
+            // failures" with no control beside it and nothing said is the
+            // screen naming somebody's problem and not their options.
+            'retry_blocked'           => DeclinedRenewal::whatCanBeDone($gateway, (string) $p->gateway),
             // Most processors mint a mandate against a fixed cadence, so the
             // action is offered per gateway rather than per status.
             'can_change_interval'     => $gateway instanceof SupportsScheduleChange,

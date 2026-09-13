@@ -18,6 +18,7 @@ use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Receipts\Receipt;
+use Gratora\Recurring\DeclinedRenewal;
 use Gratora\Recurring\PlanRow;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
@@ -403,40 +404,12 @@ final class DonorMetricsService
             if ($p->status === 'past_due') { $pastDuePlan = $p; break; }
         }
         if ($pastDuePlan) {
-            // Three outcomes, because "cannot retry" has two very different
-            // causes: a gateway with no retry endpoint, and a gateway that is
-            // not connected. Offering a retry the gateway cannot do sends the
-            // admin looking for a button that does not exist.
-            $gateway  = $this->gateways->get((string) $pastDuePlan->gateway);
-            $name     = ucfirst((string) $pastDuePlan->gateway);
+            $gateway = $this->gateways->get((string) $pastDuePlan->gateway);
+            $advice  = DeclinedRenewal::whatCanBeDone($gateway, (string) $pastDuePlan->gateway);
 
-            if ($gateway instanceof \Gratora\Gateways\SupportsPaymentRetry) {
-                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'gratora-donation-platform');
-            } elseif ($gateway === null) {
-                $message = sprintf(
-                    /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'gratora-donation-platform'),
-                    $name
-                );
-            } elseif ($gateway instanceof \Gratora\Gateways\SupportsPaymentMethodUpdate) {
-                $message = sprintf(
-                    /* translators: %s: the payment gateway name, e.g. PayPal. */
-                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'gratora-donation-platform'),
-                    $name
-                );
-            } else {
-                // The fourth outcome, and the one the comment above was already
-                // describing without covering: a gateway that can neither retry
-                // nor take a new card. Sending the admin to ask the donor to
-                // update it in the portal was the same dead end, one step
-                // removed. The portal does not render that button for these
-                // gateways, and the route answers 422.
-                $message = sprintf(
-                    /* translators: %s: the payment gateway name, e.g. GoCardless. */
-                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'gratora-donation-platform'),
-                    $name
-                );
-            }
+            $message = $advice === null
+                ? __('A renewal was declined. Open the Recurring tab to collect it again.', 'gratora-donation-platform')
+                : __('A renewal was declined.', 'gratora-donation-platform') . ' ' . $advice;
 
             $banners[] = ['kind' => 'past_due', 'message' => $message];
         }

@@ -19,7 +19,7 @@ import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import notify from '../_shared/notify';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { Switch } from '../_shared/components/Switch';
-import PlanActionDialog, { actionsFor, applyToPlans, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
+import PlanActionDialog, { actionsFor, applyToPlans, dueIn, isTerminal, retryActionFor, retryRefusalFor } from '../_shared/recurring/PlanActions';
 import { CADENCE_LABEL, cadenceLabel, renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
 import { dashboardHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
@@ -803,16 +803,32 @@ export default function List() {
             // left out of the row menu too, taking the action out of reach.
             isPrimary:  true,
             icon:       () => <RotateCw size={ 16 } strokeWidth={ 1.75 } />,
-            isEligible: ( item ) => !! retryActionFor( item ),
+            // A row that cannot be retried is offered it too, because the
+            // reason names what to do about it and this is the only control
+            // that can say so. Dropping the action leaves a row complaining
+            // about a failed renewal with nothing beside it at all.
+            isEligible: ( item ) => !! retryActionFor( item ) || !! retryRefusalFor( item ),
             supportsBulk: true,
-            callback: ( items ) => ( items.length === 1
-                ? setDialog( { plan: items[ 0 ], action: 'retry' } )
-                : runOverSelection( 'retry', items, {
+            callback: ( items ) => {
+                // One sentence per cause, not per row: a selection of twenty
+                // Stripe plans has one thing wrong with it.
+                const blocked = [ ...new Set( items.map( retryRefusalFor ).filter( Boolean ) ) ];
+                if ( blocked.length ) setRefusals( blocked );
+
+                const targets = items.filter( ( i ) => !! retryActionFor( i ) );
+                if ( ! targets.length ) return;
+
+                if ( targets.length === 1 ) {
+                    setDialog( { plan: targets[ 0 ], action: 'retry' } );
+                    return;
+                }
+
+                runOverSelection( 'retry', targets, {
                     title:        __( 'Retry these payments', 'gratora-donation-platform' ),
                     message:      sprintf(
                         /* translators: %d: number of subscriptions. */
-                        _n( 'Ask the gateway to take %d payment again now?', 'Ask the gateway to take %d payments again now?', items.length, 'gratora-donation-platform' ),
-                        items.length
+                        _n( 'Ask the gateway to take %d payment again now?', 'Ask the gateway to take %d payments again now?', targets.length, 'gratora-donation-platform' ),
+                        targets.length
                     ),
                     confirmLabel: __( 'Retry', 'gratora-donation-platform' ),
                     done:         ( n ) => sprintf(
@@ -820,7 +836,8 @@ export default function List() {
                         _n( '%d payment retried.', '%d payments retried.', n, 'gratora-donation-platform' ),
                         n
                     ),
-                } ) ),
+                } );
+            },
         },
         {
             id:       'pause',

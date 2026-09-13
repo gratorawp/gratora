@@ -79,7 +79,7 @@ final class PastDueBannerTest extends IntegrationTestCase
 
         $this->assertNotSame([], $banner);
         $this->assertStringContainsString(
-            'connection is not active',
+            'is not set up on this site',
             (string) $banner['message'],
             'that cause is different and keeps its own wording'
         );

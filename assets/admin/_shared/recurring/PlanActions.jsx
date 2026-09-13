@@ -27,14 +27,6 @@ export const isTerminal = ( status ) => status === 'cancelled' || status === 'ex
 export const canManagePlans = () => userCan( 'refund_donations' );
 
 /**
- * Retry is deliberately not in the menu.
- *
- * It is the one thing an admin opens a failing subscription to do, and it is
- * only offered where it can actually work: PayPal owns its own retry schedule
- * and exposes no endpoint to force one, so `can_retry` comes from the server
- * rather than being assumed from the status.
- */
-/**
  * How far off the next charge is. The shared timeAgo() clamps its diff at zero
  * because it describes the past, so every future date came out as "just now".
  */
@@ -53,13 +45,40 @@ export function dueIn( iso ) {
     return sprintf( _n( 'in %d day', 'in %d days', days, 'gratora-donation-platform' ), days );
 }
 
+/** A plan with a renewal the gateway has not collected: the row's own complaint. */
+const owesARenewal = ( plan ) => ! isTerminal( plan.status )
+    && ( plan.failed_renewals_count > 0 || plan.status === 'past_due' );
+
+/**
+ * Retry sits outside the menu because it is the one thing an admin opens a
+ * failing subscription to do, and it is offered only where it can work:
+ * PayPal owns its own retry schedule and exposes no endpoint to force one, so
+ * `can_retry` comes from the server rather than from the status.
+ */
 export function retryActionFor( plan ) {
     if ( ! canManagePlans() ) return null;
-    if ( isTerminal( plan.status ) ) return null;
+    if ( ! owesARenewal( plan ) ) return null;
     if ( ! plan.can_retry ) return null;
-    if ( ! ( plan.failed_renewals_count > 0 || plan.status === 'past_due' ) ) return null;
 
     return { id: 'retry', label: __( 'Retry payment', 'gratora-donation-platform' ) };
+}
+
+/**
+ * The sentence for a row that is asking to be collected and cannot be.
+ *
+ * Without it the row reads "past due, 3 failures" and offers nothing at all,
+ * which looks like a missing feature rather than a gateway that is not set up
+ * or does not take the instruction.
+ *
+ * @param {Object} plan The plan row as the server sends it.
+ * @return {?string} Why this one cannot be retried, or null.
+ */
+export function retryRefusalFor( plan ) {
+    if ( ! canManagePlans() ) return null;
+    if ( ! owesARenewal( plan ) ) return null;
+    if ( plan.can_retry ) return null;
+
+    return plan.retry_blocked || null;
 }
 
 /**
