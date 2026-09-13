@@ -23,6 +23,7 @@ final class AtRiskReason
     public const PLAN_PAUSED         = 'plan_paused';
     public const PLAN_CANCELLED      = 'plan_cancelled';
     public const PLAN_ACTIVE         = 'plan_active';
+    public const PLAN_UNSTARTED      = 'plan_unstarted';
     public const FIRST_DONATION_ONLY = 'first_donation_only';
     public const NO_GAP_YET          = 'no_gap_yet';
     public const WELL_PAST_GAP       = 'well_past_gap';
@@ -42,7 +43,7 @@ final class AtRiskReason
      * dates, because they are events the site witnessed rather than inference.
      *
      * @param  array<string,mixed>                                              $row  a listAtRisk row
-     * @param  array{failing:int,paused:int,live:int,cancelled_at:?string}|null $plan batched plan state
+     * @param  array{failing:int,paused:int,live:int,unstarted:int,cancelled_at:?string}|null $plan batched plan state
      * @return array{key:string, avg_gap_days:?int}
      *
      * @since 1.0.0
@@ -65,6 +66,10 @@ final class AtRiskReason
             }
 
             if (! empty($plan['live'])) return self::verdict(self::PLAN_ACTIVE);
+
+            // Last, because a donor holding one of these and a plan that is
+            // collecting is described by the one that collects.
+            if (! empty($plan['unstarted'])) return self::verdict(self::PLAN_UNSTARTED);
         }
 
         // Guard the count before any span math: n - 1 must never be zero, and
@@ -118,11 +123,37 @@ final class AtRiskReason
             self::PLAN_PAUSED         => __('Recurring donation paused', 'gratora-donation-platform'),
             self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'gratora-donation-platform'),
             self::PLAN_ACTIVE         => __('Recurring plan still active', 'gratora-donation-platform'),
+            self::PLAN_UNSTARTED      => __('Recurring plan waiting on the gateway', 'gratora-donation-platform'),
             self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'gratora-donation-platform'),
             self::NO_GAP_YET          => __('Not enough giving history to compare', 'gratora-donation-platform'),
             self::WELL_PAST_GAP       => __('Well past their average gap', 'gratora-donation-platform'),
             self::PAST_GAP            => __('Past their average gap', 'gratora-donation-platform'),
             self::WITHIN_GAP          => __('Within their average gap', 'gratora-donation-platform'),
+        ];
+    }
+
+    /**
+     * The pill colour for each verdict. Here rather than in the browser: a
+     * verdict added on this side reached a screen keeping its own map as an
+     * unstyled chip, which reads as no verdict at all.
+     *
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
+    public static function tones(): array
+    {
+        return [
+            self::PLAN_FAILING        => 'is-error',
+            self::PLAN_PAUSED         => 'is-info',
+            self::PLAN_CANCELLED      => 'is-warn',
+            self::PLAN_ACTIVE         => 'is-ok',
+            self::PLAN_UNSTARTED      => 'is-warn',
+            self::FIRST_DONATION_ONLY => 'is-violet',
+            self::NO_GAP_YET          => 'is-muted',
+            self::WELL_PAST_GAP       => 'is-warn',
+            self::PAST_GAP            => 'is-info',
+            self::WITHIN_GAP          => 'is-ok',
         ];
     }
 

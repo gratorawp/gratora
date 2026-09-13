@@ -456,7 +456,7 @@ final class RecurringPlanRepository
      * it, not the status.
      *
      * @param  array<int> $donorIds
-     * @return array<int, array{failing:int, paused:int, live:int, cancelled_at:?string}>
+     * @return array<int, array{failing:int, paused:int, live:int, unstarted:int, cancelled_at:?string}>
      *
      * @since 1.0.0
      */
@@ -473,7 +473,7 @@ final class RecurringPlanRepository
             // the donor is described by date arithmetic as though they had
             // never subscribed.
             $live       = PlanStatus::sqlList(PlanStatus::LIVE);
-            $collecting = PlanStatus::sqlList(array_values(array_diff(PlanStatus::LIVE, ['paused'])));
+            $collecting = PlanStatus::sqlList(array_values(array_diff(PlanStatus::LIVE, ['paused', 'pending'])));
 
             $rows = DB::table('gratora_recurring_plans')
                 ->whereIn('donor_id', $chunk)
@@ -484,6 +484,7 @@ final class RecurringPlanRepository
                               AND status IN ({$live}) THEN 1 ELSE 0 END) AS failing,
                     MAX(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) AS paused,
                     MAX(CASE WHEN status IN ({$collecting}) THEN 1 ELSE 0 END) AS live,
+                    MAX(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS unstarted,
                     MAX(CASE WHEN status = 'cancelled' THEN cancelled_at END) AS cancelled_at
                 ")
                 ->groupByRaw('donor_id')
@@ -494,6 +495,7 @@ final class RecurringPlanRepository
                     'failing'      => (int) $r['failing'],
                     'paused'       => (int) $r['paused'],
                     'live'         => (int) $r['live'],
+                    'unstarted'    => (int) $r['unstarted'],
                     // markCancelled always writes cancelled_at with the status,
                     // so there is no reason to fall back to updated_at, which a
                     // bulk job would re-date into the grace window.

@@ -107,11 +107,39 @@ final class AtRiskReasonsTest extends IntegrationTestCase
         $donor = $this->atRiskDonor();
         $this->planFor($donor, 'pending');
 
-        $reason = $this->rowFor((int) $donor->id)['risk_reason'];
+        $row = $this->rowFor((int) $donor->id);
 
-        $this->assertNotSame(AtRiskReason::PAST_GAP, $reason);
-        $this->assertNotSame(AtRiskReason::WELL_PAST_GAP, $reason);
-        $this->assertSame(AtRiskReason::PLAN_ACTIVE, $reason, 'the gateway is going to collect on this one');
+        $this->assertNotSame(AtRiskReason::PAST_GAP, $row['risk_reason']);
+        $this->assertNotSame(AtRiskReason::WELL_PAST_GAP, $row['risk_reason']);
+        $this->assertSame(AtRiskReason::PLAN_UNSTARTED, $row['risk_reason']);
+        $this->assertNotSame('', $row['risk_reason_label']);
+    }
+
+    /**
+     * A donor holding one that has started and one that has not is described
+     * by the one that has: the money is arriving.
+     */
+    public function test_a_started_plan_speaks_for_a_donor_who_also_has_one_waiting(): void
+    {
+        $donor = $this->atRiskDonor();
+        $this->planFor($donor, 'pending');
+        $this->planFor($donor, 'active');
+
+        $this->assertSame(AtRiskReason::PLAN_ACTIVE, $this->rowFor((int) $donor->id)['risk_reason']);
+    }
+
+    /** The chip is coloured by the verdict, and the colour comes with it. */
+    public function test_every_verdict_arrives_with_a_colour(): void
+    {
+        $donor = $this->atRiskDonor();
+        $this->planFor($donor, 'pending');
+
+        $this->assertSame('is-warn', $this->rowFor((int) $donor->id)['risk_reason_tone']);
+        $this->assertSame(
+            array_keys(AtRiskReason::labels()),
+            array_keys(AtRiskReason::tones()),
+            'a verdict with a word and no colour renders as an unstyled chip'
+        );
     }
 
     /** A declining plan is named as declining whatever status it declined in. */

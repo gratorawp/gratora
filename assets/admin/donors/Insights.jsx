@@ -171,19 +171,7 @@ function donorHref( id ) {
 // Deliberately not SEGMENT_META's colours: every row here is already the
 // at-risk segment, so segment colours on this pill would argue with the
 // segment chart on the same screen. These tones are about urgency.
-const REASON_TONE = {
-    plan_failing:    'is-error',
-    plan_paused:     'is-info',
-    plan_cancelled:  'is-warn',
-    plan_active:     'is-ok',
-    first_donation_only: 'is-violet',
-    no_gap_yet:      'is-muted',
-    well_past_gap:   'is-warn',
-    past_gap:        'is-info',
-    within_gap:      'is-ok',
-};
-
-function ReasonPill( { row } ) {
+export function ReasonPill( { row } ) {
     if ( ! row.risk_reason_label ) return '-';
     const title = row.avg_gap_days
         ? sprintf(
@@ -198,7 +186,7 @@ function ReasonPill( { row } ) {
         )
         : undefined;
     return (
-        <span className={ `dp-pill ${ REASON_TONE[ row.risk_reason ] || 'is-muted' }` } title={ title }>
+        <span className={ `dp-pill ${ row.risk_reason_tone || 'is-muted' }` } title={ title }>
             { row.risk_reason_label }
         </span>
     );

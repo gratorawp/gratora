@@ -127,8 +127,9 @@ final class DonorMetricsService
         // One grouped query for the whole page, not one per row.
         $plans  = $this->recurring->stateForDonors(array_column($result['rows'], 'id'));
         $labels = AtRiskReason::labels();
+        $tones  = AtRiskReason::tones();
 
-        $result['rows'] = array_map(function (array $r) use ($plans, $labels, $today): array {
+        $result['rows'] = array_map(function (array $r) use ($plans, $labels, $tones, $today): array {
             $donor = Donor::make();
             $donor->email_encrypted = (string) $r['email_encrypted'];
             $email = $this->donorService->decryptEmail($donor);
@@ -146,6 +147,7 @@ final class DonorMetricsService
                 'first_donation_at'   => $r['first_donation_at'],
                 'risk_reason'         => $reason['key'],
                 'risk_reason_label'   => $labels[$reason['key']],
+                'risk_reason_tone'    => $tones[$reason['key']] ?? 'is-muted',
                 'avg_gap_days'        => $reason['avg_gap_days'],
             ];
         }, $result['rows']);
