@@ -4,6 +4,7 @@ import { __ } from '@wordpress/i18n';
 // Timestamps arrive as MySQL strings in UTC with no zone marker, which a
 // browser reads as local time. parseTimestamp marks them.
 import { parseTimestamp } from '@gratora/ui/utils/format';
+import { statusMeta } from '../../_shared/statuses';
 
 export { formatAmount, formatAmountCompact, timeAgo } from '../../_shared/format';
 
@@ -55,15 +56,20 @@ export function donationStatusPill( status ) {
 }
 
 // Plan status → pill class + label.
+// The profile draws its own pill, so only the colour name crosses over.
+const PROFILE_CLASS = {
+    green:  'is-ok',
+    amber:  'is-warn',
+    red:    'is-error',
+    blue:   'is-info',
+    gray:   'is-muted',
+    violet: 'is-violet',
+};
+
 export function planStatusPill( status ) {
-    switch ( status ) {
-        case 'active':    return { cls: 'is-ok',    label: __( 'Active',    'gratora-donation-platform' ) };
-        case 'past_due':  return { cls: 'is-warn',  label: __( 'Past due',  'gratora-donation-platform' ) };
-        case 'paused':    return { cls: 'is-muted', label: __( 'Paused',    'gratora-donation-platform' ) };
-        case 'cancelled': return { cls: 'is-muted', label: __( 'Cancelled', 'gratora-donation-platform' ) };
-        case 'expired':   return { cls: 'is-muted', label: __( 'Expired',   'gratora-donation-platform' ) };
-        default:          return { cls: 'is-muted', label: status };
-    }
+    const { variant, label } = statusMeta( status );
+
+    return { cls: PROFILE_CLASS[ variant ] || 'is-muted', label };
 }
 
 // Event type → timeline dot variant + label builder. Keys are the types

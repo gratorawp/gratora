@@ -5,6 +5,7 @@ import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import { RotateCw } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
+import { planStatusOptions } from '../../../_shared/statuses';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../../../_shared/recurring/PlanActions';
 import PlanDetailDialog from '../../../subscriptions/PlanDetailDialog';
 import {
@@ -20,13 +21,7 @@ function subscriptionHref( id ) {
     return addQueryArgs( window.location.pathname, { page: 'gratora-subscriptions' } ) + `#subscription/${ id }`;
 }
 
-export const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'gratora-donation-platform' ) },
-    { value: 'past_due',  label: __( 'Past due', 'gratora-donation-platform' ) },
-    { value: 'paused',    label: __( 'Paused', 'gratora-donation-platform' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'gratora-donation-platform' ) },
-    { value: 'expired',   label: __( 'Expired', 'gratora-donation-platform' ) },
-];
+export const STATUS_OPTIONS = planStatusOptions();
 
 export default function RecurringTab( { recurring, onChange } ) {
     // A fresh [] each render would re-sort and re-paginate on every keystroke.

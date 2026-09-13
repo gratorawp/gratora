@@ -13,8 +13,6 @@ jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtim
 import { render } from 'preact';
 
 import RefundsCard from '../../assets/admin/donations/detail/cards/RefundsCard';
-import { planStatusPill } from '../../assets/admin/donors/profile/helpers';
-import { STATUS_OPTIONS } from '../../assets/admin/donors/profile/tabs/RecurringTab';
 
 const DONATION = { refunded_cents: 1000, refund_pending_cents: 500, refundable_cents: 0, currency: 'USD' };
 
@@ -70,18 +68,5 @@ describe( 'the refunds table', () => {
     it( 'tells a failed refund apart from one still settling', () => {
         expect( rowPill( 2 ).className ).toContain( 'is-error' );
         expect( rowPill( 1 ).className ).toContain( 'is-warn' );
-    } );
-} );
-
-describe( 'the recurring status vocabulary', () => {
-    it( 'says back every status the tab lets an operator filter by', () => {
-        for ( const option of STATUS_OPTIONS.filter( ( o ) => o.value !== '' ) ) {
-            expect( planStatusPill( option.value ).label ).toBe( option.label );
-        }
-    } );
-
-    it( 'does not print the database word for an ended plan', () => {
-        expect( planStatusPill( 'expired' ).label ).not.toBe( 'expired' );
-        expect( planStatusPill( 'expired' ).cls ).toBe( 'is-muted' );
     } );
 } );

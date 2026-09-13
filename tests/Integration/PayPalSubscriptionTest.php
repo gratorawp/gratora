@@ -321,6 +321,37 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     }
 
     /**
+     * PayPal takes the donor's approval before it activates the subscription,
+     * and the wait is not always short. The plan is recorded either way, in a
+     * status of its own, because a subscription the site has not written down
+     * is one it cannot cancel later.
+     *
+     * @dataProvider notYetActive
+     */
+    public function test_a_subscription_paypal_has_not_activated_is_recorded_as_pending(string $paypalStatus): void
+    {
+        $this->subscriptionStatus = $paypalStatus;
+
+        $reference = $this->createRecurringDonation();
+        $res       = $this->recordSubscription($reference, 'I-SUB-WAITING');
+
+        $this->assertSame(200, $res->get_status(), wp_json_encode($res->get_data()));
+
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-WAITING');
+        $this->assertNotNull($plan, 'the site can only cancel what it wrote down');
+        $this->assertSame('pending', $plan->status);
+    }
+
+    /** @return array<string, array{0:string}> */
+    public static function notYetActive(): array
+    {
+        return [
+            'approved but not started' => ['APPROVED'],
+            'waiting on the donor'     => ['APPROVAL_PENDING'],
+        ];
+    }
+
+    /**
      * The browser supplies the subscription id, so the server must prove it
      * belongs to this donation before recording anything against it.
      */
