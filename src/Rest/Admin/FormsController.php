@@ -437,6 +437,7 @@ final class FormsController
      */
     private function shapeFormSummary(Form $f, ?Campaign $c, ?array $stats = null): array
     {
+        $refusal  = $this->formService->deleteRefusal($f);
         $settings = is_array($f->settings) ? $f->settings : [];
         $goal     = is_array($settings['goal'] ?? null) ? $settings['goal'] : [];
         $goalType = (string) ($goal['type'] ?? 'none');
@@ -463,6 +464,11 @@ final class FormsController
             'raised_cents'    => (int) ($stats['raised_cents'] ?? 0),
             'donations_count' => (int) ($stats['donations_count'] ?? 0),
             'donors_count'    => (int) ($stats['donors_count'] ?? 0),
+            // Asked before the action is offered, not after it is taken: a
+            // form its donations hold in place was offered a delete that got
+            // as far as the confirmation and then failed.
+            'deletable'       => $refusal === null,
+            'delete_blocked'  => $refusal,
         ];
     }
 

@@ -308,15 +308,9 @@ final class FormService
      */
     public function delete(Form $form): void
     {
-        $campaignId    = (int) $form->campaign_id;
-        $defaultFormId = $campaignId > 0
-            ? (int) (Campaign::query()->find('id', $campaignId)?->default_form_id ?? 0)
-            : 0;
-
-        if ($defaultFormId === (int) $form->id) {
-            throw new InvalidArgumentException(
-                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'gratora-donation-platform')
-            );
+        $isDefault = $this->campaignDefaultReason($form);
+        if ($isDefault !== null) {
+            throw new InvalidArgumentException(esc_html($isDefault));
         }
 
         $blocked = $this->deleteBlockedReason($form);
@@ -344,6 +338,36 @@ final class FormService
      *
      * @since 1.0.0
      */
+    /**
+     * Why this form cannot be deleted at all, or null when it can.
+     *
+     * The one answer the screen asks before offering the action, so a form
+     * whose records hold it in place is not offered a delete that fails after
+     * the confirmation with the reason arriving as an error.
+     *
+     * @since 1.0.0
+     */
+    public function deleteRefusal(Form $form): ?string
+    {
+        return $this->campaignDefaultReason($form) ?? $this->deleteBlockedReason($form);
+    }
+
+    /** Why this form is held in place by being its campaign's default. */
+    private function campaignDefaultReason(Form $form): ?string
+    {
+        $campaignId = (int) $form->campaign_id;
+        if ($campaignId <= 0) {
+            return null;
+        }
+
+        $defaultFormId = (int) (Campaign::query()->find('id', $campaignId)?->default_form_id ?? 0);
+        if ($defaultFormId !== (int) $form->id) {
+            return null;
+        }
+
+        return __('This form is the campaign default. Pick a different default form before deleting it.', 'gratora-donation-platform');
+    }
+
     public function deleteBlockedReason(Form $form): ?string
     {
         $donations = (int) Donation::query()->where('form_id', $form->id)->count();

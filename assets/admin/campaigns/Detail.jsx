@@ -5,6 +5,7 @@ import { DataViews } from '@wordpress/dataviews';
 import { Modal, Spinner, Button, CheckboxControl } from '@wordpress/components';
 import Notice from '../_shared/components/Notice';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
+import Dialog from '../_shared/components/Dialog';
 import { notify } from '../_shared/notify';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
@@ -1225,6 +1226,7 @@ function FormsTab( { campaign } ) {
     const [ creating, setCreating ] = useState( false );
     const [ pickerOpen, setPickerOpen ] = useState( false );
     const [ confirm, setConfirm ] = useState( null );
+    const [ refused, setRefused ] = useState( null );
     const [ defaultFormId, setDefaultFormId ] = useState( campaign.default_form_id || null );
 
     useEffect( () => {
@@ -1418,19 +1420,31 @@ function FormsTab( { campaign } ) {
             icon:   () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk: true,
-            // The default form cannot be deleted. The bulk callback filters on
-            // the same predicate, as defence in depth.
-            isEligible: ( item ) => item.id !== defaultFormId,
+            // Offered on a form that cannot be deleted too, because the
+            // refusal names what to do about it and this menu is the only
+            // place that sentence can be read. The server decides: a form its
+            // donations hold in place, or the one its campaign points at.
+            isEligible: ( item ) => !! item.deletable || !! item.delete_blocked,
             callback: ( items ) => {
-                const targets = items.filter( ( i ) => i.id !== defaultFormId );
-                if ( ! targets.length ) return;
+                // One sentence per cause: a selection of six forms with
+                // donations has one thing wrong with it.
+                const reasons = [ ...new Set( items.map( ( i ) => i.delete_blocked ).filter( Boolean ) ) ];
+                const targets = items.filter( ( i ) => i.deletable );
+
+                // Not a confirmation: there is no decision to take, so a
+                // Cancel beside a Close would cancel nothing.
+                if ( ! targets.length ) {
+                    setRefused( { count: items.length, reasons } );
+                    return;
+                }
+
                 const message = targets.length === 1
-                    ? __( 'Permanently delete this form? This cannot be undone.', 'gratora-donation-platform' )
+                    ? __( 'Permanently delete this form? Nothing has been recorded against it, so no donation or total moves.', 'gratora-donation-platform' )
                     : sprintf(
                         /* translators: %d: number of forms to delete */
                         _n(
-                            'Permanently delete %d form? This cannot be undone.',
-                            'Permanently delete %d forms? This cannot be undone.',
+                            'Permanently delete %d form? Nothing has been recorded against it, so no donation or total moves.',
+                            'Permanently delete %d forms? Nothing has been recorded against them, so no donation or total moves.',
                             targets.length,
                             'gratora-donation-platform'
                         ),
@@ -1519,6 +1533,22 @@ function FormsTab( { campaign } ) {
             ) }
 
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
+
+            { refused && (
+                <Dialog
+                    title={ _n( 'This form cannot be deleted', 'These forms cannot be deleted', refused.count, 'gratora-donation-platform' ) }
+                    onClose={ () => setRefused( null ) }
+                    foot={
+                        <Btn variant="primary" onClick={ () => setRefused( null ) }>
+                            { __( 'Close', 'gratora-donation-platform' ) }
+                        </Btn>
+                    }
+                >
+                    { refused.reasons.map( ( why ) => (
+                        <Notice key={ why } status="warning" isDismissible={ false }>{ why }</Notice>
+                    ) ) }
+                </Dialog>
+            ) }
         </div>
     );
 }
