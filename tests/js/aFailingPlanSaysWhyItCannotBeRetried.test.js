@@ -114,6 +114,19 @@ beforeEach( () => {
     };
 } );
 
+/**
+ * DataViews hands the row menu every eligible action, primaries included, so a
+ * primary one is the same control twice on a row that is owed a renewal.
+ */
+it( 'offers the retry control once on a row, not once per place it could go', async () => {
+    const retry = await subscriptionsList( [ BLOCKED ] );
+
+    expect( retry.isPrimary ).toBeFalsy();
+    // The bulk bar is icon-only and drops an action without one.
+    expect( retry.icon ).toBeDefined();
+    expect( retry.supportsBulk ).toBe( true );
+} );
+
 describe( 'the subscriptions list, which has nothing else to say it', () => {
 
     it( 'still offers the control on a plan it cannot collect', async () => {

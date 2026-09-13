@@ -446,6 +446,44 @@ final class RecurringPlanRepository
     }
 
     /**
+     * The campaigns that actually have a subscription, for the filter on the
+     * subscriptions list.
+     *
+     * Drawn from the plans rather than from the campaigns table: a filter
+     * offering every campaign that ever took a donation answers most of its
+     * own chips with an empty table, because a campaign can run for years on
+     * one-off giving and never see a plan.
+     *
+     * @return list<array{value:string, label:string}>
+     *
+     * @since 1.0.0
+     */
+    public function campaignsInUse(): array
+    {
+        $prefix = DB::getPrefix();
+
+        $rows = DB::raw(
+            "SELECT DISTINCT c.id AS id, c.title AS title
+               FROM {$prefix}gratora_recurring_plans p
+               JOIN {$prefix}gratora_campaigns c ON c.id = p.campaign_id
+              ORDER BY c.title ASC",
+            []
+        )['rows'] ?? [];
+
+        $out = [];
+        foreach ($rows as $row) {
+            $id = (int) ($row->id ?? 0);
+            if ($id === 0) {
+                continue;
+            }
+            $title = trim((string) ($row->title ?? ''));
+            $out[] = ['value' => (string) $id, 'label' => $title !== '' ? $title : '#' . $id];
+        }
+
+        return $out;
+    }
+
+    /**
      * Plan state for a set of donors, in one grouped query.
      *
      * The at-risk reason needs this per row, so a per-row lookup would be a

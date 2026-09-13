@@ -30,6 +30,13 @@ import { formatAmount, formatDate } from '../donations/format';
 // two weeks, so filtering on the unit filed both under a chip they are not.
 const INTERVAL_OPTIONS = Object.entries( CADENCE_LABEL ).map( ( [ value, label ] ) => ( { value, label } ) );
 
+/** The plan a `#subscription/<id>` address names, if it names one. */
+function planIdFromHash() {
+    const found = window.location.hash.match( /^#subscription\/(\d+)$/ );
+
+    return found ? Number( found[ 1 ] ) : null;
+}
+
 // The field the cadence filter hangs on. dataviews offers every field it is
 // given as a column, so the saved view is told to keep this one out of `fields`
 // while still recognising a saved filter on it.
@@ -395,6 +402,10 @@ export default function List() {
     // why, and a toast carrying six of those is unreadable.
     const [ refusals, setRefusals ] = useState( [] );
     const [ detail, setDetail ]     = useState( null );
+    // The row link and the one on a donor's profile both name a plan by id in
+    // the fragment. Nothing read it, so a link copied, bookmarked or followed
+    // from another screen landed on an unfiltered list of everything.
+    const [ linked, setLinked ]     = useState( planIdFromHash );
     const [ unlinked, setUnlinked ] = useState( {
         total:      0,
         items:      [],
@@ -411,9 +422,10 @@ export default function List() {
         apiFetch( { path: '/gratora/v1/admin/recurring/gateway-options' } )
             .then( ( r ) => { if ( ! aborted ) setGateways( Array.isArray( r ) ? r : [] ); } )
             .catch( () => { if ( ! aborted ) setGateways( [] ); } );
-        // Same route the donations list uses: /admin/campaigns needs a
-        // capability this screen does not, and would 403 into an empty filter.
-        apiFetch( { path: '/gratora/v1/admin/donations/campaign-options' } )
+        // The campaigns that actually have a subscription. Offering every
+        // campaign that ever took a donation put chips on this screen that
+        // answer with an empty table.
+        apiFetch( { path: '/gratora/v1/admin/recurring/campaign-options' } )
             .then( ( r ) => { if ( ! aborted ) setCampaigns( Array.isArray( r ) ? r : [] ); } )
             .catch( () => { if ( ! aborted ) setCampaigns( [] ); } );
         return () => { aborted = true; };
@@ -552,6 +564,35 @@ export default function List() {
 
     useEffect( () => { loadUnlinked(); }, [] );
 
+    useEffect( () => {
+        const onHash = () => setLinked( planIdFromHash() );
+        window.addEventListener( 'hashchange', onHash );
+        return () => window.removeEventListener( 'hashchange', onHash );
+    }, [] );
+
+    // Fetched by id rather than looked for in the rows on screen: the plan a
+    // link names is as likely to be on another page, or behind a filter.
+    useEffect( () => {
+        if ( ! linked ) return undefined;
+
+        let aborted = false;
+        apiFetch( { path: `/gratora/v1/admin/recurring/${ linked }` } )
+            .then( ( plan ) => { if ( ! aborted ) setDetail( plan ); } )
+            .catch( () => { if ( ! aborted ) notify.error( __( 'That subscription could not be found.', 'gratora-donation-platform' ) ); } );
+
+        return () => { aborted = true; };
+    }, [ linked ] );
+
+    // Leaves the address matching what is on screen, so a reload or a back
+    // does not reopen a dialog the reader has closed.
+    const closeDetail = () => {
+        setDetail( null );
+        setLinked( null );
+        if ( planIdFromHash() ) {
+            window.history.replaceState( null, '', window.location.pathname + window.location.search );
+        }
+    };
+
     const fields = useMemo( () => [
         {
             id:    'id',
@@ -685,7 +726,7 @@ export default function List() {
             id:            'campaign',
             enableSorting: false,
             label:    __( 'Campaign', 'gratora-donation-platform' ),
-            elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
+            elements: campaigns,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.campaign
@@ -792,11 +833,11 @@ export default function List() {
         {
             id:    'retry',
             label: __( 'Retry payment', 'gratora-donation-platform' ),
-            // DataViews draws a primary action as an icon button, so one with
-            // no icon renders as nothing at all. It is offered in the row menu
-            // as well: the dropdown is handed every eligible action, primaries
-            // included.
-            isPrimary:  true,
+            // Not primary. DataViews draws one as an icon button and hands the
+            // row menu every eligible action anyway, primaries included, so it
+            // came out twice on the one row that is owed a renewal. The icon
+            // stays for the bulk bar, which is icon-only and drops an action
+            // without one.
             icon:       () => <RotateCw size={ 16 } strokeWidth={ 1.75 } />,
             // A row that cannot be retried is offered it too, because the
             // reason names what to do about it and this is the only control
@@ -1078,8 +1119,8 @@ export default function List() {
             { detail && (
                 <PlanDetailDialog
                     plan={ detail }
-                    onClose={ () => setDetail( null ) }
-                    onAction={ ( action ) => { setDialog( { plan: detail, action } ); setDetail( null ); } }
+                    onClose={ closeDetail }
+                    onAction={ ( action ) => { setDialog( { plan: detail, action } ); closeDetail(); } }
                 />
             ) }
 

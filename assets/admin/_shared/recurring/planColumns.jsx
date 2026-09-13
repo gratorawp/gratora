@@ -10,6 +10,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import notify from '../notify';
+import { isPlanTerminal } from '../statuses';
 
 /**
  * The five cadences this product can name. FrequencyMap is the same table on
@@ -95,7 +96,35 @@ export function renderHealth( item ) {
         );
     }
 
+    // A charge that was due and has not happened, with no failure recorded
+    // against it. The gateway has not come back either way, and reading OK
+    // next to a next-charge date the row itself calls overdue is the column
+    // contradicting its neighbour.
+    if ( isOverdue( item ) ) {
+        return (
+            <span className="gratora-pill gratora-pill--amber">
+                { __( 'Nothing heard', 'gratora-donation-platform' ) }
+            </span>
+        );
+    }
+
     return <span className="gratora-row__sub">{ __( 'OK', 'gratora-donation-platform' ) }</span>;
+}
+
+/**
+ * A live plan whose next charge is in the past and which has no failure or
+ * problem recorded. A terminal plan has no next charge to be late for.
+ */
+export function isOverdue( item ) {
+    if ( isPlanTerminal( item.status ) || item.failed_renewals_count > 0 || ( item.errors?.length || 0 ) > 0 ) {
+        return false;
+    }
+
+    const due = item.next_payment_at
+        ? new Date( String( item.next_payment_at ).replace( ' ', 'T' ) + 'Z' ).getTime()
+        : NaN;
+
+    return Number.isFinite( due ) && due < Date.now();
 }
 
 /**

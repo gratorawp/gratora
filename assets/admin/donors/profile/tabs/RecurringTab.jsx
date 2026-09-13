@@ -179,11 +179,8 @@ export default function RecurringTab( { recurring, onChange } ) {
         {
             id:    'retry',
             label: __( 'Retry payment', 'gratora-donation-platform' ),
-            // In reach without opening the menu: collecting a failed renewal
-            // is the reason this row is being looked at. The icon is not
-            // decoration, since DataViews draws a primary action as an icon
-            // button and one without an icon renders as nothing.
-            isPrimary:  true,
+            // Not primary: DataViews would draw the icon button and still put
+            // it in the row menu, which is the same action offered twice.
             icon:       () => <RotateCw size={ 16 } strokeWidth={ 1.75 } />,
             // Only where it can work. A profile whose plan the gateway will
             // not collect carries the reason in its own banner, so a second

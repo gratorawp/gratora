@@ -128,6 +128,20 @@ final class RecurringController
             'callback'            => [$this, 'gatewayOptions'],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/recurring/campaign-options', [
+            'methods'             => WP_REST_Server::READABLE,
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_view_donations'),
+            'callback'            => [$this, 'campaignOptions'],
+        ]);
+
+        // One plan by id, so a link to it opens it. The row link and the one
+        // on a donor's profile both name a plan this way.
+        register_rest_route(self::NAMESPACE, '/admin/recurring/(?P<id>\d+)', [
+            'methods'             => WP_REST_Server::READABLE,
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_view_donations'),
+            'callback'            => [$this, 'show'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/recurring/(?P<id>\d+)/action', [
             'methods'             => WP_REST_Server::CREATABLE,
             // The same authority as a refund: both change what the donor is
@@ -321,6 +335,28 @@ final class RecurringController
     public function gatewayOptions(): WP_REST_Response
     {
         return new WP_REST_Response($this->plans->gatewaysInUse(), 200);
+    }
+
+    /** @since 1.0.0 */
+    public function campaignOptions(): WP_REST_Response
+    {
+        return new WP_REST_Response($this->plans->campaignsInUse(), 200);
+    }
+
+    /**
+     * @return WP_REST_Response|WP_Error
+     *
+     * @since 1.0.0
+     */
+    public function show(WP_REST_Request $request)
+    {
+        $plan = RecurringPlan::query()->where('id', (int) $request['id'])->get();
+
+        if (! $plan instanceof RecurringPlan) {
+            return new WP_Error('gratora_not_found', __('Recurring plan not found.', 'gratora-donation-platform'), ['status' => 404]);
+        }
+
+        return new WP_REST_Response($this->shapeMany([$plan])[0], 200);
     }
 
     /**
