@@ -59,14 +59,24 @@ const UNLINKED_PREVIEW = 5;
 
 // A column header sorts by its field id; the server sorts by column name and
 // silently falls back to next_payment_at for a name it does not know, so an
-// unmapped id turns the arrow without turning the list.
+// unmapped id turns the arrow without turning the list. Every id the table can
+// sort by is here, and anything else goes back to the default rather than
+// travelling as a request that cannot be honoured: a saved view outlives the
+// column it names.
 const ORDERBY_COLUMN = {
-    amount:   'amount_cents',
-    lifetime: 'total_paid_cents',
+    id:              'id',
+    amount:          'amount_cents',
+    status:          'status',
+    next_payment_at: 'next_payment_at',
+    started_at:      'started_at',
+    lifetime:        'total_paid_cents',
 };
 
+/** The ids this table can ask the server to order by. @since 1.0.0 */
+export const SORTABLE_FIELD_IDS = Object.keys( ORDERBY_COLUMN );
+
 /** @since 1.0.0 */
-export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'next_payment_at';
+export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || 'next_payment_at';
 
 function donorHref( donorId ) {
     return addQueryArgs( window.location.pathname, { page: 'gratora-donors' } ) + `#donor/${ donorId }`;
@@ -567,6 +577,7 @@ export default function List() {
         },
         {
             id:    'donor',
+            enableSorting: false,
             label: __( 'Donor', 'gratora-donation-platform' ),
             render: ( { item } ) => {
                 const d = item.donor;
@@ -677,7 +688,9 @@ export default function List() {
                     : <span className="gratora-row__sub">-</span>
             ),
         },
-        {            id:       'campaign',
+        {
+            id:            'campaign',
+            enableSorting: false,
             label:    __( 'Campaign', 'gratora-donation-platform' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
@@ -689,6 +702,7 @@ export default function List() {
         },
         {
             id:       'gateway',
+            enableSorting: false,
             label:    __( 'Gateway', 'gratora-donation-platform' ),
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
@@ -703,6 +717,7 @@ export default function List() {
         },
         {
             id:       'failing',
+            enableSorting: false,
             label:    __( 'Health', 'gratora-donation-platform' ),
             elements: [
                 { value: 'yes', label: __( 'Has ever failed a renewal', 'gratora-donation-platform' ) },
@@ -712,6 +727,7 @@ export default function List() {
         },
         {
             id:           FILTER_ONLY,
+            enableSorting: false,
             label:        __( 'Interval', 'gratora-donation-platform' ),
             elements:     INTERVAL_OPTIONS,
             filterBy:     { operators: [ 'is' ] },

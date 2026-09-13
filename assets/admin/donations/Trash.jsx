@@ -20,7 +20,7 @@ import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import { dashboardHref } from '../_shared/adminPages';
 import notify from '../_shared/notify';
 import { userCan } from '../_shared/caps';
-import { donationFields } from './fields';
+import { donationFields, sortColumn } from './fields';
 import { postBatch } from './trashActions';
 import ViewSwitch from './ViewSwitch';
 
@@ -64,7 +64,7 @@ export default function Trash() {
         trashed:      'only',
         page:         view.page,
         per_page:     view.perPage,
-        orderby:      view.sort?.field === 'amount' ? 'amount_cents' : ( view.sort?.field || 'created_at' ),
+        orderby:      sortColumn( view.sort?.field, 'trashed_at' ),
         order:        view.sort?.direction || 'desc',
         search:       view.search || undefined,
         include_test: true,

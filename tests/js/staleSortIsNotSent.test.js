@@ -10,7 +10,7 @@
  * travelling as a request that will be quietly swapped.
  */
 
-import { sortField } from '../../assets/admin/donors/index';
+import { donorSortField } from '../../assets/admin/donors/index';
 
 jest.mock( 'react', () => require( 'preact/compat' ) );
 jest.mock( 'react-dom', () => require( 'preact/compat' ) );
@@ -22,25 +22,25 @@ jest.mock( '../../assets/admin/donors/DonorProfile', () => ( { __esModule: true,
 jest.mock( '../../assets/admin/donors/Insights', () => ( { __esModule: true, default: () => null } ) );
 
 test( 'a field the table cannot sort by is not sent', () => {
-    expect( sortField( 'name_of_a_column_that_went' ) ).toBe( 'last_donation_at' );
+    expect( donorSortField( 'name_of_a_column_that_went' ) ).toBe( 'last_donation_at' );
 } );
 
 test( 'and neither is an empty one', () => {
-    expect( sortField( undefined ) ).toBe( 'last_donation_at' );
-    expect( sortField( '' ) ).toBe( 'last_donation_at' );
+    expect( donorSortField( undefined ) ).toBe( 'last_donation_at' );
+    expect( donorSortField( '' ) ).toBe( 'last_donation_at' );
 } );
 
 test( 'the name column asks for the name order', () => {
-    expect( sortField( 'name' ) ).toBe( 'name' );
+    expect( donorSortField( 'name' ) ).toBe( 'name' );
 } );
 
 /** The column the table shows and the column the server holds differ here. */
 test( 'total donated asks for the column it is stored in', () => {
-    expect( sortField( 'total_donated' ) ).toBe( 'total_donated_cents' );
+    expect( donorSortField( 'total_donated' ) ).toBe( 'total_donated_cents' );
 } );
 
 test( 'the rest go through as themselves', () => {
-    expect( sortField( 'donations_count' ) ).toBe( 'donations_count' );
-    expect( sortField( 'last_donation_at' ) ).toBe( 'last_donation_at' );
-    expect( sortField( 'created_at' ) ).toBe( 'created_at' );
+    expect( donorSortField( 'donations_count' ) ).toBe( 'donations_count' );
+    expect( donorSortField( 'last_donation_at' ) ).toBe( 'last_donation_at' );
+    expect( donorSortField( 'created_at' ) ).toBe( 'created_at' );
 } );

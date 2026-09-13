@@ -48,7 +48,10 @@ const SORT_COLUMNS = {
     created_at:       'created_at',
 };
 
-export function sortField( field ) {
+/** The ids this table can ask the server to order by. @since 1.0.0 */
+export const SORTABLE_FIELD_IDS = Object.keys( SORT_COLUMNS );
+
+export function donorSortField( field ) {
     return SORT_COLUMNS[ field ] || 'last_donation_at';
 }
 
@@ -246,7 +249,7 @@ export function DonorsApp( { toggleSlot } ) {
             path: addQueryArgs( '/gratora/v1/admin/donors', {
                 page:       view.page,
                 per_page:   view.perPage,
-                orderby:    sortField( view.sort?.field ),
+                orderby:    donorSortField( view.sort?.field ),
                 order:      view.sort?.direction || 'desc',
                 search:     view.search || undefined,
                 country:    filterValue( 'country' )    || undefined,
@@ -288,6 +291,7 @@ export function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'id',
+            enableSorting: false,
             label: __( 'ID', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 <span className="gratora-ref-cell">
@@ -334,6 +338,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
+            enableSorting: false,
             label: __( 'Email', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 item.email
@@ -343,6 +348,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'country',
+            enableSorting: false,
             label: __( 'Country', 'gratora-donation-platform' ),
             elements: localizedCountries().map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.label }` } ) ),
             filterBy: { operators: [ 'is' ] },
@@ -358,6 +364,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'donor_type',
+            enableSorting: false,
             label: __( 'Donor type', 'gratora-donation-platform' ),
             elements: [
                 { value: 'individual',   label: __( 'Individual', 'gratora-donation-platform' ) },

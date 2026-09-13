@@ -21,7 +21,7 @@ import { userCan } from '../_shared/caps';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { Switch } from '../_shared/components/Switch';
 import { formatAmount, STATUS_LABEL } from './format';
-import { donationFields } from './fields';
+import { donationFields, sortColumn } from './fields';
 import { postBatch } from './trashActions';
 import ViewSwitch from './ViewSwitch';
 
@@ -201,7 +201,7 @@ export default function List() {
     const apiParams = useMemo( () => ( {
         page:         view.page,
         per_page:     view.perPage,
-        orderby:      view.sort?.field === 'amount' ? 'amount_cents' : ( view.sort?.field || 'created_at' ),
+        orderby:      sortColumn( view.sort?.field, 'created_at' ),
         order:        view.sort?.direction || 'desc',
         search:       view.search || undefined,
         status:       statusFilter || undefined,

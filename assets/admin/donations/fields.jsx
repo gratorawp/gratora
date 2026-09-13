@@ -64,6 +64,31 @@ export function trashHref( extra = {} ) {
  * A factory rather than a constant: the campaign and gateway filters are built
  * from what the site actually has, which is fetched.
  */
+/**
+ * What to ask the server to order by.
+ *
+ * A saved view outlives the column it names, and the server falls back without
+ * saying so, which leaves the header drawing an arrow over an order the rows
+ * are not in. Anything not on this list goes back to the default rather than
+ * travelling as a request that cannot be honoured.
+ */
+const SORT_COLUMNS = {
+    reference:  'reference',
+    status:     'status',
+    amount:     'amount_cents',
+    created_at: 'created_at',
+    paid_at:    'paid_at',
+    trashed_at: 'trashed_at',
+};
+
+/** The ids this table can ask the server to order by. @since 1.0.0 */
+export const SORTABLE_FIELD_IDS = Object.keys( SORT_COLUMNS );
+
+/** @since 1.0.0 */
+export function sortColumn( field, fallback = 'created_at' ) {
+    return SORT_COLUMNS[ field ] || fallback;
+}
+
 export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
     return [
         {
@@ -92,6 +117,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
         },
         {
             id:    'frequency',
+            enableSorting: false,
             label: __( 'Frequency', 'gratora-donation-platform' ),
             // Nothing on the row said whether the money came from a standing
             // recurring or a one-off, which is the first thing asked of it.
@@ -107,6 +133,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
         },
         {
             id:    'donor',
+            enableSorting: false,
             label: __( 'Donor', 'gratora-donation-platform' ),
             render: ( { item } ) => {
                 const d = item.donor;
@@ -153,6 +180,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
         },
         {
             id:       'gateway',
+            enableSorting: false,
             label:    __( 'Gateway', 'gratora-donation-platform' ),
             elements: gatewayOptions,
             filterBy: { operators: [ 'is' ] },
@@ -165,6 +193,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
         },
         {
             id:       'campaign',
+            enableSorting: false,
             label:    __( 'Campaign', 'gratora-donation-platform' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
@@ -193,6 +222,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
         },
         {
             id:     'form',
+            enableSorting: false,
             label:  __( 'Form', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 item.form?.title
@@ -228,6 +258,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
         },
         {
             id:    'trashed_by_name',
+            enableSorting: false,
             label: __( 'Trashed by', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 item.trashed_by_name
