@@ -796,10 +796,18 @@ final class ToolsController
     /** @return bool whether the backlog is through, so the pass can advance. */
     private function recalcCurrencyPass(array &$state, float $until): bool
     {
-        $fx        = $this->fxBackfill->run((int) ($state['after'] ?? 0), $until);
+        $fx = $this->fxBackfill->run(
+            (int) ($state['after'] ?? 0),
+            $until,
+            // Its own cursor: the plans are walked only once the donations are
+            // through, and a plan in a currency with no rate stays null, so
+            // without one every later pass re-reads the same stranded page.
+            (int) ($state['after_plan'] ?? 0)
+        );
         $converted = (int) $fx['converted'];
 
-        $state['after'] = (int) $fx['after'];
+        $state['after']      = (int) $fx['after'];
+        $state['after_plan'] = (int) ($fx['after_plan'] ?? 0);
         $state['counts']['converted_donations'] =
             (int) ($state['counts']['converted_donations'] ?? 0) + $converted;
         if (($fx['plans'] ?? 0) > 0) {

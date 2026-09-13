@@ -28,15 +28,16 @@ final class FxBackfill
     /**
      * Process the FX backlog by ID within the time budget, returning a resume cursor.
      *
-     * @param int   $after last donation id already handled, 0 to start
-     * @param float $until microtime to stop at, INF for no budget
+     * @param int   $after     last donation id already handled, 0 to start
+     * @param float $until      microtime to stop at, INF for no budget
+     * @param int   $afterPlan  last plan id already handled, 0 to start
      *
-     * @return array{converted:int, plans:int, unconvertible:int, currencies:array<int,string>, after:int, done:bool}
+     * @return array{converted:int, plans:int, unconvertible:int, currencies:array<int,string>, after:int, after_plan:int, done:bool}
      *   currencies lists what is still missing a rate, so the caller can name it.
      *
      * @since 1.0.0
      */
-    public function run(int $after = 0, float $until = INF): array
+    public function run(int $after = 0, float $until = INF, int $afterPlan = 0): array
     {
         $base = strtoupper(Money::defaultCurrency());
 
@@ -100,27 +101,34 @@ final class FxBackfill
         // Recurring plans carry their own base amount, copied from the first
         // donation, and MRR scores a foreign plan with no base as zero. Only
         // once the donations are through, so one cursor covers the pass.
-        $plans = $done ? $this->runForPlans($base, $unconvertible) : 0;
+        $plans = ['converted' => 0, 'after' => $afterPlan];
+        if ($done) {
+            $plans = $this->runForPlans($base, $unconvertible, $until, $afterPlan, $done);
+        }
 
         return [
             'converted'     => $converted,
-            'plans'         => $plans,
+            'plans'         => $plans['converted'],
             'unconvertible' => array_sum($unconvertible),
             'currencies'    => array_keys($unconvertible),
             'after'         => $afterId,
+            'after_plan'    => $plans['after'],
             'done'          => $done,
         ];
     }
 
     /**
      * @param array<string,int> $unconvertible collected across both passes
+     * @param bool              $done          cleared when the budget ran out
+     *
+     * @return array{converted:int, after:int}
      *
      * @since 1.0.0
      */
-    private function runForPlans(string $base, array &$unconvertible): int
+    private function runForPlans(string $base, array &$unconvertible, float $until, int $afterPlan, bool &$done): array
     {
         $converted = 0;
-        $afterId   = 0;
+        $afterId   = $afterPlan;
 
         while (true) {
             $plans = RecurringPlan::query()
@@ -164,9 +172,18 @@ final class FxBackfill
                 ]);
                 $converted++;
             }
+
+            // After the plans, never before: a pass that returned having done
+            // nothing would hand the caller the same work for ever. A currency
+            // with no rate leaves the row null, so only the cursor gets past
+            // one, which is why it goes back to the caller.
+            if (microtime(true) >= $until) {
+                $done = false;
+                break;
+            }
         }
 
-        return $converted;
+        return ['converted' => $converted, 'after' => $afterId];
     }
 
     /**
