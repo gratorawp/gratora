@@ -29,8 +29,13 @@ const ORDERBY_COLUMN = { type: 'is_restricted' };
 
 export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'sort_order';
 
+// The four the badge can draw, plus the one cut that is not a state at all.
+// Scheduled and Ended were shown in the column and offered by nothing, so a
+// fund reading either could not be found.
 const STATUS_OPTIONS = [
     { value: 'active',     label: __( 'Active', 'gratora-donation-platform' ) },
+    { value: 'scheduled',  label: __( 'Scheduled', 'gratora-donation-platform' ) },
+    { value: 'ended',      label: __( 'Ended', 'gratora-donation-platform' ) },
     { value: 'inactive',   label: __( 'Inactive', 'gratora-donation-platform' ) },
     { value: 'restricted', label: __( 'Restricted', 'gratora-donation-platform' ) },
 ];

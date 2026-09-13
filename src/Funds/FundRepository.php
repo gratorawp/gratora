@@ -153,13 +153,44 @@ final class FundRepository
 
         return [
             'total'        => (int) Fund::query()->count(),
-            'active'       => (int) Fund::query()->where('is_active', 1)->count(),
+            // Open, not merely flagged active: a fund outside its own window
+            // takes no donations, and the row beside this figure says so.
+            'active'       => count($this->idsInState('active')),
             'restricted'   => (int) Fund::query()->where('is_restricted', 1)->count(),
             'raised_cents' => (int) Fund::query()->sum('raised_cents'),
             'default'      => $default
                 ? ['id' => (int) $default->id, 'name' => (string) $default->name]
                 : null,
         ];
+    }
+
+    /**
+     * The funds in one of the four states the screen shows.
+     *
+     * Asked of the model rather than of a WHERE clause: the window boundaries
+     * are resolved in the org timezone, and a date-only end means the end of
+     * that day. Restating that in SQL would be a second reading of the dates,
+     * free to drift from the one the badge uses. The table is small enough
+     * that reading it whole costs less than that risk.
+     *
+     * @return list<int>
+     *
+     * @since 1.0.0
+     */
+    private function idsInState(string $state): array
+    {
+        $out = [];
+
+        foreach (Fund::query()->getAll() as $fund) {
+            $schedule = $fund->scheduleState();
+            $actual   = ! $fund->is_active ? 'inactive' : ($schedule ?? 'active');
+
+            if ($actual === $state) {
+                $out[] = (int) $fund->id;
+            }
+        }
+
+        return $out;
     }
 
     /** @since 1.0.0 */
@@ -194,10 +225,11 @@ final class FundRepository
 
         $applyFilters = function ($q) use ($args, $term) {
             $status = (string) ($args['status'] ?? '');
-            if ($status === 'active') {
-                $q = $q->where('is_active', 1);
-            } elseif ($status === 'inactive') {
-                $q = $q->where('is_active', 0);
+            if (in_array($status, ['active', 'scheduled', 'ended', 'inactive'], true)) {
+                // The same four the badge draws, so picking Active cannot
+                // return a row that reads Ended.
+                $ids = $this->idsInState($status);
+                $q = $ids === [] ? $q->whereRaw('1 = 0') : $q->whereIn('id', $ids);
             } elseif ($status === 'restricted') {
                 $q = $q->where('is_restricted', 1);
             }

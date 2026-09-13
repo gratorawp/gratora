@@ -44,7 +44,7 @@ final class FundsController
                     'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
                     'orderby'  => ['type' => 'string'],
                     'order'    => ['type' => 'string', 'enum' => ['asc', 'desc', 'ASC', 'DESC']],
-                    'status'   => ['type' => 'string', 'enum' => ['active', 'inactive', 'restricted']],
+                    'status'   => ['type' => 'string', 'enum' => ['active', 'scheduled', 'ended', 'inactive', 'restricted']],
                     'search'   => ['type' => 'string'],
                 ],
             ],
