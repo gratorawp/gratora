@@ -14,9 +14,8 @@ export default function ImportTab( { setNotice } ) {
 
     // Named back to the admin before anything is written: this rewrites live
     // gateway, email, receipt and role configuration and there is no undo.
-    // Read before asking, because the two kinds of file do different things and
-    // the settings wording ("donors and campaigns are untouched") is a lie
-    // about a full export.
+    // Read first, because the two kinds of file do different things and the
+    // admin has to be told which one they chose.
     const askImport = async ( file ) => {
         if ( ! file ) return;
 
@@ -125,7 +124,7 @@ export default function ImportTab( { setNotice } ) {
                 : { type: 'error', text: __( 'Nothing in that file matched a Gratora setting or record.', 'gratora-donation-platform' ) }
             );
         } catch ( err ) {
-            const reason = err?.message || __( 'Import failed. Check that the file is a Gratora settings export.', 'gratora-donation-platform' );
+            const reason = err?.message || __( 'Import failed. Check that the file is a Gratora export.', 'gratora-donation-platform' );
             const landed = landedParts( err?.data );
 
             setNotice( {
@@ -148,8 +147,8 @@ export default function ImportTab( { setNotice } ) {
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Import settings', 'gratora-donation-platform' ) }
-                sub={ __( 'Reads a Gratora settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'gratora-donation-platform' ) }
+                title={ __( 'Import a Gratora export', 'gratora-donation-platform' ) }
+                sub={ __( 'Takes either JSON file the Export tab makes. A settings export writes its gateway, email, receipt, numbering and role settings over the ones on this site. An Everything export does that too, and adds its campaigns, funds, forms, donors, donations, recurring plans and receipts, leaving what is already here as it is. Which one you chose is named back to you before anything is written.', 'gratora-donation-platform' ) }
             >
                 <div className="gratora-advanced-actions">
                     <Btn
