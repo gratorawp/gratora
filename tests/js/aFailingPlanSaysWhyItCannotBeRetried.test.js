@@ -111,7 +111,30 @@ beforeEach( () => {
     };
 } );
 
+/** DataViews resolves a function label against the rows it would act on. */
+const labelOf = ( action, items ) =>
+    ( typeof action.label === 'string' ? action.label : action.label( items ) );
+
 describe( 'the subscriptions list, which has nothing else to say it', () => {
+    it( 'does not name an action it will not take', async () => {
+        const retry = await subscriptionsList( [ BLOCKED ] );
+
+        expect( labelOf( retry, [ BLOCKED ] ) ).toBe( 'Why this cannot be retried' );
+    } );
+
+    it( 'still names the action on a plan it can collect', async () => {
+        const retry = await subscriptionsList( [ RETRYABLE ] );
+
+        expect( labelOf( retry, [ RETRYABLE ] ) ).toBe( 'Retry payment' );
+    } );
+
+    /** A selection with one collectable row in it is still a retry. */
+    it( 'names the action when only some of a selection are blocked', async () => {
+        const retry = await subscriptionsList( [ BLOCKED ] );
+
+        expect( labelOf( retry, [ BLOCKED, RETRYABLE ] ) ).toBe( 'Retry payment' );
+    } );
+
     it( 'still offers the control on a plan it cannot collect', async () => {
         const retry = await subscriptionsList( [ BLOCKED ] );
 

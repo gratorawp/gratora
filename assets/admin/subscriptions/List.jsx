@@ -790,7 +790,17 @@ export default function List() {
         copySubscriptionIdAction(),
         {
             id:    'retry',
-            label: __( 'Retry payment', 'gratora-donation-platform' ),
+            // The tooltip is the only thing the icon says before it is used,
+            // so on a row the gateway will not collect it named an action it
+            // was never going to take.
+            label: ( items ) => ( items.length > 0 && items.every( ( i ) => !! retryRefusalFor( i ) )
+                ? _n(
+                    'Why this cannot be retried',
+                    'Why these cannot be retried',
+                    items.length,
+                    'gratora-donation-platform'
+                )
+                : __( 'Retry payment', 'gratora-donation-platform' ) ),
             // DataViews draws a primary action as an icon button, so one with
             // no icon renders as nothing at all -- and being primary, it is
             // left out of the row menu too, taking the action out of reach.
