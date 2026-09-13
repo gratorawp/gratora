@@ -109,7 +109,7 @@ test( 'and counts the rows off as they go', async () => {
     await settle();
 } );
 
-test( 'it cannot be dismissed while rows are still going', async () => {
+test( 'the dialog holds nothing but the spinner while rows are going', async () => {
     const work    = deferred();
     const onClose = await mount( deleting( () => work.promise ) );
 
@@ -117,10 +117,12 @@ test( 'it cannot be dismissed while rows are still going', async () => {
     byLabel( 'Delete permanently' ).click();
     await settle();
 
-    const cancel = byLabel( 'Cancel' );
-    expect( cancel.disabled ).toBe( true );
+    // Not disabled but gone: a Cancel that cancels nothing is worse than no
+    // Cancel, and the requests are already away.
+    expect( buttons() ).toHaveLength( 0 );
+    expect( bodyText() ).not.toContain( 'This removes 440 donations.' );
 
-    cancel.click();
+    document.querySelector( '.gratora-dialog__close' ).click();
     await settle();
 
     expect( onClose ).not.toHaveBeenCalled();

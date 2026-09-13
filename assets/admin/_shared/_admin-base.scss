@@ -79,3 +79,9 @@
         line-height: 17px;
     }
 }
+
+// A batch already sent cannot be called off, so while one is running the
+// dialog's close control is taken away rather than left drawn and dead.
+.gratora-confirm-running .gratora-dialog__close {
+    display: none;
+}

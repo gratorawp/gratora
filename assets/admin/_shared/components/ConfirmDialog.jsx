@@ -62,14 +62,36 @@ export default function ConfirmDialog( { confirm, onClose } ) {
         }
     };
 
-    const busyText = progress && progress.total > 1
-        ? sprintf(
-            /* translators: 1: rows finished so far, 2: rows in total */
-            __( '%1$d of %2$d', 'gratora-donation-platform' ),
-            progress.done,
-            progress.total
-        )
-        : ( confirm.busyLabel || __( 'Working…', 'gratora-donation-platform' ) );
+    // Nothing but the spinner and what is happening. What the dialog said
+    // before is a description of a decision still to be taken, and the choices
+    // beside it are no longer choices: leaving them up means a checkbox that
+    // changes nothing and a Cancel that cancels nothing.
+    if ( running ) {
+        return (
+            <Dialog title={ confirm.title } onClose={ dismiss } wrapperClass="gratora-confirm-running">
+                <div
+                    className="gratora-confirm-busy"
+                    aria-live="polite"
+                    style={ { display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0' } }
+                >
+                    <Spinner />
+                    <div>
+                        <div>{ confirm.busyLabel || __( 'Working…', 'gratora-donation-platform' ) }</div>
+                        { progress && progress.total > 1 && (
+                            <div style={ { opacity: 0.7, fontSize: 12, marginTop: 2 } }>
+                                { sprintf(
+                                    /* translators: 1: rows finished so far, 2: rows in total */
+                                    __( '%1$d of %2$d', 'gratora-donation-platform' ),
+                                    progress.done,
+                                    progress.total
+                                ) }
+                            </div>
+                        ) }
+                    </div>
+                </div>
+            </Dialog>
+        );
+    }
 
     return (
         <Dialog
@@ -77,13 +99,12 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             onClose={ dismiss }
             foot={
                 <>
-                    <Btn variant="secondary" onClick={ dismiss } disabled={ running }>
+                    <Btn variant="secondary" onClick={ dismiss }>
                         { __( 'Cancel', 'gratora-donation-platform' ) }
                     </Btn>
                     <Btn
                         variant={ confirm.destructive ? 'danger' : 'primary' }
                         disabled={ ! matches }
-                        isBusy={ running }
                         onClick={ run }
                     >
                         { confirm.confirmLabel || __( 'Confirm', 'gratora-donation-platform' ) }
@@ -97,16 +118,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                  the donor goes too. Rendered above the confirmation word, so
                  the last thing before typing it is what is about to happen. */ }
             { confirm.body }
-            { running ? (
-                <div
-                    className="gratora-confirm-busy"
-                    aria-live="polite"
-                    style={ { marginTop: 16, display: 'flex', alignItems: 'center', gap: 8 } }
-                >
-                    <Spinner />
-                    <span>{ busyText }</span>
-                </div>
-            ) : ( required !== '' && (
+            { required !== '' && (
                 <label className="gratora-fld" style={ { marginTop: 16, display: 'block' } }>
                     { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'gratora-donation-platform' ), required ) }
                     <input
@@ -118,7 +130,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                         spellCheck="false"
                     />
                 </label>
-            ) ) }
+            ) }
         </Dialog>
     );
 }

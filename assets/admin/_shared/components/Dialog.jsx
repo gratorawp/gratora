@@ -7,12 +7,12 @@ import { useFocusTrap } from '../useFocusTrap';
  * The design system's dialog, with focus management added here rather than
  * forked into the package. display:contents keeps the wrapper out of layout.
  */
-export default function Dialog( props ) {
+export default function Dialog( { wrapperClass = '', ...props } ) {
     const ref = useRef( null );
     useFocusTrap( ref );
 
     return (
-        <div ref={ ref } style={ { display: 'contents' } }>
+        <div ref={ ref } className={ wrapperClass } style={ { display: 'contents' } }>
             <BaseDialog { ...props } />
         </div>
     );
