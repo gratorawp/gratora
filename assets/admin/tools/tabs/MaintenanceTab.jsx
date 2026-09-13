@@ -55,14 +55,23 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
             } );
             const total = ( res?.removed || [] ).reduce( ( n, r ) => n + ( parseInt( r.count, 10 ) || 0 ), 0 );
 
-            setNotice( {
-                type: 'success',
-                text: sprintf(
-                    /* translators: %d: how many stranded rows were removed */
-                    _n( '%d stranded record removed.', '%d stranded records removed.', total, 'gratora-donation-platform' ),
-                    total
-                ),
-            } );
+            // Nothing removed is not a job done. It happens when the card was
+            // built from a stale count, and when an add-on reports stranded
+            // rows and clears none, which reads identically and is a fault in
+            // the add-on the owner otherwise has no way to see.
+            setNotice( total > 0
+                ? {
+                    type: 'success',
+                    text: sprintf(
+                        /* translators: %d: how many stranded rows were removed */
+                        _n( '%d stranded record removed.', '%d stranded records removed.', total, 'gratora-donation-platform' ),
+                        total
+                    ),
+                }
+                : {
+                    type: 'info',
+                    text: __( 'Nothing was removed. The stranded records listed here are gone already, or the add-on that owns them did not clear them.', 'gratora-donation-platform' ),
+                } );
             setOrphanText( '' );
             loadInfo();
         } catch ( err ) {
