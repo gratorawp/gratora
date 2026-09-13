@@ -32,7 +32,7 @@ final class DeclinedRenewal
      */
     public static function isOutstanding(RecurringPlan $plan): bool
     {
-        if (in_array((string) $plan->status, RecurringPlanActions::TERMINAL, true)) {
+        if (PlanStatus::isTerminal((string) $plan->status)) {
             return false;
         }
 

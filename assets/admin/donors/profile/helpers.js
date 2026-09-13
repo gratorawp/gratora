@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 // Timestamps arrive as MySQL strings in UTC with no zone marker, which a
 // browser reads as local time. parseTimestamp marks them.
 import { parseTimestamp } from '@gratora/ui/utils/format';
-import { statusMeta } from '../../_shared/statuses';
+import { planStatusMeta } from '../../_shared/statuses';
 
 export { formatAmount, formatAmountCompact, timeAgo } from '../../_shared/format';
 
@@ -67,7 +67,7 @@ const PROFILE_CLASS = {
 };
 
 export function planStatusPill( status ) {
-    const { variant, label } = statusMeta( status );
+    const { variant, label } = planStatusMeta( status );
 
     return { cls: PROFILE_CLASS[ variant ] || 'is-muted', label };
 }

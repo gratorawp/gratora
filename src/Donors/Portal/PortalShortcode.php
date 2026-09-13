@@ -12,6 +12,7 @@ use Gratora\Campaigns\Styling\Tokens;
 use Gratora\Donations\AntiSpamGuard;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Recurring\PlanStatus;
 
 /**
  * Mounts the donor portal app on the [gratora_donor_portal] shortcode.
@@ -93,6 +94,9 @@ final class PortalShortcode extends HookProvider
                 // sending it, and name the real limit rather than a guess.
                 'avatarMaxBytes' => \Gratora\Donors\DonorAvatarUploader::maxBytes(),
                 'avatarMaxLabel' => size_format(\Gratora\Donors\DonorAvatarUploader::maxBytes()),
+                // The plan lifecycle in words, so the donor reads their own
+                // language for a status this side added.
+                'planStatuses'   => PlanStatus::all(),
             ]);
             wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
         }

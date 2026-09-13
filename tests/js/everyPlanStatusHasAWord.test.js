@@ -1,17 +1,14 @@
 /**
- * A plan sits in `pending` from the moment a donor approves a PayPal
- * subscription until PayPal activates it, which can be never. Neither the
- * profile's pill nor either screen's filter knew the word, so the row read
- * "pending" in untranslated English and no filter could find it.
+ * The words for a plan's statuses come from the side that writes them.
  *
- * The screens kept their own copies of the same five statuses. Two copies
- * missing the same word agree with each other, so a test that asked one about
- * the other passed. These drive from the lifecycle instead.
+ * Four screens and a donor portal each kept their own list of the same five,
+ * so `pending` (where a PayPal plan waits for activation) had no word anywhere
+ * and no filter could find it. Two copies missing the same status agree with
+ * each other, which is why the test asking one about the other passed.
  *
- * What this cannot see: the lifecycle list is maintained by hand against the
- * PHP that writes these statuses. A seventh added there is still invisible
- * here until someone adds it. PayPalSubscriptionTest pins the one that
- * was missing.
+ * These seed a vocabulary the browser could not have guessed and check it
+ * comes out the other end, so a screen that goes back to its own list fails
+ * here rather than on a translated site.
  */
 
 import { render } from 'preact';
@@ -43,8 +40,16 @@ jest.mock( '@wordpress/dataviews', () => ( {
     } ),
 } ) );
 
-import { PLAN_STATUSES } from '../../assets/admin/_shared/statuses';
 import { planStatusPill } from '../../assets/admin/donors/profile/helpers';
+import { recurringStatusLabel } from '../../assets/donor-portal/statusLabels';
+
+// Deliberately not the real vocabulary: a screen falling back to a list of its
+// own would still look right against the real words.
+const SHIPPED = [
+    { value: 'active', label: 'Underway', variant: 'green' },
+    { value: 'pending', label: 'Waiting on PayPal', variant: 'amber' },
+    { value: 'lapsed', label: 'Lapsed', variant: 'red' },
+];
 
 const PLAN = {
     id: 7,
@@ -72,7 +77,7 @@ function seed() {
     } );
 }
 
-async function statusFilterOf( load, props = {} ) {
+async function statusFieldOf( load, props = {} ) {
     seed();
     const Component = load();
 
@@ -98,29 +103,29 @@ beforeEach( () => {
     captured.fields = null;
     document.body.innerHTML = '';
     window.gratora = {
+        plan_statuses: SHIPPED,
         can: {
             refund_donations: true, delete_donations: true, redact_donors: true,
             manage_options: true, view_donations: true, edit_donations: true,
         },
     };
+    window.gratoraPortal = { planStatuses: SHIPPED };
 } );
 
-it( 'has a word for every status a plan can hold', () => {
-    const slugs = PLAN_STATUSES.filter( ( s ) => planStatusPill( s ).label === s );
+it.each( SCREENS )( '%s filters by exactly what it was handed', async ( _name, load, props ) => {
+    const status = await statusFieldOf( load, props );
 
-    expect( slugs ).toEqual( [] );
+    expect( status.elements ).toEqual( SHIPPED.map( ( { value, label } ) => ( { value, label } ) ) );
 } );
 
-it.each( SCREENS )( '%s can be filtered by every one of them', async ( _name, load, props ) => {
-    const status = await statusFilterOf( load, props );
-
-    expect( status.elements.map( ( e ) => e.value ) ).toEqual( PLAN_STATUSES );
+it( 'the profile pill says the word it was handed', () => {
+    expect( planStatusPill( 'pending' ).label ).toBe( 'Waiting on PayPal' );
 } );
 
-it.each( SCREENS )( 'and %s filters by the same word the pill shows', async ( _name, load, props ) => {
-    const status = await statusFilterOf( load, props );
+it( 'and wears the colour it was handed', () => {
+    expect( planStatusPill( 'lapsed' ).cls ).toBe( 'is-error' );
+} );
 
-    const disagreed = status.elements.filter( ( e ) => e.label !== planStatusPill( e.value ).label );
-
-    expect( disagreed ).toEqual( [] );
+it( 'the donor portal says the word it was handed', () => {
+    expect( recurringStatusLabel( 'pending' ) ).toBe( 'Waiting on PayPal' );
 } );

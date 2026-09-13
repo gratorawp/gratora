@@ -13,6 +13,7 @@ use Gratora\Gateways\PayPal\PayPalApi;
 use Gratora\Gateways\PayPal\PayPalGateway;
 use Gratora\Gateways\PayPal\PayPalPlans;
 use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\PlanStatus;
 use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
@@ -340,6 +341,11 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-WAITING');
         $this->assertNotNull($plan, 'the site can only cancel what it wrote down');
         $this->assertSame('pending', $plan->status);
+        $this->assertContains(
+            $plan->status,
+            PlanStatus::LIFECYCLE,
+            'and every screen that labels or filters a plan knows the word for it'
+        );
     }
 
     /** @return array<string, array{0:string}> */

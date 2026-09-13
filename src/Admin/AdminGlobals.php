@@ -13,6 +13,7 @@ use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
 use Gratora\Foundation\Http\ClientIp;
 use Gratora\Foundation\License\LicenseService;
+use Gratora\Recurring\PlanStatus;
 use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
@@ -86,6 +87,9 @@ final class AdminGlobals extends HookProvider
             // Match REST permissions, including the manage_options bypass. JS keys omit
             // gratora_.
             'can' => self::capabilities(),
+            // The plan lifecycle in words, so a screen filtering or labelling one
+            // is not keeping its own copy of the statuses this side writes.
+            'plan_statuses' => PlanStatus::all(),
             // Detect proxy defaults for the spam-protection settings.
             'detectedProxy' => ClientIp::undeclaredProxy(),
         ];

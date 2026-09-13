@@ -23,8 +23,6 @@ use InvalidArgumentException;
  */
 final class RecurringPlanActions
 {
-    /** A plan in one of these states accepts no further changes. */
-    public const TERMINAL = ['cancelled', 'expired'];
 
     /** @since 1.0.0 */
     public function __construct(
@@ -370,7 +368,7 @@ final class RecurringPlanActions
 
     private function assertChangeable(RecurringPlan $plan): void
     {
-        if (in_array((string) $plan->status, self::TERMINAL, true)) {
+        if (PlanStatus::isTerminal((string) $plan->status)) {
             throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'gratora-donation-platform'));
         }
     }

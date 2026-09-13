@@ -40,6 +40,7 @@ use Gratora\Receipts\ReceiptContext;
 use Gratora\Receipts\ReceiptIssuer;
 use Gratora\Receipts\ReceiptRepository;
 use Gratora\Receipts\Renderers\GenericReceiptRenderer;
+use Gratora\Recurring\PlanStatus;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Rest\Paging;
 use Gratora\Settings\SettingsService;
@@ -67,7 +68,6 @@ final class DonationsController
     private const EXPORT_MAX_ROWS = 50000;
 
     /** Plan statuses that will not produce another charge. */
-    private const PLAN_ENDED = ['cancelled', 'expired'];
 
     /** @since 1.0.0 */
     public function __construct(
@@ -1677,7 +1677,7 @@ final class DonationsController
 
         // Already ended is the outcome that was asked for, not a failure, and
         // the plan route rejects a second cancel.
-        if (in_array((string) $plan->status, self::PLAN_ENDED, true)) {
+        if (PlanStatus::isTerminal((string) $plan->status)) {
             return [
                 'id'      => $planId,
                 'status'  => (string) $plan->status,
@@ -1696,7 +1696,7 @@ final class DonationsController
 
         $fresh   = RecurringPlan::query()->find('id', $planId);
         $status  = (string) ($fresh?->status ?? $plan->status);
-        $stopped = in_array($status, self::PLAN_ENDED, true);
+        $stopped = PlanStatus::isTerminal($status);
 
         return [
             'id'      => $planId,

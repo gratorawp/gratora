@@ -9,6 +9,7 @@ use Gratora\Donations\DonationService;
 use Gratora\Foundation\Batch\BatchProcessor;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Gateways\TestMode;
+use Gratora\Recurring\PlanStatus;
 use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
 use Throwable;
@@ -184,7 +185,7 @@ final class SandboxRenewer
         // rehearsal ends, so a paused plan could never be cancelled again.
         $plans = RecurringPlan::query()
             ->where('gateway', 'sandbox')
-            ->whereNotIn('status', ['cancelled', 'expired'])
+            ->whereNotIn('status', PlanStatus::TERMINAL)
             ->limit(self::BATCH)
             ->getAll();
 

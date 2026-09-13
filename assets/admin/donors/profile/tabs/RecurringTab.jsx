@@ -21,8 +21,6 @@ function subscriptionHref( id ) {
     return addQueryArgs( window.location.pathname, { page: 'gratora-subscriptions' } ) + `#subscription/${ id }`;
 }
 
-export const STATUS_OPTIONS = planStatusOptions();
-
 export default function RecurringTab( { recurring, onChange } ) {
     // A fresh [] each render would re-sort and re-paginate on every keystroke.
     const plans = useMemo( () => recurring?.plans || [], [ recurring ] );
@@ -96,7 +94,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         {
             id:       'status',
             label:    __( 'Status', 'gratora-donation-platform' ),
-            elements: STATUS_OPTIONS,
+            elements: planStatusOptions(),
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
             render: ( { item } ) => {

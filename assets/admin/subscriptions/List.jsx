@@ -18,15 +18,13 @@ import Notice from '../_shared/components/Notice';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import notify from '../_shared/notify';
 import StatusBadge from '../_shared/components/StatusBadge';
-import { planStatusOptions } from '../_shared/statuses';
+import { planStatusMeta, planStatusOptions } from '../_shared/statuses';
 import { Switch } from '../_shared/components/Switch';
 import PlanActionDialog, { actionsFor, applyToPlans, dueIn, isTerminal, retryActionFor, retryRefusalFor } from '../_shared/recurring/PlanActions';
 import { CADENCE_LABEL, cadenceLabel, renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
 import { dashboardHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
-
-const STATUS_OPTIONS = planStatusOptions();
 
 // A cadence, not an interval unit: quarterly is three months and biweekly is
 // two weeks, so filtering on the unit filed both under a chip they are not.
@@ -619,12 +617,12 @@ export default function List() {
         {
             id:       'status',
             label:    __( 'Status', 'gratora-donation-platform' ),
-            elements: STATUS_OPTIONS,
+            elements: planStatusOptions(),
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
             render: ( { item } ) => (
                 <>
-                    <StatusBadge status={ item.status } />
+                    <StatusBadge status={ item.status } { ...planStatusMeta( item.status ) } />
                     { item.failed_renewals_count > 0 && (
                         <span className="gratora-row__sub" style={ { marginLeft: 6 } }>
                             { sprintf(

@@ -11,6 +11,7 @@ use Gratora\Donors\DonorRepository;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Recurring\PlanStatus;
 
 /**
  * Connect WordPress privacy tools to the existing export and erasure services, including add-on
@@ -239,7 +240,7 @@ final class WordPressPrivacy
         return $this->fields([
             [__('Amount', 'gratora-donation-platform'), $this->money($row)],
             [__('Frequency', 'gratora-donation-platform'), $row['frequency'] ?? ''],
-            [__('Status', 'gratora-donation-platform'), $row['status'] ?? ''],
+            [__('Status', 'gratora-donation-platform'), PlanStatus::label((string) ($row['status'] ?? ''))],
             [__('Payment method', 'gratora-donation-platform'), $row['gateway'] ?? ''],
             [__('Started', 'gratora-donation-platform'), $row['started_at'] ?? ''],
             [__('Next payment', 'gratora-donation-platform'), $row['next_payment_at'] ?? ''],

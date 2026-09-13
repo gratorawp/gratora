@@ -9,6 +9,8 @@ use Gratora\Donors\DonorRepository;
 use Gratora\Donors\Privacy\WordPressPrivacy;
 use Gratora\Foundation\Identity\IdentityHasher;
 use Gratora\Foundation\Plugin;
+use Gratora\Recurring\PlanStatus;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Tools, Export Personal Data and Erase Personal Data are the screens a site
@@ -46,6 +48,41 @@ final class WordPressPrivacyTest extends IntegrationTestCase
         $donor->save();
 
         return $donor;
+    }
+
+    /**
+     * The bundle WordPress emails a data subject under their right of access.
+     * Nothing else in it is a database key, and the status was one.
+     */
+    public function test_a_plan_status_reaches_the_data_subject_in_words(): void
+    {
+        $email = 'plan-status-' . uniqid() . '@example.test';
+        $donor = $this->makeDonor($email);
+        $now   = gmdate('Y-m-d H:i:s');
+
+        $plan = RecurringPlan::make();
+        $plan->donor_id                = (int) $donor->id;
+        $plan->gateway                 = 'stripe';
+        $plan->gateway_subscription_id = 'sub_' . uniqid();
+        $plan->amount_cents            = 2000;
+        $plan->currency                = 'USD';
+        $plan->interval_unit           = 'month';
+        $plan->interval_count          = 1;
+        $plan->status                  = 'past_due';
+        $plan->started_at              = $now;
+        $plan->created_at              = $now;
+        $plan->updated_at              = $now;
+        $plan->save();
+
+        $values = [];
+        foreach ((array) ($this->privacy()->export($email)['data'] ?? []) as $group) {
+            foreach ((array) ($group['data'] ?? []) as $field) {
+                $values[] = (string) ($field['value'] ?? '');
+            }
+        }
+
+        $this->assertContains(PlanStatus::label('past_due'), $values);
+        $this->assertNotContains('past_due', $values);
     }
 
     public function test_wordpress_is_told_about_both_tools(): void

@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * Every status the admin can print, and the colour it wears.
+ * Every status the admin prints that is not a plan's, and the colour it wears.
  *
  * Status strings do not collide across domains, so one map serves campaigns,
  * donations and plans. A screen that keeps its own list of the same words
@@ -32,29 +32,43 @@ const STATUS = {
     partially_refunded: { variant: 'blue',  label: __( 'Partially refunded', 'gratora-donation-platform' ) },
     disputed:           { variant: 'red',   label: __( 'Disputed', 'gratora-donation-platform' ) },
     cancelled:          { variant: 'gray',  label: __( 'Cancelled', 'gratora-donation-platform' ) },
-    // Recurring plan lifecycle. Here rather than hand-rolled on the
-    // subscriptions screen, so a plan's status pill matches a donation's.
+    // A plan's own statuses are not here: they are written on the server and
+    // arrive with their words, through planStatusMeta. These are the ones a
+    // plan shares with a campaign or a donation.
     active:             { variant: 'green', label: __( 'Active', 'gratora-donation-platform' ) },
-    past_due:           { variant: 'amber', label: __( 'Past due', 'gratora-donation-platform' ) },
-    paused:             { variant: 'gray',  label: __( 'Paused', 'gratora-donation-platform' ) },
-    expired:            { variant: 'gray',  label: __( 'Expired', 'gratora-donation-platform' ) },
 };
-
-/**
- * Every status the plans table holds, in the order a plan passes through them.
- *
- * `pending` is where a PayPal plan begins: the subscription is recorded when
- * the donor approves it and only becomes active when PayPal says so, which can
- * be never. The server writes these; adding one there means adding it here.
- */
-export const PLAN_STATUSES = [ 'active', 'pending', 'past_due', 'paused', 'cancelled', 'expired' ];
 
 /** The word and the colour for a status, or the slug spaced out if it is new. */
 export function statusMeta( status ) {
     return STATUS[ status ] || { variant: 'gray', label: String( status || '' ).replace( /_/g, ' ' ) };
 }
 
+/**
+ * The plan lifecycle, as the server that writes those statuses describes it.
+ *
+ * Read at call time rather than at import, because the admin config is put on
+ * the page for the bundle to find and a module evaluated first would cache an
+ * empty list forever.
+ */
+function shipped() {
+    const list = window.gratora?.plan_statuses;
+
+    return Array.isArray( list ) ? list : [];
+}
+
+/** Every status a plan can hold, in the order it passes through them. */
+export function planStatuses() {
+    return shipped().map( ( s ) => s.value );
+}
+
+/** The word and the colour for one of them. */
+export function planStatusMeta( status ) {
+    const found = shipped().find( ( s ) => s.value === status );
+
+    return found ? { variant: found.variant, label: found.label } : statusMeta( status );
+}
+
 /** The plan lifecycle as a DataViews filter offers it. */
 export function planStatusOptions() {
-    return PLAN_STATUSES.map( ( value ) => ( { value, label: statusMeta( value ).label } ) );
+    return shipped().map( ( { value, label } ) => ( { value, label } ) );
 }
