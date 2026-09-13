@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Rest\Admin;
 
 use Gratora\Rest\Paging;
+use Gratora\Analytics\AuditMessage;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Analytics\Event;
 use Gratora\Analytics\EventRecorder;
@@ -383,12 +384,8 @@ final class ToolsController
     }
 
     /**
-     * The record of something done TO a donor, which is not a failure.
-     *
-     * These rows are readable here on purpose, and the error branch stamped
-     * them kind 'error' and then cut ErrorLog's prefix off a type that never
-     * carried it: an erasure appeared in the log as an error from a source
-     * called "redacted", with no message at all.
+     * The record of something done TO a donor or a donation, which is not a
+     * failure. These rows are readable here on purpose.
      *
      * @return array<string,mixed>
      *
@@ -405,10 +402,16 @@ final class ToolsController
             }
         }
 
-        $message = $who !== ''
+        $deed = AuditMessage::for((string) $e->type, $payload);
+
+        $by = $who !== ''
             /* translators: %s: who performed the action, a staff name or "donor". */
             ? sprintf(__('Recorded by %s.', 'gratora-donation-platform'), $who)
             : '';
+
+        // The deed first: it is what the column asks for, and the type beside
+        // it is a database key that answers for nobody outside this codebase.
+        $message = trim($deed . ' ' . $by);
 
         // An add-on's own audit type: core cannot phrase what it means, and
         // the fallback below claims nothing was recorded on a row whose
