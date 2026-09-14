@@ -15,6 +15,7 @@
 # never reach build/.
 /package.json
 /webpack.config.js
+/build-tools
 /assets/admin
 /assets/_shared
 /assets/donation-form

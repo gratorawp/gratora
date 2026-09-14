@@ -86,7 +86,7 @@ grep -q 'github.com/gratorawp/gratora' "$OUT/readme.txt" \
 
 
 for src in assets/admin assets/_shared assets/donation-form assets/donor-portal \
-    package.json webpack.config.js
+    package.json webpack.config.js build-tools
 do
     test ! -e "$OUT/$src" || fail "$src is in the zip; the repository is what answers for it"
 done
