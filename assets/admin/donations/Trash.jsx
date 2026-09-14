@@ -100,7 +100,9 @@ export default function Trash() {
         if ( done > 0 ) {
             notify.success( doneMessage( done ) );
         }
-        setRefusals( result.refused );
+        // Appended, not replaced: an action names the rows it will not touch
+        // before it asks, and a clean batch would otherwise wipe them.
+        setRefusals( ( prev ) => [ ...prev, ...result.refused ] );
         if ( result.refused.length > 0 ) {
             notify.error( refusedMessage( result.refused.length ) );
         }
@@ -167,8 +169,17 @@ export default function Trash() {
             icon:          () => <Trash2 size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            isEligible:    ( item ) => userCan( 'delete_donations' ) && ! item.delete_blocked,
+            // A row the bin cannot empty still says why, on the screen whose
+            // whole purpose is emptying it.
+            isEligible:    ( item ) => userCan( 'delete_donations' )
+                && ( !! item.deletable || !! item.delete_blocked ),
             callback: ( items ) => {
+                // Seeded for this run, empty included, because report() appends
+                // whatever the batch refuses to it.
+                setRefusals( items
+                    .filter( ( i ) => !! i.delete_blocked )
+                    .map( ( i ) => ( { reference: i.reference, reason: i.delete_blocked } ) ) );
+
                 const targets = items.filter( ( i ) => ! i.delete_blocked );
                 if ( ! targets.length ) return;
                 const n = targets.length;

@@ -406,8 +406,19 @@ export default function List() {
             icon:          () => <Trash2 size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            isEligible:    ( item ) => userCan( 'refund_donations' ) && !! item.trashable,
+            // The row carries its refusal, and this one says a card is still
+            // being charged, so the control stays and reads it out the way
+            // Delete permanently beside it does.
+            isEligible:    ( item ) => userCan( 'refund_donations' )
+                && ( !! item.trashable || !! item.untrashable_reason ),
             callback: ( items ) => {
+                // Seeded for this run, empty included: the batch appends to it
+                // below, and a stale list from the last run would be read as
+                // belonging to this one.
+                setRefusals( items
+                    .filter( ( i ) => ! i.trashable && !! i.untrashable_reason )
+                    .map( ( i ) => ( { reference: i.reference, reason: i.untrashable_reason } ) ) );
+
                 // DataViews hands the callback the whole selection rather than
                 // the eligible part of it, so the filter is repeated here.
                 const targets = items.filter( ( i ) => i.trashable );
@@ -492,7 +503,10 @@ export default function List() {
                             );
                         }
 
-                        setRefusals( result.refused );
+                        // Appended: the rows the screen refused before asking
+                        // are already listed, and replacing would clear them on
+                        // a mixed selection whose eligible half went through.
+                        setRefusals( ( prev ) => [ ...prev, ...result.refused ] );
                         if ( result.refused.length > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
