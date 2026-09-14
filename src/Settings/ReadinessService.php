@@ -493,7 +493,7 @@ final class ReadinessService
             'receipts',
             __('Receipts are missing details donors may need', 'gratora-donation-platform'),
             implode(' ', $missing) . ' '
-                . __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'gratora-donation-platform'),
+                . __('A receipt has a place for them at the top, and donors claiming tax relief usually need them.', 'gratora-donation-platform'),
             'organization',
             __('Add the details', 'gratora-donation-platform')
         );
