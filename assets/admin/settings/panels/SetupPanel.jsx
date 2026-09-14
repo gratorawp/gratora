@@ -91,7 +91,15 @@ function Summary( { report } ) {
             _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'gratora-donation-platform' ),
             blockers
         );
-        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'gratora-donation-platform' );
+        // No count here: the headline just gave it. What this has to do is
+        // agree with it, and a ternary on 1 would only agree in languages with
+        // two plural forms.
+        sub = _n(
+            'Until it is fixed, a donor cannot complete a donation.',
+            'Until they are fixed, a donor cannot complete a donation.',
+            blockers,
+            'gratora-donation-platform'
+        );
     } else if ( warnings > 0 ) {
         tone = 'amber';
         sub  = sprintf(

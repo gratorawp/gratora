@@ -140,6 +140,14 @@ export default function NumberingPanel( { s , active } ) {
     // live, so the counters are re-read every time the tab becomes active.
     useEffect( () => { if ( active ) loadCounters(); }, [ active ] );
 
+    // Counters load after the first paint and can fail to load at all, so the
+    // preview falls back to the first number a fresh site would mint.
+    const nextCounter = ( key ) => {
+        const n = Number( counters?.[ key ] );
+
+        return Number.isFinite( n ) && n > 0 ? n : 1;
+    };
+
     const setDraft = ( key, v ) => setDrafts( ( prev ) => ( { ...prev, [ key ]: v } ) );
 
     const doSet = async ( key ) => {
@@ -187,7 +195,16 @@ export default function NumberingPanel( { s , active } ) {
             >
                 <div className="gratora-ref-previews">
                     { SCOPES.map( ( p ) => {
-                        const { head, seq } = refParts( liveFmt, livePrefix[ p.key ], 1, year );
+                        // The counter the next reference will actually carry,
+                        // not 1: a site whose donations passed the padding was
+                        // shown a width and a number it will never mint, right
+                        // above the card that says the real one.
+                        const { head, seq } = refParts(
+                            liveFmt,
+                            livePrefix[ p.key ],
+                            nextCounter( p.key ),
+                            year
+                        );
                         return (
                             <div key={ p.key } className="gratora-ref-preview">
                                 <span className="gratora-ref-preview__label">{ p.label }</span>
