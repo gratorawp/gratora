@@ -20,7 +20,14 @@ import { GoalCell } from '../_shared/components/GoalBar';
 import CreateCampaignDrawer from './CreateCampaignDrawer';
 import notify from '../_shared/notify';
 
-const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) => ( { value, label } ) );
+// A badge reads Active only while a campaign is accepting, since it renders
+// not_accepting || status, and the Active figure above the table counts the
+// same thing. Asking the stored column instead returned rows badged Ended
+// under a chip reading Active.
+const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) => ( {
+    value: value === 'published' ? 'accepting' : value,
+    label,
+} ) );
 
 /**
  * What deleting this selection destroys, said before the admin agrees to it.
