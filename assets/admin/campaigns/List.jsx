@@ -14,6 +14,7 @@ import EmptyState from '../_shared/components/EmptyState';
 import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import { rowLinkProps } from '../_shared/rowLink';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
+import Dialog from '../_shared/components/Dialog';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { GoalCell } from '../_shared/components/GoalBar';
 import CreateCampaignDrawer from './CreateCampaignDrawer';
@@ -87,6 +88,7 @@ export default function List() {
     const [ error, setError ]     = useState( null );
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
+    const [ refused, setRefused ] = useState( null );
     // Opens straight into the create drawer when reached via the command
     // palette's "New campaign" (admin.php?page=gratora-campaigns&action=new).
     const [ drawerOpen, setDrawerOpen ] = useState(
@@ -294,13 +296,28 @@ export default function List() {
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            // The server refuses to delete a campaign that has donations, so
-            // offering it was offering something that could not happen. The
-            // copy said donations stay in your database, which read as a
-            // promise that the campaign would go and they would remain.
-            isEligible:    ( item ) => ! ( ( item.donations_count ?? 0 ) > 0 ),
+            // The server decides, and it refuses on a recurring plan as well as
+            // on donations. Withheld outright the action simply vanished, and
+            // on a site whose campaigns all have donations it vanished from
+            // every row, taking with it the one sentence that names archiving
+            // as the way to keep the records.
+            isEligible:    ( item ) => !! item.deletable || !! item.delete_blocked,
             callback: ( items ) => {
                 if ( ! items.length ) return;
+
+                // One sentence per cause: a selection of six campaigns with
+                // donations has one thing wrong with it.
+                const reasons = [ ...new Set( items.map( ( i ) => i.delete_blocked ).filter( Boolean ) ) ];
+                const targets = items.filter( ( i ) => i.deletable );
+
+                // Not a confirmation: there is nothing to decide, so a Cancel
+                // beside a Close would cancel nothing.
+                if ( ! targets.length ) {
+                    setRefused( { count: items.length, reasons } );
+                    return;
+                }
+
+                items = targets;
                 const n = items.length;
                 const message = campaignsDeleteMessage( items );
                 setConfirm( {
@@ -317,8 +334,10 @@ export default function List() {
                             method: 'DELETE',
                         } ) ) );
 
-                        const refused = items.filter( ( _i, idx ) => results[ idx ].status === 'rejected' );
-                        const deleted = items.length - refused.length;
+                        // Refused by the server after the attempt, as opposed
+                        // to the ones the row never offered.
+                        const rejected = items.filter( ( _i, idx ) => results[ idx ].status === 'rejected' );
+                        const deleted  = items.length - rejected.length;
 
                         if ( deleted > 0 ) {
                             notify.success( sprintf(
@@ -327,11 +346,11 @@ export default function List() {
                                 deleted
                             ) );
                         }
-                        if ( refused.length > 0 ) {
+                        if ( rejected.length > 0 ) {
                             setError( sprintf(
                                 /* translators: %s: comma separated campaign titles */
                                 __( 'These campaigns were not deleted, because they have donations: %s', 'gratora-donation-platform' ),
-                                refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
+                                rejected.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
                             ) );
                         }
 
@@ -435,6 +454,27 @@ export default function List() {
             ) }
 
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
+
+            { refused && (
+                <Dialog
+                    title={ _n(
+                        'This campaign cannot be deleted',
+                        'These campaigns cannot be deleted',
+                        refused.count,
+                        'gratora-donation-platform'
+                    ) }
+                    onClose={ () => setRefused( null ) }
+                    foot={
+                        <Btn variant="primary" onClick={ () => setRefused( null ) }>
+                            { __( 'Close', 'gratora-donation-platform' ) }
+                        </Btn>
+                    }
+                >
+                    { refused.reasons.map( ( why ) => (
+                        <Notice key={ why } status="warning" isDismissible={ false }>{ why }</Notice>
+                    ) ) }
+                </Dialog>
+            ) }
         </div>
     );
 }

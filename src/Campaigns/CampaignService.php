@@ -311,14 +311,54 @@ final class CampaignService
      */
     public function deleteBlockedReason(Campaign $campaign): ?string
     {
-        $donations = (int) Donation::query()->where('campaign_id', $campaign->id)->count();
-        $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
+        return $this->deleteBlockedReasons([(int) $campaign->id])[(int) $campaign->id] ?? null;
+    }
 
-        if ($donations > 0 || $plans > 0) {
-            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'gratora-donation-platform');
+    /**
+     * The same gate for a whole page of campaigns, in two grouped queries
+     * rather than two per row.
+     *
+     * A list that asks per row pays a count over every donation belonging to
+     * every campaign on the page, twice. Asked this way it is the same index,
+     * walked once.
+     *
+     * @param list<int> $ids
+     * @return array<int,?string> campaign id => the refusal, or null to delete
+     *
+     * @since 1.0.0
+     */
+    public function deleteBlockedReasons(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            return [];
         }
 
-        return null;
+        $held = [];
+
+        foreach (['gratora_donations', 'gratora_recurring_plans'] as $table) {
+            $rows = DB::table($table)
+                ->selectRaw('campaign_id, COUNT(*) AS held')
+                ->whereIn('campaign_id', $ids)
+                ->groupBy('campaign_id')
+                ->getAll();
+
+            foreach ($rows as $row) {
+                if ((int) $row['held'] > 0) {
+                    $held[(int) $row['campaign_id']] = true;
+                }
+            }
+        }
+
+        $out = [];
+
+        foreach ($ids as $id) {
+            $out[$id] = isset($held[$id])
+                ? __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'gratora-donation-platform')
+                : null;
+        }
+
+        return $out;
     }
 
     /** @since 1.0.0 */

@@ -202,7 +202,16 @@ final class CampaignsController
             'search'   => $request['search'] !== null ? (string) $request['search'] : null,
         ]);
 
-        $shaped = array_map(fn (Campaign $c) => $this->shapeSummary($c), $result['items']);
+        // One gate for the page, not two counts per row: the reason names
+        // archiving as the way out and the screen has to be able to say it.
+        $blocked = $this->campaignService->deleteBlockedReasons(
+            array_map(static fn (Campaign $c): int => (int) $c->id, $result['items'])
+        );
+
+        $shaped = array_map(
+            fn (Campaign $c) => $this->shapeSummary($c, $blocked[(int) $c->id] ?? null),
+            $result['items']
+        );
 
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total',      (string) $result['total']);
@@ -458,7 +467,7 @@ final class CampaignsController
     }
 
     /** @since 1.0.0 */
-    private function shapeSummary(Campaign $c): array
+    private function shapeSummary(Campaign $c, ?string $deleteBlocked): array
     {
         $formsCount = (int) Form::query()->where('campaign_id', $c->id)->count();
         $imageUrl   = $c->image_attachment_id ? wp_get_attachment_image_url($c->image_attachment_id, 'large') : null;
@@ -484,6 +493,11 @@ final class CampaignsController
             'goal_cents'          => $c->goal_cents,
             'goal_count'          => $c->goal_count,
             'raised_cents'        => $c->raised_cents,
+            // The refusal itself, not the count the screen would have to
+            // re-derive it from: the server also refuses on a recurring plan,
+            // and the sentence names archiving, which is the way out.
+            'deletable'           => $deleteBlocked === null,
+            'delete_blocked'      => $deleteBlocked,
             'donations_count'     => $c->donations_count,
             'donors_count'        => $c->donors_count,
             'forms_count'         => $formsCount,
@@ -516,16 +530,12 @@ final class CampaignsController
         // Metrics excluded: multi-second aggregate; the Overview tab fetches
         // /admin/campaigns/{id}/metrics separately so this path stays instant.
         unset($range);
-        return $this->shapeSummary($c) + [
+        return $this->shapeSummary($c, $this->campaignService->deleteBlockedReason($c)) + [
             'description'   => $c->description,
             'starts_at'     => $c->starts_at,
             'ends_at'       => $c->ends_at,
             'page_edit_url' => $pageEditUrl,
             'page_url'      => $pageUrl ?: null,
-            // The delete gate's own answer, so the screen can stop offering an
-            // action that can only fail. Detail only: it costs two counts, and
-            // the list would pay them once per row.
-            'delete_blocked' => $this->campaignService->deleteBlockedReason($c),
         ];
     }
 
