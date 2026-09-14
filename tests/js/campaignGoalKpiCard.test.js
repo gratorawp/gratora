@@ -59,8 +59,19 @@ describe( 'the goal card on the campaign overview', () => {
 			.toBe( '' );
 	} );
 
-	it( 'never reports more than a met goal', () => {
-		expect( mount( { goal_type: 'amount', goal_cents: 100000, raised_cents: 250000 } ).textContent )
-			.toContain( '100%' );
+	it( 'says how far past a met goal it is', () => {
+		// The card prints "current / target" underneath, so a capped number is
+		// contradicted by the line below it. Five of one site's seven campaigns
+		// read 100% while standing between 1,957% and 24,841%.
+		const host = mount( { goal_type: 'amount', goal_cents: 100000, raised_cents: 250000 } );
+
+		expect( host.textContent ).toContain( '250%' );
+		expect( host.textContent ).not.toContain( '100%' );
+	} );
+
+	it( 'but its bar still stops at the end of the track', () => {
+		const host = mount( { goal_type: 'amount', goal_cents: 100000, raised_cents: 250000 } );
+
+		expect( host.querySelector( '.gratora-metric__bar-fill' ).style.width ).toBe( '100%' );
 	} );
 } );

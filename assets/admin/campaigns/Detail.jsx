@@ -22,7 +22,7 @@ import UnshownNotice from '../_shared/styling/UnshownNotice';
 import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon, AlertTriangle } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
-import { GoalCell } from '../_shared/components/GoalBar';
+import { GoalCell, goalPercent } from '../_shared/components/GoalBar';
 import { IconCoins, IconHeart, IconUsers, IconActivity } from './icons';
 import { IconGeneral, IconGoal, IconAppearance, IconDefaults, IconAdvanced } from './settings-icons';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
@@ -768,11 +768,11 @@ function OverviewTab( { campaign, nav, onError } ) {
                                 changePct={ cmp?.amount_raised_cents }
                                 icon={ <IconCoins /> } />
                     <MetricCard label={ __( 'Donations', 'gratora-donation-platform' ) }
-                                value={ String( m.donations_count ) }
+                                value={ Number( m.donations_count || 0 ).toLocaleString() }
                                 changePct={ cmp?.donations_count }
                                 icon={ <IconHeart /> } />
                     <MetricCard label={ __( 'Donors', 'gratora-donation-platform' ) }
-                                value={ String( m.donors_count ) }
+                                value={ Number( m.donors_count || 0 ).toLocaleString() }
                                 changePct={ cmp?.donors_count }
                                 icon={ <IconUsers /> } />
                     <MetricCard label={ __( 'Average donation', 'gratora-donation-platform' ) }
@@ -1137,7 +1137,10 @@ export function GoalProgressCard( { campaign } ) {
         return null;
     }
 
-    const pct = Math.min( 100, Math.round( ( current / target ) * 100 ) );
+    // The card prints "current / target" directly beneath this, so a capped
+    // number is contradicted by the line under it.
+    const pct   = goalPercent( current, target );
+    const width = Math.min( 100, pct );
 
     // Raised totals are summed in the org base currency, so they format with
     // the org default and take no per-campaign currency argument.
@@ -1158,11 +1161,11 @@ export function GoalProgressCard( { campaign } ) {
             </div>
             <div className="gratora-metric__label">{ __( 'Goal progress', 'gratora-donation-platform' ) }</div>
             <div className="gratora-metric__row">
-                <div className="gratora-metric__value">{ `${ pct }%` }</div>
+                <div className="gratora-metric__value">{ `${ pct.toLocaleString() }%` }</div>
             </div>
             <div className="gratora-metric__sub">{ `${ fmt( current ) } / ${ fmt( target ) }` }</div>
             <div className="gratora-metric__bar" aria-hidden="true">
-                <div className="gratora-metric__bar-fill" style={ { width: `${ pct }%` } } />
+                <div className="gratora-metric__bar-fill" style={ { width: `${ width }%` } } />
             </div>
         </div>
     );

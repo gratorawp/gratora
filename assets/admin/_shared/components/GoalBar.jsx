@@ -1,6 +1,19 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatAmount } from '../format';
 
+/**
+ * Progress against a goal, uncapped.
+ *
+ * A bar cannot overflow its track, so GoalBar clamps the fill. The number
+ * beside it is a different question: clamped, a campaign seventy times past
+ * its target reads the same as one that just reached it.
+ */
+export function goalPercent( current, target ) {
+    const to = Number( target ) || 0;
+
+    return to > 0 ? Math.max( 0, Math.round( ( Number( current ) || 0 ) / to * 100 ) ) : 0;
+}
+
 /** Measure goals in org base currency, independently of the row’s donation currency. */
 export function GoalCell( { item } ) {
     const type     = item.goal_type || 'amount';
@@ -11,7 +24,7 @@ export function GoalCell( { item } ) {
         : ( type === 'donors' ? item.donors_count : item.donations_count )
     ) || 0 );
     const hasGoal  = target > 0;
-    const pct      = hasGoal ? Math.min( 100, Math.max( 0, Math.round( ( current / target ) * 100 ) ) ) : 0;
+    const pct      = hasGoal ? goalPercent( current, target ) : 0;
 
     const template = type === 'donors'
         ? /* translators: %s: number of donors */ _n( '%s donor', '%s donors', target, 'gratora-donation-platform' )
@@ -25,7 +38,7 @@ export function GoalCell( { item } ) {
     return (
         <GoalBar
             left={ label }
-            right={ hasGoal ? `${ pct }%` : '-' }
+            right={ hasGoal ? `${ pct.toLocaleString() }%` : '-' }
             pct={ pct }
             muted={ ! hasGoal }
         />
