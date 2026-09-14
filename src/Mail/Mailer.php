@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Mail;
 
 use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Helpers\TemplateTokens;
 
 /**
  * Apply configured mail headers and per-template text.
@@ -180,7 +181,7 @@ final class Mailer
     {
         if ($source === '' || empty($tokens)) return $source;
         $map = [];
-        foreach ($tokens as $k => $v) {
+        foreach (TemplateTokens::withSpellingsUnwrapped($tokens) as $k => $v) {
             $map['{' . $k . '}'] = (string) $v;
         }
         return strtr($source, $map);

@@ -13,6 +13,7 @@ use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Helpers\View;
 use Gratora\Receipts\OrgProfile;
 use Gratora\Receipts\PdfBuilder;
+use Gratora\Foundation\Helpers\TemplateTokens;
 
 /**
  * Builds a donor year-end tax statement PDF (US 501(c)(3) style contribution
@@ -253,10 +254,10 @@ final class TaxStatementBuilder
         // Only the two tags a year has an answer for: the rest belong to a
         // single donation, and a receipt-scoped tag left in place would print
         // as {amount} on the document a donor files with their return.
-        $note = strtr($note, [
+        $note = strtr($note, TemplateTokens::withSpellings([
             '{organisation_name}' => $orgName,
             '{donor_name}'        => $donorName,
-        ]);
+        ]));
 
         return trim((string) preg_replace('/\{[a-z_]+\}/', '', $note));
     }

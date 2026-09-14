@@ -14,6 +14,7 @@ use Gratora\Foundation\Helpers\View;
 use Gratora\Receipts\PdfBuilder;
 use Gratora\Receipts\ReceiptContext;
 use Gratora\Receipts\ReceiptRenderer;
+use Gratora\Foundation\Helpers\TemplateTokens;
 
 /**
  * Generic receipt renderer applied to every paid donation.
@@ -195,6 +196,8 @@ final class GenericReceiptRenderer implements ReceiptRenderer
                 : '',
             '{reference}'         => (string) $donation->reference,
         ];
+
+        $replacements = TemplateTokens::withSpellings($replacements);
 
         $apply = static fn (string $s): string => strtr($s, $replacements);
 
