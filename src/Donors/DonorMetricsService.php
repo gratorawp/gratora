@@ -120,7 +120,7 @@ final class DonorMetricsService
         $segments  = $this->donors->rfmSegments($today);
         $ltv       = $this->donors->lifetimeValueHistogram([2500, 10000, 25000, 50000, 100000, 250000]);
         $top       = $this->donors->topByLifetimeValue(20);
-        $retention = $this->donors->donorCohortRetention(12, 12);
+        $retention = $this->donors->donorCohortRetention(12, 12, $today);
         $recurring = $this->recurring->recurringStats($today);
 
         // Over the donors the bands actually describe, and rounded so they

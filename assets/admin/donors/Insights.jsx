@@ -259,6 +259,18 @@ function CohortHeatmap( { retention } ) {
     }
     const cols = Array.from( { length: maxOffset + 1 }, ( _, i ) => i );
 
+    const anyPartial = cohorts.some( ( row ) =>
+        Object.values( row.retention || {} ).some( ( c ) => c && c.partial && c.pct > 0 )
+    );
+
+    // A month still running is not comparable with the months behind it, so it
+    // is drawn out of the scale rather than as the palest cell in the row.
+    const partialStyle = {
+        background: 'var(--gratora-bg-soft, #f3f4f6)',
+        color:      'var(--gratora-text-muted, #6b7280)',
+        fontStyle:  'italic',
+    };
+
     const cellStyle = ( pct ) => {
         if ( pct <= 0 ) return { background: 'var(--gratora-bg-soft, #f3f4f6)', color: 'var(--gratora-text-muted, #6b7280)' };
         // One hue, light to dark, so the cell reads as magnitude.
@@ -289,14 +301,32 @@ function CohortHeatmap( { retention } ) {
                             <td className="gratora-num">{ row.size }</td>
                             { cols.map( ( i ) => {
                                 const cell = row.retention[ i ] || { pct: 0, count: 0 };
+                                const soFar = !! cell.partial && cell.pct > 0;
+
                                 return (
                                     <td
                                         key={ i }
                                         className="gratora-cohort__cell"
-                                        style={ cellStyle( cell.pct ) }
-                                        title={ `${ cell.count } / ${ row.size } (${ cell.pct }%)` }
+                                        style={ soFar ? partialStyle : cellStyle( cell.pct ) }
+                                        title={ soFar
+                                            ? sprintf(
+                                                /* translators: 1: donors so far, 2: cohort size, 3: a percentage */
+                                                __( '%1$s of %2$s so far (%3$s%%). This month is still running.', 'gratora-donation-platform' ),
+                                                cell.count,
+                                                row.size,
+                                                cell.pct
+                                            )
+                                            : `${ cell.count } / ${ row.size } (${ cell.pct }%)` }
                                     >
-                                        { cell.pct > 0 ? `${ cell.pct }%` : '-' }
+                                        { cell.pct > 0
+                                            ? ( soFar
+                                                ? sprintf(
+                                                    /* translators: %s: a percentage reached so far this month */
+                                                    __( '%s%% so far', 'gratora-donation-platform' ),
+                                                    cell.pct
+                                                )
+                                                : `${ cell.pct }%` )
+                                            : '-' }
                                     </td>
                                 );
                             } ) }
@@ -304,6 +334,11 @@ function CohortHeatmap( { retention } ) {
                     ) ) }
                 </tbody>
             </table>
+            { anyPartial && (
+                <p className="gratora-cohort__note">
+                    { __( 'One cell per cohort falls in the month now running, and counts only the days so far. Those are marked and left out of the shading.', 'gratora-donation-platform' ) }
+                </p>
+            ) }
         </div>
     );
 }

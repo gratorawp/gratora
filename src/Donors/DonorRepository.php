@@ -502,7 +502,7 @@ final class DonorRepository
      *
      * @since 1.0.0
      */
-    public function donorCohortRetention(int $cohortMonths = 12, int $maxOffset = 12): array
+    public function donorCohortRetention(int $cohortMonths = 12, int $maxOffset = 12, ?string $today = null): array
     {
         $donorsT    = DB::getPrefix() . 'gratora_donors';
         $donationsT = DB::getPrefix() . 'gratora_donations';
@@ -553,21 +553,35 @@ final class DonorRepository
             $grid[$cohort][$offset] = $count;
         }
 
+        // The month a cell covers is only over for the cells behind this one.
+        // Counted the same way as the rest, the current month reads as a
+        // collapse from three quarters to a handful, on every cohort at once,
+        // every day until it ends.
+        $currentMonth = substr($today ?? gmdate('Y-m-d'), 0, 7);
+
         $cohorts = [];
         foreach ($grid as $cohort => $offsets) {
-            $size = (int) ($offsets[0] ?? 0);
+            $size  = (int) ($offsets[0] ?? 0);
+            $start = DateTimeImmutable::createFromFormat('Y-m-d', $cohort . '-01');
+
             $retention = [];
             for ($i = 0; $i <= $maxOffset; $i++) {
-                $cnt = (int) ($offsets[$i] ?? 0);
+                $cnt   = (int) ($offsets[$i] ?? 0);
+                $month = $start instanceof DateTimeImmutable
+                    ? $start->modify("+{$i} months")->format('Y-m')
+                    : '';
+
                 $retention[$i] = [
-                    'count' => $cnt,
-                    'pct'   => $size > 0 ? round(($cnt / $size) * 100, 1) : 0.0,
+                    'count'   => $cnt,
+                    'pct'     => $size > 0 ? round(($cnt / $size) * 100, 1) : 0.0,
+                    'month'   => $month,
+                    'partial' => $month === $currentMonth,
                 ];
             }
             $cohorts[] = ['month' => $cohort, 'size' => $size, 'retention' => $retention];
         }
 
-        return ['cohorts' => $cohorts, 'max_offset' => $maxOffset];
+        return ['cohorts' => $cohorts, 'max_offset' => $maxOffset, 'current_month' => $currentMonth];
     }
 
     /**
