@@ -572,6 +572,53 @@ final class AntiSpamGuard
         return $value === null || $value === false ? 0 : (int) $value;
     }
 
+    /**
+     * peek() for a limiter rather than a display.
+     *
+     * peek() reads a missing row and a failed read alike as 0, which is right
+     * for a counter on a screen and wrong for a gate: a database in trouble
+     * would report every caller as having spent nothing, at the one moment that
+     * matters. Null here means the count is unknown, and a caller that cannot
+     * read its ceiling has to refuse.
+     *
+     * @since 1.1.0
+     */
+    public function peekStrict(string $base, int $window, ?int $bucket = null): ?int
+    {
+        global $wpdb;
+
+        $key = '_transient_' . $base . '_' . ($bucket ?? (int) floor(time() / $window));
+
+        $value = $wpdb->get_var(
+            $wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $key)
+        );
+
+        if ($wpdb->last_error !== '') {
+            return null;
+        }
+
+        return $value === null ? 0 : (int) $value;
+    }
+
+    /**
+     * The site-wide donation ceiling a per-key limiter must stay under.
+     *
+     * An add-on that meters its own callers has to be able to prove it is
+     * narrowing this budget rather than handing out a second one.
+     *
+     * @since 1.1.0
+     */
+    public static function ipMax(): int
+    {
+        return self::IP_MAX;
+    }
+
+    /** @since 1.1.0 */
+    public static function ipWindow(): int
+    {
+        return self::IP_WINDOW;
+    }
+
     /** @since 1.0.0 */
     public function checkMinAmount(int $cents): ?WP_Error
     {
