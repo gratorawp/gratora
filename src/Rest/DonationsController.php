@@ -511,6 +511,17 @@ final class DonationsController
     /** Past this the whole blob goes, rather than the donation. */
     private const ATTRIBUTION_TOTAL_MAX = 4096;
 
+    /** The only keys an unauthenticated body may write into the JSON column. */
+    private const ATTRIBUTION_KEYS = [
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'utm_term',
+        'utm_content',
+        'referrer',
+        'landing',
+    ];
+
     /**
      * Bound the attribution blob by discarding, never by refusing.
      *
@@ -536,6 +547,9 @@ final class DonationsController
 
         $out = [];
         foreach ($attribution as $key => $value) {
+            if (! in_array((string) $key, self::ATTRIBUTION_KEYS, true)) {
+                continue;
+            }
             if (! is_scalar($value)) {
                 continue;
             }

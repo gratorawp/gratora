@@ -128,7 +128,8 @@ final class CoreDonorDataHandler implements ErasureHandler
      * the donation keeps the channel it is counted under. `landing` is the URL
      * the donor arrived on verbatim, and a link mailed through an ESP carries
      * a per-recipient identifier in it that names the person; `referrer` is the
-     * page that sent them.
+     * page that sent them. `utm_content` and `utm_term` are free text no rollup
+     * reads, so they go too rather than sit beside a date and an amount.
      *
      * @param  array<string,mixed>|null $attribution
      * @return array<string,mixed>|null
@@ -143,7 +144,7 @@ final class CoreDonorDataHandler implements ErasureHandler
 
         $kept = [];
         foreach ($attribution as $key => $value) {
-            if (str_starts_with((string) $key, 'utm_')) {
+            if (in_array((string) $key, ['utm_source', 'utm_medium'], true)) {
                 $kept[(string) $key] = $value;
             }
         }

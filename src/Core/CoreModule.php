@@ -225,6 +225,7 @@ use Gratora\Rest\Admin\SettingsController;
 use Gratora\Rest\Admin\StripeKeysController;
 use Gratora\Rest\Admin\ToolsController;
 use Gratora\Rest\Admin\UserPrefsController;
+use Gratora\Rest\CorsPolicy;
 use Gratora\Rest\DonationsController;
 use Gratora\Rest\PayPalController;
 use Gratora\Rest\Portal\PortalController as PortalController;
@@ -1287,6 +1288,11 @@ final class CoreModule implements GratoraModule
         // when something in front terminates the connection, and nothing else
         // would say so: the limits do not fail loudly, they refuse a donor.
         (new ProxyNotice())->register();
+
+        // WordPress reflects any Origin with credentials on every REST
+        // response, so a route in the namespace that does not check the origin
+        // itself is readable by the page that called it.
+        (new CorsPolicy())->register();
 
     }
 

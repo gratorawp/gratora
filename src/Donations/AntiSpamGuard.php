@@ -46,6 +46,13 @@ final class AntiSpamGuard
     private const TOKEN_WINDOW_DAYS  = 30;
     private const MIN_AMOUNT_CENTS   = 100;
 
+    // Declines one caller may collect in a day before the donation endpoint
+    // stops handing it fresh payment intents. Well above a donor whose card
+    // declines, retypes a CVC and reaches for a second card across two or
+    // three donations, and far below the volume a card tester needs: the
+    // prober's unit of work is a confirmation, and a fresh intent per card is
+    // what defeats the per-intent ceiling the gateway keeps.
+
     // Room for a test run and an automated suite, still a ceiling.
     private const TEST_MODE_RELIEF   = 10;
 
@@ -182,15 +189,25 @@ final class AntiSpamGuard
      *
      * @since 1.0.0
      */
-    private static function originOf(string $url): string
+    public static function originOf(string $url): string
     {
         $parts = wp_parse_url($url);
         if (empty($parts['scheme']) || empty($parts['host'])) {
             return '';
         }
 
-        return strtolower($parts['scheme'] . '://' . $parts['host'])
-            . (isset($parts['port']) ? ':' . (int) $parts['port'] : '');
+        $scheme = strtolower((string) $parts['scheme']);
+        $port   = isset($parts['port']) ? (int) $parts['port'] : 0;
+
+        // A browser omits the scheme's default port from Origin, so keeping it
+        // here would build a string nothing ever sends and refuse the site's
+        // own donors. A non-default port is part of the origin and stays.
+        if (($scheme === 'https' && $port === 443) || ($scheme === 'http' && $port === 80)) {
+            $port = 0;
+        }
+
+        return $scheme . '://' . strtolower((string) $parts['host'])
+            . ($port > 0 ? ':' . $port : '');
     }
 
     /** @since 1.0.0 */

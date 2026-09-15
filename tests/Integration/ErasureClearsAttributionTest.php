@@ -49,10 +49,15 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         $d->kind               = 'donation';
         $d->is_test            = false;
         $d->source_attribution = [
-            'utm_source' => 'mailchimp',
-            'utm_medium' => 'email',
-            'referrer'   => 'https://mail.example.com/click?u=8213&' . self::NEEDLE,
-            'landing'    => 'https://charity.example/appeal/?utm_source=mailchimp&' . self::NEEDLE,
+            'utm_source'   => 'mailchimp',
+            'utm_medium'   => 'email',
+            'utm_campaign' => 'spring-appeal',
+            'utm_term'     => 'robin lapsed 2024',
+            // An ESP expands a merge tag here, so the identifier travels in
+            // whichever parameter whoever built the link chose to put it in.
+            'utm_content'  => 'ask-b-' . self::NEEDLE,
+            'referrer'     => 'https://mail.example.com/click?u=8213&' . self::NEEDLE,
+            'landing'      => 'https://charity.example/appeal/?utm_source=mailchimp&' . self::NEEDLE,
         ];
         $d->failure_reason     = 'Gateway createIntent threw: card declined for robin@example.test';
         $d->paid_at            = $now;
@@ -81,6 +86,17 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
 
         $this->assertArrayNotHasKey('landing', $attribution);
         $this->assertArrayNotHasKey('referrer', $attribution);
+    }
+
+    public function test_the_parameters_no_rollup_reads_do_not_survive_the_erasure(): void
+    {
+        $this->erase();
+
+        $attribution = (array) $this->donation()->source_attribution;
+
+        $this->assertArrayNotHasKey('utm_content', $attribution);
+        $this->assertArrayNotHasKey('utm_term', $attribution);
+        $this->assertArrayNotHasKey('utm_campaign', $attribution);
     }
 
     public function test_the_row_no_longer_carries_the_identifier_the_link_named_them_by(): void

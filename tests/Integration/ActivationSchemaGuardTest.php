@@ -19,8 +19,9 @@ use ReflectionProperty;
  *
  * Restricted grants, a table-count quota or a row-size limit all end the same
  * way: dbDelta says nothing and the table is not there. Stamping the schema
- * version on top of that disarms the wp_loaded gate, which is the only thing
- * that would ever migrate again, and the install can never recover.
+ * version on top of a missing core table disarms the wp_loaded gate, which is
+ * the only thing that would ever migrate again, and the install can never
+ * recover. A table an add-on owns is reported and does not hold the stamp.
  *
  * The probe model reproduces exactly that state, a migrator that returned
  * without complaint and a table that does not exist, without touching the
@@ -39,16 +40,17 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
         parent::tearDown();
     }
 
-    public function test_activation_withholds_the_stamp_when_a_table_is_missing(): void
+    public function test_activation_stamps_even_when_an_add_on_table_is_missing(): void
     {
         $this->registerProbeModule();
         delete_option(SchemaGuard::OPTION);
 
         Plugin::onActivation();
 
-        $this->assertFalse(
+        $this->assertSame(
+            GRATORA_DB_VERSION,
             get_option(SchemaGuard::OPTION),
-            'the schema version must stay unset so the wp_loaded gate migrates again next request'
+            'one table an add-on could not create must not re-run dbDelta over every model on every request'
         );
     }
 
@@ -61,11 +63,12 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
         $this->assertSame(GRATORA_DB_VERSION, get_option(SchemaGuard::OPTION));
     }
 
-    public function test_the_missing_table_is_named(): void
+    public function test_the_missing_add_on_table_is_reported_against_its_own_plugin(): void
     {
         $this->registerProbeModule();
 
-        $this->assertContains(UnmigratedProbe::TABLE, SchemaGuard::missingTables());
+        $this->assertNotContains(UnmigratedProbe::TABLE, SchemaGuard::missingTables());
+        $this->assertArrayHasKey(UnmigratedProbe::TABLE, SchemaGuard::missingAddOnTables());
     }
 
     public function test_the_admin_notice_names_the_missing_table(): void
