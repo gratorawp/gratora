@@ -11,7 +11,7 @@ import { CHANNEL_LABEL } from '../../assets/admin/donations/detail/helpers';
 /** Every value ChannelClassifier::classify can return. */
 const CLASSIFIER_RANGE = [
     'direct', 'email', 'social', 'paid-social', 'organic',
-    'cpc', 'referral', 'qr', 'peer', 'manual',
+    'cpc', 'referral', 'qr', 'peer', 'manual', 'embed',
 ];
 
 test.each( CLASSIFIER_RANGE )( 'the channel %p has a label', ( channel ) => {

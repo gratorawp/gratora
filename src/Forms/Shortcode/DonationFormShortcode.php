@@ -27,6 +27,7 @@ use Gratora\Forms\Blocks\SectionBlock;
 use Gratora\Forms\Blocks\TermsBlock;
 use Gratora\Forms\Form;
 use Gratora\Forms\FormRepository;
+use Gratora\Forms\Rendering\FormDocument;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
 use Gratora\Foundation\Plugin;
@@ -127,7 +128,7 @@ final class DonationFormShortcode extends HookProvider
     /** @since 1.0.0 */
     private function cssFileName(): string
     {
-        return is_rtl() ? 'runtime-rtl.css' : 'runtime.css';
+        return FormDocument::cssFileName();
     }
 
     /** @since 1.0.0 */
@@ -217,8 +218,13 @@ final class DonationFormShortcode extends HookProvider
         return $html;
     }
 
-    /** @since 1.0.0 */
-    private function renderBlocks(Form $form): string
+    /**
+     * Markup only. Nothing here loads the runtime that hydrates it, so a caller
+     * outside this class wants FormDocument, which carries the assets with it.
+     *
+     * @since 1.0.0
+     */
+    public function renderBlocks(Form $form): string
     {
         $formId = 'gratora-form-' . wp_unique_id();
 
@@ -361,18 +367,7 @@ final class DonationFormShortcode extends HookProvider
         $stub->created_at  = current_time('mysql');
         $stub->updated_at  = current_time('mysql');
 
-        $html = $this->renderBlocks($stub);
-
-        $assetPath = GRATORA_DIR . 'build/donation-form/runtime/index.asset.php';
-        $asset     = is_file($assetPath) ? include $assetPath : ['dependencies' => [], 'version' => GRATORA_VERSION];
-
-        // Version CSS by mtime so SCSS-only rebuilds bust the iframe cache
-        return [
-            'html'   => $html,
-            'cssUrl' => GRATORA_URL . 'build/donation-form/' . $this->cssFileName() . '?v=' . $this->cssVersion(),
-            'jsUrl'  => GRATORA_URL . 'build/donation-form/runtime/index.js?v=' . ($asset['version'] ?? GRATORA_VERSION),
-            'jsDeps' => (array) ($asset['dependencies'] ?? []),
-        ];
+        return (new FormDocument($this))->forForm($stub);
     }
 
     /**
@@ -390,7 +385,7 @@ final class DonationFormShortcode extends HookProvider
         // Inline script-handle deps; the preview iframe is a standalone document.
         $depScripts = '';
         $scripts    = wp_scripts();
-        foreach (self::withDependencies($preview['jsDeps']) as $handle) {
+        foreach (FormDocument::withDependencies($preview['jsDeps']) as $handle) {
             $reg = $scripts->registered[$handle] ?? null;
             $src = $reg ? (string) $reg->src : '';
             if ($src !== '') {
@@ -444,45 +439,6 @@ final class DonationFormShortcode extends HookProvider
             '</html>',
         ]);
         // phpcs:enable WordPress.WP.EnqueuedResources
-    }
-
-    /**
-     * Resolve transitive script dependencies in load order; srcdoc has no WordPress queue to do
-     * this.
-     *
-     * @param list<string> $handles
-     * @return list<string>
-     *
-     * @since 1.0.0
-     */
-    private static function withDependencies(array $handles): array
-    {
-        $scripts = wp_scripts();
-        $seen    = [];
-        $ordered = [];
-
-        // Post-order: a handle is appended only after everything it needs.
-        // $seen is set on entry, so a dependency cycle terminates instead of
-        // recursing until the stack gives out.
-        $walk = static function (string $handle) use (&$walk, $scripts, &$seen, &$ordered): void {
-            if (isset($seen[$handle])) {
-                return;
-            }
-            $seen[$handle] = true;
-
-            $registered = $scripts->registered[$handle] ?? null;
-            foreach ((array) ($registered->deps ?? []) as $dep) {
-                $walk((string) $dep);
-            }
-
-            $ordered[] = $handle;
-        };
-
-        foreach ($handles as $handle) {
-            $walk((string) $handle);
-        }
-
-        return $ordered;
     }
 
     /** @since 1.0.0 */
@@ -1693,8 +1649,7 @@ final class DonationFormShortcode extends HookProvider
     private function cssVersion(): string
     {
         if ($this->cssVersion === null) {
-            $path = GRATORA_DIR . 'build/donation-form/runtime.css';
-            $this->cssVersion = (string) (@filemtime($path) ?: GRATORA_VERSION);
+            $this->cssVersion = FormDocument::cssVersion();
         }
         return $this->cssVersion;
     }

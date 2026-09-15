@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Admin\Pages;
 
+use Gratora\Admin\ExtensionAssets;
 use Gratora\Donors\ConsentService;
 use Gratora\Foundation\Hooks\HookProvider;
 use Gratora\Foundation\Plugin;
@@ -132,10 +133,13 @@ final class FormsPage extends HookProvider
         add_action('admin_print_footer_scripts', ['_WP_Editors', 'print_default_editor_scripts'], 45);
 
         $asset = require GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
+
+        ExtensionAssets::enqueue('form-editor');
+
         wp_enqueue_script(
             self::HANDLE,
             GRATORA_URL . self::BUILD_DIR . '/index.js',
-            $asset['dependencies'] ?? [],
+            array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
             $asset['version']      ?? GRATORA_VERSION,
             true
         );

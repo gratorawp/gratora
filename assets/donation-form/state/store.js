@@ -15,7 +15,23 @@ export function fieldSteps( src ) {
     return pre.concat( src.steps || [] );
 }
 
+/**
+ * The description of a host document this site served into somebody else's
+ * page, contributed through the `gratora.form.config` filter. Nothing core
+ * renders carries one, and a shape without a target origin is not honoured: the
+ * whole branch turns on there being one place to post to.
+ *
+ * @since 1.1.0
+ */
+export function embedOf( config ) {
+    const e = config ? config.embed : null;
+    if ( ! e || typeof e !== 'object' ) return null;
+
+    return ( typeof e.origin === 'string' && e.origin !== '' ) ? e : null;
+}
+
 export function initialState( config ) {
+    const embed     = embedOf( config );
     const presets   = findStep( config.steps, 'amount' )?.presets || [];
     const first     = ( Array.isArray( presets ) && presets.find( ( p ) => p && p.preselected ) ) || presets[ 0 ];
     const fallback  = typeof first === 'number'
@@ -28,9 +44,10 @@ export function initialState( config ) {
     const fundField = allDonorFields.find( ( f ) => f.kind === 'fund' );
     const freqField = allDonorFields.find( ( f ) => f.kind === 'frequency' );
     const consents  = initialConsents( donorSteps );
-    const custom    = initialCustom( donorSteps );
+    const custom    = initialCustom( donorSteps, !! embed );
 
     return {
+        embed,
         step:        0,
         steps:       config.steps,
         preamble:    Array.isArray( config.preamble ) ? config.preamble : [],
@@ -113,7 +130,7 @@ function initialConsents( donorSteps ) {
     return out;
 }
 
-function initialCustom( donorSteps ) {
+function initialCustom( donorSteps, embedded ) {
     // Multi-page wizards emit one donor step per page.
     const all = [];
     for ( const s of ( Array.isArray( donorSteps ) ? donorSteps : [ donorSteps ] ) ) {
@@ -149,7 +166,7 @@ function initialCustom( donorSteps ) {
                 break;
             }
             case 'hidden':
-                out[ key ] = resolveHiddenValue( f );
+                out[ key ] = resolveHiddenValue( f, embedded );
                 break;
             default:
                 break;
@@ -158,23 +175,27 @@ function initialCustom( donorSteps ) {
     return out;
 }
 
-function resolveHiddenValue( f ) {
+function resolveHiddenValue( f, embedded ) {
     const fallback = String( f.defaultValue || '' );
     if ( typeof window === 'undefined' ) return fallback;
 
     const src    = String( f.source || 'fixed' );
     const params = new URLSearchParams( window.location.search );
 
+    // Where this document is framed, its address is the add-on's own and names
+    // the embed key rather than anywhere the donor has been.
+    const own = ! embedded;
+
     let value = '';
     switch ( src ) {
-        case 'query':       value = params.get( String( f.queryParam || '' ) ) || ''; break;
+        case 'query':       value = own ? ( params.get( String( f.queryParam || '' ) ) || '' ) : ''; break;
         case 'utm_source':  value = params.get( 'utm_source' )   || ''; break;
         case 'utm_medium':  value = params.get( 'utm_medium' )   || ''; break;
         case 'utm_campaign':value = params.get( 'utm_campaign' ) || ''; break;
         case 'utm_term':    value = params.get( 'utm_term' )     || ''; break;
         case 'utm_content': value = params.get( 'utm_content' )  || ''; break;
-        case 'referrer':    value = document.referrer            || ''; break;
-        case 'landing':     value = window.location.href         || ''; break;
+        case 'referrer':    value = own ? ( document.referrer    || '' ) : ''; break;
+        case 'landing':     value = own ? ( window.location.href || '' ) : ''; break;
         case 'fixed':       /* fallthrough */
         default:            value = '';
     }
@@ -352,6 +373,7 @@ export function reducer( state, action ) {
             };
 
             const fresh = initialState( {
+                embed:       state.embed,
                 steps:       state.steps,
                 preamble:    state.preamble,
                 pages:       state.pages,
@@ -670,7 +692,7 @@ export function buildPayload( state ) {
         consents:          buildConsents( v.consents, sup.consents ),
         frequency:         sup.frequency ? 'one_time' : normalizeFrequency( v.frequency ),
         custom:            buildCustom( v.custom, sup.custom, conditionSourceKeys( state ) ),
-        source_attribution: buildSourceAttribution(),
+        source_attribution: buildSourceAttribution( !! state.embed ),
         profile: {
             first_name: ( v.profile.first_name || '' ).trim() || undefined,
             last_name:  ( v.profile.last_name  || '' ).trim() || undefined,
@@ -713,8 +735,12 @@ function buildConsents( c, suppressed ) {
 // risking the submission over.
 const ATTRIBUTION_VALUE_MAX = 500;
 
-function buildSourceAttribution() {
+function buildSourceAttribution( embedded ) {
     if ( typeof window === 'undefined' ) return undefined;
+    // This address belongs to a document served into somebody else's page: none
+    // of it describes where the donor came from, and the page that does is one
+    // no script here can read.
+    if ( embedded ) return undefined;
     const out = {};
     const params = new URLSearchParams( window.location.search );
     for ( const k of [ 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content' ] ) {

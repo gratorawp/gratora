@@ -4,7 +4,7 @@ import { derivedInk } from '../_shared/ink';
 import { render } from 'preact';
 import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
-import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
+import { reducer, initialState, validateStep, buildPayload, fieldSteps, embedOf } from './state/store';
 import { visibleGateways, emptyMessage, keepGatewayValid } from './util/gateways';
 import { backGlyph } from './util/direction';
 import AmountStep   from './steps/AmountStep';
@@ -62,6 +62,63 @@ function statusTokenFor( reference, state ) {
         || state.payment?.statusToken
         || ( stored.reference === reference ? stored.statusToken : '' )
         || '';
+}
+
+/**
+ * Buy a form token for this host document. The key is public, sitting in the
+ * partner page's source, so nothing here is a secret and the server decides
+ * what the key is worth.
+ *
+ * @since 1.1.0
+ */
+async function exchangeEmbedToken( embed ) {
+    const res = await fetch( String( embed.tokenUrl || '' ), {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify( { key: embed.key || '' } ),
+    } );
+    if ( ! res.ok ) return '';
+
+    const data = await res.json().catch( () => null );
+
+    return ( data && typeof data.token === 'string' ) ? data.token : '';
+}
+
+/**
+ * Whether the server says this donation is paid.
+ *
+ * @since 1.1.0
+ */
+function confirmPaid( config, reference ) {
+    const token = String( readPending().statusToken || '' );
+    if ( ! token || ! reference ) return Promise.resolve( false );
+
+    const base = String( config.rest || '' ).replace( /\/+$/, '' );
+    // rest_url is the ?rest_route= form when permalinks are plain.
+    const sep  = base.includes( '?' ) ? '&' : '?';
+    const url  = `${ base }/${ encodeURIComponent( reference ) }`
+        + `${ sep }status_token=${ encodeURIComponent( token ) }`;
+
+    return fetch( url, { headers: { Accept: 'application/json' } } )
+        .then( ( res ) => ( res.ok ? res.json() : null ) )
+        .then( ( data ) => !! data && data.status === 'paid' );
+}
+
+/**
+ * Outbound only, and only to the one origin the host document names.
+ *
+ * @since 1.1.0
+ */
+function postEmbedHeight( embed ) {
+    try {
+        const height = Math.ceil( document.documentElement.getBoundingClientRect().height );
+        window.parent.postMessage(
+            { source: 'gratora', v: 1, type: 'height', key: embed.key || '', height },
+            embed.origin
+        );
+    } catch ( e ) {
+        // A parent that has gone, or an origin the browser will not post to.
+    }
 }
 
 function paymentComponentFor( payment ) {
@@ -379,6 +436,7 @@ function FormBody( { state, dispatch, config } ) {
     // submission cannot mint one. Both gates are enforced in AntiSpamGuard.
     const honeypotName = config.spam?.honeypotName || 'form_ref';
     const formToken    = config.spam?.formToken || '';
+    const embed        = embedOf( config );
     const [ honeypot, setHoneypot ] = useState( '' );
 
     // Re-entrancy guard: a double-click fires onSubmit twice in the same tick,
@@ -402,6 +460,16 @@ function FormBody( { state, dispatch, config } ) {
                 }
             }
             dispatch( { type: 'SUBMIT_START' } );
+            // A host document carries no form token of its own: it trades its
+            // key for one, and the in-flight ref covers the extra await.
+            let embedToken = '';
+            if ( embed ) {
+                embedToken = await exchangeEmbedToken( embed );
+                if ( ! embedToken ) {
+                    dispatch( { type: 'SUBMIT_ERROR', message: config.i18n.error } );
+                    return;
+                }
+            }
             // Retries spend the original attempt’s budget. Recover redirect state from the
             // stash only when this form owns it; exclude pending offline transfers.
             const prior  = state.submission
@@ -416,8 +484,9 @@ function FormBody( { state, dispatch, config } ) {
                 ...buildPayload( state ),
                 ...( config.extra ? { extra: config.extra } : {} ),
                 ...( retry ? { _retry: retry } : {} ),
-                _ft: formToken,
+                _ft: embed ? embedToken : formToken,
                 _hp: honeypot,
+                ...( embed ? { _ek: embed.key || '', _proof: 'embed' } : {} ),
             } );
 
             const post = ( nonce ) => fetch( config.rest, {
@@ -454,7 +523,7 @@ function FormBody( { state, dispatch, config } ) {
             // Stashed on every path, not just the redirecting one: the status
             // token is deliberately kept out of the return URL, so anything
             // outliving this closure has no other source for it.
-            rememberPending( data, state.values, config.hostId );
+            rememberPending( data, state.values, config.hostId, !! embed );
 
             if ( data.redirect_url ) {
                 window.location.assign( data.redirect_url );
@@ -552,7 +621,7 @@ function FormBody( { state, dispatch, config } ) {
         } finally {
             inFlight.current = false;
         }
-    }, [ state, config, dispatch, formToken, honeypot ] );
+    }, [ state, config, dispatch, formToken, honeypot, embed ] );
 
     // Announced once per reference. `pending` is excluded on purpose: an
     // offline donation has been recorded, not paid, and may never be.
@@ -1064,6 +1133,7 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
  * checks.
  */
 function resolveReturn( config, ret, dispatch ) {
+    const embed = embedOf( config );
     const unresolved = () => dispatch( {
         type:    'RETURN_UNRESOLVED',
         data:    { reference: ret.reference },
@@ -1078,6 +1148,19 @@ function resolveReturn( config, ret, dispatch ) {
             if ( outcome === 'unknown' ) {
                 unresolved();
                 return;
+            }
+
+            // A secret on the URL proves an intent was paid, never that this
+            // donation was. Only the server holds both.
+            if ( outcome === 'succeeded' && embed ) {
+                return confirmPaid( config, ret.reference ).then( ( paid ) => {
+                    if ( ! paid ) {
+                        unresolved();
+                        return;
+                    }
+                    clearStripeReturnParams();
+                    dispatch( { type: 'SUBMIT_SUCCESS', data: { reference: ret.reference } } );
+                } );
             }
 
             clearStripeReturnParams();
@@ -1102,13 +1185,25 @@ function resolveReturn( config, ret, dispatch ) {
 function App( { config, host } ) {
     const [ state, dispatch ] = useReducer( reducer, config, initialState );
 
+    const embed = embedOf( config );
+
     // Resolve only this form’s stashed return before stripping shared URL markers. Compare
     // references as strings.
-    const claimReturn = () => (
-        ownsPendingReturn( config.hostId )
-            ? detectStripeReturn( String( readPending().reference || '' ) || null )
-            : null
-    );
+    //
+    // In a frame the party who wrote the return URL and the party who can block
+    // storage are the same party, so neither an empty stash nor an unnamed
+    // reference is read as this donor's own return: a replayed secret would
+    // otherwise thank them for a payment somebody else made.
+    const claimReturn = () => {
+        const stashed = String( readPending().reference || '' );
+        if ( embed ) {
+            const onUrl = new URLSearchParams( window.location.search ).get( 'gratora_ref' ) || '';
+
+            return ( stashed !== '' && stashed === onUrl ) ? detectStripeReturn( stashed ) : null;
+        }
+
+        return ownsPendingReturn( config.hostId ) ? detectStripeReturn( stashed || null ) : null;
+    };
 
     // Claim each redirect once and share that claim with the resolver and modal; multiple forms
     // must not resolve the same payment.
@@ -1286,6 +1381,10 @@ function Decorations( { items, values, ctx } ) {
 }
 
 function applyUrlPrefills( config ) {
+    // A host document's address is written by the add-on, and what it may
+    // preselect comes from the key record instead.
+    if ( embedOf( config ) ) return;
+
     const params = new URLSearchParams( window.location.search );
     const raw    = parseInt( params.get( 'gratora_amount' ) || '', 10 );
     const freq   = params.get( 'gratora_frequency' );
@@ -1411,7 +1510,9 @@ function mount( form ) {
     const config = readConfig( form );
     if ( ! config ) { reveal(); return; }
 
-    if ( framedByAnotherSite() ) {
+    // A host document is framed by definition, and its config says so because
+    // this server built it. Nothing a framer controls can put that key here.
+    if ( ! embedOf( config ) && framedByAnotherSite() ) {
         form.innerHTML = '';
         form.dataset.gratoraMounted = 'true';
         form.dataset.gratoraFramed  = 'true';
@@ -1461,7 +1562,24 @@ function mount( form ) {
 }
 
 function bootAll() {
+    const first = document.querySelector( '.gratora-donation-form' );
+    const embed = first ? embedOf( readConfig( first ) ) : null;
+
+    // Before hydration, so a runtime error still lets the host's loader finish
+    // its handshake and size the frame.
+    if ( embed ) postEmbedHeight( embed );
+
     document.querySelectorAll( '.gratora-donation-form' ).forEach( mount );
+
+    if ( embed ) {
+        // Outbound height and nothing else: no message from the host is read,
+        // and the preview channel below belongs to this site's own screens.
+        if ( typeof ResizeObserver === 'function' ) {
+            new ResizeObserver( () => postEmbedHeight( embed ) )
+                .observe( document.documentElement );
+        }
+        return;
+    }
 
     const inIframe = window.parent && window.parent !== window;
 

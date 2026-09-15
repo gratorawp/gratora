@@ -14,6 +14,7 @@ use Gratora\Donations\Donation;
 use Gratora\Donations\DonationIntent;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
+use Gratora\Donations\SubmissionProof;
 use Gratora\Donors\ConsentService;
 use Gratora\Donors\Donor;
 use Gratora\Forms\Blocks\TermsBlock;
@@ -88,8 +89,37 @@ final class DonationsController
         // Anti-spam gates, cheapest first; failures return generic 400/429.
         if ($err = $this->spam->checkOrigin()) return $err;
         if ($err = $this->spam->checkHoneypot((string) ($body['_hp'] ?? ''))) return $err;
-        if ($err = $this->spam->verifyFormToken((string) ($body['_ft'] ?? ''), (int) ($body['form_id'] ?? 0))) return $err;
+
+        $tokenRefusal = $this->spam->verifyFormToken((string) ($body['_ft'] ?? ''), (int) ($body['form_id'] ?? 0));
+        $scheme       = (string) ($body['_proof'] ?? '');
+        if ($tokenRefusal !== null && $scheme === '') return $tokenRefusal;
+
         if ($err = $this->spam->consumeIpQuota()) return $err;
+
+        /**
+         * A submission core's own form token refused, offered for verification
+         * by some other proof. Return a SubmissionProof to accept it; anything
+         * else, `null` included, leaves the refusal standing.
+         *
+         * Placed after consumeIpQuota because a listener resolves the scheme
+         * against the database and every key such a scheme carries is public.
+         * Above the quota this is an unmetered unauthenticated indexed lookup
+         * in a loop, which is why preCheck sits there too. A refused proof
+         * spending the caller's own budget is correct: that caller is the one
+         * making the request.
+         *
+         * @since 1.1.0
+         *
+         * @param mixed               $proof  SubmissionProof to accept, anything else to refuse.
+         * @param string              $scheme The body's `_proof` value, '' when it sent none.
+         * @param array<string,mixed> $body   The raw request body.
+         */
+        if ($tokenRefusal !== null
+            && ! (apply_filters('gratora.donation.submission_proof', null, $scheme, $body) instanceof SubmissionProof)
+        ) {
+            return $tokenRefusal;
+        }
+
         if ($err = $this->spam->preCheck($body)) return $err;
 
         $email      = (string) ($body['email'] ?? '');
@@ -256,10 +286,16 @@ final class DonationsController
         $sourceAttribution = isset($body['source_attribution']) ? (array) $body['source_attribution'] : null;
         $sourceAttribution = self::boundAttribution($sourceAttribution);
         // `manual` is reserved for money an admin recorded off the site, and it
-        // suppresses the offline payment instructions. This blob comes from the
-        // donor's own query string, so a visitor arriving on
-        // ?utm_medium=manual would otherwise be denied the bank details.
-        if (is_array($sourceAttribution) && strtolower(trim((string) ($sourceAttribution['utm_medium'] ?? ''))) === ChannelClassifier::MANUAL) {
+        // suppresses the offline payment instructions. `embed` is reserved for
+        // a submission the server itself identified as coming from a form on
+        // another site, and it buckets partner revenue. This blob comes from
+        // the donor's own query string, so a visitor arriving on
+        // ?utm_medium=manual would otherwise be denied the bank details, and
+        // one arriving on ?utm_medium=embed would write the partner report.
+        $reserved = [ChannelClassifier::MANUAL, ChannelClassifier::EMBED];
+        if (is_array($sourceAttribution)
+            && in_array(strtolower(trim((string) ($sourceAttribution['utm_medium'] ?? ''))), $reserved, true)
+        ) {
             unset($sourceAttribution['utm_medium']);
         }
         if ($custom !== [] && strlen((string) wp_json_encode($custom)) > 16384) {

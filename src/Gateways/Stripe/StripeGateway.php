@@ -207,6 +207,34 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'automatic_payment_methods' => ['enabled' => 'true'],
         ];
 
+        /**
+         * Tune Stripe's automatic payment methods.
+         *
+         * Scoped to this sub-array on purpose. Over the whole parameter array a
+         * callback reaches capture_method, setup_future_usage, customer,
+         * transfer_data, on_behalf_of, application_fee_amount and
+         * payment_method_types: a manual capture authorises every donation and
+         * captures none, a dropped setup_future_usage breaks every renewal after
+         * the first, and any payment_method_types makes Stripe reject the create.
+         * Only allow_redirects is read out of the result, and enabled stays on.
+         *
+         * @param array<string,string> $apm
+         * @param Donation             $donation
+         *
+         * @since 1.1.0
+         */
+        $apm = apply_filters(
+            'gratora.gateway.stripe.automatic_payment_methods',
+            $params['automatic_payment_methods'],
+            $donation
+        );
+
+        $params['automatic_payment_methods'] = ['enabled' => 'true'];
+        $allowRedirects = is_array($apm) ? ($apm['allow_redirects'] ?? null) : null;
+        if (is_string($allowRedirects) && $allowRedirects !== '') {
+            $params['automatic_payment_methods']['allow_redirects'] = $allowRedirects;
+        }
+
         $customerId = null;
         if (FrequencyMap::isRecurring($donation->frequency)) {
             // Stripe requires a Customer on the PI for setup_future_usage to

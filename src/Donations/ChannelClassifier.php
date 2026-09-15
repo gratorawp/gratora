@@ -19,6 +19,14 @@ final class ChannelClassifier
      */
     public const MANUAL = 'manual';
 
+    /**
+     * Reserved: stamped server-side for a submission that arrived from a form
+     * rendered on another site. The public donation route strips it from
+     * donor-supplied attribution, because it is the partner-revenue bucket in
+     * every channel report.
+     */
+    public const EMBED = 'embed';
+
     private const MEDIUM_MAP = [
         'email'          => 'email',
         'newsletter'     => 'email',
@@ -40,6 +48,7 @@ final class ChannelClassifier
         'peer'           => 'peer',
         'p2p'            => 'peer',
         'fundraiser'     => 'peer',
+        'embed'          => 'embed',
         // Recorded by an admin, not given through the site. Without its own
         // bucket it falls through to `direct`, which overstates what the
         // website itself brought in.

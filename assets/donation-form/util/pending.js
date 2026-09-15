@@ -3,7 +3,7 @@
 // than following the donor around.
 export const PENDING_KEY = 'gratora:pending-donation';
 
-export function rememberPending( data, values, hostId = '' ) {
+export function rememberPending( data, values, hostId = '', embedded = false ) {
     try {
         window.sessionStorage.setItem( PENDING_KEY, JSON.stringify( {
             reference:   data.reference,
@@ -18,7 +18,10 @@ export function rememberPending( data, values, hostId = '' ) {
             amountCents: data.amount_cents,
             currency:    data.currency,
             frequency:   values?.frequency || '',
-            email:       values?.email || '',
+            // Storage belonging to a document inside somebody else's page keeps
+            // no donor address. The status endpoint answers the return screen
+            // and returns none.
+            ...( embedded ? {} : { email: values?.email || '' } ),
         } ) );
     } catch ( e ) {
         // Private browsing can refuse storage. The donation is still made and

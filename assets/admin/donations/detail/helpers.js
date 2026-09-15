@@ -70,6 +70,7 @@ export const CHANNEL_LABEL = {
     referral:      __( 'Referral',       'gratora-donation-platform' ),
     qr:            __( 'QR code',        'gratora-donation-platform' ),
     peer:          __( 'Peer-to-peer',   'gratora-donation-platform' ),
+    embed:         __( 'Embedded form',  'gratora-donation-platform' ),
     manual:        __( 'Manual',         'gratora-donation-platform' ),
 };
 
