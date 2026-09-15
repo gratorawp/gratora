@@ -112,10 +112,19 @@ function confirmPaid( config, reference ) {
 function postEmbedHeight( embed ) {
     try {
         const height = Math.ceil( document.documentElement.getBoundingClientRect().height );
-        window.parent.postMessage(
-            { source: 'gratora', v: 1, type: 'height', key: embed.key || '', height },
-            embed.origin
-        );
+        // A key may name a www/apex pair, and the document cannot know which of
+        // the two framed it. The browser drops the post that does not match.
+        const targets = Array.isArray( embed.origins ) && embed.origins.length
+            ? embed.origins
+            : [ embed.origin ];
+
+        targets.forEach( ( target ) => {
+            if ( ! target ) return;
+            window.parent.postMessage(
+                { source: 'gratora', v: 1, type: 'height', key: embed.key || '', height },
+                target
+            );
+        } );
     } catch ( e ) {
         // A parent that has gone, or an origin the browser will not post to.
     }
