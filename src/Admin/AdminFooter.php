@@ -25,7 +25,7 @@ final class AdminFooter extends HookProvider
     /** @since 1.0.0 */
     public function reviewPrompt(string $text): string
     {
-        if (! $this->isGratoraAdminPage()) return $text;
+        if (! CurrentPage::isGratora()) return $text;
 
         $stars = sprintf(
             '<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s" style="text-decoration:none;">%s</a>',
@@ -37,11 +37,18 @@ final class AdminFooter extends HookProvider
             )
         );
 
-        return sprintf(
-            /* translators: 1: plugin name, 2: five star icons linking to the review form */
-            esc_html__('If you like %1$s please leave us a %2$s rating. Thanks in advance!', 'gratora-donation-platform'),
-            '<strong>' . esc_html__('Gratora', 'gratora-donation-platform') . '</strong>',
-            $stars
+        return wp_kses(
+            sprintf(
+                /* translators: 1: plugin name, 2: five star icons linking to the review form */
+                esc_html__('If you like %1$s please leave us a %2$s rating. Thanks in advance!', 'gratora-donation-platform'),
+                '<strong>' . esc_html__('Gratora', 'gratora-donation-platform') . '</strong>',
+                $stars
+            ),
+            [
+                'a'      => ['href' => true, 'target' => true, 'rel' => true, 'aria-label' => true, 'style' => true],
+                'span'   => ['class' => true, 'style' => true],
+                'strong' => [],
+            ]
         );
     }
 
@@ -49,13 +56,5 @@ final class AdminFooter extends HookProvider
     private function reviewUrl(): string
     {
         return 'https://wordpress.org/support/plugin/' . self::SLUG . '/reviews/?rate=5#new-post';
-    }
-
-    /** @since 1.0.0 */
-    private function isGratoraAdminPage(): bool
-    {
-        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
-
-        return $page === 'gratora' || strpos($page, 'gratora-') === 0;
     }
 }

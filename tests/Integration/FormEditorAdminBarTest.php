@@ -23,7 +23,7 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        unset($_GET['page'], $_GET['form']);
+        unset($GLOBALS['plugin_page'], $_GET['form']);
         set_current_screen('front');
         parent::tearDown();
     }
@@ -35,7 +35,7 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     public function test_the_bar_is_refused_on_the_editor(): void
     {
-        $_GET['page'] = 'gratora-forms';
+        $GLOBALS['plugin_page'] = 'gratora-forms';
         $_GET['form'] = '7';
 
         $this->assertFalse($this->page()->hideAdminBar(true));
@@ -43,21 +43,21 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     public function test_the_bar_is_left_alone_on_the_list(): void
     {
-        $_GET['page'] = 'gratora-forms';
+        $GLOBALS['plugin_page'] = 'gratora-forms';
 
         $this->assertTrue($this->page()->hideAdminBar(true));
     }
 
     public function test_the_bar_is_left_alone_elsewhere_in_wp_admin(): void
     {
-        $_GET['page'] = 'gratora-campaigns';
+        $GLOBALS['plugin_page'] = 'gratora-campaigns';
 
         $this->assertTrue($this->page()->hideAdminBar(true));
     }
 
     public function test_an_existing_refusal_is_not_overturned(): void
     {
-        $_GET['page'] = 'gratora-campaigns';
+        $GLOBALS['plugin_page'] = 'gratora-campaigns';
 
         $this->assertFalse($this->page()->hideAdminBar(false));
     }
@@ -65,7 +65,7 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     public function test_wordpress_gets_the_refusal_through_the_filter(): void
     {
-        $_GET['page'] = 'gratora-forms';
+        $GLOBALS['plugin_page'] = 'gratora-forms';
         $_GET['form'] = '7';
 
         $page = $this->page();

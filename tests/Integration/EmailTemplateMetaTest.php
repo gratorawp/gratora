@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Gratora\Tests\Integration;
 
+use Gratora\Admin\AdminGlobals;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Plugin;
 use Gratora\Settings\SettingsService;
 
 /**
@@ -14,6 +17,12 @@ use Gratora\Settings\SettingsService;
  */
 final class EmailTemplateMetaTest extends IntegrationTestCase
 {
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['plugin_page']);
+        parent::tearDown();
+    }
+
     public function test_an_addon_describes_its_template_for_the_settings_editor(): void
     {
         add_filter('gratora.email.template_meta', static function (array $meta): array {
@@ -45,20 +54,16 @@ final class EmailTemplateMetaTest extends IntegrationTestCase
             return $meta;
         });
 
-        $_GET['page'] = 'gratora-settings';
+        $GLOBALS['plugin_page'] = 'gratora-settings';
         set_current_screen('gratora_page_gratora-settings');
         wp_set_current_user(1);
 
         // The payload rides an enqueued src-less handle, so it is observed
         // where WordPress serves it: the inline script attached to the handle.
         wp_deregister_script('gratora-admin-globals');
-        (new \Gratora\Admin\AdminGlobals(
-            \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Foundation\License\LicenseService::class)
-        ))->inject();
+        (new AdminGlobals(Plugin::instance()->container->get(LicenseService::class)))->inject();
         $data    = wp_scripts()->get_data('gratora-admin-globals', 'after');
         $printed = is_array($data) ? implode('', array_filter($data)) : '';
-
-        unset($_GET['page']);
 
         $this->assertStringContainsString('email_template_meta', $printed);
         $this->assertStringContainsString('addon_thing', $printed);

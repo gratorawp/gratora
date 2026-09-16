@@ -35,7 +35,7 @@ final class AdminGlobals extends HookProvider
     public function inject(): void
     {
         // Check capabilities before exposing configuration through a user-controlled page slug.
-        if (! $this->isGratoraAdminPage() || ! Capabilities::canAccessAdmin()) return;
+        if (! CurrentPage::isGratora() || ! Capabilities::canAccessAdmin()) return;
 
         $currencyLocale = get_option('gratora_currency_locale', []);
         $defaultCurrency = Money::defaultCurrency();
@@ -128,14 +128,5 @@ final class AdminGlobals extends HookProvider
         }
 
         return $can;
-    }
-
-    /** @since 1.0.0 */
-    private function isGratoraAdminPage(): bool
-    {
-        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
-
-        // The dashboard uses the bare gratora slug.
-        return $page === 'gratora' || strpos($page, 'gratora-') === 0;
     }
 }

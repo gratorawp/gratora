@@ -16,23 +16,27 @@ use Gratora\Foundation\Plugin;
  */
 final class AdminGlobalsPageMatchTest extends IntegrationTestCase
 {
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['plugin_page']);
+        parent::tearDown();
+    }
+
     /**
-     * The payload rides an enqueued src-less handle now, so what a screen
+     * The payload rides an enqueued src-less handle, so what a screen
      * receives is observed the way WordPress serves it: the inline script
      * attached to the handle, printed by wp_scripts.
      */
     private function payloadOn(?string $page): string
     {
         if ($page === null) {
-            unset($_GET['page']);
+            unset($GLOBALS['plugin_page']);
         } else {
-            $_GET['page'] = $page;
+            $GLOBALS['plugin_page'] = $page;
         }
 
         wp_deregister_script('gratora-admin-globals');
         (new AdminGlobals(Plugin::instance()->container->get(LicenseService::class)))->inject();
-
-        unset($_GET['page']);
 
         $data = wp_scripts()->get_data('gratora-admin-globals', 'after');
         return is_array($data) ? implode('', array_filter($data)) : '';

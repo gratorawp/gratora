@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Onboarding;
 
+use Gratora\Admin\CurrentPage;
 use Gratora\Foundation\Hooks\HookProvider;
 
 /**
@@ -51,7 +52,7 @@ final class Onboarding extends HookProvider
 
         // A redirect answers a GET. Anything else is carrying a body that only
         // its own handler knows how to finish, including other plugins'.
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'GET') return false;
+        if (isset($_SERVER['REQUEST_METHOD']) && strtoupper(sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD']))) !== 'GET') return false;
 
         // pagenow is set in wp-includes/vars.php, long before admin_init.
         // get_current_screen() is not: core calls set_current_screen() after
@@ -61,8 +62,7 @@ final class Onboarding extends HookProvider
 
         if ((string) get_option(self::OPTION, '') !== 'pending') return false;
 
-        $page = is_string($_GET['page'] ?? null) ? sanitize_key(wp_unslash($_GET['page'])) : '';
-        if ($page === OnboardingPage::PAGE_ID) return false;
+        if (CurrentPage::slug() === OnboardingPage::PAGE_ID) return false;
 
         // Once. The wizard keeps its menu item, and one that reappears on every
         // screen until it is finished is a plugin holding the admin hostage.

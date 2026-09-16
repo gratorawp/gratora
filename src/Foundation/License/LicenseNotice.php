@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Gratora\Foundation\License;
 
+use Gratora\Admin\CurrentPage;
+
 /**
- * Tells an admin their license needs attention, on any screen.
- *
- * The Licenses page shows per add-on status, but nobody visits it unprompted,
- * so a refused key stays invisible until something stops working.
+ * Tells an admin on Gratora's own screens that a license needs attention.
  *
  * @since 1.0.0
  */
@@ -29,11 +28,11 @@ final class LicenseNotice
     /** @since 1.0.0 */
     public function render(): void
     {
-        if (! current_user_can('manage_options')) {
+        if (! current_user_can('manage_options') || ! CurrentPage::isGratora()) {
             return;
         }
         // Already on the screen that says all of this.
-        if ((isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === 'gratora-settings') {
+        if (CurrentPage::slug() === 'gratora-settings') {
             return;
         }
 

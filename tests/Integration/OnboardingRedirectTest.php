@@ -33,12 +33,12 @@ final class OnboardingRedirectTest extends IntegrationTestCase
 
         $GLOBALS['pagenow'] = 'index.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        unset($_GET['page']);
+        unset($GLOBALS['plugin_page']);
     }
 
     protected function tearDown(): void
     {
-        unset($GLOBALS['pagenow'], $_GET['page']);
+        unset($GLOBALS['pagenow'], $GLOBALS['plugin_page']);
         $_SERVER['REQUEST_METHOD'] = 'GET';
         delete_transient('gratora_onboarding_greet');
 
@@ -93,7 +93,7 @@ final class OnboardingRedirectTest extends IntegrationTestCase
 
     public function test_the_wizard_does_not_redirect_to_itself(): void
     {
-        $_GET['page'] = OnboardingPage::PAGE_ID;
+        $GLOBALS['plugin_page'] = OnboardingPage::PAGE_ID;
 
         $this->assertFalse($this->onboarding->shouldRedirect());
     }

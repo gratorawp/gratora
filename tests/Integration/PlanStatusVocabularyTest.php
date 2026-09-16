@@ -22,6 +22,12 @@ use Gratora\Recurring\RecurringPlanRepository;
  */
 final class PlanStatusVocabularyTest extends IntegrationTestCase
 {
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['plugin_page']);
+        parent::tearDown();
+    }
+
     private function plan(array $overrides = []): RecurringPlan
     {
         $now = gmdate('Y-m-d H:i:s');
@@ -97,11 +103,9 @@ final class PlanStatusVocabularyTest extends IntegrationTestCase
     public function test_the_admin_is_handed_the_vocabulary(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
-        $_GET['page'] = 'gratora-subscriptions';
+        $GLOBALS['plugin_page'] = 'gratora-subscriptions';
 
         $shipped = $this->shippedToAdmin();
-
-        unset($_GET['page']);
 
         $this->assertSame(PlanStatus::LIFECYCLE, array_column($shipped, 'value'));
         $this->assertNotContains('', array_column($shipped, 'label'));

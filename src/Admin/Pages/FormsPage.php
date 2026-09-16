@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Admin\Pages;
 
+use Gratora\Admin\CurrentPage;
 use Gratora\Admin\ExtensionAssets;
 use Gratora\Donors\ConsentService;
 use Gratora\Foundation\Hooks\HookProvider;
@@ -51,7 +52,8 @@ final class FormsPage extends HookProvider
     public static function isFormEditView(): bool
     {
         return is_admin()
-            && (isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === self::PAGE_ID
+            && CurrentPage::slug() === self::PAGE_ID
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which form the editor has open decides the layout; nothing is written.
             && intval($_GET['form'] ?? 0) > 0;
     }
 
@@ -129,6 +131,7 @@ final class FormsPage extends HookProvider
         wp_tinymce_inline_scripts();
         wp_enqueue_editor();
 
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- fires core's editor asset action so block extensions load in this editor, as wp-admin/edit-form-blocks.php does.
         do_action('enqueue_block_editor_assets');
         add_action('admin_print_footer_scripts', ['_WP_Editors', 'print_default_editor_scripts'], 45);
 

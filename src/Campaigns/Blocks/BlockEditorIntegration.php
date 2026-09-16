@@ -98,8 +98,8 @@ final class BlockEditorIntegration
     {
         $postId = (int) get_the_ID();
 
-        if ($postId <= 0 && isset($_GET['post'])) {
-            $postId = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading which post the editor is on, not acting on it.
+        if ($postId <= 0) {
+            $postId = intval($_GET['post'] ?? 0); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which post the editor is on; nothing is written.
         }
 
         return max(0, $postId);

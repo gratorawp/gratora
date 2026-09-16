@@ -27,14 +27,14 @@ final class AdminPayloadNeedsAdminAccessTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        unset($_GET['page']);
+        unset($GLOBALS['plugin_page']);
         wp_set_current_user(0);
         parent::tearDown();
     }
 
     private function injected(): string
     {
-        $_GET['page'] = 'gratora';
+        $GLOBALS['plugin_page'] = 'gratora';
 
         ob_start();
         (new AdminGlobals(Plugin::instance()->container->get(LicenseService::class)))->inject();

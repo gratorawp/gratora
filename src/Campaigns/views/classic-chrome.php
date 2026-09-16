@@ -11,9 +11,7 @@ defined('ABSPATH') || exit;
 
 use Gratora\Campaigns\CampaignChrome;
 
-$flags = $GLOBALS['gratora_chrome_flags'] ?? ['header' => false, 'footer' => false];
-
-CampaignChrome::openDocument((bool) $flags['header']);
+CampaignChrome::openDocument((bool) ($GLOBALS['gratora_chrome_flags']['header'] ?? false));
 ?>
 <main class="gratora-chrome-main">
     <?php
@@ -24,4 +22,4 @@ CampaignChrome::openDocument((bool) $flags['header']);
     ?>
 </main>
 <?php
-CampaignChrome::closeDocument((bool) $flags['footer']);
+CampaignChrome::closeDocument((bool) ($GLOBALS['gratora_chrome_flags']['footer'] ?? false));

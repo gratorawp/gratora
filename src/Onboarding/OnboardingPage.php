@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Onboarding;
 
+use Gratora\Admin\CurrentPage;
 use Gratora\Foundation\Hooks\HookProvider;
 
 /** @since 1.0.0 */
@@ -39,7 +40,7 @@ final class OnboardingPage extends HookProvider
     /** @since 1.0.0 */
     public function maybeAddBodyClass(string $classes): string
     {
-        if ($this->isCurrentPage()) {
+        if (CurrentPage::slug() === self::PAGE_ID) {
             $classes .= ' gratora-onboarding-fullscreen';
         }
         return $classes;
@@ -52,13 +53,6 @@ final class OnboardingPage extends HookProvider
         ?>
         <div id="gratora-admin-onboarding"></div>
         <?php
-    }
-
-    /** @since 1.0.0 */
-    private function isCurrentPage(): bool
-    {
-        $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
-        return $page === self::PAGE_ID;
     }
 
     /** @since 1.0.0 */

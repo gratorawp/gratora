@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Admin\AdminFooter;
+use ReflectionMethod;
 
 /**
  * admin_footer_text is global: every plugin that hooks it is fighting for one
@@ -13,19 +14,21 @@ use Gratora\Admin\AdminFooter;
  */
 final class AdminFooterReviewPromptTest extends IntegrationTestCase
 {
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['plugin_page']);
+        parent::tearDown();
+    }
+
     private function footerOn(?string $page, string $original = 'ORIGINAL'): string
     {
         if ($page === null) {
-            unset($_GET['page']);
+            unset($GLOBALS['plugin_page']);
         } else {
-            $_GET['page'] = $page;
+            $GLOBALS['plugin_page'] = $page;
         }
 
-        $out = (new AdminFooter())->reviewPrompt($original);
-
-        unset($_GET['page']);
-
-        return $out;
+        return (new AdminFooter())->reviewPrompt($original);
     }
 
     public function test_the_dashboard_gets_the_prompt(): void
@@ -85,7 +88,7 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
     {
         // has_filter() is the wrong probe here: core registers its own
         // core_update_footer. Read what this provider declares instead.
-        $filters = (new \ReflectionMethod(AdminFooter::class, 'filters'));
+        $filters = (new ReflectionMethod(AdminFooter::class, 'filters'));
         $filters->setAccessible(true);
 
         $this->assertSame(['admin_footer_text'], array_keys($filters->invoke(new AdminFooter())));

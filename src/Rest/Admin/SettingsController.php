@@ -198,9 +198,7 @@ final class SettingsController
 
     /**
      * Recursively sanitize settings values. Email/receipt templates are sent as
-     * plain text, so settings hold no HTML; sanitize_textarea_field strips tags
-     * + control chars while preserving line breaks and leaving ampersands and a
-     * stray "<" intact (wp_kses_post would turn "&" into "&amp;" and eat "<").
+     * plain text, so settings hold no HTML.
      *
      * @param array<string,mixed> $data
      * @return array<string,mixed>
@@ -233,12 +231,15 @@ final class SettingsController
     private const WHITESPACE_IS_THE_VALUE = ['decimal_sep', 'thousand_sep'];
 
     /**
-     * Tags, invalid UTF-8 and control characters removed, and nothing else.
+     * Tags, script and style bodies, invalid UTF-8 and control characters removed.
+     * A "<" that opens no tag is kept, HTML-escaped with the text that follows it.
      *
      * A settings string can carry a percent-encoded URL, and WordPress's text
      * sanitizers delete every %XX run they find, which turns a tracked link in
-     * a template into a dead one. Ordinary and non-breaking spaces are left
-     * alone; the caller decides which keys are trimmed.
+     * a template into a dead one. Non-breaking spaces are always kept. A value
+     * containing "<" goes through wp_strip_all_tags, which trims its ordinary
+     * leading and trailing whitespace; any other value keeps it, and the caller
+     * decides which keys are trimmed.
      *
      * @since 1.0.0
      */
@@ -250,8 +251,7 @@ final class SettingsController
             // Escaped before stripping: strip_tags reads "<3" as an unclosed
             // tag and takes the rest of the body with it.
             $clean = wp_pre_kses_less_than($clean);
-            $clean = (string) preg_replace('@<(script|style)[^>]*?>.*?</\1>@si', '', $clean);
-            $clean = strip_tags($clean);
+            $clean = wp_strip_all_tags($clean);
         }
 
         return (string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $clean);

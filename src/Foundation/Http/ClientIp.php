@@ -217,7 +217,7 @@ final class ClientIp
     /** @since 1.0.0 */
     private static function header(string $key): string
     {
-        return trim((string) wp_unslash($_SERVER[$key] ?? ''));
+        return sanitize_text_field(wp_unslash($_SERVER[$key] ?? ''));
     }
 
     /**
