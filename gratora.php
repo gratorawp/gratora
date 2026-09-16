@@ -66,6 +66,5 @@ add_action('plugins_loaded', static function (): void {
         WP_CLI::add_command('gratora recompute-aggregates', [$cli, 'recompute_aggregates']);
         WP_CLI::add_command('gratora seed', [$cli, 'seed']);
         WP_CLI::add_command('gratora demo-seed', [$cli, 'demo_seed']);
-        WP_CLI::add_command('gratora e2e-seed', [$cli, 'e2e_seed']);
     }
 });

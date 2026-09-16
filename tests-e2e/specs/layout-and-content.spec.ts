@@ -8,7 +8,7 @@ import { test, expect } from '../fixtures/donor-form';
 const FORM_PATH = process.env.GRATORA_E2E_LAYOUT_FORM_PATH ?? '';
 
 test.describe('layout + content blocks', () => {
-    test.skip(! FORM_PATH, 'set GRATORA_E2E_LAYOUT_FORM_PATH via `wp gratora e2e-seed`');
+    test.skip(! FORM_PATH, 'set GRATORA_E2E_LAYOUT_FORM_PATH via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
     test.use({ formPath: FORM_PATH });
 
     test('heading block renders at the seeded level with the seeded text', async ({ donor }) => {

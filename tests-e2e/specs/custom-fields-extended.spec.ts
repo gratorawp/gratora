@@ -1,6 +1,7 @@
 /**
- * Use GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH from wp gratora e2e-seed. Exercise each control
- * through full submission.
+ * Use GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH from
+ * `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`. Exercise each
+ * control through full submission.
  */
 
 import { test, expect } from '../fixtures/donor-form';
@@ -8,7 +9,7 @@ import { test, expect } from '../fixtures/donor-form';
 const FORM_PATH = process.env.GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH ?? '';
 
 test.describe('custom-field blocks (extended)', () => {
-    test.skip(! FORM_PATH, 'set GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH via `wp gratora e2e-seed`');
+    test.skip(! FORM_PATH, 'set GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
     test.use({ formPath: FORM_PATH });
 
     test('text-input renders, accepts input, and submits', async ({ donor }) => {

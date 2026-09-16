@@ -8,7 +8,7 @@ import { test, expect } from '../fixtures/donor-form';
 const CONDITIONAL_FORM_PATH = process.env.GRATORA_E2E_CONDITIONAL_FORM_PATH ?? '';
 
 test.describe('conditional logic', () => {
-    test.skip(! CONDITIONAL_FORM_PATH, 'set GRATORA_E2E_CONDITIONAL_FORM_PATH via `wp gratora e2e-seed`');
+    test.skip(! CONDITIONAL_FORM_PATH, 'set GRATORA_E2E_CONDITIONAL_FORM_PATH via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
     test.use({ formPath: CONDITIONAL_FORM_PATH });
 
     test('conditionally-shown heading is absent until the trigger matches', async ({ donor }) => {

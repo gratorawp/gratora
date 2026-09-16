@@ -5,7 +5,8 @@
  * thank-you.
  *
  * Requires a separate multi-step form whose path lives in
- * `GRATORA_E2E_MULTI_STEP_FORM_PATH`. The seed (`wp gratora e2e-seed`) creates one
+ * `GRATORA_E2E_MULTI_STEP_FORM_PATH`. The seed
+ * (`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`) creates one
  * with these pages:
  *   step 1: gratora/donation-amount (presets, required)
  *   step 2: gratora/name + gratora/email (both required)
@@ -19,7 +20,7 @@ import { test, expect } from '../fixtures/donor-form';
 const MULTI_STEP_FORM_PATH = process.env.GRATORA_E2E_MULTI_STEP_FORM_PATH ?? '';
 
 test.describe('multi-step wizard', () => {
-    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp gratora e2e-seed`');
+    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('donor step renders fields after continuing from amount', async ({ donor }) => {
@@ -128,7 +129,7 @@ test.describe('multi-step wizard', () => {
 });
 
 test.describe('multi-step wizard health', () => {
-    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp gratora e2e-seed`');
+    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('no render-error console output on the donor step', async ({ donor }) => {

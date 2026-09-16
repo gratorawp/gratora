@@ -5,7 +5,7 @@ import { settle } from '../../helpers/visual';
 const MULTI_STEP_FORM_PATH = process.env.GRATORA_E2E_MULTI_STEP_FORM_PATH ?? '';
 
 test.describe('visual: multi-step wizard', () => {
-    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp gratora e2e-seed`');
+    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('each step renders', async ({ donor }) => {

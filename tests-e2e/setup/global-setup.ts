@@ -36,14 +36,14 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
             if (! res.ok()) {
                 throw new Error(
                     `Form page not reachable: GET ${baseURL}${formPath} -> ${res.status()}. ` +
-                    `Run \`wp gratora e2e-seed\`. See tests-e2e/README.md.`,
+                    `Run \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed\`. See tests-e2e/README.md.`,
                 );
             }
             const html = await res.text();
             if (! /<form[^>]*class="[^"]*gratora-donation-form/.test(html)) {
                 throw new Error(
                     `Page ${formPath} did not render a Gratora donation form. ` +
-                    `Run \`wp gratora e2e-seed\` and ensure the form is published.`,
+                    `Run \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed\` and ensure the form is published.`,
                 );
             }
             assertCanonicalForm(html, formPath);
@@ -55,7 +55,7 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
             if (! res.ok()) {
                 throw new Error(
                     `Payment form page not reachable: GET ${baseURL}${paymentPath} -> ${res.status()}. ` +
-                    `Run \`wp gratora e2e-seed\`. See tests-e2e/README.md.`,
+                    `Run \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed\`. See tests-e2e/README.md.`,
                 );
             }
         }
@@ -66,7 +66,7 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
             if (! res.ok()) {
                 throw new Error(
                     `Conditional form page not reachable: GET ${baseURL}${condPath} -> ${res.status()}. ` +
-                    `Run \`wp gratora e2e-seed\`. See tests-e2e/README.md.`,
+                    `Run \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed\`. See tests-e2e/README.md.`,
                 );
             }
         }
@@ -77,7 +77,7 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
             if (! res.ok()) {
                 throw new Error(
                     `Custom-fields form page not reachable: GET ${baseURL}${customFieldsPath} -> ${res.status()}. ` +
-                    `Run \`wp gratora e2e-seed\`. See tests-e2e/README.md.`,
+                    `Run \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed\`. See tests-e2e/README.md.`,
                 );
             }
         }
@@ -88,7 +88,7 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
             if (! res.ok()) {
                 throw new Error(
                     `Layout form page not reachable: GET ${baseURL}${layoutPath} -> ${res.status()}. ` +
-                    `Run \`wp gratora e2e-seed\`. See tests-e2e/README.md.`,
+                    `Run \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed\`. See tests-e2e/README.md.`,
                 );
             }
         }

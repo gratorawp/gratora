@@ -77,12 +77,17 @@ jobs:
       # --yes because the seed asks before overwriting org money settings, and
       # a runner has no stdin: WP-CLI reads EOF, treats it as "no" and halts
       # with exit 0, so the step passes having seeded nothing.
+      #
+      # The seed is not in the release zip, so it is loaded from the checkout.
+      # wp-env mounts the checkout under its folder name and runs commands from
+      # the WordPress root, so --env-cwd is what makes the --require path resolve.
       - name: Seed core fixtures
         run: |
+          PLUGIN_DIR="wp-content/plugins/$(basename "$GITHUB_WORKSPACE")"
           # The step runs under `bash -e`, so a failing seed would abort the
           # assignment before the echo and take its own explanation with it.
           set +e
-          OUT="$(npx wp-env run cli wp gratora e2e-seed --yes 2>&1)"
+          OUT="$(npx wp-env run cli --env-cwd="$PLUGIN_DIR" wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed --yes 2>&1)"
           CODE=$?
           set -e
           echo "$OUT"

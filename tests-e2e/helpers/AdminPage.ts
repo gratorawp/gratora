@@ -5,7 +5,8 @@ export const ADMIN_PASS = process.env.GRATORA_E2E_ADMIN_PASS ?? 'password';
 
 /**
  * wp-admin session helper. Logs in via the wp-login.php form using env creds
- * (defaults match wp-env; the P2P seed provisions `gratora-e2e-admin` for Local).
+ * (defaults match wp-env; the core e2e seed provisions `gratora-e2e-admin` and
+ * prints the password it generated).
  */
 export class AdminPage {
     constructor(readonly page: Page) {}

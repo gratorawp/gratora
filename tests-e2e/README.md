@@ -32,12 +32,13 @@ kitchen-sink block set below in step with them.
    npx playwright install chromium
    ```
 
-2. Seed the canonical forms:
+2. Seed the canonical forms, from the plugin directory:
    ```sh
-   wp gratora e2e-seed
+   wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed
    ```
-   Idempotent - re-run anytime to converge to whatever the current spec set
-   expects. It:
+   The command lives in `tests-e2e/cli/`, which is not in the release zip, so
+   it exists only when that file is loaded with `--require`. Idempotent - re-run
+   anytime to converge to whatever the current spec set expects. It:
    - Creates / updates the campaign `gratora-e2e` (published).
    - Creates / updates the single-page form `gratora-e2e-form` (published) with
      every block the specs assert against (amount, name, email, country,
@@ -51,6 +52,9 @@ kitchen-sink block set below in step with them.
      have something to switch between.
    - Clears AntiSpamGuard rate-limit transients so the suite isn't penalised
      by prior runs.
+   - Creates / updates the `gratora-e2e-admin` administrator for the admin
+     specs. It refuses a login that already exists unless an earlier run of
+     this seed created it.
 
    The command prints the env vars you need.
 
@@ -73,8 +77,9 @@ If you'd rather build the canonical form by hand instead of running the CLI,
 the kitchen-sink block set is documented at the bottom of this file.
 
 The `screenshots` project wants `GRATORA_E2E_ADMIN_USER` / `GRATORA_E2E_ADMIN_PASS`,
-which the seed also prints (the defaults match wp-env, so a hermetic run needs
-nothing).
+which the seed also prints. The password is generated on every run, so take it
+from the latest output; export `GRATORA_E2E_ADMIN_PASS` before seeding to keep
+one of your own.
 
 ## Run
 
@@ -87,7 +92,7 @@ npm run test:e2e -- specs/amount.spec.ts   # one spec
 
 Reports / traces / screenshots on failure land in `test-results/` (gitignored).
 
-If you hit `gratora_rate_limited` (429), re-run `wp gratora e2e-seed` to clear the
+If you hit `gratora_rate_limited` (429), re-run the seed to clear the
 AntiSpamGuard IP transients and start fresh. Better: put the fixture site in
 org test mode (Settings, or `gratora_gateway_config['test_mode']`), which the
 guard short-circuits. Repeated local runs trip the IP quota otherwise, at ten
@@ -225,8 +230,11 @@ The committed `.wp-env.json` loads core only, so a standalone checkout boots:
 
 ```sh
 npx wp-env start
-npx wp-env run cli wp gratora e2e-seed
+npx wp-env run cli --env-cwd="wp-content/plugins/$(basename "$PWD")" wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed
 ```
+
+wp-env mounts the checkout under its own folder name, which `--env-cwd` reads
+from the current directory, so run these from the checkout.
 
 An add-on suite needs its plugin mounted too. Add an override (gitignored) and
 run that suite from the add-on's own directory:
@@ -234,7 +242,7 @@ run that suite from the add-on's own directory:
 ```sh
 echo '{ "plugins": [ ".", "../gratora-p2p" ] }' > .wp-env.override.json
 npx wp-env start
-npx wp-env run cli wp gratora e2e-seed
+npx wp-env run cli --env-cwd="wp-content/plugins/$(basename "$PWD")" wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed
 npx wp-env run cli wp gratora-p2p e2e-seed
 ```
 
@@ -244,12 +252,13 @@ npx wp-env run cli wp gratora-p2p e2e-seed
 
 `.github/workflows/e2e.yml` runs this suite hermetically on every push/PR. Its
 optional `gratora-p2p` checkout and seed steps (repo variable `GRATORA_P2P_REPO` +
-secret `GRATORA_P2P_TOKEN`) now only provision site state; the p2p specs run from
+secret `GRATORA_P2P_TOKEN`) only provision site state; the p2p specs run from
 the add-on's own repository.
 
 ## Conventions
 
-- TypeScript only (no JS in `tests-e2e/`).
+- TypeScript only (no JS in `tests-e2e/`). The one PHP file is the seed command
+  in `cli/`.
 - Specs use the `donor` fixture from `fixtures/donor-form.ts`. The fixture
   opens the form page, waits for `data-gratora-ready` (the runtime cloak), and
   assert-fails the spec on any `[gratora] render error contained by boundary`
@@ -264,7 +273,7 @@ the add-on's own repository.
 - Each spec generates a unique donor email per run with `Date.now()` to avoid
   cross-test donor collisions.
 
-## Manual canonical form (if you skip `wp gratora e2e-seed`)
+## Manual canonical form (if you skip the seed)
 
 The canonical specs assume the form behind `GRATORA_E2E_FORM_PATH` includes
 these blocks (the required minimum + every block any spec targets). A missing
