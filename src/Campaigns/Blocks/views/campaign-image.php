@@ -11,12 +11,10 @@ defined('ABSPATH') || exit;
 $classes = 'gratora-block gratora-block--image is-ratio-' . $ratio . ($rounded ? ' is-rounded' : '');
 ?>
 <figure <?php
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
-echo get_block_wrapper_attributes(array_filter([
+echo wp_kses_data(get_block_wrapper_attributes(array_filter([
     'class' => $classes,
     'style' => $styleVars,
-]));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+])));
 ?> data-block="gratora/campaign-image">
     <?php
     // Attachment IDs supply srcset and sizes.

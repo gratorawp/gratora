@@ -102,6 +102,32 @@ final class DonationFormPrintsNoTagsOfItsOwnTest extends IntegrationTestCase
         $this->assertSame(['SCRIPT application/json config'], $this->assetTagsIn($this->render()));
     }
 
+    /** A CSP plugin hands inline scripts their nonce through this filter. */
+    public function test_the_config_carries_what_a_csp_plugin_gives_inline_scripts(): void
+    {
+        add_filter('wp_inline_script_attributes', static fn (array $attributes): array => $attributes + ['nonce' => 'n0nce']);
+
+        $processor = new WP_HTML_Tag_Processor($this->render());
+        while ($processor->next_tag('SCRIPT') && $processor->get_attribute('data-gratora-form-config') === null) {
+            continue;
+        }
+
+        $this->assertSame('n0nce', $processor->get_attribute('nonce'));
+    }
+
+    /** Markup a writer stored between the blocks, outside any container. */
+    public function test_markup_stored_between_the_blocks_prints_without_its_handler_or_script(): void
+    {
+        $form         = Form::query()->where('slug', $this->slug)->get();
+        $form->blocks = '<img src="x" onerror="window.gratoraProbe=1"><script>window.gratoraProbe=2</script>' . $form->blocks;
+        $form->save();
+
+        $html = $this->render();
+
+        $this->assertStringNotContainsString('onerror', $html);
+        $this->assertSame(['SCRIPT application/json config'], $this->assetTagsIn($html));
+    }
+
     /**
      * A form in a block on a classic theme, or inside the donate button's
      * modal, renders after the head has printed.

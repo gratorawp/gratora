@@ -11,12 +11,10 @@ defined('ABSPATH') || exit;
  */
 ?>
 <section id="gratora-form" <?php
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
-echo get_block_wrapper_attributes(array_filter([
+echo wp_kses_data(get_block_wrapper_attributes(array_filter([
     'class' => 'gratora-block gratora-block--donation-form',
     'style' => $styleVars,
-]));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+])));
 ?> data-block="gratora/donation-form">
     <?php if (($mode ?? 'front') === 'empty'): ?>
         <p class="gratora-block__empty"><?php echo esc_html($emptyText ?? '');

@@ -16,12 +16,10 @@ defined('ABSPATH') || exit;
  */
 ?>
 <section <?php
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
-echo get_block_wrapper_attributes(array_filter([
+echo wp_kses_data(get_block_wrapper_attributes(array_filter([
     'class' => 'gratora-block gratora-block--top-donors gratora-block--layout-' . $layout,
     'style' => $styleVars,
-]));
-// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+])));
 ?>
          data-block="gratora/top-donors">
     <?php if ($title !== ''): ?>
