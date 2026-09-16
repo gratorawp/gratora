@@ -101,7 +101,24 @@ test -z "$BIN" || fail "${BIN#"$OUT"/} ships a package's own tooling"
 
 # Use find -print -quit; head can trigger SIGPIPE and abort under pipefail before reporting the
 # file.
-JUNK=$(find "$OUT" \( -name '.DS_Store' -o -name 'Thumbs.db' \) -print -quit)
+JUNK=$(find "$OUT" \( -name '.*' -o -name 'Thumbs.db' \) -print -quit)
 test -z "$JUNK" || fail "${JUNK#"$OUT"/} is in the zip; hidden files are not permitted"
+
+# A Composer home once landed inside the Strauss output and shipped a live auth.json.
+AUTH=$(find "$OUT" -name 'auth.json' -print -quit)
+test -z "$AUTH" || fail "${AUTH#"$OUT"/} is a credentials file"
+
+OUT="$OUT" php -r '
+    $out = getenv("OUT");
+    $allowed = ["autoload.php", "composer"];
+    foreach (json_decode(file_get_contents("$out/composer.json"), true)["extra"]["strauss"]["packages"] as $package) {
+        $allowed[] = explode("/", $package)[0];
+    }
+    $stray = array_diff(array_diff(scandir("$out/vendor/vendor-prefixed"), [".", ".."]), $allowed);
+    if ($stray !== []) {
+        fwrite(STDERR, "::error::vendor/vendor-prefixed/" . implode(", ", $stray) . " is not a Strauss package\n");
+        exit(1);
+    }
+'
 
 echo "zip verified"

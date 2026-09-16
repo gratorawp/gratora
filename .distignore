@@ -88,6 +88,7 @@ tests
 .github
 .gitignore
 .php-cs-fixer.php
+auth.json
 
 /vendor/vendor-prefixed/gratora/queryable/bin
 /vendor/vendor-prefixed/gratora/queryable/tests
