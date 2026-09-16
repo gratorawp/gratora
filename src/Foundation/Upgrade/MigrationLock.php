@@ -32,14 +32,7 @@ final class MigrationLock
     {
         global $wpdb;
 
-        $insert = $wpdb->prepare(
-            "INSERT IGNORE INTO `{$wpdb->options}` (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
-            self::OPTION,
-            (string) time()
-        );
-
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the point is to bypass every cache.
-        $rows = $wpdb->query($insert);
+        $rows = self::insert();
 
         // A driver without INSERT IGNORE reports an error rather than a count,
         // and a stack this exotic still has to be able to migrate.
@@ -51,7 +44,7 @@ final class MigrationLock
             return true;
         }
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- same reason.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the point is to bypass every cache.
         $held = (int) $wpdb->get_var($wpdb->prepare(
             "SELECT option_value FROM `{$wpdb->options}` WHERE option_name = %s",
             self::OPTION
@@ -64,13 +57,24 @@ final class MigrationLock
         // Stale: whoever held it died mid-pass.
         self::release();
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- same reason.
-        return $wpdb->query($insert) !== 0;
+        return self::insert() !== 0;
     }
 
     /** @since 1.0.0 */
     public static function release(): void
     {
         delete_option(self::OPTION);
+    }
+
+    private static function insert(): int|bool
+    {
+        global $wpdb;
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the point is to bypass every cache.
+        return $wpdb->query($wpdb->prepare(
+            "INSERT IGNORE INTO `{$wpdb->options}` (option_name, option_value, autoload) VALUES (%s, %s, 'no')",
+            self::OPTION,
+            (string) time()
+        ));
     }
 }

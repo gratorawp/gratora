@@ -28,6 +28,9 @@ use Gratora\Onboarding\Onboarding;
 /** @since 1.0.0 */
 final class Plugin
 {
+    /** @since 1.1.0 */
+    public const OPT_REWRITE_RULES_PENDING = 'gratora_rewrite_rules_pending';
+
     private static ?self $instance = null;
     private static bool $booted = false;
 
@@ -147,6 +150,20 @@ final class Plugin
             (new PortalPage())->maybeHeal();
         }, 100);
 
+        // The activation hook flushes before any module has booted, so the
+        // rules it stores lack the routes of an add-on that stayed active while
+        // core was off. Flushed once more on the first request that has booted
+        // every module. The marker is kept as an autoloaded '0': without a
+        // persistent object cache, an absent option costs a query per request.
+        add_action('wp_loaded', static function (): void {
+            if (get_option(self::OPT_REWRITE_RULES_PENDING) !== '1') {
+                return;
+            }
+
+            update_option(self::OPT_REWRITE_RULES_PENDING, '0', true);
+            flush_rewrite_rules(false);
+        }, 101);
+
         do_action('gratora.booted', $self);
     }
 
@@ -207,13 +224,15 @@ final class Plugin
      */
     public static function migrateSchema(): void
     {
-        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
         $self = self::instance();
 
         // CLI/early activation may run before plugins_loaded; registration is idempotent.
         if (! $self->modules->get('core')) {
             $self->modules->register(new CoreModule());
+        }
+
+        if (! function_exists('dbDelta')) {
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         }
 
         foreach ($self->modules->allMigrations() as $modelClass) {
@@ -330,94 +349,9 @@ final class Plugin
 
         (new CampaignPermalinks())->addRule();
         flush_rewrite_rules();
+        update_option(self::OPT_REWRITE_RULES_PENDING, '1', true);
 
         do_action('gratora.activated');
-    }
-
-    /**
-     * Switch off the add-ons that cannot run without core.
-     *
-     * An add-on extends core's classes, and core's autoloader goes with core, so
-     * an add-on left active afterwards fatals the moment anything touches one of
-     * those classes, including its own deactivation hook. That leaves the site
-     * owner unable to switch off the thing that is breaking their site from the
-     * screen that would switch it off.
-     *
-     * Done here, inside core's own deactivation, because core is still loaded
-     * for the rest of this request: each add-on's deactivation hook runs with
-     * the classes it expects still in memory.
-     *
-     * @since 1.0.0
-     */
-    private static function deactivateDependents(): void
-    {
-        if (! function_exists('deactivate_plugins')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
-        // The slug an add-on names is the one the directory distributes core
-        // under, which is the text domain, not whatever folder this checkout
-        // happens to sit in. plugin_basename() is no good either: it returns the
-        // whole absolute path when the plugin is outside the registered plugin
-        // directory, and the slug would then match no add-on at all.
-        $slug = (string) (get_file_data(GRATORA_FILE, ['TextDomain' => 'Text Domain'])['TextDomain'] ?? '');
-        $here = basename(dirname(GRATORA_FILE));
-
-        $dependents = [];
-
-        foreach ((array) get_option('active_plugins', []) as $plugin) {
-            $plugin = (string) $plugin;
-            if (dirname($plugin) === $here) {
-                continue;
-            }
-
-            $file = WP_PLUGIN_DIR . '/' . $plugin;
-            if (! is_readable($file)) {
-                continue;
-            }
-
-            // The header WordPress itself reads for plugin dependencies, so an
-            // add-on declares this once and both core and WordPress honour it.
-            $requires = get_file_data($file, ['RequiresPlugins' => 'Requires Plugins'])['RequiresPlugins'] ?? '';
-            $names    = array_filter(array_map('trim', explode(',', (string) $requires)));
-
-            if ($slug !== '' && in_array($slug, $names, true)) {
-                $dependents[] = $plugin;
-            }
-        }
-
-        /**
-         * Add-ons that must go off with core.
-         *
-         * The header covers anything that declares itself properly; this is for
-         * an add-on that cannot, and for tests.
-         *
-         * @param list<string> $dependents Plugin basenames.
-         * @since 1.0.0
-         */
-        $dependents = (array) apply_filters('gratora.dependent_plugins', $dependents);
-
-        if ($dependents === []) {
-            return;
-        }
-
-        $dependents = array_values(array_unique($dependents));
-
-        // Not silent: silent is what skips deactivate_{$plugin}, which is the
-        // action register_deactivation_hook installs, so each add-on's own
-        // cleanup never ran and its cron jobs and rewrite rules outlived it.
-        deactivate_plugins($dependents);
-
-        // WordPress is inside its own deactivate_plugins() for core and writes
-        // active_plugins from a copy it read before this hook ran, so the write
-        // just made is about to be overwritten and the add-ons would come back
-        // on. Strip them from that write too, once.
-        $strip = static function ($value) use (&$strip, $dependents) {
-            remove_filter('pre_update_option_active_plugins', $strip);
-
-            return array_values(array_diff((array) $value, $dependents));
-        };
-        add_filter('pre_update_option_active_plugins', $strip);
     }
 
     /**
@@ -429,18 +363,14 @@ final class Plugin
      */
     public static function onDeactivation(bool $networkDeactivating = false): void
     {
-        // Anything that reads Gratora's own tables runs before the wipe, because
-        // the plugin is still loaded and hooked for the rest of this request.
-        self::deactivateDependents();
-
         do_action('gratora.deactivated');
 
-        // Deleted rather than flushed, and after the dependents: a flush from a
-        // plugin that is still loaded stores its own rules again, and
-        // CampaignPermalinks::addRule has already run on init. WordPress
-        // rebuilds the option on the next permalink request, by which time the
-        // rule is gone with the plugin. Left behind, it rewrote every URL under
-        // /campaigns/ on a site that had moved on to ordinary pages.
+        // Deleted rather than flushed: a flush from a plugin that is still
+        // loaded stores its own rules again, and CampaignPermalinks::addRule
+        // has already run on init. WordPress rebuilds the option on the next
+        // permalink request, by which time the rule is gone with the plugin.
+        // Left behind, it rewrote every URL under /campaigns/ on a site that
+        // had moved on to ordinary pages.
         delete_option('rewrite_rules');
 
         // init reinstalls these on reactivation, and a run with no callback

@@ -84,15 +84,14 @@ final class DonorAvatarUploader
             return new WP_Error('gratora_upload_not_image', __('That does not look like a picture. JPEG, PNG, GIF or WebP.', 'gratora-donation-platform'), ['status' => 415]);
         }
 
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/media.php';
-        require_once ABSPATH . 'wp-admin/includes/image.php';
-
         $overrides = [
             'test_form' => false,
             'mimes'     => self::ALLOWED,
         ];
 
+        if (! function_exists('wp_handle_upload')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
         $moved = wp_handle_upload($file, $overrides);
         if (! is_array($moved) || isset($moved['error'])) {
             return new WP_Error('gratora_upload_failed', (string) ($moved['error'] ?? __('That file could not be saved.', 'gratora-donation-platform')), ['status' => 400]);
@@ -112,10 +111,11 @@ final class DonorAvatarUploader
             return new WP_Error('gratora_upload_failed', __('That file could not be saved.', 'gratora-donation-platform'), ['status' => 500]);
         }
 
-        wp_update_attachment_metadata(
-            (int) $attachmentId,
-            wp_generate_attachment_metadata((int) $attachmentId, (string) $moved['file'])
-        );
+        if (! function_exists('wp_generate_attachment_metadata')) {
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+        }
+        $metadata = wp_generate_attachment_metadata((int) $attachmentId, (string) $moved['file']);
+        wp_update_attachment_metadata((int) $attachmentId, $metadata);
 
         $previous = (int) ($donor->avatar_attachment_id ?? 0);
 

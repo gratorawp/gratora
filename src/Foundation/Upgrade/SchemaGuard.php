@@ -254,7 +254,7 @@ final class SchemaGuard
             }
 
             $full = $wpdb->prefix . $table;
-            $rows = $wpdb->get_col('SHOW COLUMNS FROM `' . esc_sql($full) . '`');
+            $rows = $wpdb->get_col($wpdb->prepare('SHOW COLUMNS FROM %i', $full));
             if (! is_array($rows) || $rows === []) {
                 continue;
             }

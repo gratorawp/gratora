@@ -67,6 +67,7 @@ final class DataEraser
         'gratora_reference_settings',
         'gratora_retention_cursor',
         'gratora_retention_starts_at',
+        'gratora_rewrite_rules_pending',
         'gratora_roles',
         'gratora_upgrade_routines_done',
         'gratora_upgrade_routines_failed',
@@ -182,10 +183,8 @@ final class DataEraser
         foreach ($tables as $table) {
             $full = $wpdb->prefix . $table;
 
-            // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- prepare() has no placeholder for an identifier, so a table name can only be interpolated. $table comes from this class's own list and never from a request.
-            $wpdb->query("DROP TABLE IF EXISTS `{$full}`");
-            $wpdb->query("DROP TABLE IF EXISTS `{$full}_meta`");
-            // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+            $wpdb->query($wpdb->prepare('DROP TABLE IF EXISTS %i', $full));
+            $wpdb->query($wpdb->prepare('DROP TABLE IF EXISTS %i', $full . '_meta'));
             delete_option('queryable_' . $table . '_version');
         }
     }

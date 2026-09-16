@@ -110,9 +110,8 @@ final class SystemReport
      * data it wrote is still in the database. Whether one is switched off is
      * usually the answer to the ticket this report is pasted into.
      *
-     * Recognised by text domain: the add-ons deliberately do not declare
-     * Requires Plugins, because that header also stops WordPress deactivating
-     * core while one of them is on.
+     * Recognised by the gratora- text domain every add-on carries, whether or
+     * not it declares Requires Plugins.
      *
      * @return list<array{label:string, value:string}>
      *
@@ -160,10 +159,6 @@ final class SystemReport
      */
     private static function installedPlugins(): array
     {
-        if (! function_exists('get_plugins')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
         return get_plugins();
     }
 
@@ -316,7 +311,7 @@ final class SystemReport
                     ? sprintf(
                         /* translators: %s: a row count */
                         __('%s rows', 'gratora-donation-platform'),
-                        number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a name declared by a registered model, never from input.
+                        number_format_i18n((int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM %i', $table)))
                     )
                     : __('MISSING', 'gratora-donation-platform')
             );

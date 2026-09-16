@@ -145,6 +145,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
             'gratora_email_settings',
             'gratora_paypal_product',
             'gratora_paypal_plans',
+            Plugin::OPT_REWRITE_RULES_PENDING,
         ] as $option) {
             $this->assertContains(
                 $option,
