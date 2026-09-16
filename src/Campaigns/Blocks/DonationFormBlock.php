@@ -16,7 +16,7 @@ final class DonationFormBlock extends CampaignBlock
     public function __construct(
         CampaignRepository $campaigns,
         private readonly FormRepository $forms,
-        private readonly ?DonationFormShortcode $shortcode = null,
+        private readonly DonationFormShortcode $shortcode,
     ) {
         parent::__construct($campaigns);
     }
@@ -65,29 +65,23 @@ final class DonationFormBlock extends CampaignBlock
         // own browsing context boots the runtime in isolation. The real form
         // renders on the front.
         if ($this->isBlockRendererRequest()) {
-            $previewDoc = '';
-            if ($this->shortcode !== null) {
-                $preview = $this->shortcode->renderPreview(
-                    (string) $form->blocks,
-                    is_array($form->settings) ? $form->settings : null,
-                    (int) $form->campaign_id,
-                );
-                $previewDoc = $this->shortcode->buildPreviewDocument($preview, autoResize: true, transparent: true);
-            }
+            $preview = $this->shortcode->renderPreview(
+                (string) $form->blocks,
+                is_array($form->settings) ? $form->settings : null,
+                (int) $form->campaign_id,
+            );
 
             return View::loadRelative(__DIR__, 'views/donation-form', [
-                'mode'         => 'editor',
-                'previewDoc'   => $previewDoc,
-                'formTitle'    => (string) $form->title,
-                'styleVars' => $this->styleVars($campaign),
+                'mode'       => 'editor',
+                'previewDoc' => $this->shortcode->buildPreviewDocument($preview, autoResize: true, transparent: true),
+                'formTitle'  => (string) $form->title,
+                'styleVars'  => $this->styleVars($campaign),
             ]);
         }
 
-        // A published form still renders nothing when the campaign itself is
-        // not taking donations, a draft or one outside its schedule. Having a
-        // form row is not the same as having something to show.
-        $formHtml = do_shortcode('[gratora_donation_form slug="' . esc_attr($form->slug) . '"]');
-        if (trim($formHtml) === '') {
+        // A hidden form is empty for a visitor. The shortcode tells a manager
+        // why, so only everyone else gets this block's own empty card.
+        if ($this->shortcode->gate($form) === 'hidden' && ! DonationFormShortcode::showsReasons()) {
             return View::loadRelative(__DIR__, 'views/donation-form', [
                 'mode'      => 'empty',
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
@@ -100,8 +94,8 @@ final class DonationFormBlock extends CampaignBlock
         }
 
         return View::loadRelative(__DIR__, 'views/donation-form', [
-            'mode'         => 'front',
-            'formHtml'     => $formHtml,
+            'mode'      => 'front',
+            'formSlug'  => (string) $form->slug,
             'styleVars' => $this->styleVars($campaign),
         ]);
     }
@@ -119,7 +113,7 @@ final class DonationFormBlock extends CampaignBlock
             return false;
         }
 
-        $postId = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0;
+        $postId = isset($_GET['post_id']) ? (int) $_GET['post_id'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- names the post the block renderer previews; core's route has already checked edit_post for it, and nothing is written.
 
         return $postId > 0
             ? current_user_can('edit_post', $postId)

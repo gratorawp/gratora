@@ -8,6 +8,7 @@ use Gratora\Foundation\Plugin;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Vendor\Queryable\DB;
 use ReflectionProperty;
+use WP_HTML_Tag_Processor;
 use WP_UnitTestCase;
 use wpdb;
 
@@ -201,6 +202,33 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
                 $wpdb->update($as, ['status' => 'complete'], ['action_id' => $p->action_id]);
             }
         }
+    }
+
+    /**
+     * The JSON the runtime parses out of the first donation form in $html.
+     * Found by its attribute rather than by the markup around it: core prints
+     * the element, so attribute order and whitespace are core's to choose.
+     */
+    protected function formConfigJsonIn(string $html): string
+    {
+        $processor = new WP_HTML_Tag_Processor($html);
+
+        while ($processor->next_tag('SCRIPT')) {
+            if ($processor->get_attribute('data-gratora-form-config') !== null) {
+                return trim($processor->get_modifiable_text());
+            }
+        }
+
+        $this->fail('no script carries data-gratora-form-config, so the runtime has no config to read');
+    }
+
+    /** @return array<string, mixed> */
+    protected function formConfigIn(string $html): array
+    {
+        $config = json_decode($this->formConfigJsonIn($html), true);
+        $this->assertIsArray($config, 'the form config is JSON the runtime can parse');
+
+        return $config;
     }
 
     /**

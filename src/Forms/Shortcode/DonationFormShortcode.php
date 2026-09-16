@@ -28,6 +28,7 @@ use Gratora\Forms\Blocks\TermsBlock;
 use Gratora\Forms\Form;
 use Gratora\Forms\FormRepository;
 use Gratora\Forms\Rendering\FormDocument;
+use Gratora\Forms\Rendering\FormMarkup;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
 use Gratora\Foundation\Plugin;
@@ -44,12 +45,12 @@ use Throwable;
  */
 final class DonationFormShortcode extends HookProvider
 {
-    private const TAG    = 'gratora_donation_form';
-    private const HANDLE = 'gratora-donation-form-runtime';
-
-    private bool $cssLinkInlined = false;
-
-    private bool $cloakEmitted = false;
+    private const TAG            = 'gratora_donation_form';
+    private const HANDLE         = 'gratora-donation-form-runtime';
+    private const CLOAK_FAILSAFE = 'gratora-form-cloak-failsafe';
+    private const PREVIEW_STYLE  = 'gratora-form-preview';
+    private const PREVIEW_FLAG   = 'gratora-form-preview-flag';
+    private const PREVIEW_RESIZE = 'gratora-form-preview-resize';
 
     private ?string $cssVersion = null;
 
@@ -89,8 +90,21 @@ final class DonationFormShortcode extends HookProvider
     {
         if (! is_singular()) return;
         global $post;
-        if (! $post || ! has_shortcode((string) $post->post_content, self::TAG)) return;
-        $this->enqueue();
+        if (! $post) return;
+
+        if (has_shortcode((string) $post->post_content, self::TAG)) {
+            $this->enqueue();
+            return;
+        }
+
+        // A campaign block asks the gate when it renders, so the runtime waits
+        // for that. The stylesheet carries the cloak and has to be in the head.
+        if (has_block('gratora/donation-form', $post) || has_block('gratora/donate-button', $post)) {
+            $this->registerRuntime();
+            if (wp_style_is(self::HANDLE, 'registered')) {
+                wp_enqueue_style(self::HANDLE);
+            }
+        }
     }
 
     /** @since 1.0.0 */
@@ -99,8 +113,29 @@ final class DonationFormShortcode extends HookProvider
         FormGatewayAssets::enqueue();
         FormFieldAssets::enqueue();
 
+        $this->registerRuntime();
+        if (wp_script_is(self::HANDLE, 'registered')) {
+            wp_enqueue_script(self::HANDLE);
+        }
+        if (wp_style_is(self::HANDLE, 'registered')) {
+            wp_enqueue_style(self::HANDLE);
+        }
+
+        // runtime.css hides the form until the runtime marks it ready, and an
+        // animation reveals it if the runtime never arrives. This covers a page
+        // whose CSS switches animations off.
+        if (! wp_script_is(self::CLOAK_FAILSAFE, 'registered')) {
+            wp_register_script(self::CLOAK_FAILSAFE, false, [], GRATORA_VERSION, true);
+            wp_add_inline_script(self::CLOAK_FAILSAFE, self::cloakFailsafeJs());
+        }
+        wp_enqueue_script(self::CLOAK_FAILSAFE);
+    }
+
+    /** @since 1.1.0 */
+    private function registerRuntime(): void
+    {
         $assetPath = GRATORA_DIR . 'build/donation-form/runtime/index.asset.php';
-        if (file_exists($assetPath)) {
+        if (! wp_script_is(self::HANDLE, 'registered') && file_exists($assetPath)) {
             $asset = require $assetPath;
             wp_register_script(
                 self::HANDLE,
@@ -109,11 +144,9 @@ final class DonationFormShortcode extends HookProvider
                 $asset['version']      ?? GRATORA_VERSION,
                 true
             );
-            wp_enqueue_script(self::HANDLE);
         }
 
-        $cssPath = GRATORA_DIR . 'build/donation-form/runtime.css';
-        if (file_exists($cssPath)) {
+        if (! wp_style_is(self::HANDLE, 'registered') && file_exists(GRATORA_DIR . 'build/donation-form/runtime.css')) {
             wp_register_style(
                 self::HANDLE,
                 GRATORA_URL . 'build/donation-form/runtime.css',
@@ -121,14 +154,20 @@ final class DonationFormShortcode extends HookProvider
                 $this->cssVersion()
             );
             wp_style_add_data(self::HANDLE, 'rtl', 'replace');
-            wp_enqueue_style(self::HANDLE);
         }
     }
 
-    /** @since 1.0.0 */
-    private function cssFileName(): string
+    /** @since 1.1.0 */
+    private static function cloakFailsafeJs(): string
     {
-        return FormDocument::cssFileName();
+        return <<<'JS'
+setTimeout(function () {
+    var forms = document.querySelectorAll('.gratora-donation-form:not([data-gratora-ready])');
+    for (var i = 0; i < forms.length; i++) {
+        forms[i].setAttribute('data-gratora-ready', '1');
+    }
+}, 4000);
+JS;
     }
 
     /** @since 1.0.0 */
@@ -149,73 +188,77 @@ final class DonationFormShortcode extends HookProvider
             ));
         }
 
-        // Rendering a form the submit gate will refuse is worse than rendering
-        // nothing. The preview filter only takes effect for a user who can
-        // edit, so the gate is never bypassed for a public visitor.
-        $editorPreview = current_user_can('edit_posts')
-            && (bool) apply_filters('gratora.form.editor_preview', false, $form);
-        if (! $editorPreview) {
-            // Nothing renders for a visitor either way. renderError adds the
-            // reason for whoever can act on it, so a page that has quietly lost
-            // its form does not depend on the admin thinking to check the
-            // campaign screen. The equivalent block already explains itself.
-            if ($form->status !== 'published') {
-                return $this->renderError(__('This form is not published, so it is hidden here.', 'gratora-donation-platform'));
-            }
-            $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
-            if (! $campaign) {
-                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'gratora-donation-platform'));
-            }
-            if (! $campaign->acceptsDonations()) {
-                return $this->renderNotAccepting($campaign->notAcceptingReason());
-            }
+        [$gate, $reason] = $this->standing($form);
+
+        // renderError adds the reason for whoever can act on it, so a page that
+        // has quietly lost its form does not depend on the admin thinking to
+        // check the campaign screen. The equivalent block already explains itself.
+        if ($gate !== 'render') {
+            return match ($reason) {
+                'form_unpublished' => $this->renderError(__('This form is not published, so it is hidden here.', 'gratora-donation-platform')),
+                'campaign_missing' => $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'gratora-donation-platform')),
+                default            => $this->renderNotAccepting($reason),
+            };
         }
 
         if (! wp_script_is(self::HANDLE, 'enqueued')) {
             $this->enqueue();
         }
 
-        $html = $this->renderBlocks($form);
+        return $this->renderBlocks($form);
+    }
 
-        // Rendered after <head> (block, modal, or do_shortcode): wp_enqueue_style
-        // would defer the stylesheet to the footer and the form paints unstyled
-        // first. Once per request is enough; the rule set is global.
-        if (
-            ! $this->cssLinkInlined
-            && did_action('wp_head')
-            && wp_style_is(self::HANDLE, 'registered')
-            && ! wp_style_is(self::HANDLE, 'done')
-        ) {
-            $this->cssLinkInlined = true;
-            wp_dequeue_style(self::HANDLE);
-            $href = GRATORA_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
-            // The enqueued route is the one dequeued two lines up, for the
-            // reason above; the handle stays registered so the version and the
-            // filename still come from wp_styles.
-            // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- wp_dequeue_style() drops this same handle just above; href is esc_url()d and its version comes from wp_styles.
-            $html = '<link rel="stylesheet" id="gratora-runtime-css" href="' . esc_url($href) . '">' . $html;
+    /**
+     * What render() does with a form, decided without rendering it.
+     *
+     * @return 'render'|'closed'|'hidden'
+     *
+     * @since 1.1.0
+     */
+    public function gate(Form $form): string
+    {
+        return $this->standing($form)[0];
+    }
+
+    /**
+     * Whether the current user is told why a form is hidden or closed.
+     *
+     * @since 1.1.0
+     */
+    public static function showsReasons(): bool
+    {
+        return current_user_can('manage_options') || current_user_can('manage_gratora');
+    }
+
+    /**
+     * @return array{0: 'render'|'closed'|'hidden', 1: ?string}
+     *
+     * @since 1.1.0
+     */
+    private function standing(Form $form): array
+    {
+        // Rendering a form the submit gate will refuse is worse than rendering
+        // nothing. The preview filter only takes effect for a user who can
+        // edit, so the gate is never bypassed for a public visitor.
+        if (current_user_can('edit_posts') && (bool) apply_filters('gratora.form.editor_preview', false, $form)) {
+            return ['render', null];
         }
 
-        // The server fallback markup is not styled by the runtime CSS, so it
-        // flashes unstyled until the (footer) runtime mounts. The `gratora-js`
-        // class is only added when JS runs, so no-JS visitors keep the visible
-        // fallback, and the timeout failsafe reveals the form if the runtime
-        // never loads. Once per request.
-        //
-        // Inline by necessity, not oversight: the cloak has to apply before
-        // first paint of the markup it precedes, and an enqueued asset prints
-        // in the head or footer, after the flash it exists to prevent.
-        // phpcs:ignore WordPress.WP.EnqueuedResources -- see above.
-        if (! $this->cloakEmitted) {
-            $this->cloakEmitted = true;
-            $html = "<style>.gratora-js .gratora-donation-form:not([data-gratora-ready]){visibility:hidden}</style>"
-                . "<script>document.documentElement.classList.add('gratora-js');"
-                . "setTimeout(function(){var n=document.querySelectorAll('.gratora-donation-form:not([data-gratora-ready])');"
-                . "for(var i=0;i<n.length;i++)n[i].setAttribute('data-gratora-ready','1')},4000)</script>"
-                . $html;
+        if ($form->status !== 'published') {
+            return ['hidden', 'form_unpublished'];
         }
 
-        return $html;
+        $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
+        if (! $campaign) {
+            return ['hidden', 'campaign_missing'];
+        }
+
+        $reason = $campaign->notAcceptingReason();
+        if ($reason === null) {
+            return ['render', null];
+        }
+
+        return [self::closedSentence($reason) !== null ? 'closed' : 'hidden', $reason];
     }
 
     /**
@@ -253,28 +296,26 @@ final class DonationFormShortcode extends HookProvider
 
         $tokens     = is_array($config['theme']['tokens'] ?? null) ? $config['theme']['tokens'] : [];
         $styleDecls = $this->tokenStyle($tokens) . $containerDecls;
-        $styleAttr  = $styleDecls !== '' ? ' style="' . esc_attr($styleDecls) . '"' : '';
-
-        // Only a no-JS visitor sees this: a dead form would GET their inputs
-        // into the URL on submit.
-        $noscript = '<noscript><div class="gratora-donation-form__noscript">'
-            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'gratora-donation-platform')
-            . '</div></noscript>';
 
         return sprintf(
-            '<form class="gratora-donation-form gratora-donation-form--blocks%s" id="%s" data-form-slug="%s" data-gateway="%s" data-layout="%s"%s%s novalidate>%s<script type="application/json" data-gratora-form-config>%s</script></form>',
-            $containerClass,
+            '<form class="%s" id="%s" data-form-slug="%s" data-gateway="%s" data-layout="%s"%s%s novalidate><noscript><div class="gratora-donation-form__noscript">%s</div></noscript>%s%s</form>',
+            esc_attr('gratora-donation-form gratora-donation-form--blocks' . $containerClass),
             esc_attr($formId),
             esc_attr($form->slug),
             esc_attr($gateway),
             esc_attr((string) ($config['layout'] ?? 'inline')),
             $variant ? ' data-variant="' . esc_attr($variant) . '"' : '',
-            $styleAttr,
-            $noscript . $inner,
-            // JSON_HEX_TAG so no config string (e.g. a thank-you message
-            // containing </script>) can break out of this inline JSON block and
-            // inject markup. The client JSON.parse decodes it back transparently.
-            wp_json_encode($config, JSON_HEX_TAG | JSON_UNESCAPED_UNICODE)
+            $styleDecls !== '' ? ' style="' . esc_attr($styleDecls) . '"' : '',
+            // Only a no-JS visitor sees this: a dead form would GET their inputs
+            // into the URL on submit.
+            esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'gratora-donation-platform'),
+            wp_kses($inner, FormMarkup::allowedHtml()),
+            // JSON_HEX_TAG leaves no '<' in the payload, so no config string (a
+            // thank-you message holding </script>) can close the element early.
+            wp_get_inline_script_tag(
+                (string) wp_json_encode($config, JSON_HEX_TAG | JSON_UNESCAPED_UNICODE),
+                ['type' => 'application/json', 'data-gratora-form-config' => true]
+            )
         );
     }
 
@@ -371,74 +412,134 @@ final class DonationFormShortcode extends HookProvider
     }
 
     /**
-     * A self-contained document: the host editor never runs the runtime and the
-     * iframe srcdoc cannot reach the editor's scripts, so both are inlined here.
+     * A whole document for a frame with no queue of its own: the editor that
+     * frames it never runs the runtime, and srcdoc cannot reach its scripts.
      *
      * @since 1.0.0
      */
     public function buildPreviewDocument(array $preview, bool $autoResize = false, bool $transparent = false): string
     {
-        $cssUrl   = esc_url($preview['cssUrl']);
-        $jsUrl    = esc_url($preview['jsUrl']);
-        $formHtml = $preview['html'];
+        $this->registerRuntime();
+        self::registerPreviewAssets();
 
-        // Inline script-handle deps; the preview iframe is a standalone document.
-        $depScripts = '';
-        $scripts    = wp_scripts();
-        foreach (FormDocument::withDependencies($preview['jsDeps']) as $handle) {
-            $reg = $scripts->registered[$handle] ?? null;
-            $src = $reg ? (string) $reg->src : '';
-            if ($src !== '') {
-                $url = strpos($src, 'http') === 0 ? $src : site_url($src);
-                // srcdoc, so there is no wp_scripts queue on the far side to
-                // enqueue into: the tag is the only way the dependency arrives.
-                // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- srcdoc document has no wp_scripts queue to enqueue into; src is esc_url()d and taken from the registered handle.
-                $depScripts .= '<script src="' . esc_url($url) . '"></script>' . "\n";
-            }
+        // Printed item by item: a queue marks what it prints as done, and a
+        // second document built in the same request would then lose it.
+        $head = self::printed(static function (): void {
+            wp_styles()->do_item(self::HANDLE);
+            wp_styles()->do_item(self::PREVIEW_STYLE);
+            wp_scripts()->do_item(self::PREVIEW_FLAG);
+        });
+
+        $scripts   = FormDocument::withDependencies((array) $preview['jsDeps']);
+        $scripts[] = self::HANDLE;
+        if ($autoResize) {
+            $scripts[] = self::PREVIEW_RESIZE;
         }
+        $body = self::printed(static function () use ($scripts): void {
+            foreach ($scripts as $handle) {
+                wp_scripts()->do_item($handle);
+            }
+        });
 
-        // Auto-resize hugs content, so the body must NOT stretch to the viewport:
-        // min-height:100vh plus padding inflates the measured height and, fed back
-        // into the frame height each observer tick, runs away.
-        $bodyMinHeight = $autoResize ? '0' : '100vh';
-        // White like a real page: the preview frame plays a browser window, and a
-        // grey page inside it reads as a second window over the editor stage.
-        $background    = $transparent ? 'transparent' : '#fff';
-        $resize = $autoResize
-            ? '<script>(function(){var l=0;function s(){try{if(!window.frameElement)return;var h=Math.min(document.documentElement.scrollHeight,4000);if(Math.abs(h-l)>2){l=h;window.frameElement.style.height=h+"px"}}catch(e){}}addEventListener("load",s);if(window.ResizeObserver){new ResizeObserver(s).observe(document.documentElement)}setTimeout(s,300);setTimeout(s,1200)})();</script>'
-            : '';
+        $classes = 'gratora-form-preview' . ($autoResize ? ' is-fit' : '') . ($transparent ? ' is-transparent' : '');
 
-        // phpcs:disable WordPress.WP.EnqueuedResources -- same reason as the dependency tags above: this is the whole document the iframe gets, head included, and nothing in it is enqueueable.
         return implode("\n", [
             '<!DOCTYPE html>',
             // The iframe is a document of its own, so it inherits nothing from
             // the admin around it: without these an Arabic author previews their
             // form left to right and in the wrong language.
-            '<html lang="' . esc_attr(str_replace('_', '-', determine_locale())) . '"' . (is_rtl() ? ' dir="rtl"' : '') . '>',
+            '<html class="' . esc_attr($classes) . '" lang="' . esc_attr(str_replace('_', '-', determine_locale())) . '"' . (is_rtl() ? ' dir="rtl"' : '') . '>',
             '<head>',
-            '    <meta charset="utf-8">',
-            '    <meta name="viewport" content="width=device-width, initial-scale=1">',
-            // The admin previews are sandboxed without allow-same-origin, so
-            // this document has an opaque origin and the runtime's frame guard
-            // cannot tell it from a hostile embed. Only a document this server
-            // built carries the flag: a site framing the real form cannot
-            // script into it to set one.
-            '    <script>window.gratoraFormPreview = true;</script>',
-            '    <link rel="stylesheet" href="' . $cssUrl . '">',
-            '    <style>',
-            '        html, body { margin: 0; padding: 0; background: ' . $background . '; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }',
-            '        body { padding: 32px 16px; min-height: ' . $bodyMinHeight . '; }',
-            '    </style>',
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            $head,
             '</head>',
             '<body>',
-            '    ' . $formHtml,
-            '    ' . $depScripts,
-            '    <script src="' . $jsUrl . '"></script>',
-            '    ' . $resize,
+            (string) $preview['html'],
+            $body,
             '</body>',
             '</html>',
         ]);
-        // phpcs:enable WordPress.WP.EnqueuedResources
+    }
+
+    /** @since 1.1.0 */
+    private static function registerPreviewAssets(): void
+    {
+        if (! wp_style_is(self::PREVIEW_STYLE, 'registered')) {
+            wp_register_style(self::PREVIEW_STYLE, false, [], GRATORA_VERSION);
+            wp_add_inline_style(self::PREVIEW_STYLE, self::previewCss());
+        }
+
+        // The admin previews are sandboxed without allow-same-origin, so the
+        // document has an opaque origin and the runtime's frame guard cannot
+        // tell it from a hostile embed. Only a document this server built
+        // prints the flag: a site framing the real form cannot script into it.
+        // Never attached to the runtime handle, or a real form printed later in
+        // the same request would carry it.
+        if (! wp_script_is(self::PREVIEW_FLAG, 'registered')) {
+            wp_register_script(self::PREVIEW_FLAG, false, [], GRATORA_VERSION);
+            wp_add_inline_script(self::PREVIEW_FLAG, 'window.gratoraFormPreview = true;');
+        }
+
+        if (! wp_script_is(self::PREVIEW_RESIZE, 'registered')) {
+            wp_register_script(self::PREVIEW_RESIZE, false, [], GRATORA_VERSION, true);
+            wp_add_inline_script(self::PREVIEW_RESIZE, self::previewResizeJs());
+        }
+    }
+
+    /** @since 1.1.0 */
+    private static function previewCss(): string
+    {
+        // White like a real page: the preview frame plays a browser window, and
+        // a grey page inside it reads as a second window over the editor stage.
+        // A fitted frame must not stretch to the viewport: min-height plus
+        // padding inflates the measured height, and fed back into the frame
+        // height each observer tick it runs away.
+        return <<<'CSS'
+html.gratora-form-preview, html.gratora-form-preview body { margin: 0; padding: 0; background: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
+html.gratora-form-preview body { padding: 32px 16px; min-height: 100vh; }
+html.gratora-form-preview.is-fit body { min-height: 0; }
+html.gratora-form-preview.is-transparent, html.gratora-form-preview.is-transparent body { background: transparent; }
+CSS;
+    }
+
+    /** @since 1.1.0 */
+    private static function previewResizeJs(): string
+    {
+        return <<<'JS'
+(function () {
+    var last = 0;
+    function fit() {
+        try {
+            if (!window.frameElement) return;
+            var height = Math.min(document.documentElement.scrollHeight, 4000);
+            if (Math.abs(height - last) > 2) {
+                last = height;
+                window.frameElement.style.height = height + 'px';
+            }
+        } catch (e) {}
+    }
+    addEventListener('load', fit);
+    if (window.ResizeObserver) {
+        new ResizeObserver(fit).observe(document.documentElement);
+    }
+    setTimeout(fit, 300);
+    setTimeout(fit, 1200);
+})();
+JS;
+    }
+
+    /** @since 1.1.0 */
+    private static function printed(callable $print): string
+    {
+        ob_start();
+        try {
+            $print();
+        } finally {
+            $printed = (string) ob_get_clean();
+        }
+
+        return $printed;
     }
 
     /** @since 1.0.0 */
@@ -1594,12 +1695,7 @@ final class DonationFormShortcode extends HookProvider
      */
     private function renderNotAccepting(?string $reason): string
     {
-        $public = match ($reason) {
-            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'gratora-donation-platform'),
-            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'gratora-donation-platform'),
-            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'gratora-donation-platform'),
-            default     => null,
-        };
+        $public = self::closedSentence($reason);
 
         if ($public === null) {
             return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'gratora-donation-platform'));
@@ -1609,34 +1705,45 @@ final class DonationFormShortcode extends HookProvider
         // change. Whoever can act gets that as a second line in the same notice:
         // a closed campaign is not an error, and two stacked boxes read as one
         // thing having gone wrong twice.
-        $note = '';
-        if (current_user_can('manage_options') || current_user_can('manage_gratora')) {
+        $for = '';
+        if (self::showsReasons()) {
             $for = match ($reason) {
                 'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'gratora-donation-platform'),
                 'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'gratora-donation-platform'),
                 'scheduled' => __('It opens on its start date. Only you can see this note.', 'gratora-donation-platform'),
                 default     => '',
             };
-
-            if ($for !== '') {
-                $note = sprintf(
-                    '<span class="gratora-donation-form__closed-note" style="display:block;margin-top:8px;font-size:13px;color:#6b6558;">%s</span>',
-                    esc_html($for)
-                );
-            }
         }
 
         return sprintf(
             '<div class="gratora-donation-form__closed" style="padding:16px 20px;border:1px solid #e5e0d8;border-radius:10px;background:#faf8f4;color:#3f3a33;font-size:15px;line-height:1.55;">%s%s</div>',
             esc_html($public),
-            $note
+            $for !== ''
+                ? '<span class="gratora-donation-form__closed-note" style="display:block;margin-top:8px;font-size:13px;color:#6b6558;">' . esc_html($for) . '</span>'
+                : ''
         );
+    }
+
+    /**
+     * What a visitor reads when the campaign closed on its schedule or its
+     * goal, or null when the reason is not one to tell the public.
+     *
+     * @since 1.1.0
+     */
+    private static function closedSentence(?string $reason): ?string
+    {
+        return match ($reason) {
+            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'gratora-donation-platform'),
+            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'gratora-donation-platform'),
+            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'gratora-donation-platform'),
+            default     => null,
+        };
     }
 
     /** @since 1.0.0 */
     private function renderError(string $message): string
     {
-        if (! current_user_can('manage_options') && ! current_user_can('manage_gratora')) {
+        if (! self::showsReasons()) {
             return '';
         }
         return sprintf(

@@ -38,9 +38,7 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[gratora_donation_form slug="' . $slug . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        return (string) ($m[1] ?? '');
+        return $this->formConfigJsonIn(do_shortcode('[gratora_donation_form slug="' . $slug . '"]'));
     }
 
     public function test_every_data_and_content_block_survives_into_the_config(): void

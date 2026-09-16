@@ -196,7 +196,7 @@ final class AdminFormsTest extends IntegrationTestCase
         $this->assertStringContainsString('data-cents="1500"', $html);
         $this->assertStringContainsString('Send', $html);
         $this->assertMatchesRegularExpression(
-            '/<link rel="stylesheet" href="[^"]+build\/donation-form\/runtime\.css/',
+            '/<link\b[^>]*\brel=[\'"]stylesheet[\'"][^>]*\bhref=[\'"][^\'"]+build\/donation-form\/runtime\.css/',
             $html
         );
     }

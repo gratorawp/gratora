@@ -61,7 +61,17 @@ final class TestModeBadge extends HookProvider
         $bar->add_node([
             'id' => 'gratora-test-mode',
             'parent' => 'top-secondary',
-            'title'  => '<span class="gratora-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
+            'title'  => '<span class="gratora-test-mode-badge">'
+                . '<svg class="gratora-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
+                . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+                . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
+                . '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0'
+                . ' 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/>'
+                . '<path d="M6.453 15h11.094"/>'
+                . '<path d="M8.5 2h7"/>'
+                . '</svg>'
+                . esc_html($title)
+                . '</span>',
             'href'   => esc_url(admin_url('admin.php?page=gratora-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
@@ -69,23 +79,6 @@ final class TestModeBadge extends HookProvider
                     : __('These forms take no real money. Every other form on the site does.', 'gratora-donation-platform'),
             ],
         ]);
-    }
-
-    /**
-     * Lucide flask-conical.
-     *
-     * @since 1.0.0
-     */
-    private function icon(): string
-    {
-        return '<svg class="gratora-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
-            . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
-            . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
-            . '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0'
-            . ' 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/>'
-            . '<path d="M6.453 15h11.094"/>'
-            . '<path d="M8.5 2h7"/>'
-            . '</svg>';
     }
 
     private const BADGE_CSS = <<<'CSS'

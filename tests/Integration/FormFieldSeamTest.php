@@ -110,10 +110,7 @@ final class FormFieldSeamTest extends IntegrationTestCase
 
     private function configFor(string $blocks): string
     {
-        $html = do_shortcode('[gratora_donation_form slug="' . $this->publishedForm($blocks) . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-
-        return (string) ($m[1] ?? '');
+        return $this->formConfigJsonIn(do_shortcode('[gratora_donation_form slug="' . $this->publishedForm($blocks) . '"]'));
     }
 
     private function publishedForm(string $blocks): string

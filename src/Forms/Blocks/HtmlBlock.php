@@ -26,7 +26,7 @@ final class HtmlBlock implements Block
     {
         $raw = (string) ($attrs['content'] ?? '');
         if ($raw === '') return '';
-        return sprintf('<div class="gratora-block gratora-block--html">%s</div>', self::sanitize($raw));
+        return sprintf('<div class="gratora-block gratora-block--html">%s</div>', wp_kses_post($raw));
     }
 
     /** @since 1.0.0 */

@@ -773,20 +773,6 @@ body.gratora-modal-open { overflow: hidden; }
 .gratora-block--donation-form {
     margin: 0 0 24px;
 }
-.gratora-donation-form__placeholder {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 28px;
-    text-align: center;
-    border: 1px dashed var(--gratora-border, #{$border-fallback});
-    border-radius: var(--gratora-radius, #{$radius-fallback});
-    background: var(--gratora-bg-soft, #{$bg-soft-fallback});
-    color: var(--gratora-text-muted, #{$text-muted-fallback});
-
-    strong { color: var(--gratora-text, #{$text-fallback}); font-size: 15px; }
-    span   { font-size: 13px; }
-}
 
 .gratora-avatar {
     position: relative;

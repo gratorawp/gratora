@@ -13,14 +13,14 @@ namespace Gratora\Campaigns\Blocks;
  */
 final class BlockAvatar
 {
-    /** @since 1.0.0 */
-    public static function markup(string $name, bool $anonymous = false, string $imageUrl = ''): string
+    /** @since 1.1.0 */
+    public static function render(string $name, bool $anonymous = false, string $imageUrl = ''): void
     {
         $name = trim($name);
         if ($anonymous || $name === '') {
-            return '<span class="gratora-avatar gratora-avatar--anon" aria-hidden="true">?</span>';
+            echo '<span class="gratora-avatar gratora-avatar--anon" aria-hidden="true">?</span>';
+            return;
         }
-
 
         // Decode stored HTML entities before selecting the initial.
         $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -30,19 +30,22 @@ final class BlockAvatar
         // Use mb_ord so multibyte initials have distinct hues.
         $hue = ((mb_ord($initial, 'UTF-8') ?: 0) * 47) % 360;
 
+        printf(
+            '<span class="gratora-avatar" aria-hidden="true" style="background: hsl(%d 52%% 42%%);">%s',
+            (int) $hue,
+            esc_html($initial)
+        );
+
         // The picture layers over the initial rather than replacing it:
         // Gravatar is asked for a transparent image when it has none on file,
         // so a donor without one keeps their colored letter.
-        $photo = $imageUrl === '' ? '' : sprintf(
-            '<img class="gratora-avatar__photo" src="%s" alt="" loading="lazy" decoding="async">',
-            esc_url($imageUrl)
-        );
+        if ($imageUrl !== '') {
+            printf(
+                '<img class="gratora-avatar__photo" src="%s" alt="" loading="lazy" decoding="async">',
+                esc_url($imageUrl)
+            );
+        }
 
-        return sprintf(
-            '<span class="gratora-avatar" aria-hidden="true" style="background: hsl(%d 52%% 42%%);">%s%s</span>',
-            $hue,
-            esc_html($initial),
-            $photo
-        );
+        echo '</span>';
     }
 }

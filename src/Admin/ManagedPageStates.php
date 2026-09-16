@@ -34,12 +34,12 @@ final class ManagedPageStates extends HookProvider
         }
 
         if (in_array((int) $post->ID, $this->campaignPageIds(), true)) {
-            $states['gratora_campaign'] = __('Gratora Campaign', 'gratora-donation-platform');
+            $states['gratora_campaign'] = esc_html__('Gratora Campaign', 'gratora-donation-platform');
             return $states;
         }
 
         if ((int) get_option(PortalPage::OPTION_PAGE_ID, 0) === (int) $post->ID) {
-            $states['gratora_portal'] = __('Gratora Donor Portal', 'gratora-donation-platform');
+            $states['gratora_portal'] = esc_html__('Gratora Donor Portal', 'gratora-donation-platform');
         }
 
         return $states;

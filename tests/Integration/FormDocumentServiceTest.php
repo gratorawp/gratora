@@ -64,21 +64,6 @@ final class FormDocumentServiceTest extends IntegrationTestCase
         return $form;
     }
 
-    /** @return array<string, mixed> */
-    private function configIn(string $html): array
-    {
-        $this->assertSame(
-            1,
-            preg_match('/data-gratora-form-config>(.*?)<\/script>/s', $html, $m),
-            'the runtime reads its config out of the markup'
-        );
-
-        $config = json_decode($m[1], true);
-        $this->assertIsArray($config, 'the config block is JSON the runtime can parse');
-
-        return $config;
-    }
-
     private function chain(): void
     {
         wp_register_script('gratora-doc-a', 'https://example.org/a.js', [], '1', true);
@@ -103,7 +88,7 @@ final class FormDocumentServiceTest extends IntegrationTestCase
 
         $this->assertStringContainsString('data-form-slug="' . $form->slug . '"', $document['html']);
 
-        $config = $this->configIn($document['html']);
+        $config = $this->formConfigIn($document['html']);
         $this->assertSame((int) $form->id, $config['form_id']);
         $this->assertSame((int) $form->campaign_id, $config['campaign_id']);
         // A stored row is what the submit gate scopes a token to, so this is
@@ -115,7 +100,7 @@ final class FormDocumentServiceTest extends IntegrationTestCase
     {
         $preview = $this->shortcode()->renderPreview(self::BLOCKS);
 
-        $config = $this->configIn($preview['html']);
+        $config = $this->formConfigIn($preview['html']);
         $this->assertSame(0, $config['form_id']);
         $this->assertSame('', (string) $config['spam']['formToken']);
     }

@@ -14,12 +14,7 @@ use Gratora\Forms\Shortcode\DonationFormShortcode;
  */
 final class FormDocument
 {
-    /**
-     * The shortcode holds per-request render state, so it is injected rather
-     * than built here: a second instance re-emits the once-per-request cloak.
-     *
-     * @since 1.1.0
-     */
+    /** @since 1.1.0 */
     public function __construct(private DonationFormShortcode $shortcode)
     {
     }

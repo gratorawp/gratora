@@ -1,4 +1,8 @@
 <?php
+
+use Gratora\Campaigns\Blocks\BlockAvatar;
+use Gratora\Foundation\Helpers\Money;
+
 defined('ABSPATH') || exit;
 /**
  * @var string $title
@@ -32,13 +36,13 @@ echo get_block_wrapper_attributes(array_filter([
             <?php foreach ($entries as $entry): ?>
                 <li class="gratora-supporter-wall__card<?php echo esc_attr($entry['message'] !== '' && $showMessage ? ' has-message' : ''); ?>">
                     <div class="gratora-supporter-wall__top">
-                        <?php echo \Gratora\Campaigns\Blocks\BlockAvatar::markup($entry['name'], false, (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
+                        <?php BlockAvatar::render($entry['name'], false, (string) ($entry['avatar_url'] ?? '')); ?>
                         <div class="gratora-supporter-wall__name"><?php echo esc_html($entry['name']);
 ?></div>
                     </div>
                     <?php if ($showAmount && $entry['amount_cents'] > 0): ?>
                         <div class="gratora-supporter-wall__amount">
-                            <?php echo esc_html(\Gratora\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
+                            <?php echo esc_html(Money::format($entry['amount_cents'], $entry['currency'], true));
 ?>
                         </div>
                     <?php endif; ?>

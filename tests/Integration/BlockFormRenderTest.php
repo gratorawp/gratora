@@ -159,8 +159,7 @@ final class BlockFormRenderTest extends IntegrationTestCase
 
         $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode($m[1], true);
+        $config = $this->formConfigIn($html);
 
         $this->assertIsArray($config);
         $this->assertArrayHasKey('stripe', $config);
@@ -183,14 +182,7 @@ BLOCKS,
 
         $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
-        // Extract the config JSON the runtime will read.
-        $this->assertMatchesRegularExpression(
-            '/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s',
-            $html,
-            'Form should emit a config script tag for the Preact runtime.'
-        );
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode($m[1], true);
+        $config = $this->formConfigIn($html);
 
         $this->assertIsArray($config);
         $this->assertSame($created['slug'], $config['slug']);
@@ -225,8 +217,7 @@ BLOCKS,
         ]);
 
         $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode($m[1], true);
+        $config = $this->formConfigIn($html);
 
         $types = array_column($config['steps'], 'type');
         $this->assertContains('submit', $types, 'Runtime needs a submit/review step at the end.');
@@ -254,8 +245,7 @@ BLOCKS,
         ]);
 
         $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode($m[1], true);
+        $config = $this->formConfigIn($html);
 
         $this->assertSame(['USD', 'EUR'], $config['currencies'], 'base first, JPY (not enabled) dropped');
     }
@@ -299,8 +289,7 @@ BLOCKS,
         ]);
 
         $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode($m[1], true);
+        $config = $this->formConfigIn($html);
 
         $this->assertSame('USD', $config['fx']['base']);
         $this->assertEqualsWithDelta(1.0, $config['fx']['rates']['USD'], 1e-9, 'base is unity');
@@ -326,8 +315,7 @@ BLOCKS,
         ]);
 
         $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode($m[1], true);
+        $config = $this->formConfigIn($html);
 
         $this->assertSame('pills', $config['currencySwitcher']['style']);
         $this->assertSame('right', $config['currencySwitcher']['align']);
@@ -345,8 +333,7 @@ BLOCKS,
 BLOCKS,
         ]);
         $html2 = do_shortcode('[gratora_donation_form slug="' . $bad['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html2, $m2);
-        $config2 = json_decode($m2[1], true);
+        $config2 = $this->formConfigIn($html2);
         $this->assertSame('dropdown', $config2['currencySwitcher']['style']);
         $this->assertSame('left', $config2['currencySwitcher']['align']);
     }
@@ -407,8 +394,7 @@ BLOCKS,
                 . '<!-- wp:gratora/submit-button {"label":"Give","align":"center"} /-->',
         ]);
         $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $cfg = json_decode($m[1], true);
+        $cfg = $this->formConfigIn($html);
         $submit = null;
         foreach ($cfg['steps'] as $s) {
             if ($s['type'] === 'submit') { $submit = $s; break; }
@@ -420,8 +406,7 @@ BLOCKS,
             'blocks' => '<!-- wp:gratora/submit-button {"align":"sideways"} /-->',
         ]);
         $html2 = do_shortcode('[gratora_donation_form slug="' . $bad['slug'] . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html2, $m2);
-        $cfg2 = json_decode($m2[1], true);
+        $cfg2 = $this->formConfigIn($html2);
         $sb = null;
         foreach ($cfg2['steps'] as $s) {
             if ($s['type'] === 'submit') { $sb = $s; break; }
@@ -444,8 +429,7 @@ BLOCKS,
         $this->assertStringContainsString('border-top:3px solid #cccccc', $html);
 
         // Runtime config decoration.
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $cfg = json_decode($m[1], true);
+        $cfg = $this->formConfigIn($html);
         $divider = null;
         foreach ($cfg['steps'] as $s) {
             foreach (($s['items'] ?? []) as $d) {
@@ -473,8 +457,7 @@ BLOCKS,
         ]);
 
         $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $cfg = json_decode($m[1], true);
+        $cfg = $this->formConfigIn($html);
 
         $donor = null;
         foreach ($cfg['steps'] as $s) {
@@ -510,8 +493,7 @@ BLOCKS,
         ]);
 
         $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $cfg = json_decode($m[1], true);
+        $cfg = $this->formConfigIn($html);
 
         $donor = null;
         foreach ($cfg['steps'] as $s) {

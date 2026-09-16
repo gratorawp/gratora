@@ -1,4 +1,8 @@
 <?php
+
+use Gratora\Campaigns\Blocks\BlockAvatar;
+use Gratora\Foundation\Helpers\Money;
+
 defined('ABSPATH') || exit;
 /**
  * @var string $title
@@ -30,7 +34,7 @@ echo get_block_wrapper_attributes(array_filter([
         <ul class="gratora-recent-donations__list">
             <?php foreach ($entries as $entry): ?>
                 <li class="gratora-recent-donations__item">
-                    <?php echo \Gratora\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
+                    <?php BlockAvatar::render($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); ?>
                     <div class="gratora-recent-donations__content">
                         <div class="gratora-recent-donations__header">
                             <span class="gratora-recent-donations__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
@@ -39,7 +43,7 @@ echo get_block_wrapper_attributes(array_filter([
                             </span>
                             <?php if ($showAmount): ?>
                                 <span class="gratora-recent-donations__amount">
-                                    <?php echo esc_html(\Gratora\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
+                                    <?php echo esc_html(Money::format($entry['amount_cents'], $entry['currency'], true));
 ?>
                                 </span>
                             <?php endif; ?>

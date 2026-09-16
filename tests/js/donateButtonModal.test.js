@@ -57,7 +57,7 @@ function formConfig( overrides = {} ) {
 // runtime never boots.
 function formMarkup( id, hydrate, overrides = {} ) {
     const json = hydrate
-        ? `<script type="application/json" data-gratora-form-config>${ JSON.stringify( formConfig( overrides ) ) }</script>`
+        ? `<script data-gratora-form-config type="application/json">${ JSON.stringify( formConfig( overrides ) ) }</script>`
         : '';
 
     return `<form class="gratora-donation-form"${ id ? ` id="${ id }"` : '' }>${ json }</form>`;

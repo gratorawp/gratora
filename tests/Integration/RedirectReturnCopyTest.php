@@ -48,16 +48,7 @@ final class RedirectReturnCopyTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function renderedI18n(): array
     {
-        $html = do_shortcode('[gratora_donation_form slug="' . $this->slug . '"]');
-
-        $this->assertMatchesRegularExpression(
-            '#<script type="application/json" data-gratora-form-config>(.*?)</script>#s',
-            $html
-        );
-        preg_match('#<script type="application/json" data-gratora-form-config>(.*?)</script>#s', $html, $m);
-
-        $config = json_decode(html_entity_decode($m[1], ENT_QUOTES), true);
-        $this->assertIsArray($config);
+        $config = $this->formConfigIn(do_shortcode('[gratora_donation_form slug="' . $this->slug . '"]'));
 
         return (array) ($config['i18n'] ?? []);
     }

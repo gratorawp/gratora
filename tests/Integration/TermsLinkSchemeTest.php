@@ -55,10 +55,7 @@ final class TermsLinkSchemeTest extends IntegrationTestCase
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-
-        return (string) ($m[1] ?? '');
+        return $this->formConfigJsonIn(do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]'));
     }
 
     /** The linkUrl the runtime would actually bind to the href. */

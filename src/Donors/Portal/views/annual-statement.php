@@ -2,7 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * Annual donation statement, rendered to HTML then handed to the PDF builder.
- * Standalone document with a scoped <style> block (no theme/token context),
+ * Standalone document with a scoped style block (no theme/token context),
  * so the literal colors below are intentional and self-contained.
  *
  * @var int    $year       statement year

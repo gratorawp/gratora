@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
  * @var string  $size          sm|md|lg
  * @var bool    $fullWidth
  * @var ?string $formSlug
- * @var string  $formHtml
+ * @var bool    $withForm
  * @var string  $styleVars
  */
 $alignClass = in_array($align, ['left', 'center', 'right'], true) ? "is-align-{$align}" : 'is-align-left';
@@ -30,7 +30,7 @@ echo get_block_wrapper_attributes(array_filter([
             <?php echo esc_html($label);
 ?>
         </button>
-        <?php if ($formHtml): ?>
+        <?php if ($withForm): ?>
             <div class="gratora-donate-modal" data-form-slug="<?php echo esc_attr($formSlug);
 ?>" hidden>
                 <div class="gratora-donate-modal__backdrop" data-gratora-modal-close></div>
@@ -42,9 +42,7 @@ echo get_block_wrapper_attributes(array_filter([
                             <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                         </svg>
                     </button>
-                    <?php // $formHtml is trusted do_shortcode() output of the donation form; it ships its own ?>
-                    <?php // <style>/<script>/JSON config that wp_kses_post would strip, so echo it raw like the_content(). ?>
-                    <div class="gratora-donate-modal__body"><?php echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[gratora_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG. ?></div>
+                    <div class="gratora-donate-modal__body"><?php echo do_shortcode('[gratora_donation_form slug="' . esc_attr($formSlug) . '"]'); ?></div>
                 </div>
             </div>
         <?php endif; ?>

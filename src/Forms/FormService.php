@@ -7,6 +7,7 @@ namespace Gratora\Forms;
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Donations\Donation;
+use Gratora\Forms\Rendering\FormMarkup;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Recurring\RecurringPlan;
 use InvalidArgumentException;
@@ -102,7 +103,7 @@ final class FormService
         $form->title       = $title;
         $form->slug        = $this->uniqueSlug($input['slug'] ?? $title);
         $form->status      = $this->coerceStatus($input['status'] ?? 'draft');
-        $form->blocks      = $this->sanitizeBlocks((string) ($input['blocks'] ?? ''));
+        $form->blocks      = FormMarkup::sanitizeBlocks((string) ($input['blocks'] ?? ''));
         $form->settings    = $this->normaliseSettings(is_array($input['settings'] ?? null) ? $input['settings'] : null);
         $form->spec_version = 1;
         $form->campaign_id = $campaign->id;
@@ -267,7 +268,7 @@ final class FormService
         }
 
         if (array_key_exists('blocks', $input)) {
-            $form->blocks = $this->sanitizeBlocks((string) $input['blocks']);
+            $form->blocks = FormMarkup::sanitizeBlocks((string) $input['blocks']);
         }
 
         if (array_key_exists('settings', $input)) {
@@ -483,41 +484,6 @@ final class FormService
             }
         }
         return $slug;
-    }
-
-    /**
-     * Strip script-bearing raw HTML from block markup for authors lacking
-     * `unfiltered_html` (mirrors WP core's post-content rule). Parse + kses the
-     * literal HTML chunks + re-serialize so block-delimiter JSON survives intact
-     * (blanket wp_kses_post would mangle it). Without this, a scoped form manager
-     * could plant a script that runs on the public donation page via do_blocks.
-     *
-     * @since 1.0.0
-     */
-    public function sanitizeBlocks(string $markup): string
-    {
-        if ($markup === '' || current_user_can('unfiltered_html')) {
-            return $markup;
-        }
-        return serialize_blocks($this->ksesBlockList(parse_blocks($markup)));
-    }
-
-    /** @since 1.0.0 */
-    private function ksesBlockList(array $blocks): array
-    {
-        foreach ($blocks as &$block) {
-            if (is_array($block['innerContent'] ?? null)) {
-                $block['innerContent'] = array_map(
-                    static fn ($chunk) => is_string($chunk) ? wp_kses_post($chunk) : $chunk,
-                    $block['innerContent']
-                );
-            }
-            if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])) {
-                $block['innerBlocks'] = $this->ksesBlockList($block['innerBlocks']);
-            }
-        }
-        unset($block);
-        return $blocks;
     }
 
     /**

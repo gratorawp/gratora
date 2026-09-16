@@ -4,7 +4,7 @@ defined('ABSPATH') || exit;
  * @var string  $mode         'front' | 'editor' | 'empty'
  * @var ?string $emptyText     Shown in 'empty' mode
  * @var ?string $notice
- * @var ?string $formHtml
+ * @var ?string $formSlug
  * @var ?string $previewDoc    Self-contained iframe document (editor mode)
  * @var ?string $formTitle
  * @var string  $styleVars
@@ -26,30 +26,16 @@ echo get_block_wrapper_attributes(array_filter([
 ?></div>
         <?php endif; ?>
     <?php elseif (($mode ?? 'front') === 'editor'): ?>
-        <?php if (($previewDoc ?? '') !== ''): ?>
-            <iframe
-                class="gratora-donation-form__editor-preview"
-                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'gratora-donation-platform'));
+        <iframe
+            class="gratora-donation-form__editor-preview"
+            title="<?php echo esc_attr($formTitle ?? __('Donation form', 'gratora-donation-platform'));
 ?>"
-                loading="lazy"
-                style="width:100%;border:0;display:block;min-height:520px"
-                srcdoc="<?php echo esc_attr($previewDoc);
+            loading="lazy"
+            style="width:100%;border:0;display:block;min-height:520px"
+            srcdoc="<?php echo esc_attr($previewDoc ?? '');
 ?>"
-            ></iframe>
-        <?php else: ?>
-            <div class="gratora-donation-form__placeholder">
-                <strong><?php echo esc_html($formTitle ?? '');
-?></strong>
-                <span><?php esc_html_e('Donation form - shown to visitors here.', 'gratora-donation-platform');
-?></span>
-            </div>
-        <?php endif; ?>
+        ></iframe>
     <?php else: ?>
-        <?php
-        // Trusted first-party form output (shortcode -> do_blocks + bootstrap
-        // script/style/JSON config). Must be echoed raw, never kses'd, or the
-        // form renders as visible gibberish and never initializes.
-        echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[gratora_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG.
-        ?>
+        <?php echo do_shortcode('[gratora_donation_form slug="' . esc_attr($formSlug ?? '') . '"]'); ?>
     <?php endif; ?>
 </section>

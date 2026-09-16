@@ -47,6 +47,20 @@
     }
 }
 
+// The server markup is unstyled until the runtime mounts. A visitor without
+// scripting keeps it, and the animation reveals it if the runtime never marks
+// the form ready.
+@media (scripting: enabled) {
+    .gratora-donation-form:not([data-gratora-ready]) {
+        visibility: hidden;
+        animation: gratora-cloak-failsafe 0s 4s forwards;
+    }
+}
+
+@keyframes gratora-cloak-failsafe {
+    to { visibility: visible; }
+}
+
 // Declare defaults on the wrapper so inline theme tokens win instead of being shadowed by
 // descendants.
 .gratora-donation-form {

@@ -2,7 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * Revenue one-pager, rendered to HTML then handed to the PDF builder.
- * Standalone document with a scoped <style> block (no theme/token context), so
+ * Standalone document with a scoped style block (no theme/token context), so
  * the literal colors below are intentional and self-contained. Aggregate
  * figures only: no donor names or PII appear on this document.
  *

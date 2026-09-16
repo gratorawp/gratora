@@ -65,9 +65,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function runtimePurpose(): array
     {
-        $html = do_shortcode('[gratora_donation_form slug="' . $this->publishedForm() . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = json_decode((string) ($m[1] ?? ''), true);
+        $config = $this->formConfigIn(do_shortcode('[gratora_donation_form slug="' . $this->publishedForm() . '"]'));
 
         foreach ((array) ($config['steps'] ?? []) as $step) {
             foreach ((array) ($step['items'] ?? []) as $item) {

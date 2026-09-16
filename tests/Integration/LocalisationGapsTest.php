@@ -98,12 +98,8 @@ final class LocalisationGapsTest extends IntegrationTestCase
     private function formConfig(): array
     {
         $shortcode = Plugin::instance()->container->get(\Gratora\Forms\Shortcode\DonationFormShortcode::class);
-        $html      = (string) $shortcode->renderPreview('')['html'];
 
-        preg_match('/<script type="application\/json"[^>]*>(.*?)<\/script>/s', $html, $m);
-        $this->assertNotSame('', (string) ($m[1] ?? ''), 'fixture: the config rides in a JSON script tag');
-
-        return (array) json_decode((string) $m[1], true);
+        return $this->formConfigIn((string) $shortcode->renderPreview('')['html']);
     }
 
     public function test_the_terms_checkbox_labels_come_from_the_server(): void

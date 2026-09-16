@@ -1,4 +1,8 @@
 <?php
+
+use Gratora\Campaigns\Blocks\BlockAvatar;
+use Gratora\Foundation\Helpers\Money;
+
 defined('ABSPATH') || exit;
 /**
  * @var string $title
@@ -42,14 +46,14 @@ echo get_block_wrapper_attributes(array_filter([
 ?>">
                     <div class="gratora-top-donors__podium-rank"><?php echo esc_html((string) $rank);
 ?></div>
-                    <?php echo \Gratora\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
+                    <?php BlockAvatar::render($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); ?>
                     <div class="gratora-top-donors__podium-name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                         <?php echo esc_html($entry['name']);
 ?>
                     </div>
                     <?php if ($showAmount): ?>
                         <div class="gratora-top-donors__podium-amount">
-                            <?php echo esc_html(\Gratora\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true));
+                            <?php echo esc_html(Money::format($entry['amount_cents'], $currency, true));
 ?>
                         </div>
                     <?php endif; ?>
@@ -71,7 +75,7 @@ echo get_block_wrapper_attributes(array_filter([
             <ol class="gratora-top-donors__list" start="4">
                 <?php foreach ($rest as $i => $entry): ?>
                     <li class="gratora-top-donors__row">
-                        <?php echo \Gratora\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
+                        <?php BlockAvatar::render($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); ?>
                         <span class="gratora-top-donors__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                             <?php echo esc_html($entry['name']);
 ?>
@@ -88,7 +92,7 @@ echo get_block_wrapper_attributes(array_filter([
                         <?php endif; ?>
                         <?php if ($showAmount): ?>
                             <span class="gratora-top-donors__amount">
-                                <?php echo esc_html(\Gratora\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true));
+                                <?php echo esc_html(Money::format($entry['amount_cents'], $currency, true));
 ?>
                             </span>
                         <?php endif; ?>
@@ -100,7 +104,7 @@ echo get_block_wrapper_attributes(array_filter([
         <ol class="gratora-top-donors__list">
             <?php foreach ($entries as $i => $entry): ?>
                 <li class="gratora-top-donors__row">
-                    <?php echo \Gratora\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
+                    <?php BlockAvatar::render($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); ?>
                     <span class="gratora-top-donors__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                         <?php echo esc_html($entry['name']);
 ?>
@@ -117,7 +121,7 @@ echo get_block_wrapper_attributes(array_filter([
                     <?php endif; ?>
                     <?php if ($showAmount): ?>
                         <span class="gratora-top-donors__amount">
-                            <?php echo esc_html(\Gratora\Foundation\Helpers\Money::format($entry['amount_cents'], $currency, true));
+                            <?php echo esc_html(Money::format($entry['amount_cents'], $currency, true));
 ?>
                         </span>
                     <?php endif; ?>

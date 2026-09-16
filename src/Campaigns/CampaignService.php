@@ -684,20 +684,20 @@ final class CampaignService
         // so the editor rewrites dp-band--tight on its first save and the
         // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
         // writes it the same way.
-        $t0 = __('Campaign name', 'gratora-donation-platform');
+        $t0 = esc_html__('Campaign name', 'gratora-donation-platform');
         // Bound, so this is only what an organizer who has written no
         // description sees in the editor. Nothing else is seeded as prose:
         // seeded words read to a donor as the campaign's own.
-        $t2 = __('What this campaign is raising for.', 'gratora-donation-platform');
+        $t2 = esc_html__('What this campaign is raising for.', 'gratora-donation-platform');
         $t5 = __('Recent donations', 'gratora-donation-platform');
         $t6 = __('Top donors', 'gratora-donation-platform');
         $t7 = __('Our supporters', 'gratora-donation-platform');
         // Section headings, so a starter page reads as a page rather than a
         // stack of blocks. Above the prose and above the form, which are the
         // two things no block titles for itself.
-        $t8 = __('About this campaign', 'gratora-donation-platform');
-        $t9  = __('Donate', 'gratora-donation-platform');
-        $t10 = __('Other campaigns', 'gratora-donation-platform');
+        $t8 = esc_html__('About this campaign', 'gratora-donation-platform');
+        $t9  = esc_html__('Donate', 'gratora-donation-platform');
+        $t10 = esc_html__('Other campaigns', 'gratora-donation-platform');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gratora\Forms\Blocks;
 
+use Gratora\Forms\Rendering\FormMarkup;
+
 /** @since 1.0.0 */
 final class SectionBlock implements Block
 {
@@ -34,7 +36,7 @@ final class SectionBlock implements Block
         return sprintf(
             '<div class="gratora-block gratora-block--section"%s>%s</div>',
             $style !== '' ? ' style="' . esc_attr($style) . '"' : '',
-            $content
+            wp_kses($content, FormMarkup::allowedHtml())
         );
     }
 

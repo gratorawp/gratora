@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gratora\Forms\Blocks;
 
+use Gratora\Forms\Rendering\FormMarkup;
+
 /** @since 1.0.0 */
 final class ColumnsBlock implements Block
 {
@@ -29,7 +31,7 @@ final class ColumnsBlock implements Block
         return sprintf(
             '<div class="gratora-block gratora-block--columns" style="%s">%s</div>',
             esc_attr(self::columnsStyle($attrs)),
-            $content
+            wp_kses($content, FormMarkup::allowedHtml())
         );
     }
 

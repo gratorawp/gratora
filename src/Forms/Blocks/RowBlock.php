@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gratora\Forms\Blocks;
 
+use Gratora\Forms\Rendering\FormMarkup;
+
 /** @since 1.0.0 */
 final class RowBlock implements Block
 {
@@ -36,12 +38,12 @@ final class RowBlock implements Block
             $gapUnit = 'px';
         }
 
+        $style = sprintf('display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s', $columns, $gap, $gapUnit);
+
         return sprintf(
-            '<div class="gratora-block gratora-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
-            $columns,
-            $gap,
-            $gapUnit,
-            $content
+            '<div class="gratora-block gratora-block--row" style="%s">%s</div>',
+            esc_attr($style),
+            wp_kses($content, FormMarkup::allowedHtml())
         );
     }
 }

@@ -22,13 +22,6 @@ final class View
         return self::renderFile(self::resolve($path), $args);
     }
 
-    /** @since 1.0.0 */
-    public static function render(string $path, array $args = []): void
-    {
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- self::load returns a whole rendered template, which escaping would mangle; each template escapes its own values with esc_html()/esc_attr() as it prints them.
-        echo self::load($path, $args);
-    }
-
     /**
      * Load a view relative to a caller-supplied base directory.
      * Use when the module layout does not match src/{Module}/resources/views/.
@@ -37,27 +30,47 @@ final class View
      */
     public static function loadRelative(string $baseDir, string $path, array $args = []): string
     {
-        $rel = str_replace('.', '/', $path);
-        $template = rtrim($baseDir, '/\\') . '/' . $rel . '.php';
-        return self::renderFile($template, $args);
+        return self::renderFile(self::relative($baseDir, $path), $args);
+    }
+
+    /** @since 1.1.0 */
+    public static function printRelative(string $baseDir, string $path, array $args = []): void
+    {
+        self::includeFile(self::relative($baseDir, $path), $args);
     }
 
     /** @since 1.0.0 */
     private static function renderFile(string $template, array $args): string
     {
+        ob_start();
+
+        try {
+            self::includeFile($template, $args);
+        } finally {
+            $html = (string) ob_get_clean();
+        }
+
+        return $html;
+    }
+
+    /** @since 1.1.0 */
+    private static function includeFile(string $template, array $args): void
+    {
         if (! file_exists($template)) {
             throw new InvalidArgumentException(esc_html("Gratora view template not found: {$template}"));
         }
-
-        ob_start();
 
         if (! empty($args)) {
             extract($args, EXTR_SKIP);
         }
 
         include $template;
+    }
 
-        return (string) ob_get_clean();
+    /** @since 1.1.0 */
+    private static function relative(string $baseDir, string $path): string
+    {
+        return rtrim($baseDir, '/\\') . '/' . str_replace('.', '/', $path) . '.php';
     }
 
     /** @since 1.0.0 */

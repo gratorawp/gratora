@@ -375,7 +375,9 @@ function focusFirstInvalid( hostId ) {
 }
 
 function readConfig( form ) {
-    const node = form.querySelector( 'script[type="application/json"][data-gratora-form-config]' );
+    // Not keyed on type: core's inline script filter lets an optimizer rewrite
+    // it, and the config would then be lost.
+    const node = form.querySelector( 'script[data-gratora-form-config]' );
     if ( ! node ) return null;
     try {
         return JSON.parse( node.textContent || '{}' );
@@ -1512,8 +1514,8 @@ function FramedElsewhere( { i18n } ) {
 function mount( form ) {
     if ( form.dataset.gratoraMounted === 'true' ) return;
 
-    // Called on every exit path, or the JS-gated cloak can leave the form
-    // permanently hidden.
+    // Called on every exit path, or the form stays cloaked until the failsafe
+    // fires.
     const reveal = () => { form.dataset.gratoraReady = 'true'; };
 
     const config = readConfig( form );

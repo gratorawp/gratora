@@ -350,7 +350,7 @@ final class Tokens
         $v = trim($value);
 
         // As tight as sanitiseValue's own classes: a pass-through value lands
-        // inside a <style> block, so neither pattern may carry ';', '{' or '}'.
+        // inside a PDF template's stylesheet, so neither pattern may carry ';', '{' or '}'.
         if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $v) === 1) return $v;
         if (preg_match('/^rgba?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return $v;
         if (preg_match('/^hsla?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return Ink::hex($v) ?? $fallback;

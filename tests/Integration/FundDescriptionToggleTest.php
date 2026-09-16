@@ -67,9 +67,7 @@ final class FundDescriptionToggleTest extends IntegrationTestCase
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
-        $config = (string) ($m[1] ?? '');
+        $config = $this->formConfigJsonIn(do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]'));
 
         $this->assertNotSame('', $config, 'the form rendered no runtime config, so nothing below is being tested');
         $this->assertStringContainsString('Water and Sanitation', $config, 'the fund itself has to be on the form');

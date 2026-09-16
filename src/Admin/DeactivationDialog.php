@@ -68,14 +68,9 @@ final class DeactivationDialog
             return;
         }
 
-        $markup = View::loadRelative(__DIR__, 'views/deactivation-dialog', [
+        View::printRelative(__DIR__, 'views/deactivation-dialog', [
             'wipeOptIn' => DataEraser::requested(),
         ]);
-
-        // The echo is its own statement so the annotation covers the line the
-        // sniff reports, which is the argument rather than the echo.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- views/deactivation-dialog.php prints only esc_html_e(), esc_attr_e() and checked() output.
-        echo $markup;
     }
 
     /** @since 1.0.0 */

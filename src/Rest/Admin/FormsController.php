@@ -10,6 +10,7 @@ use Gratora\Forms\Form;
 use Gratora\Forms\FormRepository;
 use Gratora\Forms\FormService;
 use Gratora\Forms\FormTemplates;
+use Gratora\Forms\Rendering\FormMarkup;
 use Gratora\Forms\Shortcode\DonationFormShortcode;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Helpers\Money;
@@ -282,7 +283,7 @@ final class FormsController
         // the two read different forms.
         $body = (array) ($request->get_json_params() ?? []);
         if (array_key_exists('blocks', $body)) {
-            $form->blocks = $this->formService->sanitizeBlocks((string) $body['blocks']);
+            $form->blocks = FormMarkup::sanitizeBlocks((string) $body['blocks']);
         }
         if (is_array($body['settings'] ?? null)) {
             $form->settings = $body['settings'];
@@ -304,7 +305,7 @@ final class FormsController
     public function preview(WP_REST_Request $request): WP_REST_Response
     {
         $body       = (array) ($request->get_json_params() ?? []);
-        $blocks     = $this->formService->sanitizeBlocks((string) ($body['blocks'] ?? ''));
+        $blocks     = FormMarkup::sanitizeBlocks((string) ($body['blocks'] ?? ''));
         $settings   = is_array($body['settings'] ?? null) ? $body['settings'] : null;
         $campaignId = isset($body['campaign_id']) ? (int) $body['campaign_id'] : null;
 

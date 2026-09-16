@@ -49,17 +49,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     /** @return array<string,mixed> the JSON the runtime reads out of the rendered form */
     private function renderedConfig(): array
     {
-        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
-
-        $this->assertMatchesRegularExpression(
-            '/data-gratora-form-config>(.*?)<\/script>/s',
-            $html,
-            'The form did not render its config script.'
-        );
-        preg_match('/data-gratora-form-config>(.*?)<\/script>/s', $html, $m);
-        $config = json_decode(html_entity_decode($m[1]), true);
-
-        return is_array($config) ? $config : [];
+        return $this->formConfigIn(do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]'));
     }
 
     public function test_a_browser_aware_gateway_reaches_the_form_config(): void

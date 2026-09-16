@@ -6,6 +6,7 @@ namespace Gratora\Foundation\Transfer;
 
 use Gratora\Analytics\ErrorLog;
 use Gratora\Donations\AggregateSyncer;
+use Gratora\Forms\Rendering\FormMarkup;
 use Gratora\Foundation\Crypto\Crypto;
 use Gratora\Foundation\Identity\IdentityHasher;
 use Gratora\Foundation\References\ReferenceGenerator;
@@ -342,7 +343,7 @@ final class DataImporter
         }
 
         if ($table === 'gratora_forms' && isset($row['blocks'])) {
-            $row['blocks'] = $this->remapFundIdsInBlocks((string) $row['blocks']);
+            $row['blocks'] = FormMarkup::sanitizeBlocks($this->remapFundIdsInBlocks((string) $row['blocks']));
         }
 
         if ($table === 'gratora_funds') {

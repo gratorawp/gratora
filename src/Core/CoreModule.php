@@ -1124,13 +1124,8 @@ final class CoreModule implements GratoraModule
             $c->get(CampaignStatMetrics::class),
         ));
         $blocks->add(new CampaignGridBlock($c->get(CampaignRepository::class)));
-        $blocks->add(new DonateButtonBlock(
-            $c->get(CampaignRepository::class),
-            $c->get(FormRepository::class),
-        ));
         // Bound rather than built here: an add-on rendering a donation form in
-        // the editor needs this to build the preview document, and it holds
-        // per-request state that a second instance would not share.
+        // the editor needs this to build the preview document.
         $c->bind(DonationFormShortcode::class, fn (Container $c) => new DonationFormShortcode(
             $c->get(FormRepository::class),
             $c->get(CampaignStyleResolver::class),
@@ -1140,6 +1135,11 @@ final class CoreModule implements GratoraModule
             $c->get(TestMode::class),
         ));
         $formShortcode = $c->get(DonationFormShortcode::class);
+        $blocks->add(new DonateButtonBlock(
+            $c->get(CampaignRepository::class),
+            $c->get(FormRepository::class),
+            $formShortcode,
+        ));
         $blocks->add(new DonationFormBlock(
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
