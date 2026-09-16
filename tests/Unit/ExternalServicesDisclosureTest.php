@@ -15,10 +15,9 @@ use RecursiveIteratorIterator;
  * while every service the plugin can reach is listed with the switch that turns
  * it on.
  *
- * Gravatar is the one host the plugin can cause a request to without owning the
- * request: avatars go through core's get_avatar_url, so WordPress decides
- * whether anything leaves and under whose settings. That is why the section has
- * no Gravatar entry, and why the check below is inverted.
+ * No URL in the source names Gravatar's host, because avatars go through core's
+ * get_avatar_url. The host check cannot see it, so the Gravatar check pins the
+ * one path its entry describes.
  */
 final class ExternalServicesDisclosureTest extends TestCase
 {
@@ -81,15 +80,14 @@ final class ExternalServicesDisclosureTest extends TestCase
     }
 
     /**
-     * The section lists services this plugin decides to contact. Avatars are
-     * not one: the plugin hands an address to get_avatar_url and core builds
-     * whatever URL the site's own avatar settings and filters call for, which
-     * a privacy plugin or a host theme may already have replaced.
+     * The Gravatar entry describes one path: DonorAvatars, behind the privacy
+     * toggle, hands a donor's address to get_avatar_url, and core builds the
+     * URL through the avatar filters a privacy plugin may use to replace it.
      *
-     * Assemble a gravatar.com URL by hand and that stops being true. The
-     * request becomes this plugin's, it outlives the site's avatar settings,
-     * and a disclosure is owed. So nothing here asserts the section mentions
-     * Gravatar; this asserts that nobody wrote the line that would owe one.
+     * A gravatar.com URL assembled anywhere else is a request that entry does
+     * not describe, and the host check lets it through when its host appears
+     * in the section, as secure.gravatar.com does, or when it has no scheme.
+     * So this asserts nobody wrote one.
      */
     public function test_no_gravatar_url_is_assembled_outside_core(): void
     {
@@ -97,7 +95,7 @@ final class ExternalServicesDisclosureTest extends TestCase
         $this->assertStringContainsString(
             'get_avatar_url(',
             $avatars,
-            'Donor avatars no longer go through core, so the section owes Gravatar an entry of its own.'
+            'Donor avatars do not go through get_avatar_url, the path the Gravatar entry in readme.txt describes.'
         );
 
         $offenders = [];
@@ -130,7 +128,7 @@ final class ExternalServicesDisclosureTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            "These build a Gravatar URL instead of asking core for one, so the request is ours to disclose:\n"
+            "These build a Gravatar URL by hand, a request the Gravatar entry in readme.txt does not describe:\n"
                 . implode("\n", $offenders)
         );
     }

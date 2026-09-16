@@ -8,16 +8,17 @@ use Gratora\Foundation\Crypto\Crypto;
 use Gratora\Settings\SettingsService;
 
 /**
- * Resolves Gravatar URLs for the donor-activity blocks.
+ * Resolves donor pictures, an upload or a Gravatar, for the donor lists in the
+ * campaign blocks and the admin donor screens.
  *
- * Off unless the org turns it on. Asking Gravatar for a picture sends a hash of
- * the donor's address to a third party from every visitor's browser, on a page
- * that is public, and Gratora encrypts those addresses at rest precisely so they
- * are not casually exposed. That trade is the org's to make.
+ * Gravatar is off unless the org turns it on. Asking Gravatar for a picture
+ * sends a hash of the donor's address to a third party from the browser of
+ * whoever views the page, and Gratora encrypts those addresses at rest precisely
+ * so they are not casually exposed. That trade is the org's to make.
  *
- * Resolves to a URL rather than handing an address to the caller: the blocks
- * only need something to put in a src, and a plaintext address travelling
- * further than this class is a leak waiting for somewhere to happen.
+ * Resolves to a URL rather than handing an address to the caller: callers only
+ * need something to put in a src, and a plaintext address travelling further
+ * than this class is a leak waiting for somewhere to happen.
  *
  * @since 1.0.0
  */
@@ -153,9 +154,10 @@ final class DonorAvatars
             // 'blank' is what makes the initial underneath usable as the
             // fallback: no image on file returns a transparent pixel rather
             // than a silhouette painted over the letter.
-            // get_avatar_url rather than a hand-built gravatar.com URL: it
-            // honors the site's own avatar settings and the filters a host
-            // theme or privacy plugin may already rely on.
+            // get_avatar_url rather than a hand-built gravatar.com URL, so the
+            // avatar filters a host theme or privacy plugin relies on still
+            // apply. It never reads the Show Avatars option, so enabled() is
+            // the only switch.
             $url = get_avatar_url($email, ['size' => 96, 'default' => 'blank']);
             if (is_string($url) && $url !== '') {
                 $out[(int) $id] = $url;
