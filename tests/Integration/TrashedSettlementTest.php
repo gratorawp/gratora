@@ -188,6 +188,9 @@ final class TrashedSettlementTest extends IntegrationTestCase
         $donation = $this->pending();
         $this->trash($donation);
 
+        get_role('administrator')->add_cap('gratora_refund_donations');
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
         $c        = Plugin::instance()->container;
         $registry = new CommandRegistry($c->get(EventRecorder::class));
         (new CoreCommandProvider())->register($registry, $c);

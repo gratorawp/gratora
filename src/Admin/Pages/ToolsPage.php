@@ -25,9 +25,9 @@ final class ToolsPage extends HookProvider
         $pages[] = [
             'id'         => self::PAGE_ID,
             'title'      => __('Tools', 'gratora-donation-platform'),
-            // Every Tools route wants gratora_manage_settings; this virtual menu cap
-            // is granted on exactly that (or manage_options), so what the menu shows
-            // and what the screen can do agree.
+            // Granted on gratora_manage_settings (or manage_options), which is
+            // what the screen needs to load. Each control needs its own
+            // capability, and the screen hides any the reader does not hold.
             'capability' => 'gratora_access_settings',
             'position'   => 95,
             'render'     => [$this, 'render'],

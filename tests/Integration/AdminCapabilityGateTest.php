@@ -130,6 +130,26 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         );
     }
 
+    public function test_recalculate_requires_full_admin_not_just_settings_cap(): void
+    {
+        // The currency pass writes base-currency values onto donation rows.
+        $this->actAs(['gratora_manage_settings']);
+        $this->assertAllowed(
+            $this->status('GET', '/gratora/v1/admin/tools/info'),
+            'settings manager reaches the Tools screen'
+        );
+        $this->assertForbidden(
+            $this->status('POST', '/gratora/v1/admin/tools/recalculate', ['scope' => 'all']),
+            'settings manager cannot recalculate'
+        );
+
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        $this->assertAllowed(
+            $this->status('POST', '/gratora/v1/admin/tools/recalculate', ['scope' => 'all']),
+            'an admin can recalculate'
+        );
+    }
+
     public function test_bulk_exports_carry_the_capability_of_the_data_not_the_screen(): void
     {
         // Reading a donor on screen is one record at a time; the CSV is the

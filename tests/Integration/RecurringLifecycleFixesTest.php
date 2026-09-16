@@ -49,6 +49,7 @@ final class RecurringLifecycleFixesTest extends IntegrationTestCase
     private function adminCtx(): CommandContext
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
+        get_role('administrator')->add_cap('gratora_refund_donations');
         wp_set_current_user($admin);
 
         return new CommandContext($admin, 'rest', 'req-' . uniqid());

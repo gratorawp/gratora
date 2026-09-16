@@ -8,8 +8,11 @@ use Gratora\Analytics\EventRecorder;
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Core\Commands\CoreCommandProvider;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
 use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
 use Gratora\Donations\Refund;
+use Gratora\Foundation\Commands\AbilitiesBridge;
 use Gratora\Foundation\Commands\CommandContext;
 use Gratora\Foundation\Commands\CommandRegistry;
 use Gratora\Foundation\Plugin;
@@ -74,6 +77,42 @@ final class CoreCommandProviderTest extends IntegrationTestCase
 
         $this->assertSame('gratora_refund_donations', $byId['donation.refund']['capability']);
         $this->assertSame('core', $byId['donation.refund']['meta']['add_on']);
+
+        $changesWhatIsCharged = [
+            'donation.create', 'donation.confirm', 'donation.mark_failed',
+            'recurring.cancel', 'recurring.pause', 'recurring.resume',
+            'recurring.update_amount', 'recurring.cancel_for_campaign',
+        ];
+        foreach ($changesWhatIsCharged as $id) {
+            $this->assertSame('gratora_refund_donations', $byId[$id]['capability'], "{$id} must need the capability its REST route needs");
+        }
+
+        $this->assertSame('manage_options', $byId['donation.aggregates.sync']['capability'], 'the same capability as Tools > Recalculate');
+    }
+
+    public function test_a_donations_viewer_cannot_mark_a_donation_paid(): void
+    {
+        $viewer = self::factory()->user->create_and_get(['role' => 'subscriber']);
+        $viewer->add_cap('gratora_view_donations');
+        wp_set_current_user($viewer->ID);
+
+        $donation = Plugin::instance()->container->get(DonationService::class)->createPending(new DonationIntent(
+            email:        'viewer-confirm@example.test',
+            amount_cents: 2500,
+            currency:     'USD',
+            gateway:      'offline',
+            frequency:    'one_time',
+        ))['donation'];
+        $input = ['donation_reference' => (string) $donation->reference];
+
+        $res = $this->registry()->dispatch('donation.confirm', $input, new CommandContext($viewer->ID, 'rest', 'req-' . uniqid()));
+
+        $this->assertSame('command.denied', $res->error_code, (string) $res->error);
+        $this->assertSame('pending', (string) Donation::query()->where('id', (int) $donation->id)->get()->status);
+
+        $ability = wp_get_ability(AbilitiesBridge::abilityName('donation.confirm'));
+        $this->assertNotNull($ability, 'donation.confirm is published as an ability');
+        $this->assertFalse($ability->check_permissions($input), 'the ability an MCP client reads carries the same gate');
     }
 
     public function test_manifest_flags_destructive_commands_and_previewable_ones(): void

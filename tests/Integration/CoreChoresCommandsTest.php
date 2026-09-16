@@ -36,7 +36,7 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
         $role  = get_role('administrator');
-        foreach (['gratora_view_donations', 'gratora_edit_donors'] as $cap) {
+        foreach (['gratora_view_donations', 'gratora_refund_donations', 'gratora_edit_donors'] as $cap) {
             $role->add_cap($cap);
         }
         wp_set_current_user($admin);
@@ -58,7 +58,7 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
         $this->assertArrayHasKey('recurring.cancel_for_campaign', $byId);
         $this->assertTrue($byId['recurring.cancel_for_campaign']['mutating'], 'cancel_for_campaign is a write');
         $this->assertFalse($byId['recurring.cancel_for_campaign']['idempotent']);
-        $this->assertSame('gratora_view_donations', $byId['recurring.cancel_for_campaign']['capability']);
+        $this->assertSame('gratora_refund_donations', $byId['recurring.cancel_for_campaign']['capability']);
 
         $this->assertArrayHasKey('donor.send_email', $byId);
         $this->assertTrue($byId['donor.send_email']['mutating'], 'send_email is a write');

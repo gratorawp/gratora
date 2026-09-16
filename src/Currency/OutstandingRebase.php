@@ -90,7 +90,7 @@ final class OutstandingRebase
             ErrorLog::record(
                 'currency.rebase',
                 sprintf(
-                    'Outstanding donations in %s could not be restated into %s: there is no rate for them, so they still carry the base amount they were stamped with. Set a rate on Settings > Currency, then run Recalculate.',
+                    'Outstanding donations in %s could not be restated into %s: there is no rate for them, so they still carry the base amount they were stamped with under the previous base currency, and one that settles is counted at that amount.',
                     implode(', ', $stranded),
                     $to
                 ),

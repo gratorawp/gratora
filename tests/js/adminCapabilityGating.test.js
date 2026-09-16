@@ -258,8 +258,10 @@ describe( 'the cards beside the rail', () => {
 
 describe( 'the maintenance tab', () => {
     const INFO = {
-        pending_upgrades: [ { id: 'x', description: 'Recalculating totals.' } ],
-        test_data:        { donations: 3, recurring_plans: 1, donors: 2 },
+        pending_upgrades:      [ { id: 'x', description: 'Recalculating totals.' } ],
+        test_data:             { donations: 3, recurring_plans: 1, donors: 2 },
+        orphans:               [ { key: 'gift_aid_claims', label: 'Gift Aid claims whose donation no longer exists.', count: 2 } ],
+        unconverted_donations: [ { currency: 'JPY', count: 4, amount_cents: 120000, needs_rate: true } ],
     };
 
     const tab = () => (
@@ -273,11 +275,17 @@ describe( 'the maintenance tab', () => {
     );
 
     it( 'keeps the site-wide cards away from a reader who cannot run them', () => {
-        window.gratora = { can: { view_reports: true } };
+        window.gratora = { can: { view_reports: true, manage_settings: true } };
         mount( tab() );
 
         expect( document.body.textContent ).not.toContain( 'Data updates are outstanding' );
         expect( document.body.textContent ).not.toContain( 'Test data' );
+        expect( document.body.textContent ).not.toContain( 'Recalculate aggregates' );
+        expect( document.body.textContent ).not.toContain( 'Records left behind' );
+        expect( document.body.textContent ).not.toContain( 'Setup wizard' );
+        expect( labels() ).not.toContain( 'Recalculate' );
+        expect( labels() ).not.toContain( 'Remove them' );
+        expect( labels() ).not.toContain( 'Open setup wizard' );
     } );
 
     it( 'shows them to an administrator', () => {
@@ -286,6 +294,20 @@ describe( 'the maintenance tab', () => {
 
         expect( document.body.textContent ).toContain( 'Data updates are outstanding' );
         expect( document.body.textContent ).toContain( 'Test data' );
+        expect( document.body.textContent ).toContain( 'Recalculate aggregates' );
+        expect( document.body.textContent ).toContain( 'Records left behind' );
+        expect( document.body.textContent ).toContain( 'Setup wizard' );
+        expect( labels() ).toContain( 'Recalculate' );
+        expect( labels() ).toContain( 'Remove them' );
+        expect( labels() ).toContain( 'Open setup wizard' );
+    } );
+
+    it( 'still tells a reader who cannot recalculate which donations are missing, and who can bring them in', () => {
+        window.gratora = { can: { manage_settings: true } };
+        mount( tab() );
+
+        expect( document.body.textContent ).toContain( 'Donations missing from your totals' );
+        expect( document.body.textContent ).toContain( 'ask a site administrator to recalculate' );
     } );
 } );
 

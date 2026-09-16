@@ -171,8 +171,9 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
         }
     };
 
-    const testData  = info?.test_data;
-    const testTotal = ( testData?.donations || 0 ) + ( testData?.recurring_plans || 0 );
+    const testData       = info?.test_data;
+    const testTotal      = ( testData?.donations || 0 ) + ( testData?.recurring_plans || 0 );
+    const canRecalculate = userCan( 'manage_options' );
 
     return (
         <div className="gratora-panel">
@@ -227,8 +228,12 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                     title={ __( 'Donations missing from your totals', 'gratora-donation-platform' ) }
                     sub={
                         info.unconverted_donations.some( ( row ) => row.needs_rate )
-                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'gratora-donation-platform' )
-                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'gratora-donation-platform' )
+                            ? ( canRecalculate
+                                ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'gratora-donation-platform' )
+                                : __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then ask a site administrator to recalculate on this screen to bring them in.', 'gratora-donation-platform' ) )
+                            : ( canRecalculate
+                                ? __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'gratora-donation-platform' )
+                                : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. A site administrator can bring them in by recalculating on this screen; no exchange rate is needed.', 'gratora-donation-platform' ) )
                     }
                 >
                     <ul className="gratora-advanced-cron">
@@ -245,7 +250,11 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                 { ! row.needs_rate && (
                                     <>
                                         { ' ' }
-                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'gratora-donation-platform' ) }</em>
+                                        <em>
+                                            { canRecalculate
+                                                ? __( '(your base currency: recalculate is all this needs)', 'gratora-donation-platform' )
+                                                : __( '(your base currency: no exchange rate is needed)', 'gratora-donation-platform' ) }
+                                        </em>
                                     </>
                                 ) }
                             </li>
@@ -254,61 +263,66 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 </Card>
             ) }
 
-            <Card
-                title={ __( 'Recalculate aggregates', 'gratora-donation-platform' ) }
-                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'gratora-donation-platform' ) }
-            >
-                <div className="gratora-advanced-actions">
-                    <label className="gratora-tools-field">
-                        { __( 'Scope', 'gratora-donation-platform' ) }
-                        <select
-                            className="gratora-select"
-                            value={ recalcScope }
-                            onChange={ ( e ) => setRecalcScope( e.target.value ) }
-                            disabled={ recalcRunning }
-                        >
-                            { scopes.map( ( sc ) => (
-                                <option key={ sc.value } value={ sc.value }>{ sc.label }</option>
-                            ) ) }
-                        </select>
-                    </label>
-                    <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
-                        { recalcRunning ? __( 'Recalculating…', 'gratora-donation-platform' ) : __( 'Recalculate', 'gratora-donation-platform' ) }
-                    </Btn>
-                </div>
-                { recalcResult && (
-                    <ul className="gratora-advanced-cron" style={ { marginTop: 12 } }>
-                        { Object.entries( recalcResult.counts || {} )
-                            .filter( ( [ , n ] ) => n > 0 )
-                            .map( ( [ k, n ] ) => (
-                                <li key={ k }>
-                                    { sprintf(
-                                        /* translators: 1: what was recomputed (Donors, Funds, ...), 2: how many */
-                                        __( '%1$s: %2$d synced', 'gratora-donation-platform' ),
-                                        countLabel( k ),
-                                        n
-                                    ) }
-                                </li>
-                            ) ) }
-                    </ul>
-                ) }
+            { canRecalculate && (
+                <Card
+                    title={ __( 'Recalculate aggregates', 'gratora-donation-platform' ) }
+                    sub={
+                        /* translators: "Everything" and "Currency conversions" are options in the Scope list below and should read as they do there. */
+                        __( 'Re-derive donor, fund, campaign and form counters from the donation rows. The "Everything" and "Currency conversions" scopes also convert any donation or recurring plan that has no value in your base currency at today\'s exchange rate. That value is kept when rates change later.', 'gratora-donation-platform' )
+                    }
+                >
+                    <div className="gratora-advanced-actions">
+                        <label className="gratora-tools-field">
+                            { __( 'Scope', 'gratora-donation-platform' ) }
+                            <select
+                                className="gratora-select"
+                                value={ recalcScope }
+                                onChange={ ( e ) => setRecalcScope( e.target.value ) }
+                                disabled={ recalcRunning }
+                            >
+                                { scopes.map( ( sc ) => (
+                                    <option key={ sc.value } value={ sc.value }>{ sc.label }</option>
+                                ) ) }
+                            </select>
+                        </label>
+                        <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
+                            { recalcRunning ? __( 'Recalculating…', 'gratora-donation-platform' ) : __( 'Recalculate', 'gratora-donation-platform' ) }
+                        </Btn>
+                    </div>
+                    { recalcResult && (
+                        <ul className="gratora-advanced-cron" style={ { marginTop: 12 } }>
+                            { Object.entries( recalcResult.counts || {} )
+                                .filter( ( [ , n ] ) => n > 0 )
+                                .map( ( [ k, n ] ) => (
+                                    <li key={ k }>
+                                        { sprintf(
+                                            /* translators: 1: what was recomputed (Donors, Funds, ...), 2: how many */
+                                            __( '%1$s: %2$d synced', 'gratora-donation-platform' ),
+                                            countLabel( k ),
+                                            n
+                                        ) }
+                                    </li>
+                                ) ) }
+                        </ul>
+                    ) }
 
-                { recalcResult?.stillUnconvertible > 0 && (
-                    <Notice status="warning" isDismissible={ false }>
-                        { sprintf(
-                            /* translators: 1: how many donations, 2: comma-separated currency codes */
-                            _n(
-                                '%1$d donation is still missing from your totals: there is no exchange rate for %2$s.',
-                                '%1$d donations are still missing from your totals: there is no exchange rate for %2$s.',
+                    { recalcResult?.stillUnconvertible > 0 && (
+                        <Notice status="warning" isDismissible={ false }>
+                            { sprintf(
+                                /* translators: 1: how many donations, 2: comma-separated currency codes */
+                                _n(
+                                    '%1$d donation is still missing from your totals: there is no exchange rate for %2$s.',
+                                    '%1$d donations are still missing from your totals: there is no exchange rate for %2$s.',
+                                    recalcResult.stillUnconvertible,
+                                    'gratora-donation-platform'
+                                ),
                                 recalcResult.stillUnconvertible,
-                                'gratora-donation-platform'
-                            ),
-                            recalcResult.stillUnconvertible,
-                            ( recalcResult.currencies || [] ).join( ', ' )
-                        ) }
-                    </Notice>
-                ) }
-            </Card>
+                                ( recalcResult.currencies || [] ).join( ', ' )
+                            ) }
+                        </Notice>
+                    ) }
+                </Card>
+            ) }
 
             { userCan( 'manage_options' ) && testTotal > 0 && (
                 <Card
@@ -376,7 +390,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 </Card>
             ) }
 
-            { ( info?.orphans?.length > 0 ) && (
+            { userCan( 'manage_options' ) && info?.orphans?.length > 0 && (
                 <Card
                     title={ __( 'Records left behind', 'gratora-donation-platform' ) }
                     sub={ __( 'An add-on clears its own records when you delete a campaign, a donation or a donor, which it can only do while it is switched on. These were left behind by something deleted while the add-on was off, and no other screen can show them: the screens that would are reached through the very thing that was deleted.', 'gratora-donation-platform' ) }
@@ -419,16 +433,18 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 </Card>
             ) }
 
-            <Card
-                title={ __( 'Setup wizard', 'gratora-donation-platform' ) }
-                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'gratora-donation-platform' ) }
-            >
-                <div className="gratora-advanced-actions">
-                    <Btn variant="secondary" href="admin.php?page=gratora-onboarding">
-                        { __( 'Open setup wizard', 'gratora-donation-platform' ) }
-                    </Btn>
-                </div>
-            </Card>
+            { userCan( 'manage_options' ) && (
+                <Card
+                    title={ __( 'Setup wizard', 'gratora-donation-platform' ) }
+                    sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'gratora-donation-platform' ) }
+                >
+                    <div className="gratora-advanced-actions">
+                        <Btn variant="secondary" href="admin.php?page=gratora-onboarding">
+                            { __( 'Open setup wizard', 'gratora-donation-platform' ) }
+                        </Btn>
+                    </div>
+                </Card>
+            ) }
         </div>
     );
 }

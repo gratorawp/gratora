@@ -102,7 +102,7 @@ final class CoreCommandProvider
                 'is_anonymous' => ['type' => 'boolean'],
             ], ['email', 'amount_cents', 'currency', 'gateway']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -157,7 +157,7 @@ final class CoreCommandProvider
                 'result'             => ['type' => 'object', 'description' => 'Raw gateway confirmation payload (transaction id, etc.). Supplied by the payment gateway, not composed by hand; omit it when confirming manually.'],
             ], ['donation_reference']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -183,7 +183,7 @@ final class CoreCommandProvider
                 'reason'             => ['type' => ['string', 'null']],
             ], ['donation_reference']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -289,7 +289,7 @@ final class CoreCommandProvider
                 'form_id'     => ['type' => ['integer', 'null'], 'minimum' => 1],
             ]),
             [],
-            'gratora_view_reports',
+            'manage_options',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1060,7 +1060,7 @@ final class CoreCommandProvider
                 'reason'  => ['type' => ['string', 'null']],
             ], ['plan_id']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -1086,7 +1086,7 @@ final class CoreCommandProvider
                 'resumes_at' => ['type' => ['string', 'null']],
             ], ['plan_id']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1114,7 +1114,7 @@ final class CoreCommandProvider
                 'plan_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['plan_id']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1136,7 +1136,7 @@ final class CoreCommandProvider
                 'amount_cents' => ['type' => 'integer', 'minimum' => 1],
             ], ['plan_id', 'amount_cents']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1163,7 +1163,7 @@ final class CoreCommandProvider
                 'reason'      => ['type' => ['string', 'null']],
             ], ['campaign_id']),
             [],
-            'gratora_view_donations',
+            'gratora_refund_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -1842,7 +1842,7 @@ final class CoreCommandProvider
     /** @since 1.0.0 */
     private function linkExpiryHint(): string
     {
-        $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
+        $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS, 'wp_rest'); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- reads core's nonce lifetime for the wp_rest nonce this link carries.
         return sprintf(
             /* translators: %s: human-readable duration, e.g. "1 day". */
             __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'gratora-donation-platform'),

@@ -34,7 +34,7 @@ final class RecurringCancelForCampaignCommandCountTest extends IntegrationTestCa
     private function ctx(): CommandContext
     {
         $user = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('gratora_view_donations');
+        get_role('administrator')->add_cap('gratora_refund_donations');
         wp_set_current_user($user);
 
         return new CommandContext($user, 'rest', 'test-' . uniqid());

@@ -104,7 +104,9 @@ final class ToolsController
         register_rest_route(self::NAMESPACE, '/admin/tools/recalculate', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'recalculate'],
-            'permission_callback' => [$this, 'canAccess'],
+            // manage_options: the currency pass stamps a base-currency value
+            // onto donation rows at today's rate, and no later run revisits it.
+            'permission_callback' => [$this, 'canManage'],
             'args'                => [
                 'scope' => [
                     'type'    => 'string',
