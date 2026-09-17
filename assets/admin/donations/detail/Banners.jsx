@@ -1,6 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
+import { donationHref } from '../../_shared/adminPages';
 import { IconAlert } from './icons';
 
 function Banner( { variant, children } ) {
@@ -69,11 +69,7 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
                     { ' ' }
                     { __( 'It is still pending, and it can still settle if the payment it is waiting on goes through.', 'gratora-donation-platform' ) }
                     <div style={ { marginTop: 6 } }>
-                        <a href={ addQueryArgs( window.location.pathname, {
-                            page:      'gratora-donations',
-                            view:      'detail',
-                            reference: replacedBy,
-                        } ) }>
+                        <a href={ donationHref( replacedBy ) }>
                             { sprintf(
                                 /* translators: %s: the replacement donation's reference. */
                                 __( 'Open %s', 'gratora-donation-platform' ),

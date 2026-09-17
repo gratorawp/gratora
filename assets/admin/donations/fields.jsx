@@ -9,8 +9,9 @@ import { addQueryArgs } from '@wordpress/url';
 
 import StatusBadge from '../_shared/components/StatusBadge';
 import { rowLinkProps } from '../_shared/rowLink';
-import { formatAmount, formatDate, STATUS_LABEL } from './format';
+import { formatAmount, formatDateTime, STATUS_LABEL } from './format';
 import { timeAgo, detailHref as campaignDetailHref, formEditorHref } from '../_shared/format';
+import { donationHref } from '../_shared/adminPages';
 
 export const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) => ( {
     value,
@@ -47,14 +48,6 @@ export const FREQUENCY_OPTIONS = [
     { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora-donation-platform' ) },
     { value: 'quarterly', label: __( 'Quarterly', 'gratora-donation-platform' ) },
 ];
-
-export function detailHref( reference ) {
-    return addQueryArgs( window.location.pathname, {
-        page:      'gratora-donations',
-        view:      'detail',
-        reference,
-    } );
-}
 
 export function trashHref( extra = {} ) {
     return addQueryArgs( window.location.pathname, {
@@ -107,7 +100,7 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
             // donation took no money.
             render: ( { item } ) => (
                 <span className="gratora-ref-cell">
-                    <a className="gratora-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
+                    <a className="gratora-mono-link" href={ donationHref( item.reference ) } { ...rowLinkProps }>
                         { item.reference }
                     </a>
                     { item.is_test && (
@@ -241,9 +234,9 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
             label:         __( 'Created', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="gratora-time" title={ formatDate( item.created_at ) }>
+                <span className="gratora-time" title={ formatDateTime( item.created_at ) }>
                     <span className="gratora-time__rel">{ timeAgo( item.created_at ) }</span>
-                    <span className="gratora-time__abs">{ formatDate( item.created_at ) }</span>
+                    <span className="gratora-time__abs">{ formatDateTime( item.created_at ) }</span>
                 </span>
             ),
         },
@@ -254,9 +247,9 @@ export function donationFields( { campaigns = [], gatewayOptions = [] } = {} ) {
             render: ( { item } ) => (
                 item.trashed_at
                     ? (
-                        <span className="gratora-time" title={ formatDate( item.trashed_at ) }>
+                        <span className="gratora-time" title={ formatDateTime( item.trashed_at ) }>
                             <span className="gratora-time__rel">{ timeAgo( item.trashed_at ) }</span>
-                            <span className="gratora-time__abs">{ formatDate( item.trashed_at ) }</span>
+                            <span className="gratora-time__abs">{ formatDateTime( item.trashed_at ) }</span>
                         </span>
                     )
                     : <span className="gratora-row__sub">-</span>

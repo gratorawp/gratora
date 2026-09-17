@@ -1,15 +1,7 @@
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
+import { donationHref } from '../../../_shared/adminPages';
 import { formatAmount, formatDate, donationStatusPill } from '../helpers';
-
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, {
-        page:      'gratora-donations',
-        view:      'detail',
-        reference,
-    } );
-}
 
 export default function RelatedDonationsCard( { donor, related } ) {
     if ( ! donor || ! related || related.length <= 1 ) return null;

@@ -8,6 +8,7 @@ import { Mail as MailIcon, Check as CheckIcon } from 'lucide-react';
 
 import ConfirmDialog from '../../../_shared/components/ConfirmDialog';
 import { notify } from '../../../_shared/notify';
+import { donationHref } from '../../../_shared/adminPages';
 import { formatAmount, formatDateTime, timeAgo, donationStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
@@ -19,14 +20,6 @@ const STATUS_OPTIONS = [
     { value: 'partial_refund', label: __( 'Partial refund', 'gratora-donation-platform' ) },
     { value: 'disputed',       label: __( 'Disputed', 'gratora-donation-platform' ) },
 ];
-
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, {
-        page:      'gratora-donations',
-        view:      'detail',
-        reference,
-    } );
-}
 
 export default function DonationsTab( { donorId, redacted } ) {
     const [ view, setView ] = useState( {

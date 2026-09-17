@@ -30,16 +30,13 @@ import RelatedDonationsCard from './detail/cards/RelatedDonationsCard';
 import QuickStatsCard       from './detail/rail/QuickStatsCard';
 import ActionsCard          from './detail/rail/ActionsCard';
 import { postBatch }        from './trashActions';
+import { donorHref }        from '../_shared/adminPages';
 import MetadataCard         from './detail/rail/MetadataCard';
 
 import './donations.scss';
 
 function listHref() {
     return addQueryArgs( window.location.pathname, { page: 'gratora-donations' } );
-}
-
-function donorHref( donorId ) {
-    return addQueryArgs( window.location.pathname, { page: 'gratora-donors' } ) + `#donor/${ donorId }`;
 }
 
 export default function Detail( { reference } ) {

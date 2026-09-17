@@ -1,20 +1,16 @@
 import { useMemo, useState } from '@wordpress/element';
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Receipt, Download as DownloadIcon, Mail as MailIcon } from 'lucide-react';
 
 import Btn from '../../../_shared/components/Btn';
 import ConfirmDialog from '../../../_shared/components/ConfirmDialog';
 import EmptyState from '../../../_shared/components/EmptyState';
+import { donationHref } from '../../../_shared/adminPages';
 import { formatDateTime, timeAgo } from '../helpers';
-import { downloadFile } from '../../../_shared/download';
+import { downloadFile } from '@gratora/ui/utils/download';
 import { notify } from '../../../_shared/notify';
-
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
-}
 
 function StackedDate( { iso } ) {
     if ( ! iso ) return '-';

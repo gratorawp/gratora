@@ -5,12 +5,9 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 
+import { donationHref } from '../../../_shared/adminPages';
 import { eventMeta, formatAmount, formatDateTime, timeAgo } from '../helpers';
 import { TimelineDot, eventTitle } from './ActivityTab';
-
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
-}
 
 // The full activity log for one donor, paginated server-side. The overview tab
 // shows the 10 most recent; this is the whole history.
