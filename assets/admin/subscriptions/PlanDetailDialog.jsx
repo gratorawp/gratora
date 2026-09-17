@@ -1,21 +1,13 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
 import Dialog from '../_shared/components/Dialog';
 import Btn from '../_shared/components/Btn';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { planStatusMeta } from '../_shared/statuses';
-import { formatAmount, formatDate } from '../donations/format';
+import { donationHref, donorHref } from '../_shared/adminPages';
+import { formatAmount, formatDateTime } from '../donations/format';
 import { actionsFor } from '../_shared/recurring/PlanActions';
 import { cadenceLabel } from '../_shared/recurring/planColumns';
-
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, {
-        page: 'gratora-donations',
-        view: 'detail',
-        reference,
-    } );
-}
 
 /** Empty rows are dropped, so a section never renders a column of dashes. */
 function Section( { title, rows } ) {
@@ -38,9 +30,6 @@ function Section( { title, rows } ) {
 }
 
 export default function PlanDetailDialog( { plan, onClose, onAction } ) {
-    const donorHref = addQueryArgs( window.location.pathname, { page: 'gratora-donors' } )
-        + `#donor/${ plan.donor?.id }`;
-
     // Named after the provider, because the dialog title is also a subscription
     // id and the two never match.
     const gatewayName = plan.gateway_label || plan.gateway || '';
@@ -85,7 +74,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
 
             { plan.donor?.name && (
                 <p className="sd-head__donor">
-                    <a href={ donorHref }>{ plan.donor.name }</a>
+                    <a href={ donorHref( plan.donor.id ) }>{ plan.donor.name }</a>
                 </p>
             ) }
 
@@ -103,11 +92,11 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             <Section
                 title={ __( 'Schedule', 'gratora-donation-platform' ) }
                 rows={ [
-                    { label: __( 'Next payment', 'gratora-donation-platform' ), value: plan.next_payment_at && formatDate( plan.next_payment_at ) },
-                    { label: __( 'Last payment', 'gratora-donation-platform' ), value: plan.last_payment_at && formatDate( plan.last_payment_at ) },
-                    { label: __( 'Started', 'gratora-donation-platform' ), value: plan.started_at && formatDate( plan.started_at ) },
-                    { label: __( 'Resumes', 'gratora-donation-platform' ), value: plan.resume_at && formatDate( plan.resume_at ) },
-                    { label: __( 'Cancelled', 'gratora-donation-platform' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
+                    { label: __( 'Next payment', 'gratora-donation-platform' ), value: plan.next_payment_at && formatDateTime( plan.next_payment_at ) },
+                    { label: __( 'Last payment', 'gratora-donation-platform' ), value: plan.last_payment_at && formatDateTime( plan.last_payment_at ) },
+                    { label: __( 'Started', 'gratora-donation-platform' ), value: plan.started_at && formatDateTime( plan.started_at ) },
+                    { label: __( 'Resumes', 'gratora-donation-platform' ), value: plan.resume_at && formatDateTime( plan.resume_at ) },
+                    { label: __( 'Cancelled', 'gratora-donation-platform' ), value: plan.cancelled_at && formatDateTime( plan.cancelled_at ) },
                     { label: __( 'Reason', 'gratora-donation-platform' ), value: plan.cancellation_reason },
                 ] }
             />
@@ -127,7 +116,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                     <ul className="sd-errors">
                         { plan.errors.map( ( e, i ) => (
                             <li className="sd-errors__row" key={ `${ e.at }-${ i }` }>
-                                <span className="sd-errors__when">{ formatDate( e.at ) }</span>
+                                <span className="sd-errors__when">{ formatDateTime( e.at ) }</span>
                                 <span className="sd-errors__msg">{ e.message }</span>
                                 <span className="sd-errors__src" title={ e.source }>{ e.origin || e.source }</span>
                             </li>

@@ -6,7 +6,7 @@ import Btn from '../../_shared/components/Btn';
 import DateField from '../../_shared/components/DateField';
 import MonthField from '../../_shared/components/MonthField';
 import { userCan } from '../../_shared/caps';
-import { saveBlob } from '../../_shared/download';
+import { saveBlob } from '@gratora/ui/utils/download';
 
 /** Fetch rather than a bare link: the REST route needs the nonce header. */
 async function download( path, setNotice, setBusy, fallbackName ) {

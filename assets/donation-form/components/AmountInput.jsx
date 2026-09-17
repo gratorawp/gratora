@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { useEffect, useState } from 'preact/hooks';
-import { getActiveNumberFormat, groupDigits } from '../util/format';
+import { numberFormat, groupDigits } from '../util/format';
 import { isZeroDecimal } from '../util/fx';
 
 /**
@@ -44,7 +44,7 @@ export default function AmountInput( {
     className      = '',
     inputProps     = {},
 } ) {
-    const fmt = getActiveNumberFormat();
+    const fmt = numberFormat();
     const dp  = typeof decimalPlaces === 'number'
         ? decimalPlaces
         : ( isZeroDecimal( currency ) ? 0 : 2 );

@@ -2,7 +2,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-import { initials, formatMonth, formatDate, formatDateTime, SEGMENT_LABELS } from './helpers';
+import { initials, formatMonth, formatDayMonth, formatDateTime, SEGMENT_LABELS } from './helpers';
 import { countryName } from '../../../_shared/countries';
 import { userCan } from '../../_shared/caps';
 import { IconMail, IconMapPin, IconCalendar, IconCopy, IconPhone } from './icons';
@@ -165,7 +165,7 @@ export default function IdentityCard( { donor } ) {
                         <IdentityRow
                             icon={ <IconCalendar width="14" height="14" /> }
                             value={ sprintf( /* translators: %s: month */ __( 'Donor since %s', 'gratora-donation-platform' ), formatMonth( donor.first_donation_at ) ) }
-                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'gratora-donation-platform' ), formatDate( donor.last_donation_at ) ) : null }
+                            sub={ donor.last_donation_at ? sprintf( /* translators: %s: date */ __( 'Last donation %s', 'gratora-donation-platform' ), formatDayMonth( donor.last_donation_at ) ) : null }
                         />
                     ) }
                 </div>

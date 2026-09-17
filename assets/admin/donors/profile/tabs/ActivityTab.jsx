@@ -1,14 +1,11 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 import { Coins, History } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
+import { donationHref } from '../../../_shared/adminPages';
 import { cadenceLabel } from '../../../_shared/recurring/planColumns';
 
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
-}
-import { formatAmount, formatDateTime, formatDate, timeAgo, donationStatusPill, planStatusPill, eventMeta } from '../helpers';
+import { formatAmount, formatDateTime, formatDayMonth, timeAgo, donationStatusPill, planStatusPill, eventMeta } from '../helpers';
 import { isPlanTerminal } from '../../../_shared/statuses';
 import {
     IconCheck, IconAlert, IconRotate, IconNote, IconClock, IconRefund, IconFile,
@@ -229,8 +226,8 @@ function ActivePlanCard( { plans } ) {
                     </strong>
                     <span className={ `dp-pill ${ pill.cls }` }>{ pill.label }</span>
                 </div>
-                <Row label={ __( 'Next attempt', 'gratora-donation-platform' ) }       value={ formatDate( active.next_payment_at ) } />
-                <Row label={ __( 'Last successful', 'gratora-donation-platform' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
+                <Row label={ __( 'Next attempt', 'gratora-donation-platform' ) }       value={ formatDayMonth( active.next_payment_at ) } />
+                <Row label={ __( 'Last successful', 'gratora-donation-platform' ) }    value={ active.last_payment_at ? formatDayMonth( active.last_payment_at ) : '-' } />
                 <Row label={ __( 'Lifetime on plan', 'gratora-donation-platform' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
             </div>
         </div>

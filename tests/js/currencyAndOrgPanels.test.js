@@ -17,7 +17,8 @@ import { render } from 'preact';
 
 import CurrencyPanel, { previewSymbol } from '../../assets/admin/settings/panels/CurrencyPanel';
 import OrganizationPanel from '../../assets/admin/settings/panels/OrganizationPanel';
-import { formatAmount, CURRENCY_SYMBOLS } from '../../assets/_shared/money';
+import { formatAmount } from '../../assets/_shared/money';
+import { CURRENCY_SYMBOLS } from '@gratora/ui/utils/format';
 
 function mount( node ) {
     document.body.innerHTML = '<div id="root"></div>';

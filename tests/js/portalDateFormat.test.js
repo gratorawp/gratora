@@ -1,7 +1,7 @@
 /**
- * A donor and the org look at the same event and must read the same date. The
- * portal formatted with a bare toLocaleDateString, so admin said
- * "Sep 02, 2026, 02:44 PM" and the portal said "9/2/2026" for one timestamp.
+ * A donor and the org look at the same event and must read the same date. Two
+ * renderers for one timestamp drift, and then the portal says "9/2/2026" for
+ * the donation the admin screen dates "Sep 02, 2026, 02:44 PM".
  */
 
 jest.mock( 'react', () => require( 'preact/compat' ) );
@@ -10,8 +10,8 @@ jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 jest.mock( '@wordpress/api-fetch', () => jest.fn( () => new Promise( () => {} ) ) );
 
-import { formatDate as portalDate } from '../../assets/donor-portal/index';
-import { formatDate as adminDate } from '../../assets/admin/donations/format';
+import { formatDateTime as portalDate } from '../../assets/donor-portal/index';
+import { formatDateTime as adminDate } from '../../assets/admin/donations/format';
 
 const STAMPS = [
 	'2026-09-02 14:44:00',
@@ -25,15 +25,18 @@ test( 'the portal reads a timestamp exactly as the admin does', () => {
 	}
 } );
 
-test( 'it no longer pushes a date-only value to UTC midnight', () => {
+test( 'a calendar day is the same day on both, wherever the reader is', () => {
 	expect( portalDate( '2026-09-02' ) ).toBe( adminDate( '2026-09-02' ) );
+	expect( portalDate( '2026-09-02' ) ).toContain( 'Sep 02' );
 } );
 
-test( 'an empty value stays empty rather than printing a placeholder', () => {
+test( 'a date nobody set leaves the portal line empty, where the admin prints a dash', () => {
 	expect( portalDate( '' ) ).toBe( '' );
 	expect( portalDate( null ) ).toBe( '' );
+	expect( adminDate( '' ) ).toBe( '-' );
 } );
 
 test( 'an unparseable value is handed back rather than shown as Invalid Date', () => {
 	expect( portalDate( 'not a date' ) ).toBe( 'not a date' );
+	expect( adminDate( 'not a date' ) ).toBe( 'not a date' );
 } );

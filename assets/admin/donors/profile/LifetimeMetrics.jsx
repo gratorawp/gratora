@@ -1,6 +1,6 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-import { formatAmount, formatAmountCompact, formatDate } from './helpers';
+import { formatAmount, formatAmountCompact, formatDayMonth } from './helpers';
 import { IconCoin, IconHeart, IconActivity, IconRotate } from './icons';
 
 function Sparkline( { values } ) {
@@ -70,7 +70,7 @@ export default function LifetimeMetrics( { lifetime } ) {
     }
 
     const activePart = active_plan_count > 0
-        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'gratora-donation-platform' ), active_plan_count, formatDate( next_payment_at ) )
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'gratora-donation-platform' ), active_plan_count, formatDayMonth( next_payment_at ) )
         : __( 'No active plans', 'gratora-donation-platform' );
 
     const mrrSub = mrr_unconverted > 0

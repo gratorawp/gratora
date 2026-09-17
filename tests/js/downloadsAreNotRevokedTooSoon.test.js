@@ -12,7 +12,7 @@ jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
-import { saveBlob } from '../../assets/admin/_shared/download';
+import { saveBlob } from '@gratora/ui/utils/download';
 
 let clicked;
 
@@ -27,7 +27,7 @@ beforeEach( () => {
 
 afterEach( () => jest.restoreAllMocks() );
 
-describe( 'the shared admin saver', () => {
+describe( 'the saver every download goes through', () => {
     it( 'does not free the blob before the browser has fetched it', () => {
         saveBlob( new Blob( [ '{}' ] ), 'gratora-export.json' );
 

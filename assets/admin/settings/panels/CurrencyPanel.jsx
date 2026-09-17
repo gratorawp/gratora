@@ -6,7 +6,7 @@ import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
 import { CURRENCIES, currencyByCode, previewAmount } from '../../_shared/currency';
-import { CURRENCY_SYMBOLS } from '../../../_shared/money';
+import { CURRENCY_SYMBOLS } from '@gratora/ui/utils/format';
 
 function fmtRate( n ) {
     const v = Number( n );

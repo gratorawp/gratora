@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 import { formatAmount, canRefundDonation, canResendReceipt, isDonorRedacted } from '../helpers';
 import { IconRefund, IconMail, IconDownload, IconNote, IconCheck, IconAlert, IconTrash } from '../icons';
-import { downloadFile } from '../../../_shared/download';
+import { downloadFile } from '@gratora/ui/utils/download';
 import notify from '../../../_shared/notify';
 import { userCan } from '../../../_shared/caps';
 

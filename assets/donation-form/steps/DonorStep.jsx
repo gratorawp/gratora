@@ -3,7 +3,7 @@
 import { evaluateCondition } from '../state/conditions';
 import { fieldEntry } from '../state/fields';
 import { formatAmount } from '../util/format';
-import { decodeEntities } from '../util/entities';
+import { decodeEntities } from '@gratora/ui/utils/text';
 import { safeUrl } from '../util/url';
 import { computeFees } from '../state/store';
 import ErrorBoundary from '../components/ErrorBoundary';

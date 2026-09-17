@@ -7,7 +7,7 @@ import { ShieldCheck } from 'lucide-react';
 import EmptyState from '../../../_shared/components/EmptyState';
 import { formatDateTime } from '../helpers';
 import { IconAlert, IconDownload, IconTrash } from '../icons';
-import { downloadFile } from '../../../_shared/download';
+import { downloadFile } from '@gratora/ui/utils/download';
 import notify from '../../../_shared/notify';
 import { userCan } from '../../../_shared/caps';
 

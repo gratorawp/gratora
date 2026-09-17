@@ -7,6 +7,7 @@ namespace Gratora\Tests\Integration;
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Campaigns\Styling\CampaignStyleResolver;
 use Gratora\Forms\FormRepository;
+use Gratora\Forms\Rendering\FormDocument;
 use Gratora\Forms\Shortcode\DonationFormShortcode;
 use Gratora\Foundation\Plugin;
 use Gratora\Gateways\GatewayManager;
@@ -52,28 +53,29 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
         );
     }
 
-    public function test_a_dependency_of_a_dependency_is_in_the_document(): void
+    /**
+     * srcdoc resolves nothing: a handle's own dependencies are only in the
+     * document if something put them there, in an order the browser can run.
+     */
+    public function test_a_dependency_of_a_dependency_is_resolved_first(): void
     {
-        $scripts = $this->scriptsIn($this->document());
+        wp_register_script('gratora-probe-base', 'https://example.org/base.js', [], '1', true);
+        wp_register_script('gratora-probe-leaf', 'https://example.org/leaf.js', ['gratora-probe-base'], '1', true);
 
-        $this->assertContains('hooks.min.js', $scripts, 'wp-i18n reads wp.hooks at module scope');
-        $this->assertContains('i18n.min.js', $scripts);
+        $this->assertSame(
+            ['gratora-probe-base', 'gratora-probe-leaf'],
+            FormDocument::withDependencies(['gratora-probe-leaf'])
+        );
     }
 
-    /** A dependency that arrives after its dependent has already thrown. */
-    public function test_dependencies_come_before_the_scripts_that_need_them(): void
+    public function test_the_runtime_is_the_last_script_in_the_document(): void
     {
         $scripts = $this->scriptsIn($this->document());
 
-        $this->assertLessThan(
-            array_search('i18n.min.js', $scripts, true),
-            array_search('hooks.min.js', $scripts, true),
-            'hooks must be evaluated before i18n'
-        );
         $this->assertSame(
             'index.js',
             end($scripts),
-            'and the runtime itself goes last, after everything it needs'
+            'the runtime goes last, after everything it needs'
         );
     }
 

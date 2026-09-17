@@ -16,7 +16,7 @@ import Card from '../_shared/components/Card';
 import FormRow from '../_shared/components/FormRow';
 import { ToggleRow } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
-import { downloadFile } from '../_shared/download';
+import { downloadFile } from '@gratora/ui/utils/download';
 import TokenEditor from '../_shared/styling/TokenEditor';
 import UnshownNotice from '../_shared/styling/UnshownNotice';
 import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon, AlertTriangle } from 'lucide-react';

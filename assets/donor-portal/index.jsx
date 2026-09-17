@@ -3,7 +3,8 @@
 import { render } from 'preact';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { parseTimestamp } from '@gratora/ui/utils/format';
+import { formatDateTime as renderDateTime, parseTimestamp } from '@gratora/ui/utils/format';
+import { saveBlob } from '@gratora/ui/utils/download';
 import { formatAmount } from '../_shared/money';
 import { localizedCountries } from '../_shared/countries';
 import AmountInput from '../donation-form/components/AmountInput';
@@ -679,7 +680,7 @@ function Overview( { me } ) {
             <div class="dp-kpis">
                 <Kpi label={ __( 'Lifetime giving', 'gratora-donation-platform' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
                 <Kpi label={ __( 'Donations', 'gratora-donation-platform' ) } value={ String( me.donations_count ) } />
-                <Kpi label={ __( 'Donor since', 'gratora-donation-platform' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
+                <Kpi label={ __( 'Donor since', 'gratora-donation-platform' ) } value={ me.first_donation_at ? formatDateTime( me.first_donation_at ) : '-' } />
             </div>
             { me.unconverted_count > 0 && (
                 <p class="dp-hint">
@@ -774,7 +775,7 @@ function Donations( { onOpen } ) {
                             <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s refunded', 'gratora-donation-platform' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
                         ) }
                         { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'gratora-donation-platform' ) }</span> }
-                        <div class="dp-list__sub">{ formatDate( d.paid_at ) } · { d.reference }</div>
+                        <div class="dp-list__sub">{ formatDateTime( d.paid_at ) } · { d.reference }</div>
                     </div>
                     <span class={ `dp-pill dp-pill--${ d.frequency }` }>{ freqLabel( d.frequency ) }</span>
                 </div>
@@ -812,7 +813,7 @@ function DonationDetail( { reference, onClose } ) {
                     <>
                         <div class="dp-detail__head">
                             <div class="dp-detail__amount">{ formatAmount( d.amount_cents, d.currency ) }</div>
-                            <div class="dp-detail__meta">{ formatDate( d.paid_at ) } · { d.reference }</div>
+                            <div class="dp-detail__meta">{ formatDateTime( d.paid_at ) } · { d.reference }</div>
                             { d.refunded_cents > 0 && (
                                 <div class="dp-detail__refund">
                                     <span>{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s was refunded to you', 'gratora-donation-platform' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
@@ -909,7 +910,7 @@ function Recurring() {
                             <strong>{ formatAmount( p.amount_cents, p.currency ) }</strong>
                             <span class="dp-list__pill">{ intervalLabel( p.interval_count, p.interval_unit ) }</span>
                             <div class="dp-list__sub">
-                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'gratora-donation-platform' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
+                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'gratora-donation-platform' ), p.next_payment_at ? formatDateTime( p.next_payment_at ) : '-' ) }
                             </div>
                         </div>
                         <div class="dp-list__actions">
@@ -995,10 +996,10 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                             { [
                                 [ __( 'Campaign', 'gratora-donation-platform' ), plan.campaign_title ],
                                 [ __( 'Fund', 'gratora-donation-platform' ), plan.fund_name ],
-                                [ __( 'Next charge', 'gratora-donation-platform' ), plan.next_payment_at ? formatDate( plan.next_payment_at ) : null ],
-                                [ __( 'Last charge', 'gratora-donation-platform' ), plan.last_payment_at ? formatDate( plan.last_payment_at ) : null ],
-                                [ __( 'Resumes', 'gratora-donation-platform' ), plan.resume_at ? formatDate( plan.resume_at ) : null ],
-                                [ __( 'Giving since', 'gratora-donation-platform' ), plan.started_at ? formatDate( plan.started_at ) : null ],
+                                [ __( 'Next charge', 'gratora-donation-platform' ), plan.next_payment_at ? formatDateTime( plan.next_payment_at ) : null ],
+                                [ __( 'Last charge', 'gratora-donation-platform' ), plan.last_payment_at ? formatDateTime( plan.last_payment_at ) : null ],
+                                [ __( 'Resumes', 'gratora-donation-platform' ), plan.resume_at ? formatDateTime( plan.resume_at ) : null ],
+                                [ __( 'Giving since', 'gratora-donation-platform' ), plan.started_at ? formatDateTime( plan.started_at ) : null ],
                                 [ __( 'Donations made', 'gratora-donation-platform' ), plan.payments_count || null ],
                                 [ __( 'Given in total', 'gratora-donation-platform' ), plan.total_paid_cents ? formatAmount( plan.total_paid_cents, plan.currency ) : null ],
                             ].filter( ( [ , v ] ) => v ).map( ( [ k, v ] ) => (
@@ -1334,21 +1335,6 @@ function onPortalOrigin( url ) {
     }
 }
 
-// A synthesized anchor, not window.open: a popup a gesture did not open is
-// blocked outright on iOS Safari, and blocked silently.
-function saveBlob( blob, filename ) {
-    const url = URL.createObjectURL( blob );
-    const a   = document.createElement( 'a' );
-    a.href     = url;
-    a.download = filename;
-    // Append before click and defer the revoke, or the browser cancels the
-    // download mid-flight.
-    document.body.appendChild( a );
-    a.click();
-    a.remove();
-    setTimeout( () => URL.revokeObjectURL( url ), 10000 );
-}
-
 function Receipts() {
     const [ page, setPage ]   = useState( null );
     const [ error, setError ] = useState( null );
@@ -1456,7 +1442,7 @@ function Receipts() {
                         <li key={ r.id } class="dp-list__row">
                             <div>
                                 <strong>{ r.receipt_number }</strong>
-                                <div class="dp-list__sub">{ formatDate( r.issued_at ) }</div>
+                                <div class="dp-list__sub">{ formatDateTime( r.issued_at ) }</div>
                                 { rowError.id === r.id && rowError.message && (
                                     <p class="dp-error dp-list__error" role="alert">{ rowError.message }</p>
                                 ) }
@@ -1978,7 +1964,7 @@ function Consents( { onResolved } ) {
                         { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'gratora-donation-platform' ) }</span> }
                         { p.description && <p class="dp-consent__desc">{ p.description }</p> }
                         { p.has_record && p.occurred_at && (
-                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'gratora-donation-platform' ), formatDate( p.occurred_at ) ) }</p>
+                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'gratora-donation-platform' ), formatDateTime( p.occurred_at ) ) }</p>
                         ) }
                         { p.stale && (
                             <button
@@ -2061,21 +2047,11 @@ function Kpi( { label, value } ) {
 
 /**
  * The same reading the admin gives a timestamp, so a donor and the org see one
- * date for one event. parseTimestamp marks a zoneless MySQL string as UTC, and
- * leaves a date-only value alone rather than pushing it to UTC midnight.
+ * date for one event. A date the org has not set yet leaves the line blank
+ * rather than printing a dash into the middle of a sentence.
  */
-export function formatDate( iso ) {
-    if ( ! iso ) return '';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-
-    return d.toLocaleString( undefined, {
-        year:   'numeric',
-        month:  'short',
-        day:    '2-digit',
-        hour:   '2-digit',
-        minute: '2-digit',
-    } );
+export function formatDateTime( iso ) {
+    return renderDateTime( iso, { empty: '' } );
 }
 
 const FREQUENCY_LABELS = {

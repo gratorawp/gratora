@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 import { formatDateTime } from '../helpers';
 import { IconReceipt, IconDownload } from '../icons';
-import { downloadFile } from '../../../_shared/download';
+import { downloadFile } from '@gratora/ui/utils/download';
 import notify from '../../../_shared/notify';
 import { userCan } from '../../../_shared/caps';
 

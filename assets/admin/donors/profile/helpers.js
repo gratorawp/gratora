@@ -1,43 +1,17 @@
 // Shared formatters and event-mapping for the donor profile views.
 
 import { __ } from '@wordpress/i18n';
-// Timestamps arrive as MySQL strings in UTC with no zone marker, which a
-// browser reads as local time. parseTimestamp marks them.
-import { parseTimestamp } from '@gratora/ui/utils/format';
 import { planStatusMeta } from '../../_shared/statuses';
 
-export { formatAmount, formatAmountCompact, timeAgo } from '../../_shared/format';
-
-export function formatMonth( iso ) {
-    if ( ! iso ) return '-';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-    return d.toLocaleDateString( undefined, { month: 'short', year: 'numeric' } );
-}
-
-export function formatDate( iso ) {
-    if ( ! iso ) return '-';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-    return d.toLocaleDateString( undefined, { month: 'short', day: '2-digit' } );
-}
-
-export function formatDateTime( iso ) {
-    if ( ! iso ) return '-';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-    return d.toLocaleString( undefined, {
-        month: 'short', day: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-    } );
-}
-
-
-export function initials( name ) {
-    if ( ! name ) return '?';
-    const parts = String( name ).trim().split( /\s+/ ).slice( 0, 2 );
-    return parts.map( ( p ) => p[ 0 ] || '' ).join( '' ).toUpperCase() || '?';
-}
+export {
+    formatAmount,
+    formatAmountCompact,
+    formatDayMonth,
+    formatDateTime,
+    formatMonth,
+    timeAgo,
+} from '../../_shared/format';
+export { initials } from '@gratora/ui/utils/text';
 
 // Donation status → pill class + label.
 export function donationStatusPill( status ) {

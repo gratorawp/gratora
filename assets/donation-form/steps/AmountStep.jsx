@@ -2,7 +2,7 @@
 
 import { formatAmount } from '../util/format';
 import { displayPreset, roundToCurrency } from '../util/fx';
-import { decodeEntities } from '../util/entities';
+import { decodeEntities } from '@gratora/ui/utils/text';
 import AmountInput from '../components/AmountInput';
 import CurrencySwitcher from '../components/CurrencySwitcher';
 

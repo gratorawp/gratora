@@ -5,7 +5,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import Btn from '../../_shared/components/Btn';
-import { formatDate } from '../../donations/format';
+import { formatDateTime } from '../../donations/format';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Dialog from '../../_shared/components/Dialog';
 import { userCan } from '../../_shared/caps';
@@ -192,7 +192,7 @@ export default function LogsTab( { active, setNotice } ) {
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
-            render:        ( { item } ) => formatDate( item.occurred_at ),
+            render:        ( { item } ) => formatDateTime( item.occurred_at ),
         },
         {
             id:            'source',
@@ -321,7 +321,7 @@ export default function LogsTab( { active, setNotice } ) {
                 >
                     <div className="gratora-log__detail-head">
                         <code className="gratora-log__source">{ fullType( detail ) }</code>
-                        <span className="gratora-row__sub">{ formatDate( detail.occurred_at ) }</span>
+                        <span className="gratora-row__sub">{ formatDateTime( detail.occurred_at ) }</span>
                     </div>
                     <div className="gratora-log__message">{ detail.message }</div>
                     <pre className="gratora-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>

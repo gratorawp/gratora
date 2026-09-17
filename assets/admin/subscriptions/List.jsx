@@ -22,9 +22,9 @@ import { planStatusMeta, planStatusOptions } from '../_shared/statuses';
 import { Switch } from '../_shared/components/Switch';
 import PlanActionDialog, { actionsFor, applyToPlans, dueIn, isTerminal, retryActionFor, retryRefusalFor } from '../_shared/recurring/PlanActions';
 import { CADENCE_LABEL, cadenceLabel, renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
-import { dashboardHref } from '../_shared/adminPages';
+import { dashboardHref, donationHref, donorHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
-import { formatAmount, formatDate } from '../donations/format';
+import { formatAmount, formatDateTime } from '../donations/format';
 
 // A cadence, not an interval unit: quarterly is three months and biweekly is
 // two weeks, so filtering on the unit filed both under a chip they are not.
@@ -77,18 +77,6 @@ export const SORTABLE_FIELD_IDS = Object.keys( ORDERBY_COLUMN );
 
 /** @since 1.0.0 */
 export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || 'next_payment_at';
-
-function donorHref( donorId ) {
-    return addQueryArgs( window.location.pathname, { page: 'gratora-donors' } ) + `#donor/${ donorId }`;
-}
-
-function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, {
-        page: 'gratora-donations',
-        view: 'detail',
-        reference,
-    } );
-}
 
 // Count running plans on the card and disclose the broader health-filter count separately.
 // Unlinked donations appear in the note, including test donations regardless of the plan
@@ -688,7 +676,7 @@ export default function List() {
                                 ? sprintf(
                                     /* translators: %s: date the plan ended. */
                                     __( 'Ended %s', 'gratora-donation-platform' ),
-                                    formatDate( item.cancelled_at )
+                                    formatDateTime( item.cancelled_at )
                                 )
                                 : __( 'Ended', 'gratora-donation-platform' ) }
                         </span>
@@ -697,7 +685,7 @@ export default function List() {
                         ? (
                             <div className="gratora-row">
                                 <div className="gratora-row__body">
-                                    <div className="gratora-row__name">{ formatDate( item.resume_at ) }</div>
+                                    <div className="gratora-row__name">{ formatDateTime( item.resume_at ) }</div>
                                     <div className="gratora-row__sub">{ __( 'when it resumes', 'gratora-donation-platform' ) }</div>
                                 </div>
                             </div>
@@ -705,7 +693,7 @@ export default function List() {
                     : (
                         <div className="gratora-row">
                             <div className="gratora-row__body">
-                                <div className="gratora-row__name">{ formatDate( item.next_payment_at ) }</div>
+                                <div className="gratora-row__name">{ formatDateTime( item.next_payment_at ) }</div>
                                 { item.next_payment_at && <div className="gratora-row__sub">{ dueIn( item.next_payment_at ) }</div> }
                             </div>
                         </div>
@@ -718,7 +706,7 @@ export default function List() {
             enableSorting: true,
             render: ( { item } ) => (
                 item.started_at
-                    ? <span>{ formatDate( item.started_at ) }</span>
+                    ? <span>{ formatDateTime( item.started_at ) }</span>
                     : <span className="gratora-row__sub">-</span>
             ),
         },

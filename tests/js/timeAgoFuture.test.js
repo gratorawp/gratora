@@ -1,27 +1,28 @@
 /**
- * The shared helper clamps a negative age to zero, so anything dated ahead of
- * now comes back as "just now". A donation an admin recorded for later today
- * then sat at the top of the dashboard claiming to have arrived this second,
- * which is the most reassuring reading of the data and the wrong one.
+ * A relative reading of a timestamp clamps a negative age to zero, so anything
+ * dated ahead of now reads as if it had just happened. A donation an admin
+ * recorded for later today then sits at the top of the dashboard claiming to
+ * have arrived this second, which is the most reassuring reading of the data
+ * and the wrong one.
  */
 import { timeAgo } from '../../assets/admin/_shared/format';
 
 const iso = ( offsetMs ) => new Date( Date.now() + offsetMs ).toISOString().replace( 'T', ' ' ).slice( 0, 19 );
 
-test( 'something that has not happened shows its date, not just now', () => {
+test( 'something that has not happened shows its date, not a relative age', () => {
 	const answer = timeAgo( iso( 3 * 60 * 60 * 1000 ) );
 
-	expect( answer ).not.toMatch( /just now/i );
+	expect( answer ).toMatch( /\d{4}/ );
 	expect( answer ).not.toMatch( /ago/i );
 } );
 
-test( 'something that happened seconds ago is still just now', () => {
-	expect( timeAgo( iso( -5 * 1000 ) ) ).toMatch( /just now/i );
+test( 'something that happened seconds ago is still now', () => {
+	expect( timeAgo( iso( -5 * 1000 ) ) ).toBe( 'now' );
 } );
 
 /** A server clock and a browser clock disagree by seconds, not by minutes. */
 test( 'a donation made this instant is not pushed into the future by clock skew', () => {
-	expect( timeAgo( iso( 20 * 1000 ) ) ).toMatch( /just now/i );
+	expect( timeAgo( iso( 20 * 1000 ) ) ).toBe( 'now' );
 } );
 
 test( 'the ordinary relative answers are untouched', () => {

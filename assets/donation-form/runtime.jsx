@@ -19,7 +19,7 @@ import PayPalPayment from './components/PayPalPayment';
 import { detectStripeReturn, resolveStripeReturn, clearStripeReturnParams, returnOutcome } from './util/stripe';
 import { rememberPending, readPending, clearPending, ownsPendingReturn } from './util/pending';
 import { interpolateLabel } from './util/interpolate';
-import { decodeEntities } from './util/entities';
+import { decodeEntities } from '@gratora/ui/utils/text';
 import { setActiveNumberFormat, formatAmount, frequencyLabel } from './util/format';
 import { maxAmountFor, roundToCurrency } from './util/fx';
 import { evaluateCondition } from './state/conditions';

@@ -22,6 +22,7 @@ import { dashboardHref } from '../_shared/adminPages';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { formatAmount, formatDate, timeAgo } from '../_shared/format';
+import { initials } from '@gratora/ui/utils/text';
 import { localizedCountries } from '../../_shared/countries';
 import Insights from './Insights';
 import DonorProfile from './DonorProfile';
@@ -54,12 +55,6 @@ export const SORTABLE_FIELD_IDS = Object.keys( SORT_COLUMNS );
 
 export function donorSortField( field ) {
     return SORT_COLUMNS[ field ] || 'last_donation_at';
-}
-
-function initials( name ) {
-    if ( ! name ) return '?';
-    const parts = String( name ).trim().split( /\s+/ ).slice( 0, 2 );
-    return parts.map( ( p ) => p[ 0 ] || '' ).join( '' ).toUpperCase() || '?';
 }
 
 export function donorKpis( stats ) {

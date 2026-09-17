@@ -1,27 +1,10 @@
 import { __ } from '@wordpress/i18n';
-// MySQL strings arrive in UTC with no zone marker, which a browser reads as
-// local time. parseTimestamp marks them.
-import { parseTimestamp } from '@gratora/ui/utils/format';
 
 export const STATUS_LABEL = {
     draft:     __( 'Draft', 'gratora-donation-platform' ),
     published: __( 'Published', 'gratora-donation-platform' ),
     archived:  __( 'Archived', 'gratora-donation-platform' ),
 };
-
-export function formatDate( iso, opts = {} ) {
-    if ( ! iso ) return '-';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-    return d.toLocaleString( undefined, {
-        year:   'numeric',
-        month:  'short',
-        day:    '2-digit',
-        hour:   '2-digit',
-        minute: '2-digit',
-        ...opts,
-    } );
-}
 
 export function editorHref( id ) {
     const params = new URLSearchParams();

@@ -1,42 +1,16 @@
 import {
     setActiveNumberFormat as setNumberFormat,
-    getActiveNumberFormat,
+    numberFormat,
     defaultCurrency,
     groupDigits,
+    CURRENCY_SYMBOLS,
 } from '@gratora/ui/utils/format';
 import { minorUnitsFor } from '../../_shared/money';
 
 // parseAmount is deliberately not re-exported: it reads a typed figure by
 // stripping the org's configured thousands separator, which is what
 // typedAmountToNumber exists to avoid.
-export { getActiveNumberFormat, groupDigits };
-
-// ISO 4217 to symbol, kept in step with Money::SYMBOLS so the form and the
-// receipt it triggers name the same currency. A code that is not here renders
-// as itself, which is honest; borrowing another currency's symbol is not.
-const SYMBOLS = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    AUD: 'A$',
-    CAD: 'C$',
-    CHF: 'CHF',
-    JPY: '¥',
-    CNY: '¥',
-    SEK: 'kr',
-    NOK: 'kr',
-    DKK: 'kr',
-    PLN: 'zł',
-    CZK: 'Kč',
-    HUF: 'Ft',
-    BRL: 'R$',
-    MXN: 'Mex$',
-    INR: '₹',
-    NZD: 'NZ$',
-    ZAR: 'R',
-    SGD: 'S$',
-    HKD: 'HK$',
-};
+export { numberFormat, groupDigits };
 
 // The currency the form was authored in: the one the server derived
 // numberFormat.symbol from, and the only one the org's display preferences
@@ -58,7 +32,7 @@ export function setActiveNumberFormat( fmt, currency = '' ) {
  * Pass { compact: true } to drop the decimals on a whole amount.
  */
 export function formatAmount( cents, currency = '', opts = {} ) {
-    const fmt   = getActiveNumberFormat();
+    const fmt   = numberFormat();
     const n     = Number( cents ) || 0;
     const code  = ( String( currency || '' ).trim() || formCurrency || defaultCurrency() ).toUpperCase();
     const own   = code === ( formCurrency || defaultCurrency() );
@@ -79,7 +53,7 @@ export function formatAmount( cents, currency = '', opts = {} ) {
     const number = groupDigits( major, fmt.thousandSep, fmt.decimalSep, dp );
     // The injected symbol belongs to the form's own currency alone. Letting
     // any other code inherit it prints a currency the donor is not paying in.
-    const symbol = SYMBOLS[ code ] || ( own ? fmt.symbol : '' ) || code;
+    const symbol = CURRENCY_SYMBOLS[ code ] || ( own ? fmt.symbol : '' ) || code;
 
     return fmt.symbolPosition === 'after' ? `${ number } ${ symbol }` : `${ symbol }${ number }`;
 }

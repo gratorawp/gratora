@@ -5,7 +5,7 @@
  * the receipt in their inbox, and the two are the same money.
  */
 
-import { groupDigits } from '@gratora/ui/utils/format';
+import { CURRENCY_SYMBOLS, groupDigits } from '@gratora/ui/utils/format';
 
 const DEFAULT_NUMBER_FORMAT = {
     decimalPlaces:  2,
@@ -60,33 +60,6 @@ export function minorUnitsFor( currency ) {
 
     return 2;
 }
-
-// ISO 4217 to symbol, kept in step with Money::SYMBOLS so a screen and the
-// receipt it links to name the same currency. A code that is not here renders
-// as itself, which is honest; borrowing another currency's symbol is not.
-export const CURRENCY_SYMBOLS = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    AUD: 'A$',
-    CAD: 'C$',
-    CHF: 'CHF',
-    JPY: '¥',
-    CNY: '¥',
-    SEK: 'kr',
-    NOK: 'kr',
-    DKK: 'kr',
-    PLN: 'zł',
-    CZK: 'Kč',
-    HUF: 'Ft',
-    BRL: 'R$',
-    MXN: 'Mex$',
-    INR: '₹',
-    NZD: 'NZ$',
-    ZAR: 'R',
-    SGD: 'S$',
-    HKD: 'HK$',
-};
 
 /**
  * Decimal places to render `cents` of `currency` in. The currency's own minor

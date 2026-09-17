@@ -2,7 +2,7 @@
 // {frequency} (recurring frequency, empty when not set).
 
 import { formatAmount } from './format';
-import { decodeEntities } from './entities';
+import { decodeEntities } from '@gratora/ui/utils/text';
 import { coveredFeeCents } from '../state/store';
 
 const FALLBACK_FREQ = {
