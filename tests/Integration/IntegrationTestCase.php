@@ -232,6 +232,32 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
     }
 
     /**
+     * Every opening and closing tag with its attributes, decoded. A style loses
+     * only its trailing semicolon when kses re-encodes it, which the browser
+     * reads identically.
+     *
+     * @return list<array{string, array<string, string|true>}>
+     */
+    protected function tagTokens(string $html): array
+    {
+        $processor = new WP_HTML_Tag_Processor($html);
+        $tokens    = [];
+
+        while ($processor->next_tag(['tag_closers' => 'visit'])) {
+            $attributes = [];
+            foreach ((array) $processor->get_attribute_names_with_prefix('') as $attribute) {
+                $value = $processor->get_attribute($attribute);
+                $attributes[$attribute] = $attribute === 'style' && is_string($value) ? rtrim($value, ';') : $value;
+            }
+            ksort($attributes);
+
+            $tokens[] = [($processor->is_tag_closer() ? '/' : '') . strtolower((string) $processor->get_tag()), $attributes];
+        }
+
+        return $tokens;
+    }
+
+    /**
      * Capture wp_mail invocations. Returns an `ArrayObject` so the closure and
      * the caller share the same instance - assertions against the returned
      * object see the captured mails as they accumulate.

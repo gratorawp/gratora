@@ -1,14 +1,26 @@
 <?php
 defined('ABSPATH') || exit;
 /**
- * @var string  $label
- * @var string  $align         left|center|right
- * @var string  $size          sm|md|lg
- * @var bool    $fullWidth
+ * The button, and the modal it opens around the form. With the form, 'before'
+ * stops where the form goes and 'after' closes what it opened; without it,
+ * 'before' is the whole block.
+ *
+ * @var string  $part          'before' | 'after'
+ * @var ?string $label
+ * @var ?string $align         left|center|right
+ * @var ?string $size          sm|md|lg
+ * @var ?bool   $fullWidth
  * @var ?string $formSlug
- * @var bool    $withForm
- * @var string  $styleVars
+ * @var ?bool   $withForm
+ * @var ?string $styleVars
  */
+if ($part === 'after'): ?>
+</div>
+                </div>
+            </div>
+</div>
+<?php return; endif;
+
 $alignClass = in_array($align, ['left', 'center', 'right'], true) ? "is-align-{$align}" : 'is-align-left';
 $sizeClass  = 'is-size-' . (in_array($size, ['sm', 'md', 'lg'], true) ? $size : 'md');
 ?>
@@ -19,7 +31,7 @@ echo wp_kses_data(get_block_wrapper_attributes(array_filter([
 ])));
 ?>
      data-block="gratora/donate-button">
-    <?php if ($formSlug): ?>
+    <?php if (($formSlug ?? '') !== ''): ?>
         <button type="button"
                 class="gratora-donate-button <?php echo esc_attr($sizeClass);
 ?>"
@@ -40,9 +52,6 @@ echo wp_kses_data(get_block_wrapper_attributes(array_filter([
                             <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                         </svg>
                     </button>
-                    <div class="gratora-donate-modal__body"><?php echo do_shortcode('[gratora_donation_form slug="' . esc_attr($formSlug) . '"]'); ?></div>
-                </div>
-            </div>
-        <?php endif; ?>
+                    <div class="gratora-donate-modal__body"><?php return; endif; ?>
     <?php endif; ?>
 </div>

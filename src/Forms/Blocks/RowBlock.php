@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Gratora\Forms\Blocks;
 
-use Gratora\Forms\Rendering\FormMarkup;
-
 /** @since 1.0.0 */
 final class RowBlock implements Block
 {
@@ -43,7 +41,7 @@ final class RowBlock implements Block
         return sprintf(
             '<div class="gratora-block gratora-block--row" style="%s">%s</div>',
             esc_attr($style),
-            wp_kses($content, FormMarkup::allowedHtml())
+            $content
         );
     }
 }

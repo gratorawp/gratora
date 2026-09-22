@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Campaigns\Campaign;
-use WP_HTML_Tag_Processor;
 
 /**
- * A container block wraps whatever sits between its delimiters in storage,
- * and nothing between the store and the page filters that for it. Every writer
- * that skips the post-content rule (an import, a direct model write, a future
- * tool) would otherwise put script on the public donation page. The filter it
- * applies instead has to let every field through untouched, or a donation form
+ * A container block wraps whatever sits between its delimiters in storage. The
+ * donation form runs its whole body through the form's filter, but anywhere
+ * else do_blocks meets a container, a post or pattern holding form markup, only
+ * the container's callback stands between that markup and the page. The filter
+ * it applies has to let every field through untouched, or a donation form
  * quietly loses a control.
  */
 final class FormContainersEscapeWhatTheyWrapTest extends IntegrationTestCase
@@ -64,8 +63,8 @@ final class FormContainersEscapeWhatTheyWrapTest extends IntegrationTestCase
             . '<!-- /wp:gratora/step --><!-- /wp:gratora/steps -->'
         );
 
-        $bareTokens   = $this->tokens($bare);
-        $nestedTokens = $this->tokens($nested);
+        $bareTokens   = $this->tagTokens($bare);
+        $nestedTokens = $this->tagTokens($nested);
 
         $this->assertGreaterThan(100, count($bareTokens), 'fixture: the fields rendered');
         $this->assertSame(
@@ -144,31 +143,5 @@ final class FormContainersEscapeWhatTheyWrapTest extends IntegrationTestCase
             . '<!-- wp:gratora/payment-gateways /-->'
             . '<!-- wp:gratora/donation-summary {"showGateway":false} /-->'
             . '<!-- wp:gratora/submit-button {"label":"Give","align":"full"} /-->';
-    }
-
-    /**
-     * Every opening and closing tag with its attributes, decoded. A style loses
-     * only its trailing semicolon when kses re-encodes it, which the browser
-     * reads identically.
-     *
-     * @return list<array{string, array<string, string|true>}>
-     */
-    private function tokens(string $html): array
-    {
-        $processor = new WP_HTML_Tag_Processor($html);
-        $tokens    = [];
-
-        while ($processor->next_tag(['tag_closers' => 'visit'])) {
-            $attributes = [];
-            foreach ((array) $processor->get_attribute_names_with_prefix('') as $attribute) {
-                $value = $processor->get_attribute($attribute);
-                $attributes[$attribute] = $attribute === 'style' && is_string($value) ? rtrim($value, ';') : $value;
-            }
-            ksort($attributes);
-
-            $tokens[] = [($processor->is_tag_closer() ? '/' : '') . strtolower((string) $processor->get_tag()), $attributes];
-        }
-
-        return $tokens;
     }
 }

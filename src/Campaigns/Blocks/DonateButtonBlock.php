@@ -10,7 +10,7 @@ use Gratora\Forms\Shortcode\DonationFormShortcode;
 use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
-final class DonateButtonBlock extends CampaignBlock
+final class DonateButtonBlock extends CampaignFormBlock
 {
     /** @since 1.0.0 */
     public function __construct(
@@ -39,10 +39,10 @@ final class DonateButtonBlock extends CampaignBlock
     }
 
     /** @since 1.0.0 */
-    public function render(array $attrs, string $content): string
+    public function render(array $attrs): EmbeddedForm
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice($attrs);
+        if (! $campaign) return new EmbeddedForm($this->notBoundNotice($attrs));
 
         $form = $this->forms->publishedForCampaign(
             (int) $campaign->id,
@@ -51,11 +51,11 @@ final class DonateButtonBlock extends CampaignBlock
 
         // Show missing-form notices only to editors.
         if (! $form) {
-            return (is_user_logged_in() && current_user_can('edit_posts'))
+            return new EmbeddedForm((is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="gratora-block-notice">'
                     . esc_html__('This campaign has no published donation form yet.', 'gratora-donation-platform')
                     . '</div>'
-                : '';
+                : '');
         }
 
         // The modal carries the form inline so it opens without a network
@@ -73,15 +73,16 @@ final class DonateButtonBlock extends CampaignBlock
                 default    => __('Donations are not open for this campaign yet.', 'gratora-donation-platform'),
             };
 
-            return '<p class="gratora-block__empty">' . esc_html($message) . '</p>'
+            return new EmbeddedForm('<p class="gratora-block__empty">' . esc_html($message) . '</p>'
                 . ((is_user_logged_in() && current_user_can('edit_posts'))
                     ? '<div class="gratora-block-notice">'
                         . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'gratora-donation-platform')
                         . '</div>'
-                    : '');
+                    : ''));
         }
 
-        return View::loadRelative(__DIR__, 'views/donate-button', [
+        $before = View::loadRelative(__DIR__, 'views/donate-button', [
+            'part'         => 'before',
             // Use ?: because an unset label is an empty string.
             'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'gratora-donation-platform'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
@@ -92,6 +93,10 @@ final class DonateButtonBlock extends CampaignBlock
             'withForm'     => ! $editorPreview,
             'styleVars'    => $this->styleVars($campaign),
         ]);
+
+        return $editorPreview
+            ? new EmbeddedForm($before)
+            : new EmbeddedForm($before, formSlug: (string) $form->slug, after: View::loadRelative(__DIR__, 'views/donate-button', ['part' => 'after']));
     }
 
     /**

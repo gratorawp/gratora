@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Gratora\Forms\Blocks;
 
+use Gratora\Forms\Rendering\FormMarkup;
+
 /** @since 1.0.0 */
 final class BlockRegistry
 {
@@ -43,20 +45,10 @@ final class BlockRegistry
             if (! isset($attrs['condition'])) {
                 $attrs['condition'] = ['type' => 'object', 'default' => null];
             }
-            $args = [
+            register_block_type($name, [
                 'attributes'      => $attrs,
-                'render_callback' => fn (array $a, string $content): string => $block->render($a, $content),
-            ];
-            // Optional method. Blocks that opt in expose feature flags such
-            // as the WP 7.0 `visibility` responsive control. Avoids forcing
-            // every block to grow a no-op `supports()` shim.
-            if (method_exists($block, 'supports')) {
-                $supports = $block->supports();
-                if (is_array($supports) && $supports !== []) {
-                    $args['supports'] = $supports;
-                }
-            }
-            register_block_type($name, $args);
+                'render_callback' => fn (array $a, string $content): string => wp_kses($block->render($a, $content), FormMarkup::allowedHtml()),
+            ]);
         }
     }
 }

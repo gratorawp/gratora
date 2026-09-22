@@ -12,7 +12,7 @@ use Gratora\Foundation\Hooks\HookProvider;
 /**
  * Block Bindings source resolving campaign stats for core blocks (e.g. bind a
  * Heading to gratora/campaign:raised). args.campaign_id is optional; it falls back
- * to the page's _gratora_campaign_id meta, same as CampaignBlock.
+ * to the page's _gratora_campaign_id meta, same as CampaignPageBlock.
  *
  * @since 1.0.0
  */

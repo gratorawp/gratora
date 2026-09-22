@@ -27,6 +27,7 @@ use Gratora\Async\AsyncDispatcher;
 use Gratora\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
 use Gratora\Campaigns\Blocks\CampaignBindingPreviewController;
 use Gratora\Campaigns\Blocks\CampaignBindings;
+use Gratora\Campaigns\Blocks\CampaignBlockRegistry;
 use Gratora\Campaigns\Blocks\CampaignGridBlock;
 use Gratora\Campaigns\Blocks\CampaignImageBlock;
 use Gratora\Campaigns\Blocks\CampaignProgressBlock;
@@ -1117,13 +1118,14 @@ final class CoreModule implements GratoraModule
             [$c->get(GatewayManager::class), 'declareSettings']
         );
 
-        $blocks->add(new CampaignImageBlock($c->get(CampaignRepository::class)));
-        $blocks->add(new CampaignProgressBlock($c->get(CampaignRepository::class)));
-        $blocks->add(new CampaignStatBlock(
+        $pageBlocks = new CampaignBlockRegistry();
+        $pageBlocks->add(new CampaignImageBlock($c->get(CampaignRepository::class)));
+        $pageBlocks->add(new CampaignProgressBlock($c->get(CampaignRepository::class)));
+        $pageBlocks->add(new CampaignStatBlock(
             $c->get(CampaignRepository::class),
             $c->get(CampaignStatMetrics::class),
         ));
-        $blocks->add(new CampaignGridBlock($c->get(CampaignRepository::class)));
+        $pageBlocks->add(new CampaignGridBlock($c->get(CampaignRepository::class)));
         // Bound rather than built here: an add-on rendering a donation form in
         // the editor needs this to build the preview document.
         $c->bind(DonationFormShortcode::class, fn (Container $c) => new DonationFormShortcode(
@@ -1135,27 +1137,27 @@ final class CoreModule implements GratoraModule
             $c->get(TestMode::class),
         ));
         $formShortcode = $c->get(DonationFormShortcode::class);
-        $blocks->add(new DonateButtonBlock(
+        $pageBlocks->add(new DonateButtonBlock(
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
             $formShortcode,
         ));
-        $blocks->add(new DonationFormBlock(
+        $pageBlocks->add(new DonationFormBlock(
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
             $formShortcode,
         ));
-        $blocks->add(new TopDonorsBlock(
+        $pageBlocks->add(new TopDonorsBlock(
             $c->get(CampaignRepository::class),
             $c->get(DonationRepository::class),
             $c->get(DonorAvatars::class),
         ));
-        $blocks->add(new RecentDonationsBlock(
+        $pageBlocks->add(new RecentDonationsBlock(
             $c->get(CampaignRepository::class),
             $c->get(DonationRepository::class),
             $c->get(DonorAvatars::class),
         ));
-        $blocks->add(new SupporterWallBlock(
+        $pageBlocks->add(new SupporterWallBlock(
             $c->get(CampaignRepository::class),
             $c->get(DonorAvatars::class),
         ));
@@ -1163,9 +1165,10 @@ final class CoreModule implements GratoraModule
         // Broadcast on init, not here: add-on modules boot after core, so a
         // handler they attach during their own boot would miss a broadcast
         // fired inside this method and their block would never register.
-        add_action('init', static function () use ($blocks): void {
+        add_action('init', static function () use ($blocks, $pageBlocks): void {
             do_action('gratora.blocks.register_server', $blocks);
             $blocks->register();
+            $pageBlocks->register();
         });
 
         // WordPress's own Tools, Export and Erase Personal Data. They answered

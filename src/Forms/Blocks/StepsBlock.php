@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Gratora\Forms\Blocks;
 
-use Gratora\Forms\Rendering\FormMarkup;
-
 /** @since 1.0.0 */
 final class StepsBlock implements Block
 {
@@ -28,6 +26,6 @@ final class StepsBlock implements Block
     /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
-        return sprintf('<div class="gratora-block gratora-block--steps">%s</div>', wp_kses($content, FormMarkup::allowedHtml()));
+        return sprintf('<div class="gratora-block gratora-block--steps">%s</div>', $content);
     }
 }

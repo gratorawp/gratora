@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Forms\Form;
+use WP_HTML_Tag_Processor;
 use WP_REST_Request;
 
 /**
@@ -111,6 +112,39 @@ final class DonationFormBlockRestRenderTest extends IntegrationTestCase
             $html,
             'and no live form is rendered into the canvas itself'
         );
+    }
+
+    /**
+     * The preview frame runs same-origin with wp-admin, and its document is an
+     * attribute value: whatever the document escaped must stay text once the
+     * browser decodes the attribute, or a field label becomes markup in the
+     * editor of everyone who opens the page.
+     */
+    public function test_text_the_preview_escaped_stays_text_inside_the_frame(): void
+    {
+        $form         = Form::query()->where('campaign_id', $this->campaignId)->get();
+        $form->blocks = '<!-- wp:gratora/text-input {"label":"<img src=x onerror=window.gratoraProbe=1>"} /-->' . $form->blocks;
+        $form->save();
+
+        $pageId = self::factory()->post->create(['post_type' => 'page', 'post_status' => 'draft']);
+        $_GET['post_id'] = (string) $pageId;
+
+        try {
+            $html = $this->renderFormOn(self::BLOCK_RENDERER_ROUTE);
+        } finally {
+            unset($_GET['post_id']);
+        }
+
+        $frame = new WP_HTML_Tag_Processor($html);
+        $this->assertTrue($frame->next_tag(['class_name' => 'gratora-donation-form__editor-preview']), 'the editor gets the preview frame');
+
+        $document = (string) $frame->get_attribute('srcdoc');
+        $this->assertStringContainsString('&lt;img src=x onerror', $document, 'the label reaches the frame as the text the preview escaped');
+
+        $inside = new WP_HTML_Tag_Processor($document);
+        while ($inside->next_tag('IMG')) {
+            $this->assertNull($inside->get_attribute('onerror'), 'and never as an element');
+        }
     }
 
     public function test_a_page_read_gets_the_live_form_for_reader_and_editor_alike(): void

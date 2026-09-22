@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Gratora\Campaigns\Blocks;
 
+use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Forms\FormRepository;
 use Gratora\Forms\Shortcode\DonationFormShortcode;
 use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
-final class DonationFormBlock extends CampaignBlock
+final class DonationFormBlock extends CampaignFormBlock
 {
     /** @since 1.0.0 */
     public function __construct(
@@ -36,10 +37,10 @@ final class DonationFormBlock extends CampaignBlock
     }
 
     /** @since 1.0.0 */
-    public function render(array $attrs, string $content): string
+    public function render(array $attrs): EmbeddedForm
     {
         $campaign = $this->resolveCampaign($attrs);
-        if (! $campaign) return $this->notBoundNotice($attrs);
+        if (! $campaign) return new EmbeddedForm($this->notBoundNotice($attrs));
 
         $form = $this->forms->publishedForCampaign(
             (int) $campaign->id,
@@ -48,15 +49,15 @@ final class DonationFormBlock extends CampaignBlock
 
         // Keep the seeded heading from captioning unrelated content.
         if (! $form) {
-            return View::loadRelative(__DIR__, 'views/donation-form', [
-                'mode'      => 'empty',
+            [$before, $after] = $this->wrapper($campaign, [
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
                     ?: __('Donations are not open for this campaign yet.', 'gratora-donation-platform'),
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
                     ? __('This campaign has no published donation form yet.', 'gratora-donation-platform')
                     : '',
-                'styleVars' => $this->styleVars($campaign),
             ]);
+
+            return new EmbeddedForm($before, after: $after);
         }
 
         // Editor preview: ServerSideRender injects the response as raw HTML and
@@ -70,34 +71,47 @@ final class DonationFormBlock extends CampaignBlock
                 is_array($form->settings) ? $form->settings : null,
                 (int) $form->campaign_id,
             );
+            $document = $this->shortcode->buildPreviewDocument($preview, autoResize: true, transparent: true);
 
-            return View::loadRelative(__DIR__, 'views/donation-form', [
-                'mode'       => 'editor',
-                'previewDoc' => $this->shortcode->buildPreviewDocument($preview, autoResize: true, transparent: true),
-                'formTitle'  => (string) $form->title,
-                'styleVars'  => $this->styleVars($campaign),
-            ]);
+            [$before, $after] = $this->wrapper($campaign);
+
+            return new EmbeddedForm($before, previewDocument: $document, previewTitle: (string) $form->title, after: $after);
         }
 
         // A hidden form is empty for a visitor. The shortcode tells a manager
         // why, so only everyone else gets this block's own empty card.
         if ($this->shortcode->gate($form) === 'hidden' && ! DonationFormShortcode::showsReasons()) {
-            return View::loadRelative(__DIR__, 'views/donation-form', [
-                'mode'      => 'empty',
+            [$before, $after] = $this->wrapper($campaign, [
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
                     ?: __('Donations are not open for this campaign yet.', 'gratora-donation-platform'),
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
                     ? __('This campaign is not accepting donations, so the form is hidden. Publish the campaign and check its schedule.', 'gratora-donation-platform')
                     : '',
-                'styleVars' => $this->styleVars($campaign),
             ]);
+
+            return new EmbeddedForm($before, after: $after);
         }
 
-        return View::loadRelative(__DIR__, 'views/donation-form', [
-            'mode'      => 'front',
-            'formSlug'  => (string) $form->slug,
-            'styleVars' => $this->styleVars($campaign),
-        ]);
+        [$before, $after] = $this->wrapper($campaign);
+
+        return new EmbeddedForm($before, formSlug: (string) $form->slug, after: $after);
+    }
+
+    /**
+     * @param array{emptyText?: string, notice?: string} $emptyCard
+     * @return array{string, string}
+     *
+     * @since 1.1.0
+     */
+    private function wrapper(Campaign $campaign, array $emptyCard = []): array
+    {
+        return [
+            View::loadRelative(__DIR__, 'views/donation-form', [
+                'part'      => 'before',
+                'styleVars' => $this->styleVars($campaign),
+            ] + $emptyCard),
+            View::loadRelative(__DIR__, 'views/donation-form', ['part' => 'after']),
+        ];
     }
 
     /**

@@ -1,39 +1,28 @@
 <?php
 defined('ABSPATH') || exit;
 /**
- * @var string  $mode         'front' | 'editor' | 'empty'
- * @var ?string $emptyText     Shown in 'empty' mode
+ * The block's wrapper. The form or its preview goes between 'before' and
+ * 'after'; with no form to show, 'before' carries the empty card instead.
+ *
+ * @var string  $part       'before' | 'after'
+ * @var ?string $emptyText  the empty card's text
  * @var ?string $notice
- * @var ?string $formSlug
- * @var ?string $previewDoc    Self-contained iframe document (editor mode)
- * @var ?string $formTitle
- * @var string  $styleVars
+ * @var ?string $styleVars
  */
-?>
+if ($part === 'after'): ?>
+</section>
+<?php return; endif; ?>
 <section id="gratora-form" <?php
 echo wp_kses_data(get_block_wrapper_attributes(array_filter([
     'class' => 'gratora-block gratora-block--donation-form',
     'style' => $styleVars,
 ])));
 ?> data-block="gratora/donation-form">
-    <?php if (($mode ?? 'front') === 'empty'): ?>
-        <p class="gratora-block__empty"><?php echo esc_html($emptyText ?? '');
+    <?php if (($emptyText ?? '') !== ''): ?>
+        <p class="gratora-block__empty"><?php echo esc_html($emptyText);
 ?></p>
         <?php if (($notice ?? '') !== ''): ?>
             <div class="gratora-block-notice"><?php echo esc_html($notice);
 ?></div>
         <?php endif; ?>
-    <?php elseif (($mode ?? 'front') === 'editor'): ?>
-        <iframe
-            class="gratora-donation-form__editor-preview"
-            title="<?php echo esc_attr($formTitle ?? __('Donation form', 'gratora-donation-platform'));
-?>"
-            loading="lazy"
-            style="width:100%;border:0;display:block;min-height:520px"
-            srcdoc="<?php echo esc_attr($previewDoc ?? '');
-?>"
-        ></iframe>
-    <?php else: ?>
-        <?php echo do_shortcode('[gratora_donation_form slug="' . esc_attr($formSlug ?? '') . '"]'); ?>
     <?php endif; ?>
-</section>

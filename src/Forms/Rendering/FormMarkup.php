@@ -15,7 +15,7 @@ final class FormMarkup
      * Core merges _wp_add_global_attributes() into the post tags once, when
      * kses loads, so a tag added here has to list the same set itself.
      */
-    private const GLOBAL_ATTRIBUTES = [
+    public const GLOBAL_ATTRIBUTES = [
         'aria-controls'    => true,
         'aria-current'     => true,
         'aria-describedby' => true,
