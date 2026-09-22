@@ -55,6 +55,6 @@ final class AdminFooter extends HookProvider
     /** @since 1.0.0 */
     private function reviewUrl(): string
     {
-        return 'https://wordpress.org/support/plugin/' . self::SLUG . '/reviews/?rate=5#new-post';
+        return 'https://wordpress.org/support/plugin/' . self::SLUG . '/reviews/';
     }
 }

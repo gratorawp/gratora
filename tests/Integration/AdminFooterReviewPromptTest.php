@@ -52,20 +52,21 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
         }
     }
 
-    public function test_the_prompt_asks_for_five_stars(): void
+    public function test_the_prompt_shows_five_stars(): void
+    {
+        $this->assertSame(5, substr_count($this->footerOn('gratora'), 'dashicons-star-filled'));
+    }
+
+    /**
+     * Every review, not a view filtered to the favourable ones: the directory
+     * refuses a plugin that links to reviews narrowed by rating.
+     */
+    public function test_the_link_opens_every_review_on_the_assigned_permalink(): void
     {
         $out = $this->footerOn('gratora');
 
-        $this->assertSame(5, substr_count($out, 'dashicons-star-filled'));
-        $this->assertStringContainsString('rate=5', $out);
-    }
-
-    public function test_the_link_points_at_the_assigned_permalink(): void
-    {
-        $this->assertStringContainsString(
-            'https://wordpress.org/support/plugin/gratora-donation-platform/reviews/?rate=5#new-post',
-            $this->footerOn('gratora')
-        );
+        $this->assertStringContainsString('href="https://wordpress.org/support/plugin/gratora-donation-platform/reviews/"', $out);
+        $this->assertStringNotContainsString('rate=', $out);
     }
 
     /**
