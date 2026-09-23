@@ -112,10 +112,22 @@ jobs:
           path: dist/gratora-donation-platform.zip
           if-no-files-found: error
 
-      # Only after everything above passed, and never on a dry run.
+      # Only after everything above passed, and never on a dry run: the step is skipped
+      # whole, so a dry run never reaches plugins.svn.wordpress.org.
+      #
+      # Not 10up/action-wordpress-plugin-deploy. It copies the tag locally and sends
+      # trunk, the tag copy and the assets as one transaction, which for a first release
+      # is the whole tree twice. wordpress.org failed to finalise that twice, at
+      # "Committing transaction...", first E175012 and then E000104. bin/publish-svn.sh
+      # sends the tree a part at a time and makes the tag as a server side copy.
+      #
+      # The runner image carries no subversion.
       - name: Publish to WordPress.org
         if: startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true
-        uses: 10up/action-wordpress-plugin-deploy@stable
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends subversion
+          bash bin/publish-svn.sh
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
