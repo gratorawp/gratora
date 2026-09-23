@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Campaigns\Blocks;
 
+use Gratora\Foundation\Helpers\GoalProgress;
 use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
@@ -40,13 +41,15 @@ final class CampaignProgressBlock extends CampaignBlock
             'amount' => (int) ($campaign->goal_cents ?? 0),
             default  => (int) ($campaign->goal_count ?? 0),
         };
-        $pct = $target > 0 ? min(100, (int) round(($current / $target) * 100)) : 0;
+        $pct      = GoalProgress::percent($current, $target);
+        $barWidth = GoalProgress::barWidth($pct);
 
         return View::loadRelative(__DIR__, 'views/campaign-progress', [
             'goalType'    => $type,
             'current'     => $current,
             'target'      => $target,
             'pct'         => $pct,
+            'barWidth'    => $barWidth,
             'currency'    => $campaign->currency,
             'showLabels'  => (bool) ($attrs['showLabels'] ?? true),
             'align'       => in_array($attrs['align'] ?? 'left', ['left', 'center'], true)

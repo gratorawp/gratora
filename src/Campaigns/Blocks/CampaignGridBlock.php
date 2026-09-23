@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Campaigns\Blocks;
 
+use Gratora\Foundation\Helpers\GoalProgress;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Helpers\View;
 
@@ -102,7 +103,7 @@ final class CampaignGridBlock extends CampaignBlock
                 default     => (int) $c->raised_cents,
             };
             $target  = $type === 'amount' ? (int) ($c->goal_cents ?? 0) : (int) ($c->goal_count ?? 0);
-            $percent = $target > 0 ? min(100, (int) round($current / $target * 100)) : 0;
+            $percent = GoalProgress::percent($current, $target);
 
             $cards[] = [
                 'title'     => (string) $c->title,
@@ -119,6 +120,7 @@ final class CampaignGridBlock extends CampaignBlock
                         : number_format_i18n($target))
                     : '',
                 'percent'   => $percent,
+                'barWidth'  => GoalProgress::barWidth($percent),
                 'accent'    => $c->accentColor(),
             ];
         }

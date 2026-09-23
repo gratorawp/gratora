@@ -8,6 +8,7 @@ use Gratora\Campaigns\Styling\Tokens;
 use Gratora\Campaigns\Styling\CampaignStyleResolver;
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Foundation\Helpers\GoalProgress;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Helpers\View;
 use Gratora\Receipts\OrgProfile;
@@ -88,8 +89,8 @@ final class CampaignReportBuilder
         if ($type === 'amount') {
             $goalCents = (int) ($campaign->goal_cents ?? 0);
             if ($goalCents <= 0) return [false, '', 0, 0];
-            $percent = (int) round(((int) $summary['amount_raised_cents'] / $goalCents) * 100);
-            return [true, Money::format($goalCents, $currency), $percent, $this->clamp($percent)];
+            $percent = GoalProgress::percent((int) $summary['amount_raised_cents'], $goalCents);
+            return [true, Money::format($goalCents, $currency), $percent, GoalProgress::barWidth($percent)];
         }
 
         $goalCount = (int) ($campaign->goal_count ?? 0);
@@ -105,14 +106,8 @@ final class CampaignReportBuilder
             $display = sprintf(__('%s donations', 'gratora-donation-platform'), number_format_i18n($goalCount));
         }
 
-        $percent = (int) round(($current / $goalCount) * 100);
-        return [true, $display, $percent, $this->clamp($percent)];
-    }
-
-    /** @since 1.0.0 */
-    private function clamp(int $percent): int
-    {
-        return max(0, min(100, $percent));
+        $percent = GoalProgress::percent($current, $goalCount);
+        return [true, $display, $percent, GoalProgress::barWidth($percent)];
     }
 
     /** @since 1.0.0 */

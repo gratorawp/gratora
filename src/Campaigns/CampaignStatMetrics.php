@@ -82,7 +82,7 @@ final class CampaignStatMetrics
             'goal'      => $target > 0 ? $inGoalUnits($target) : null,
             'remaining' => $target > 0 ? $inGoalUnits(max(0, $target - $towards)) : null,
             'percent'   => $target > 0
-                ? sprintf('%d%%', (int) min(100, floor(($towards / $target) * 100)))
+                ? sprintf('%d%%', (int) floor(($towards / $target) * 100))
                 : null,
             'donations' => number_format_i18n($donations),
             'donors'    => number_format_i18n((int) $campaign->donors_count),

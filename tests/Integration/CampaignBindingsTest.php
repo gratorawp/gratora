@@ -35,18 +35,18 @@ final class CampaignBindingsTest extends IntegrationTestCase
         );
     }
 
-    public function test_resolves_progress_percent_with_clamp(): void
+    public function test_resolves_progress_percent_past_the_goal(): void
     {
         $campaign = $this->seedCampaign(['raised_cents' => 75000, 'goal_cents' => 50000]);
         $bindings = $this->bindings();
 
         $this->assertSame(
-            '100',
+            '150',
             $bindings->resolve(['key' => 'percent', 'campaign_id' => $campaign->id], null, 'content'),
-            'percent clamps to 100 when raised exceeds goal'
+            'a binding carries a figure, not a bar, so nothing here is capped'
         );
         $this->assertSame(
-            '100%',
+            '150%',
             $bindings->resolve(['key' => 'percent_label', 'campaign_id' => $campaign->id], null, 'content')
         );
     }

@@ -6,6 +6,7 @@ namespace Gratora\Campaigns\Blocks;
 
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignRepository;
+use Gratora\Foundation\Helpers\GoalProgress;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
 
@@ -140,7 +141,7 @@ final class CampaignBindings extends HookProvider
             'amount' => (int) ($campaign->goal_cents ?? 0),
             default  => (int) ($campaign->goal_count ?? 0),
         };
-        $percent = $target > 0 ? min(100, (int) round(($current / $target) * 100)) : 0;
+        $percent = GoalProgress::percent($current, $target);
 
         return match ($key) {
             'title'             => $campaign->title,

@@ -6,6 +6,7 @@ namespace Gratora\Forms\Blocks;
 
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Forms\FormRepository;
+use Gratora\Foundation\Helpers\GoalProgress;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Helpers\View;
 use Gratora\Vendor\Queryable\DB;
@@ -149,7 +150,9 @@ final class GoalBlock implements Block
         ?string $endsAt,
         array $attrs,
     ): string {
-        $percent = $target > 0 ? min(100, (int) round(($current / $target) * 100)) : 0;
+        // This block prints no figure: the value reaches only the fill
+        // width and aria-valuenow, and both are bounded by the track.
+        $percent = GoalProgress::barWidth(GoalProgress::percent($current, $target));
 
         return View::loadRelative(__DIR__, 'views/goal', [
             'goalType'     => $goalType,

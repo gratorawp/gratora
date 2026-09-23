@@ -3,6 +3,7 @@ import { PanelBody, ToggleControl, ExternalLink } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatAmount } from '../../../_shared/format';
+import { goalPercent } from '../../../_shared/components/GoalBar';
 import Segmented from '../../../_shared/components/Segmented';
 import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
@@ -87,7 +88,8 @@ function Edit( { attributes, setAttributes } ) {
 
     const donors  = isFormSource ? 0 : Number( campaign?.donors_count || 0 );
     const days    = isFormSource ? null : daysLeft( campaign?.ends_at );
-    const percent = target > 0 ? Math.min( 100, Math.round( ( current / target ) * 100 ) ) : 0;
+    const percent = goalPercent( current, target );
+    const fill    = Math.min( 100, percent );
 
     const hasGoal = goalType !== 'none' && target > 0;
 
@@ -166,7 +168,7 @@ function Edit( { attributes, setAttributes } ) {
                         <div className="gratora-block-preview__goal-bar">
                             <div
                                 className="gratora-block-preview__goal-fill"
-                                style={ { width: `${ percent }%` } }
+                                style={ { width: `${ fill }%` } }
                             />
                         </div>
                         <div className="gratora-block-preview__goal-meta">

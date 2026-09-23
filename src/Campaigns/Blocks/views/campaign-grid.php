@@ -2,7 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * @var string $heading
- * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','accent']
+ * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','barWidth','accent']
  * @var string $styleVars
  * @var ?string $emptyText     set only when there are no cards
  * @var ?string $emptySubText
@@ -50,8 +50,8 @@ echo wp_kses_data(get_block_wrapper_attributes(array_filter([
 ?></span>
                     <?php endif; ?>
                     <span class="gratora-campaign-card__progress">
-                        <span class="gratora-campaign-card__bar" role="progressbar" aria-valuenow="<?php echo (int) $card['percent']; ?>" aria-valuemin="0" aria-valuemax="100">
-                            <span style="width: <?php echo (int) $card['percent']; ?>%;"></span>
+                        <span class="gratora-campaign-card__bar" role="progressbar" aria-valuenow="<?php echo (int) $card['barWidth']; ?>" aria-valuemin="0" aria-valuemax="100">
+                            <span style="width: <?php echo (int) $card['barWidth']; ?>%;"></span>
                         </span>
                         <span class="gratora-campaign-card__meta">
                             <span class="gratora-campaign-card__raised"><?php echo esc_html($card['raised']);

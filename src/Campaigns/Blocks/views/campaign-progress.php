@@ -4,7 +4,8 @@ defined('ABSPATH') || exit;
  * @var string $goalType   amount|donations|donors
  * @var int    $current
  * @var int    $target
- * @var int    $pct
+ * @var int    $pct        true progress, which may exceed 100
+ * @var int    $barWidth   $pct clamped to the track
  * @var string $currency
  * @var bool   $showLabels
  * @var string $align
@@ -51,10 +52,10 @@ echo wp_kses_data(get_block_wrapper_attributes(array_filter([
         </div>
     <?php endif; ?>
     <div class="gratora-progress__bar" role="progressbar"
-         aria-valuenow="<?php echo esc_attr((string) $pct);
+         aria-valuenow="<?php echo esc_attr((string) $barWidth);
 ?>"
          aria-valuemin="0" aria-valuemax="100">
-        <div class="gratora-progress__bar-fill" style="width: <?php echo esc_attr((string) $pct);
+        <div class="gratora-progress__bar-fill" style="width: <?php echo esc_attr((string) $barWidth);
 ?>%;"></div>
     </div>
 </section>
