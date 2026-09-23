@@ -131,7 +131,7 @@ final class DonationFormShortcode extends HookProvider
         wp_enqueue_script(self::CLOAK_FAILSAFE);
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private function registerRuntime(): void
     {
         $assetPath = GRATORA_DIR . 'build/donation-form/runtime/index.asset.php';
@@ -157,7 +157,7 @@ final class DonationFormShortcode extends HookProvider
         }
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function cloakFailsafeJs(): string
     {
         return <<<'JS'
@@ -213,7 +213,7 @@ JS;
      *
      * @return 'render'|'closed'|'hidden'
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public function gate(Form $form): string
     {
@@ -223,7 +223,7 @@ JS;
     /**
      * Whether the current user is told why a form is hidden or closed.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function showsReasons(): bool
     {
@@ -233,7 +233,7 @@ JS;
     /**
      * @return array{0: 'render'|'closed'|'hidden', 1: ?string}
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     private function standing(Form $form): array
     {
@@ -462,7 +462,7 @@ JS;
         ]);
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function registerPreviewAssets(): void
     {
         if (! wp_style_is(self::PREVIEW_STYLE, 'registered')) {
@@ -487,7 +487,7 @@ JS;
         }
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function previewCss(): string
     {
         // White like a real page: the preview frame plays a browser window, and
@@ -503,7 +503,7 @@ html.gratora-form-preview.is-transparent, html.gratora-form-preview.is-transpare
 CSS;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function previewResizeJs(): string
     {
         return <<<'JS'
@@ -529,7 +529,7 @@ CSS;
 JS;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function printed(callable $print): string
     {
         ob_start();
@@ -1728,7 +1728,7 @@ JS;
      * What a visitor reads when the campaign closed on its schedule or its
      * goal, or null when the reason is not one to tell the public.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     private static function closedSentence(?string $reason): ?string
     {

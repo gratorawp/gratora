@@ -7,7 +7,7 @@ namespace Gratora\Forms\Rendering;
 /**
  * The HTML a donation form's blocks may carry.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class FormMarkup
 {
@@ -86,7 +86,7 @@ final class FormMarkup
      *
      * @return array<string, array<string, mixed>>
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function allowedHtml(): array
     {
@@ -105,7 +105,7 @@ final class FormMarkup
      * without unfiltered_html. Only the literal HTML chunks are filtered, so the
      * JSON in the block delimiters survives.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function sanitizeBlocks(string $markup): string
     {
@@ -120,7 +120,7 @@ final class FormMarkup
      * @param array<int, array<string, mixed>> $blocks
      * @return array<int, array<string, mixed>>
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     private static function ksesBlockList(array $blocks): array
     {

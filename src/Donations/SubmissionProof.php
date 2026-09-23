@@ -15,7 +15,7 @@ namespace Gratora\Donations;
  * plugin returning `null` unconditionally restores core's behaviour instead of
  * disabling the site's replay control.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class SubmissionProof
 {

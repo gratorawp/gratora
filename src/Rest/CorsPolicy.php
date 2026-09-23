@@ -23,13 +23,13 @@ use WP_REST_Request;
  * allowed_http_origins filter keeps its headers: that filter is how a
  * decoupled front end declares itself, and one takes donations through it.
  *
- * @since 1.0.1
+ * @since 1.0.0
  */
 final class CorsPolicy extends HookProvider
 {
     private const NAMESPACE = 'gratora/v1';
 
-    /** @since 1.0.1 */
+    /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
@@ -40,7 +40,7 @@ final class CorsPolicy extends HookProvider
         ];
     }
 
-    /** @since 1.0.1 */
+    /** @since 1.0.0 */
     public function stripForeignOrigin(mixed $served, mixed $result = null, mixed $request = null): mixed
     {
         if (! $request instanceof WP_REST_Request || ! $this->inNamespace($request)) {
@@ -73,7 +73,7 @@ final class CorsPolicy extends HookProvider
      * empty.
      *
      * @return array<string, string>
-     * @since 1.0.1
+     * @since 1.0.0
      */
     public function headersFor(string $origin): array
     {
@@ -95,7 +95,7 @@ final class CorsPolicy extends HookProvider
      * donation lost; an origin this allows that the endpoint refuses is the
      * reflection back again.
      *
-     * @since 1.0.1
+     * @since 1.0.0
      */
     public function wouldBeRefused(string $origin): bool
     {
@@ -113,7 +113,7 @@ final class CorsPolicy extends HookProvider
         return ! is_allowed_http_origin($origin);
     }
 
-    /** @since 1.0.1 */
+    /** @since 1.0.0 */
     private function inNamespace(WP_REST_Request $request): bool
     {
         $route = ltrim((string) $request->get_route(), '/');

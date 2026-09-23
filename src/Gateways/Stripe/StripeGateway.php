@@ -221,7 +221,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
          * @param array<string,string> $apm
          * @param Donation             $donation
          *
-         * @since 1.1.0
+         * @since 1.0.0
          */
         $apm = apply_filters(
             'gratora.gateway.stripe.automatic_payment_methods',

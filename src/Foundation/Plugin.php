@@ -28,7 +28,7 @@ use Gratora\Onboarding\Onboarding;
 /** @since 1.0.0 */
 final class Plugin
 {
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public const OPT_REWRITE_RULES_PENDING = 'gratora_rewrite_rules_pending';
 
     private static ?self $instance = null;

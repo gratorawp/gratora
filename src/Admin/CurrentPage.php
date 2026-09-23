@@ -9,14 +9,14 @@ namespace Gratora\Admin;
  * it from ?page= before admin_init. That is the page WordPress routes to, so
  * no screen decides differently from the router.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class CurrentPage
 {
     /**
      * Empty outside a plugin admin page.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function slug(): string
     {
@@ -28,7 +28,7 @@ final class CurrentPage
     /**
      * The dashboard's slug is the bare "gratora"; every other screen is "gratora-".
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function isGratora(): bool
     {

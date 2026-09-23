@@ -101,7 +101,7 @@ final class DonationFormBlock extends CampaignFormBlock
      * @param array{emptyText?: string, notice?: string} $emptyCard
      * @return array{string, string}
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     private function wrapper(Campaign $campaign, array $emptyCard = []): array
     {

@@ -33,7 +33,7 @@ final class View
         return self::renderFile(self::relative($baseDir, $path), $args);
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public static function printRelative(string $baseDir, string $path, array $args = []): void
     {
         self::includeFile(self::relative($baseDir, $path), $args);
@@ -53,7 +53,7 @@ final class View
         return $html;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function includeFile(string $template, array $args): void
     {
         if (! file_exists($template)) {
@@ -67,7 +67,7 @@ final class View
         include $template;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     private static function relative(string $baseDir, string $path): string
     {
         return rtrim($baseDir, '/\\') . '/' . str_replace('.', '/', $path) . '.php';

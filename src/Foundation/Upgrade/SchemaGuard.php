@@ -46,7 +46,7 @@ final class SchemaGuard
      * name mapped to the plugin that owns it.
      *
      * @return array<string, string>
-     * @since 1.0.1
+     * @since 1.0.0
      */
     public static function missingAddOnTables(): array
     {

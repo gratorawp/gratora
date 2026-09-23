@@ -108,7 +108,7 @@ final class DonationsController
          * spending the caller's own budget is correct: that caller is the one
          * making the request.
          *
-         * @since 1.1.0
+         * @since 1.0.0
          *
          * @param mixed               $proof  SubmissionProof to accept, anything else to refuse.
          * @param string              $scheme The body's `_proof` value, '' when it sent none.

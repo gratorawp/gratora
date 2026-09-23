@@ -16,7 +16,7 @@ use WP_Post;
  * campaignId attribute or, when 0, falls back to the page's `_gratora_campaign_id`
  * post meta.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 abstract class CampaignPageBlock
 {

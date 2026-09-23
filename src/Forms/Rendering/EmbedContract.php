@@ -15,7 +15,7 @@ namespace Gratora\Forms\Rendering;
  * against a core release whose branch it does not know, rather than degrade
  * silently on every partner page.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class EmbedContract
 {

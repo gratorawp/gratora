@@ -10,11 +10,11 @@ use Gratora\Forms\Shortcode\DonationFormShortcode;
 /**
  * A donation form's markup together with the assets that hydrate it.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class FormDocument
 {
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public function __construct(private DonationFormShortcode $shortcode)
     {
     }
@@ -22,7 +22,7 @@ final class FormDocument
     /**
      * @return array{html:string, cssUrl:string, jsUrl:string, jsDeps:list<string>}
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public function forForm(Form $form): array
     {
@@ -44,7 +44,7 @@ final class FormDocument
      * @param list<string> $handles
      * @return list<string>
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function withDependencies(array $handles): array
     {
@@ -76,7 +76,7 @@ final class FormDocument
         return $ordered;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public static function cssFileName(): string
     {
         return is_rtl() ? 'runtime-rtl.css' : 'runtime.css';
@@ -85,7 +85,7 @@ final class FormDocument
     /**
      * Versioned by mtime so an SCSS-only rebuild busts a cached document.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function cssVersion(): string
     {

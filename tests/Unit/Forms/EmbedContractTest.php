@@ -14,7 +14,7 @@ use ReflectionClass;
  * that add-on as a deleted one, and a symbol-level test would follow the rename
  * and stay green through it.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class EmbedContractTest extends TestCase
 {

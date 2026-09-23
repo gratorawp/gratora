@@ -9,7 +9,7 @@ use Gratora\Forms\Rendering\FormMarkup;
 /**
  * The HTML a campaign page block's own markup may hold.
  *
- * @since 1.1.0
+ * @since 1.0.0
  */
 final class CampaignMarkup
 {
@@ -65,7 +65,7 @@ final class CampaignMarkup
      *
      * @return array<string, array<string, mixed>>
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function allowedHtml(): array
     {

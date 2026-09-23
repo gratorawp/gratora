@@ -581,7 +581,7 @@ final class AntiSpamGuard
      * matters. Null here means the count is unknown, and a caller that cannot
      * read its ceiling has to refuse.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public function peekStrict(string $base, int $window, ?int $bucket = null): ?int
     {
@@ -606,14 +606,14 @@ final class AntiSpamGuard
      * An add-on that meters its own callers has to be able to prove it is
      * narrowing this budget rather than handing out a second one.
      *
-     * @since 1.1.0
+     * @since 1.0.0
      */
     public static function ipMax(): int
     {
         return self::IP_MAX;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public static function ipWindow(): int
     {
         return self::IP_WINDOW;

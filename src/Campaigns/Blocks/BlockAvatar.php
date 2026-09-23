@@ -13,7 +13,7 @@ namespace Gratora\Campaigns\Blocks;
  */
 final class BlockAvatar
 {
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public static function render(string $name, bool $anonymous = false, string $imageUrl = ''): void
     {
         $name = trim($name);

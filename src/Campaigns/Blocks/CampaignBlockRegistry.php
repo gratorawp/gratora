@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Gratora\Campaigns\Blocks;
 
-/** @since 1.1.0 */
+/** @since 1.0.0 */
 final class CampaignBlockRegistry
 {
     /** @var array<string, CampaignBlock|CampaignFormBlock> */
     private array $blocks = [];
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public function add(CampaignBlock|CampaignFormBlock $block): void
     {
         $this->blocks[$block->name()] = $block;
     }
 
-    /** @since 1.1.0 */
+    /** @since 1.0.0 */
     public function register(): void
     {
         foreach ($this->blocks as $name => $block) {
