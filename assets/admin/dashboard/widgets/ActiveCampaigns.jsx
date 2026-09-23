@@ -2,6 +2,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Target } from 'lucide-react';
 
 import EmptyState from '../../_shared/components/EmptyState';
+import { goalPercent } from '../../_shared/components/GoalBar';
 import { formatAmount, timeAgo, detailHref, StatusBadge } from '../../_shared/format';
 
 export default function ActiveCampaigns( { rows = [] } ) {
@@ -25,7 +26,11 @@ export default function ActiveCampaigns( { rows = [] } ) {
                 const current = c.goal_type === 'amount'
                     ? c.raised_cents
                     : ( c.goal_type === 'donations' ? c.donations_count : c.donors_count );
-                const pct = target > 0 ? Math.min( 100, Math.round( ( current / target ) * 100 ) ) : 0;
+                // The fill is capped because a track has a width. The figure
+                // beside it is not: capped, a campaign past its target reads
+                // the same as one that just reached it.
+                const pct  = goalPercent( current, target );
+                const fill = Math.min( 100, pct );
 
                 const fmt = ( v ) => c.goal_type === 'amount'
                     ? formatAmount( v, c.currency )
@@ -38,7 +43,7 @@ export default function ActiveCampaigns( { rows = [] } ) {
                             <StatusBadge status={ c.not_accepting || c.status } />
                         </div>
                         <div className="gratora-active-campaigns__bar">
-                            <div className="gratora-active-campaigns__bar-fill" style={ { width: `${ pct }%` } } />
+                            <div className="gratora-active-campaigns__bar-fill" style={ { width: `${ fill }%` } } />
                         </div>
                         <div className="gratora-active-campaigns__meta">
                             <span>

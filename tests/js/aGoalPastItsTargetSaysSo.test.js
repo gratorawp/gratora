@@ -8,13 +8,14 @@
  * above "$3,161,295.00 / $45,000.00", so the contradiction needed no
  * arithmetic to see.
  *
- * Two copies computed the cap, one per screen. There is one now, and only the
- * bar uses it.
+ * Three copies computed the cap, one per screen. There is one now, and only
+ * the bar uses it.
  */
 
 import { render } from 'preact';
 
 import GoalBar, { GoalCell, goalPercent } from '../../assets/admin/_shared/components/GoalBar';
+import ActiveCampaigns from '../../assets/admin/dashboard/widgets/ActiveCampaigns';
 
 jest.mock( 'react', () => require( 'preact/compat' ) );
 jest.mock( 'react-dom', () => require( 'preact/compat' ) );
@@ -79,6 +80,23 @@ test( 'a campaign with no goal still says so', () => {
 
     expect( root.textContent ).toContain( 'No goal' );
     expect( root.textContent ).not.toContain( '%' );
+} );
+
+/** The dashboard widget carried the third copy, beside its own bar. */
+test( 'the dashboard widget prints the real figure and still caps its bar', () => {
+	const root = draw( <ActiveCampaigns rows={ [ {
+		id: 6,
+		title: 'Winter Emergency Appeal',
+		status: 'ended',
+		goal_type: 'amount',
+		goal_cents: 800000,
+		raised_cents: 894000,
+		currency: 'USD',
+	} ] } /> );
+
+	expect( root.textContent ).toContain( '112%' );
+	expect( root.textContent ).not.toContain( '100%' );
+	expect( root.querySelector( '.gratora-active-campaigns__bar-fill' ).style.width ).toBe( '100%' );
 } );
 
 /**
