@@ -32,6 +32,47 @@ const CAMPAIGN_ID = process.env.GRATORA_E2E_CAMPAIGN_ID ?? '3';
 const FORM_ID   = process.env.GRATORA_E2E_BUILDER_FORM_ID ?? '13';
 const WIZARD_ID = process.env.GRATORA_E2E_WIZARD_FORM_ID ?? '11';
 
+/** The organisation the wizard shots are filled in as, matching the seeded site. */
+const ORG = {
+    name:    'Wildwater Trust',
+    email:   'hello@wildwatertrust.org',
+    country: 'United States',
+    state:   'Montana',
+};
+
+/** The wizard's one forward button, whatever this step calls it. */
+async function advanceWizard(page: Page): Promise<void> {
+    await page.getByRole('button', { name: /^(Get started|Next|Finish setup)/ }).click();
+}
+
+/**
+ * Choose from one of the wizard's comboboxes, addressed by the label around it.
+ *
+ * The control is a filtering text input that renders only the first fifty
+ * options, so a country late in the alphabet is not in the DOM until it is
+ * typed. Each option carries its code beside it, so the match is made against
+ * the label element rather than the option's whole text.
+ */
+async function pickFrom(page: Page, label: string, option: string): Promise<void> {
+    const control = page.locator('.gratora-onboarding__control-label')
+        .filter({ hasText: label })
+        .getByRole('combobox')
+        .first();
+
+    await control.click();
+    await control.fill(option);
+    await page.waitForTimeout(400);
+
+    // Matched on the option's own label element: "United States" and "United
+    // States Minor Outlying Islands" share a prefix, and hasText would take
+    // either.
+    await page.getByRole('option')
+        .filter({ has: page.getByText(option, { exact: true }) })
+        .first()
+        .click();
+    await page.waitForTimeout(300);
+}
+
 const admin = (page: string, extra = ''): string => `/wp-admin/admin.php?page=${page}${extra}`;
 
 const shotPath = (name: string): string => path.join(SHOTS_DIR, `${name}.png`);
@@ -248,8 +289,11 @@ test.describe('documentation screenshots', () => {
     });
 
     test('setup wizard', async ({ page }) => {
-        // Only the first step is captured. Every later step is reached by a
-        // button that writes settings, and the last one creates a campaign.
+        // The later steps are reached by buttons that write the organisation's
+        // profile, currency and brand, so walking the whole wizard is opt-in:
+        // set GRATORA_E2E_ONBOARDING=1 and put those settings back afterwards.
+        // Finishing is safe on a site that has onboarded already, because the
+        // one destructive branch in finalize() is guarded on a first run.
         await page.setViewportSize(WIZARD_VIEWPORT);
         await page.goto(admin('gratora-onboarding'));
         await page.waitForLoadState('networkidle');
@@ -265,6 +309,31 @@ test.describe('documentation screenshots', () => {
         await page.getByText('Nonprofit or charity', { exact: true }).click();
         await page.waitForTimeout(400);
         await shoot(page, 'onboarding-step1');
+
+        if (! process.env.GRATORA_E2E_ONBOARDING) return;
+
+        await advanceWizard(page);
+        await expect(page.getByRole('heading', { name: 'Where are you based?' })).toBeVisible({ timeout: 15_000 });
+
+        // The org profile is empty on a seeded site, and an empty form is a
+        // poor illustration of a step about filling one in.
+        await page.locator('#gratora-onboarding-name').fill(ORG.name);
+        await page.locator('#gratora-onboarding-email').fill(ORG.email);
+        await pickFrom(page, 'Country', ORG.country);
+        await pickFrom(page, 'State', ORG.state);
+        await page.waitForTimeout(600);
+        await shoot(page, 'onboarding-step2');
+
+        await advanceWizard(page);
+        await expect(page.getByRole('heading', { name: 'Pick a starting look' })).toBeVisible({ timeout: 15_000 });
+        // The preview renders its own form, which arrives after the step does.
+        await page.waitForTimeout(1_500);
+        await shoot(page, 'onboarding-step4');
+
+        await advanceWizard(page);
+        await expect(page.getByText('Skip for now', { exact: true })).toBeVisible({ timeout: 15_000 });
+        await page.waitForTimeout(800);
+        await shoot(page, 'onboarding-step5');
     });
 
     test('creating a campaign', async ({ page }) => {
