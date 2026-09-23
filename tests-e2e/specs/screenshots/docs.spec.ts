@@ -47,12 +47,14 @@ function widget(page: Page, heading: string): Locator {
  * The admin menu is position:fixed, so a fullPage shot paints it once at the
  * viewport it was captured from and leaves the rest of the column empty, which
  * reads as a rendering glitch in the middle of the article. Static positioning
- * lets it paint the whole height.
+ * lets it paint the whole height. The bar goes static for a second reason: an
+ * absolute one keeps its top offset and lands over the page heading, taking
+ * the heading and its controls out of the shot.
  */
 async function unpinAdminChrome(page: Page): Promise<void> {
     await page.addStyleTag({
         content: `#adminmenuback, #adminmenuwrap { position: static !important; }
-                  #wpadminbar { position: absolute !important; }`,
+                  #wpadminbar { position: static !important; }`,
     });
 }
 
