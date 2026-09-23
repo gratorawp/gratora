@@ -56,6 +56,9 @@ final class DemoSeeder
 
     private int $rng = self::SEED;
 
+    /** @var array<int,int> rotation position per campaign */
+    private array $noteCursor = [];
+
     /** @var Closure(string):void */
     private Closure $log;
 
@@ -655,7 +658,7 @@ final class DemoSeeder
                 'channel'       => $this->pickChannel(),
                 'anonymous'     => $this->chance(9),
                 'cover_fees'    => $this->chance(28),
-                'note'          => $this->pickNote(),
+                'note'          => $this->pickNote($ci),
                 'brand'         => $brands[$this->next(count($brands))],
                 'last4'         => str_pad((string) $this->next(10000), 4, '0', STR_PAD_LEFT),
                 'failure'       => $failures[$this->next(count($failures))],
@@ -1218,7 +1221,7 @@ final class DemoSeeder
     }
 
     /** @since 1.0.0 */
-    private function pickNote(): ?string
+    private function pickNote(int $campaign): ?string
     {
         $notes = [
             'In memory of my grandmother, who never let anyone leave hungry.',
@@ -1229,11 +1232,32 @@ final class DemoSeeder
             'The update newsletter made the decision easy. Thank you.',
             'For the school kitchen. My children eat every day; theirs should too.',
             'Small amount, given gladly. See you at the next open day.',
+            'Instead of presents this year. Tell the team we said hello.',
+            'My first month of giving. Hoping to make it a habit.',
+            'For Dad, who worked on the pumps for thirty years.',
+            'Our book club voted on this one. Unanimous.',
+            'Saw the photos from the last trip. Count me in again.',
+            'A little late, but the harvest was good this year.',
+            'My daughter asked what we could do. This is what we could do.',
+            'Matching what my employer put in. Every bit counts.',
+            'Thank you for the receipt last time. It reached me in minutes.',
+            'From a quiet supporter. No need to write back.',
+            'The talk at the library convinced me. Well argued.',
+            'On behalf of the Friday five-a-side. We lost, but we gave.',
         ];
 
-        $note = $notes[$this->next(count($notes))];
+        if (! $this->chance(16)) {
+            return null;
+        }
 
-        return $this->chance(16) ? $note : null;
+        // A supporter wall shows one campaign at a time, so the rotation is per
+        // campaign: one shared across them resonates with the share weights and
+        // repeats a single note down a whole wall.
+        $cursor = $this->noteCursor[$campaign] ?? 0;
+
+        $this->noteCursor[$campaign] = $cursor + 1;
+
+        return $notes[$cursor % count($notes)];
     }
 
     /**
