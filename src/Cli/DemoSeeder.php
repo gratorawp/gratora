@@ -1053,18 +1053,36 @@ final class DemoSeeder
     {
         $h = crc32($key);
 
-        return $this->clock->now()
-            ->modify("-{$daysAgo} days")
-            ->setTime(7 + ($h % 15), ($h >> 4) % 60, ($h >> 10) % 60)
-            ->format('Y-m-d H:i:s');
+        return $this->withinElapsedDay($daysAgo, 7 + ($h % 15), ($h >> 4) % 60, ($h >> 10) % 60);
     }
 
     /** @since 1.0.0 */
     private function stamp(int $daysAgo): string
     {
-        return $this->clock->now()
-            ->modify("-{$daysAgo} days")
-            ->setTime(7 + $this->next(15), $this->next(60), $this->next(60))
+        return $this->withinElapsedDay($daysAgo, 7 + $this->next(15), $this->next(60), $this->next(60));
+    }
+
+    /**
+     * The giving hours run to 21:59, so a time drawn for today can land after
+     * the seed run itself. A relative formatter declines a future stamp and
+     * prints a bare date, so one row in each feed reads unlike its neighbours.
+     *
+     * @since 1.0.0
+     */
+    private function withinElapsedDay(int $daysAgo, int $hour, int $minute, int $second): string
+    {
+        $now  = $this->clock->now();
+        $day  = $now->modify("-{$daysAgo} days")->setTime(0, 0, 0);
+        $when = $day->setTime($hour, $minute, $second);
+
+        if ($when <= $now) {
+            return $when->format('Y-m-d H:i:s');
+        }
+
+        $elapsed = $now->getTimestamp() - $day->getTimestamp();
+        $drawn   = ($hour * 3600) + ($minute * 60) + $second;
+
+        return $day->modify('+' . ($elapsed > 0 ? $drawn % $elapsed : 0) . ' seconds')
             ->format('Y-m-d H:i:s');
     }
 
