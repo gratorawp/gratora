@@ -7,6 +7,10 @@ namespace Gratora\Tests\E2e;
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignService;
 use Gratora\Currency\FxRates;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
 use Gratora\Donors\DonorService;
 use Gratora\Donors\MagicLinkService;
 use Gratora\Donors\Portal\PortalPage;
@@ -14,7 +18,9 @@ use Gratora\Donors\Portal\PortalSession;
 use Gratora\Forms\Form;
 use Gratora\Forms\FormService;
 use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
 use Gratora\Funds\Fund;
 use Gratora\Funds\FundService;
 use Gratora\Gateways\GatewayManager;
@@ -39,6 +45,43 @@ final class E2eSeedCommand
     /** Fixture credentials for a throwaway site: they charge nothing and reach no network. */
     private const STRIPE_SECRET      = 'sk_test_gratora_e2e_fixture';
     private const STRIPE_PUBLISHABLE = 'pk_test_gratora_e2e_fixture';
+
+    private const BRAND_OPTION = 'gratora_org_brand';
+    private const BRAND_BACKUP = 'gratora_org_brand_e2e_backup';
+
+    /**
+     * A dark card under a pale accent: the pairing where ink chosen for one
+     * ground lands on another and reads at 1:1. Classic carries a mid-dark
+     * accent on a red-brown card and Bold a red card.
+     */
+    private const QA_BRAND = [
+        'presets'    => [
+            [
+                'id'      => 'classic',
+                'tokens'  => ['gratora-accent' => '#452ef5', 'gratora-bg' => '#804242'],
+                'builtin' => true,
+            ],
+            [
+                'id'      => 'bold',
+                'tokens'  => ['gratora-bg' => '#f55151'],
+                'builtin' => true,
+            ],
+            [
+                'id'          => 'qa-dark-pale',
+                'name'        => 'QA Dark Pale',
+                'description' => '',
+                'tokens'      => [
+                    'gratora-bg'        => '#15142b',
+                    'gratora-bg-soft'   => '#221f3d',
+                    'gratora-accent'    => '#fde68a',
+                    'gratora-border'    => '#3a3660',
+                    'gratora-radius'    => '10px',
+                    'gratora-radius-sm' => '6px',
+                ],
+            ],
+        ],
+        'default_id' => 'qa-dark-pale',
+    ];
 
     private function container(): Container
     {
@@ -288,6 +331,112 @@ final class E2eSeedCommand
     }
 
     /**
+     * `wp gratora e2e-seed-branding`, the fixture specs/branding-grounds.spec.ts
+     * runs against: the QA brand and a page for each surface that paints a
+     * ground of its own.
+     *
+     * Replaces the org brand. The first run keeps the one it replaced in
+     * gratora_org_brand_e2e_backup and later runs leave that backup alone, so
+     * --restore always puts back the brand from before the first run. The
+     * campaigns, forms, pages and three paid live donations stay, and a later
+     * run reuses them. Each run prints a fresh single-use donor portal link.
+     *
+     * ## OPTIONS
+     *
+     * [--restore]
+     * : Put back the brand the first run replaced, drop the backup, and touch
+     * nothing else.
+     *
+     * [--force]
+     * : Seed even though this install reports itself as production. Only for a
+     * throwaway install.
+     *
+     * [--yes]
+     * : Skip the confirmation prompt.
+     *
+     * ## EXAMPLES
+     *
+     *     wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding
+     *     wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding --restore
+     *
+     * @when after_wp_load
+     */
+    public function seedBranding(array $args, array $assoc): void
+    {
+        if (! empty($assoc['restore'])) {
+            $this->restoreBrand();
+
+            return;
+        }
+
+        if (wp_get_environment_type() === 'production' && empty($assoc['force'])) {
+            WP_CLI::error(
+                'Refusing to seed: this install reports itself as production. The '
+                . 'fixture replaces the org brand, records three paid live donations '
+                . 'and publishes e2e campaigns and pages. Set WP_ENVIRONMENT_TYPE to '
+                . 'local, development or staging in wp-config.php, or pass --force on '
+                . 'a throwaway install.'
+            );
+        }
+
+        WP_CLI::confirm(
+            'Replace the org brand (kept for --restore), record three paid live '
+            . 'donations and publish the branding e2e campaigns and pages on this install?',
+            $assoc
+        );
+
+        $this->backUpBrand();
+        update_option(self::BRAND_OPTION, self::QA_BRAND);
+        WP_CLI::log('  brand: QA Dark Pale is the default');
+
+        $page    = $this->brandingCampaign('e2e-branding-page', 'Branding Page', 'standard', null, 500000);
+        $pale    = $this->brandingCampaign('e2e-branding-pale', 'Branding Pale', 'standard', null, 100000);
+        $guest   = $this->brandingCampaign('e2e-branding-guest', 'Branding Guest', 'standard', null, 200000);
+        $host    = $this->brandingCampaign('e2e-branding-host', 'Branding Host', 'standard', null, 200000);
+        $white   = $this->brandingCampaign('e2e-branding-white', 'Branding White Host', 'standard', ['preset_id' => 'quiet'], 200000);
+        $bold    = $this->brandingCampaign('e2e-branding-bold', 'Branding Bold', 'standard', ['preset_id' => 'bold'], 200000);
+        $classic = $this->brandingCampaign('e2e-branding-classic', 'Branding Classic', 'hero', ['preset_id' => 'classic'], 200000);
+        $cover   = $this->brandingCampaign('e2e-branding-cover', 'Branding Cover', 'cover', null, 200000);
+        $theme   = $this->brandingCampaign('e2e-branding-theme', 'Branding Site Theme', 'standard', ['preset_id' => 'theme'], 200000);
+
+        $this->brandingDonations([
+            ['key' => 'e2e-branding-1', 'campaign' => $page, 'email' => 'e2e-branding-1@example.test', 'first' => 'Ada', 'last' => 'Branding', 'cents' => 12000],
+            ['key' => 'e2e-branding-2', 'campaign' => $page, 'email' => 'e2e-branding-2@example.test', 'first' => 'Ben', 'last' => 'Branding', 'cents' => 4500],
+            ['key' => 'e2e-branding-3', 'campaign' => $pale, 'email' => 'e2e-branding-1@example.test', 'first' => 'Ada', 'last' => 'Branding', 'cents' => 30000],
+        ]);
+
+        $forms = $this->container()->get(FormService::class);
+        $plain = $this->brandingForm($forms, 'e2e-branding-plain-form', 'Branding Plain', (int) $page->id, 'plain');
+        $frame = $this->brandingForm($forms, 'e2e-branding-frame-form', 'Branding Frame', (int) $page->id, 'frame');
+        $frameBold = $this->brandingForm($forms, 'e2e-branding-frame-bold-form', 'Branding Frame Bold', (int) $bold->id, 'frame');
+
+        $shortcode = static fn (Form $form): string => "<!-- wp:shortcode -->\n[gratora_donation_form slug=\"" . esc_attr($form->slug) . "\"]\n<!-- /wp:shortcode -->";
+
+        $paths = [
+            'CAMPAIGN'   => $this->campaignPath($page),
+            'PLAIN'      => $this->brandingPage('e2e-branding-plain', 'Branding Plain', $shortcode($plain), null),
+            'FRAME'      => $this->brandingPage('e2e-branding-frame', 'Branding Frame', $shortcode($frame), null),
+            'FRAME_BOLD' => $this->brandingPage('e2e-branding-frame-bold', 'Branding Frame Bold', $shortcode($frameBold), null),
+            'PANEL'      => $this->brandingPage('e2e-branding-panel', 'Branding Panel', self::panelBlocks((int) $host->id, (int) $guest->id), $host),
+            'WHITE_HOST' => $this->brandingPage('e2e-branding-white-host', 'Branding White Host Page', self::whiteHostBlocks((int) $page->id), $white),
+            'BOLD_HOST'  => $this->brandingPage('e2e-branding-bold-host', 'Branding Bold Host', self::boldHostBlocks((int) $page->id, (int) $bold->id), $bold),
+            'WHITE_GRID' => $this->brandingPage('e2e-branding-white-grid', 'Branding White Grid', '<!-- wp:gratora/campaign-grid {"count":12} /-->', null),
+            'MODAL'      => $this->brandingPage('e2e-branding-modal', 'Branding Modal', '<!-- wp:gratora/donate-button {"campaignId":' . (int) $page->id . ',"label":"Donate in a modal"} /-->', $guest),
+            'CLASSIC'    => $this->campaignPath($classic),
+            'COVER'      => $this->campaignPath($cover),
+            'THEME'      => $this->campaignPath($theme),
+        ];
+
+        WP_CLI::success('Branding fixture ready. Restore the brand with --restore.');
+        WP_CLI::log('  export GRATORA_E2E_URL="' . untrailingslashit(home_url()) . '"');
+        foreach ($paths as $name => $path) {
+            WP_CLI::log('  export GRATORA_E2E_BRANDING_' . $name . '_PATH="' . $path . '"');
+        }
+        WP_CLI::log('  export GRATORA_E2E_BRANDING_PORTAL_URL="'
+            . $this->mintPortalLink('e2e-branding-1@example.test', ['first_name' => 'Ada', 'last_name' => 'Branding']) . '"');
+    }
+
+    /**
      * A dedicated administrator for the admin specs, so they run the same on a
      * Local site as in CI and never lean on whatever real account the install
      * happens to have.
@@ -369,12 +518,11 @@ final class E2eSeedCommand
      * earlier run is already spent, and the spec would then skip itself and
      * read as coverage.
      */
-    private function mintPortalLink(): string
-    {
-        $donor = $this->container()->get(DonorService::class)->findOrCreate(
-            'gratora-e2e-portal@example.test',
-            ['first_name' => 'Portal', 'last_name' => 'Tester']
-        );
+    private function mintPortalLink(
+        string $email = 'gratora-e2e-portal@example.test',
+        array $profile = ['first_name' => 'Portal', 'last_name' => 'Tester']
+    ): string {
+        $donor = $this->container()->get(DonorService::class)->findOrCreate($email, $profile);
 
         $token = $this->container()->get(MagicLinkService::class)
             ->issue((int) $donor->id, PortalSession::PORTAL_PURPOSE, null, 3600);
@@ -704,6 +852,243 @@ BLOCKS;
         ]);
     }
 
+    /**
+     * Written once: a later run would otherwise back up its own fixture, and
+     * --restore would put the QA brand back instead of the org's.
+     */
+    private function backUpBrand(): void
+    {
+        if (get_option(self::BRAND_BACKUP, null) !== null) {
+            WP_CLI::log('  brand: keeping the backup an earlier run made');
+
+            return;
+        }
+
+        $current = get_option(self::BRAND_OPTION, null);
+        update_option(self::BRAND_BACKUP, ['exists' => $current !== null, 'value' => $current], false);
+        WP_CLI::log('  brand: backed up to ' . self::BRAND_BACKUP);
+    }
+
+    private function restoreBrand(): void
+    {
+        $backup = get_option(self::BRAND_BACKUP, null);
+        if (! is_array($backup) || ! array_key_exists('exists', $backup)) {
+            WP_CLI::error('Nothing to restore: ' . self::BRAND_BACKUP . ' is not set.');
+        }
+
+        if ($backup['exists']) {
+            update_option(self::BRAND_OPTION, $backup['value']);
+        } else {
+            delete_option(self::BRAND_OPTION);
+        }
+        delete_option(self::BRAND_BACKUP);
+
+        WP_CLI::success('Brand restored.');
+    }
+
+    /**
+     * @param array<string,string>|null $style null follows the org default preset
+     */
+    private function brandingCampaign(string $slug, string $title, string $template, ?array $style, int $goalCents): Campaign
+    {
+        $service  = $this->container()->get(CampaignService::class);
+        $campaign = Campaign::query()->where('slug', $slug)->get();
+
+        if (! $campaign) {
+            $campaign = $service->create([
+                'title'         => $title,
+                'slug'          => $slug,
+                'status'        => 'published',
+                'description'   => 'A campaign the branding suite measures text contrast on.',
+                'goal_type'     => 'amount',
+                'goal_cents'    => $goalCents,
+                'page_template' => $template,
+            ]);
+            WP_CLI::log("  campaign created: {$slug} id={$campaign->id}");
+        } else {
+            WP_CLI::log("  campaign reused: {$slug} id={$campaign->id}");
+        }
+
+        $campaign = $service->update($campaign, [
+            'status'  => 'published',
+            'style'   => $style,
+            'ends_at' => gmdate('Y-m-d H:i:s', time() + 60 * DAY_IN_SECONDS),
+        ]);
+
+        // The grids list the newest campaigns first, and the spec reads these cards.
+        $campaign->created_at = $this->container()->get(Clock::class)->now()->format('Y-m-d H:i:s');
+        $campaign->save();
+
+        return $campaign;
+    }
+
+    private function campaignPath(Campaign $campaign): string
+    {
+        return (string) wp_parse_url((string) get_permalink((int) $campaign->page_id), PHP_URL_PATH);
+    }
+
+    /**
+     * Paid live donations, so the list blocks have rows and the grid cards a
+     * percentage. Test-mode rows are left out of both. Keyed by intent id, so a
+     * later run writes nothing.
+     *
+     * @param list<array{key:string,campaign:Campaign,email:string,first:string,last:string,cents:int}> $specs
+     */
+    private function brandingDonations(array $specs): void
+    {
+        $donations = $this->container()->get(DonationService::class);
+
+        $noMail    = static fn () => true;
+        $noReceipt = static fn () => false;
+        add_filter('pre_wp_mail', $noMail, 99);
+        add_filter('gratora.receipt.should_issue', $noReceipt, 99);
+
+        $campaignIds = [];
+        try {
+            foreach ($specs as $spec) {
+                $campaignIds[(int) $spec['campaign']->id] = true;
+
+                if (Donation::query()->where('gateway_intent_id', $spec['key'])->get() !== null) {
+                    continue;
+                }
+
+                $donation = $donations->createPending(new DonationIntent(
+                    email:          $spec['email'],
+                    amount_cents:   $spec['cents'],
+                    currency:       strtoupper(Money::defaultCurrency()),
+                    gateway:        'offline',
+                    form_id:        ((int) ($spec['campaign']->default_form_id ?? 0)) ?: null,
+                    campaign_id:    (int) $spec['campaign']->id,
+                    profile:        ['first_name' => $spec['first'], 'last_name' => $spec['last']],
+                    payment_method: 'bank_transfer',
+                    is_test:        false,
+                ))['donation'];
+                $donations->setGatewayIntent($donation, $spec['key']);
+                $donations->confirm($donation, ['gateway_txn_id' => $spec['key'], 'payment_method' => 'bank_transfer']);
+                WP_CLI::log("  donation recorded: {$spec['key']}");
+            }
+        } finally {
+            remove_filter('pre_wp_mail', $noMail, 99);
+            remove_filter('gratora.receipt.should_issue', $noReceipt, 99);
+        }
+
+        $aggregates = $this->container()->get(AggregateSyncer::class);
+        foreach (array_keys($campaignIds) as $id) {
+            $aggregates->syncCampaign($id);
+        }
+    }
+
+    private function brandingForm(FormService $forms, string $slug, string $title, int $campaignId, string $container): Form
+    {
+        $input = [
+            'campaign_id' => $campaignId,
+            'blocks'      => self::brandingFormBlocks(),
+            'status'      => 'published',
+            'settings'    => [
+                'layout'    => 'inline',
+                'container' => ['style' => $container, 'width' => 540],
+                'recurring' => ['enabled' => true, 'frequencies' => ['monthly']],
+                'gateways'  => ['allowed' => []],
+            ],
+        ];
+
+        $form = Form::query()->where('slug', $slug)->get();
+        if (! $form) {
+            $form = $forms->create($input + ['title' => $title, 'slug' => $slug]);
+            WP_CLI::log("  form created: {$slug} id={$form->id}");
+        } else {
+            $forms->update($form, $input);
+            WP_CLI::log("  form updated: {$slug} id={$form->id}");
+        }
+
+        return $form;
+    }
+
+    /** @return string the page's path */
+    private function brandingPage(string $slug, string $title, string $content, ?Campaign $campaign): string
+    {
+        $page = get_page_by_path($slug, OBJECT, 'page');
+        if ($page && Campaign::query()->where('page_id', (int) $page->ID)->get()) {
+            WP_CLI::error("Page {$slug} belongs to a campaign. Rename that campaign's page and run again.");
+        }
+
+        $post = [
+            'post_title'   => $title,
+            'post_name'    => $slug,
+            'post_status'  => 'publish',
+            'post_type'    => 'page',
+            'post_content' => $content,
+        ];
+        $id = $page ? wp_update_post(['ID' => $page->ID] + $post, true) : wp_insert_post($post, true);
+        if (is_wp_error($id)) {
+            WP_CLI::error("Page {$slug} not written: " . $id->get_error_message());
+        }
+
+        if ($campaign) {
+            update_post_meta((int) $id, '_gratora_campaign_id', (int) $campaign->id);
+        } else {
+            delete_post_meta((int) $id, '_gratora_campaign_id');
+        }
+        WP_CLI::log("  page ready: {$slug} id={$id}");
+
+        return (string) wp_parse_url((string) get_permalink((int) $id), PHP_URL_PATH);
+    }
+
+    /** Every surface the form paints text on: goal, tiles with an impact line, tabs, fund options, fields, checks, summary. */
+    private static function brandingFormBlocks(): string
+    {
+        return implode("\n", [
+            '<!-- wp:gratora/heading {"text":"Support the branding fixture","level":2} /-->',
+            '<!-- wp:gratora/goal {"showDeadline":true} /-->',
+            '<!-- wp:gratora/donation-amount {"presets":[{"cents":2500,"impact":"A week of meals","preselected":false},{"cents":5000,"impact":"","preselected":true},{"cents":10000,"impact":"","preselected":false},{"cents":25000,"impact":"","preselected":false}]} /-->',
+            '<!-- wp:gratora/recurring-toggle {"label":"Make this a recurring donation","style":"tabs","frequencies":["one-time","monthly"]} /-->',
+            '<!-- wp:gratora/fund-picker {"label":"Where it goes"} /-->',
+            '<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:gratora/email {"required":true} /-->',
+            '<!-- wp:gratora/comment {"label":"Add a message of support"} /-->',
+            '<!-- wp:gratora/anonymous-toggle {"label":"Hide my name from the supporter wall"} /-->',
+            '<!-- wp:gratora/cover-fees {"label":"Cover the processing fee","defaultOn":true} /-->',
+            '<!-- wp:gratora/payment-gateways /-->',
+            '<!-- wp:gratora/donation-summary /-->',
+            '<!-- wp:gratora/submit-button {"label":"Donate {amount}"} /-->',
+        ]);
+    }
+
+    /** An accent panel holding the host's own empty list and a guest campaign's. */
+    private static function panelBlocks(int $host, int $guest): string
+    {
+        return implode("\n", [
+            '<!-- wp:group {"className":"dp-panel dp-panel--accent"} -->',
+            '<div class="wp-block-group dp-panel dp-panel--accent">',
+            '<!-- wp:gratora/top-donors {"campaignId":' . $host . ',"title":"Top donors host"} /-->',
+            '<!-- wp:gratora/top-donors {"campaignId":' . $guest . ',"title":"Top donors guest"} /-->',
+            '</div>',
+            '<!-- /wp:group -->',
+        ]);
+    }
+
+    /** A guest campaign's figures and lists straight on the theme's white page. */
+    private static function whiteHostBlocks(int $guest): string
+    {
+        return implode("\n", [
+            '<!-- wp:gratora/campaign-progress {"campaignId":' . $guest . '} /-->',
+            '<!-- wp:gratora/campaign-stat {"campaignId":' . $guest . ',"metric":"raised","size":"lg"} /-->',
+            '<!-- wp:gratora/campaign-stat {"campaignId":' . $guest . ',"metric":"goal"} /-->',
+            '<!-- wp:gratora/recent-donations {"campaignId":' . $guest . ',"title":"Recent guest","limit":5} /-->',
+            '<!-- wp:gratora/top-donors {"campaignId":' . $guest . ',"title":"Top guest","limit":5,"layout":"list"} /-->',
+        ]);
+    }
+
+    /** A guest grid and the host's own on Bold's red card, and an empty list on that card. */
+    private static function boldHostBlocks(int $guest, int $host): string
+    {
+        return implode("\n", [
+            '<!-- wp:gratora/campaign-grid {"campaignId":' . $guest . ',"count":12,"className":"e2e-grid-guest"} /-->',
+            '<!-- wp:gratora/campaign-grid {"campaignId":' . $host . ',"count":12,"className":"e2e-grid-host"} /-->',
+            '<!-- wp:gratora/top-donors {"campaignId":' . $host . ',"title":"Top donors bold"} /-->',
+        ]);
+    }
+
     private static function conditionalBlocks(): string
     {
         $dropdown = wp_json_encode([
@@ -749,4 +1134,5 @@ BLOCKS;
 
 if (defined('WP_CLI') && WP_CLI) {
     WP_CLI::add_command('gratora e2e-seed', [new E2eSeedCommand(), 'seed']);
+    WP_CLI::add_command('gratora e2e-seed-branding', [new E2eSeedCommand(), 'seedBranding']);
 }

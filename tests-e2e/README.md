@@ -146,6 +146,34 @@ The goldens assume the seeded e2e site state, including test mode being ON
 (the form renders the test-mode banner). If a golden fails after reseeding,
 check the site state before re-blessing.
 
+## Branding grounds
+
+`specs/branding-grounds.spec.ts` measures the WCAG contrast of the text Gratora
+draws against the ground painted behind it: the theme's page, the card
+(`--gratora-bg`), the soft ground, a field, the accent and its tint. It runs
+against a brand of its own, so seed it separately:
+
+```sh
+wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding
+```
+
+The seed replaces the org brand with a dark card (#15142b) under a pale accent
+(#fde68a), with Classic set to #452ef5 on #804242 and Bold to a #f55151 card. The
+first run keeps the brand it replaced in `gratora_org_brand_e2e_backup`. It
+publishes `e2e-branding-*` campaigns, forms and pages, records three paid live
+donations on its own campaigns so the lists have rows, and prints the
+`GRATORA_E2E_BRANDING_*` exports, including a single-use donor portal link. It
+refuses on an install that reports itself as production. Put the brand back when
+done:
+
+```sh
+wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding --restore
+```
+
+The administrator check on the campaign page logs in with
+`GRATORA_E2E_ADMIN_USER` / `GRATORA_E2E_ADMIN_PASS`, or reuses a saved session
+from `GRATORA_E2E_ADMIN_STORAGE_STATE`, and skips without either.
+
 ## Demo data for screenshots
 
 The admin screens are only worth photographing against a site that has a year

@@ -1,0 +1,523 @@
+/**
+ * Text reads on the ground actually painted behind it. The page ink is the
+ * page's, a surface that paints the card, the soft ground, a field or the
+ * accent restates its ink from that ground, and the accent drawn as text is
+ * measured on the ground it sits on.
+ *
+ * Runs against the QA brand: a dark card (#15142b) under a pale accent
+ * (#fde68a) on the theme's white page, where ink chosen for one ground and
+ * drawn on another reads at 1:1. Seed with
+ * `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding`
+ * and restore the brand afterwards with `--restore`.
+ */
+
+import { expect, test, type Page } from '@playwright/test';
+
+import { AdminPage } from '../helpers/AdminPage';
+import {
+    VIEWPORTS,
+    contrast,
+    decodePng,
+    describeInk,
+    expectReadable,
+    expectRgb,
+    inkOf,
+    inksOf,
+    installInk,
+    sweep,
+    waitForForms,
+    type Ink,
+} from '../helpers/contrast';
+
+const path = (name: string): string => process.env[`GRATORA_E2E_BRANDING_${name}_PATH`] ?? '';
+const unseeded = (name: string): string =>
+    `set GRATORA_E2E_BRANDING_${name}_PATH via \`wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding\``;
+
+const WHITE = 'rgb(255, 255, 255)';
+const INK = 'rgb(17, 24, 39)';
+const MUTED = 'rgb(107, 114, 128)';
+const CARD = 'rgb(21, 20, 43)';
+const ACCENT = 'rgb(253, 230, 138)';
+const ON_ACCENT = 'rgb(16, 22, 42)';
+
+/** Every text run Gratora draws, on a page or in a form. */
+const GRATORA_TEXT = '.gratora-block, .gratora-donation-form, .dp-layout, .dp-panel, .dp-cover, .dp-display';
+
+test.beforeEach(async ({ page }) => {
+    await page.addInitScript(installInk);
+});
+
+async function open(page: Page, url: string): Promise<void> {
+    await page.goto(url);
+    await waitForForms(page);
+    // A colour read mid-transition is neither end of it.
+    await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+}
+
+async function expectNothingBelowTheBar(page: Page, what: string, roots = GRATORA_TEXT): Promise<void> {
+    const { count, failures } = await sweep(page, roots);
+    expect(count, `${what}: text runs measured`).toBeGreaterThan(0);
+    expect(failures.map(describeInk), `${what}: text runs below the WCAG bar`).toEqual([]);
+}
+
+function expectInk(ink: Ink, color: string, ground: string, what: string): void {
+    expectRgb(ink.color, color, `${what} ink (${describeInk(ink)})`);
+    expectRgb(ink.ground, ground, `${what} ground (${describeInk(ink)})`);
+}
+
+/** Tab from the top of the page until an amount tile has keyboard focus. */
+async function tabToFirstTile(page: Page): Promise<void> {
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    for (let i = 0; i < 80; i++) {
+        await page.keyboard.press('Tab');
+        if (await page.evaluate(() => document.activeElement?.classList.contains('gratora-form__preset') ?? false)) {
+            return;
+        }
+    }
+    throw new Error('Tab never reached an amount tile.');
+}
+
+test.describe('campaign page on the default preset', () => {
+    test.skip(! path('CAMPAIGN'), unseeded('CAMPAIGN'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`page ink stays the page's on the theme's white page at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('CAMPAIGN'));
+
+            // The Plain form and the blocks paint no card.
+            expectInk(await inkOf(page.locator('span.gratora-form__label').first()), MUTED, WHITE, 'form label');
+            for (const ink of await inksOf(page.locator('.gratora-stat__value'))) {
+                expectInk(ink, INK, WHITE, 'stat value');
+            }
+            expectReadable(await inkOf(page.locator('p.dp-body').first()), 'description');
+            for (const selector of ['.gratora-stat__label', '.gratora-recent-donations__name', '.gratora-form__label']) {
+                const inks = await inksOf(page.locator(selector));
+                expect(inks.length, selector).toBeGreaterThan(0);
+                inks.forEach((ink) => expectReadable(ink, selector));
+            }
+
+            // The pale accent drawn as text stands down to the page ink.
+            for (const selector of ['.gratora-progress__value', '.gratora-recent-donations__amount', '.gratora-top-donors__amount']) {
+                const inks = await inksOf(page.locator(selector));
+                expect(inks.length, selector).toBeGreaterThan(0);
+                inks.forEach((ink) => expectInk(ink, INK, WHITE, selector));
+            }
+
+            // The currency code reads the field's own muted ink.
+            expectInk(await inkOf(page.locator('.gratora-amount__code').first()), 'rgba(16, 22, 42, 0.62)', WHITE, 'currency code');
+
+            await expectNothingBelowTheBar(page, 'campaign page');
+        });
+    }
+
+    test('an administrator sees the same ink', async ({ browser }) => {
+        const storageState = process.env.GRATORA_E2E_ADMIN_STORAGE_STATE;
+        test.skip(! storageState && ! process.env.GRATORA_E2E_ADMIN_USER, 'set GRATORA_E2E_ADMIN_USER and GRATORA_E2E_ADMIN_PASS, or GRATORA_E2E_ADMIN_STORAGE_STATE');
+
+        const context = await browser.newContext(storageState ? { storageState } : {});
+        const page = await context.newPage();
+        await page.addInitScript(installInk);
+        if (! storageState) {
+            await new AdminPage(page).login();
+        }
+
+        for (const viewport of VIEWPORTS) {
+            await page.setViewportSize(viewport);
+            await open(page, path('CAMPAIGN'));
+            await expect(page.locator('#wpadminbar')).toHaveCount(1);
+            expectInk(await inkOf(page.locator('.gratora-progress__value').first()), INK, WHITE, 'progress value');
+            await expectNothingBelowTheBar(page, `campaign page as an administrator at ${viewport.width}`);
+        }
+        await context.close();
+    });
+});
+
+test.describe('plain form on a shortcode page', () => {
+    test.skip(! path('PLAIN'), unseeded('PLAIN'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`every run reads on the host page and the panels it paints at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('PLAIN'));
+            const form = page.locator('form.gratora-donation-form');
+
+            // Nothing paints the card, so the page ink stands on white.
+            const label = await inkOf(form.locator('span.gratora-form__label').first());
+            expectInk(label, MUTED, WHITE, 'field label');
+            expect(label.ratio).toBeCloseTo(4.83, 1);
+            for (const ink of await inksOf(form.locator('.gratora-form__check span'))) {
+                expectInk(ink, INK, WHITE, 'check label');
+            }
+            expectInk(await inkOf(form.locator('.gratora-goal__amount strong')), INK, WHITE, 'goal amount');
+            expectInk(await inkOf(form.locator('.gratora-goal__meta')), MUTED, WHITE, 'goal meta');
+
+            // The summary panel paints the soft ground and its values read it.
+            const values = await inksOf(form.locator('.gratora-form__summary-row dd:not(.gratora-form__summary-amount)'));
+            expect(values.length, 'summary values').toBeGreaterThan(0);
+            values.forEach((ink) => expectInk(ink, WHITE, 'rgb(34, 31, 61)', 'summary value'));
+
+            expectInk(await inkOf(form.locator('.gratora-amount__code')), 'rgba(16, 22, 42, 0.62)', WHITE, 'currency code');
+            expectInk(await inkOf(form.locator('.gratora-form__cover-fees-math')), INK, WHITE, 'cover-fees math');
+
+            // The selected tile's accent is measured on its tint.
+            expectInk(await inkOf(form.locator('.gratora-form__preset.is-selected')), ACCENT, 'rgb(49, 45, 54)', 'selected tile');
+
+            expectInk(await inkOf(form.locator('.gratora-form__heading')), INK, WHITE, 'heading');
+            expectReadable(await inkOf(form.locator('.gratora-form__frequency legend')), 'recurring legend');
+
+            // The required marker is carried toward the page ink.
+            const required = await inkOf(form.locator('.gratora-form__required').first());
+            expectInk(required, 'rgb(159, 43, 106)', WHITE, 'required marker');
+            expect(required.ratio).toBeCloseTo(6.94, 1);
+
+            await expectNothingBelowTheBar(page, 'plain form');
+        });
+    }
+
+    test('the tabs draw the selected frequency in ink that reads on the page', async ({ page }) => {
+        await open(page, path('PLAIN'));
+        const tabs = page.locator('.gratora-form__frequency--tabs');
+        await expect(tabs).toBeVisible();
+
+        const selected = tabs.locator('.gratora-form__frequency-option.is-selected');
+        expectInk(await inkOf(selected), INK, WHITE, 'selected tab');
+        expectRgb(await inkOf(selected, 'border-bottom-color').then((i) => i.color), INK, 'selected tab underline');
+        await expect(selected).toHaveCSS('border-bottom-width', '2px');
+
+        const other = tabs.locator('.gratora-form__frequency-option:not(.is-selected)').first();
+        expectInk(await inkOf(other), MUTED, WHITE, 'unselected tab');
+        await expect(other).toHaveCSS('font-size', '13px');
+        await expect(other).toHaveCSS('font-weight', '500');
+    });
+
+    test('the keyboard ring on a tile reads on the page around it', async ({ page }) => {
+        await open(page, path('PLAIN'));
+        await tabToFirstTile(page);
+
+        // Drawn 2px outside the tile, on the host page.
+        const tile = page.locator('.gratora-form__preset:focus-visible');
+        await expect(tile).toHaveCSS('outline-offset', '2px');
+        const ring = await inkOf(tile, 'outline-color');
+        expectInk(ring, INK, WHITE, 'focus ring');
+        expect(ring.ratio).toBeGreaterThanOrEqual(3);
+    });
+
+    test('the field text follows Base font size', async ({ page }) => {
+        await open(page, path('PLAIN'));
+        const form = page.locator('form.gratora-donation-form');
+
+        for (const size of ['14px', '15px', '16px']) {
+            await form.evaluate((el, s) => (el as HTMLElement).style.setProperty('--gratora-type-size', s), size);
+            await expect(form.locator('.gratora-form__field input').first()).toHaveCSS('font-size', size);
+        }
+    });
+});
+
+test.describe('framed form', () => {
+    test.skip(! path('FRAME'), unseeded('FRAME'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`the frame is one card in the brand's ground at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('FRAME'));
+            const frame = page.locator('form.gratora-donation-form');
+
+            await expect(frame).toHaveCSS('background-color', CARD);
+            await expect(frame).toHaveCSS('border-top-left-radius', '10px');
+            await expect(frame).toHaveCSS('box-shadow', 'rgba(15, 23, 42, 0.06) 0px 12px 32px 0px');
+
+            const shot = decodePng(await frame.screenshot());
+            const inset = 10;
+            const white: string[] = [];
+            const check = (x: number, y: number): void => {
+                const [r, g, b] = shot.pixel(x, y);
+                if (r === 255 && g === 255 && b === 255) white.push(`${x},${y}`);
+            };
+            for (let y = 0; y < inset; y++) {
+                for (let x = inset; x < shot.width - inset; x++) {
+                    check(x, y);
+                    check(x, shot.height - 1 - y);
+                }
+            }
+            for (let x = 0; x < inset; x++) {
+                for (let y = inset; y < shot.height - inset; y++) {
+                    check(x, y);
+                    check(shot.width - 1 - x, y);
+                }
+            }
+            expect(white.slice(0, 5), `white pixels within ${inset}px inside the frame edge (${white.length})`).toEqual([]);
+
+            const label = await inkOf(frame.locator('span.gratora-form__label').first());
+            expectInk(label, 'rgba(255, 255, 255, 0.72)', CARD, 'field label');
+            expect(label.ratio).toBeCloseTo(9.63, 1);
+
+            // The field stays white, and so does its ink.
+            expectInk(await inkOf(frame.locator('.gratora-amount__code')), 'rgba(16, 22, 42, 0.62)', WHITE, 'currency code');
+
+            const required = await inkOf(frame.locator('.gratora-form__required').first());
+            expectInk(required, 'rgb(225, 108, 166)', CARD, 'required marker');
+            expect(required.ratio).toBeCloseTo(5.91, 1);
+
+            await expectNothingBelowTheBar(page, 'framed form');
+        });
+    }
+
+    test('the keyboard ring on a tile reads on the card around it', async ({ page }) => {
+        await open(page, path('FRAME'));
+        await tabToFirstTile(page);
+
+        const ring = await inkOf(page.locator('.gratora-form__preset:focus-visible'), 'outline-color');
+        expectInk(ring, ACCENT, CARD, 'focus ring');
+        expect(ring.ratio).toBeCloseTo(14.45, 1);
+    });
+});
+
+test.describe('framed form on Bold', () => {
+    test.skip(! path('FRAME_BOLD'), unseeded('FRAME_BOLD'));
+
+    test('the frame takes the preset card shadow', async ({ page }) => {
+        await open(page, path('FRAME_BOLD'));
+        const frame = page.locator('form.gratora-donation-form');
+
+        await expect(frame).toHaveCSS('background-color', 'rgb(245, 81, 81)');
+        await expect(frame).toHaveCSS('box-shadow', 'rgba(0, 0, 0, 0.25) 0px 30px 60px 0px');
+        expectReadable(await inkOf(frame.locator('span.gratora-form__label').first()), 'field label on Bold');
+    });
+
+    // Mixing the pink toward the card ink cannot lift it on a red card: 2.04:1.
+    // The marker needs ink measured on the card, which only the server can do.
+    test.fixme('the required marker reads on the red card', async ({ page }) => {
+        await open(page, path('FRAME_BOLD'));
+        expectReadable(await inkOf(page.locator('.gratora-form__required').first()), 'required marker on Bold');
+    });
+});
+
+test.describe('photo cover without a photo', () => {
+    test.skip(! path('COVER'), unseeded('COVER'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`the cover is the accent under ink measured on it at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('COVER'));
+            const cover = page.locator('.dp-cover');
+
+            await expect(cover).toHaveCSS('background-color', ACCENT);
+            expect(await cover.evaluate((el) => getComputedStyle(el, '::after').backgroundImage)).toBe('none');
+            const title = await inkOf(cover.locator('.dp-cover__body h1'));
+            expectInk(title, ON_ACCENT, ACCENT, 'cover title');
+            expect(title.ratio).toBeCloseTo(14.41, 1);
+
+            await expectNothingBelowTheBar(page, 'cover');
+        });
+    }
+});
+
+test.describe('accent panel with an empty list', () => {
+    test.skip(! path('PANEL'), unseeded('PANEL'));
+
+    test('a guest block reads the panel ink, and an empty card its own', async ({ page }) => {
+        await open(page, path('PANEL'));
+        const panel = page.locator('.dp-panel--accent');
+        const titles = await inksOf(panel.locator('h3.gratora-block__title'));
+
+        // The guest's title on the panel, as the host's.
+        expect(titles.map((t) => t.text)).toEqual(['Top donors host', 'Top donors guest']);
+        titles.forEach((ink) => expectInk(ink, ON_ACCENT, ACCENT, ink.text));
+        expect(titles[1].ratio).toBeCloseTo(14.41, 1);
+
+        // The empty card paints the brand's card, and reads it.
+        const cards = panel.locator('.gratora-empty');
+        await expect(cards).toHaveCount(2);
+        for (let i = 0; i < 2; i++) {
+            const card = cards.nth(i);
+            const title = await inkOf(card.locator('.gratora-empty__title'));
+            expectInk(title, WHITE, CARD, 'empty title');
+            expect(title.ratio).toBeCloseTo(18, 0);
+            expectInk(await inkOf(card.locator('.gratora-empty__sub')), 'rgba(255, 255, 255, 0.72)', CARD, 'empty sub');
+            expectInk(await inkOf(card.locator('.gratora-empty__icon')), 'rgba(255, 255, 255, 0.72)', CARD, 'empty icon');
+        }
+
+        await expectNothingBelowTheBar(page, 'accent panel');
+    });
+});
+
+test.describe('guest blocks on a white-ground host', () => {
+    test.skip(! path('WHITE_HOST'), unseeded('WHITE_HOST'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`a guest's figures read on the page they are on at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('WHITE_HOST'));
+
+            for (const selector of ['.gratora-progress__value', '.gratora-stat__value', 'h3.gratora-block__title', '.gratora-recent-donations__amount', '.gratora-top-donors__amount']) {
+                const inks = await inksOf(page.locator(selector));
+                expect(inks.length, selector).toBeGreaterThan(0);
+                inks.forEach((ink) => expectInk(ink, INK, WHITE, selector));
+            }
+            for (const selector of ['.gratora-progress__caption', '.gratora-progress__target', '.gratora-stat__label']) {
+                const inks = await inksOf(page.locator(selector));
+                expect(inks.length, selector).toBeGreaterThan(0);
+                inks.forEach((ink) => expectInk(ink, MUTED, WHITE, selector));
+            }
+
+            await expectNothingBelowTheBar(page, 'white-ground host');
+        });
+    }
+});
+
+test.describe('grids on a Bold host', () => {
+    test.skip(! path('BOLD_HOST'), unseeded('BOLD_HOST'));
+
+    test('each card measures its accent on the card it is drawn on', async ({ page }) => {
+        await open(page, path('BOLD_HOST'));
+
+        // Muted ink on Bold's red card is measured.
+        expect(await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--gratora-on-bg-muted').trim())).toBe('rgba(16,22,42,.86)');
+        const sub = await inkOf(page.locator('.gratora-empty__sub'));
+        expectRgb(sub.ground, 'rgb(245, 81, 81)', 'empty card on Bold');
+        expect(sub.ratio, describeInk(sub)).toBeGreaterThanOrEqual(4.5);
+
+        // The guest states its tint unset rather than inheriting the host's.
+        const guest = page.locator('section.gratora-block--grid.e2e-grid-guest');
+        const host = page.locator('section.gratora-block--grid.e2e-grid-host');
+        expect(await guest.evaluate((el) => getComputedStyle(el).getPropertyValue('--gratora-accent-soft'))).toBe('');
+        expect(await guest.getAttribute('style')).toContain('--gratora-accent-soft:initial;');
+
+        const palePill = await inkOf(guest.locator('.gratora-campaign-card', { hasText: 'Branding Pale' }).locator('.gratora-campaign-card__pct'));
+        expectInk(palePill, ACCENT, 'rgb(49, 45, 54)', 'pale pill in the QA grid');
+        expect(palePill.ratio).toBeCloseTo(10.81, 1);
+
+        const onDark = await inkOf(guest.locator('.gratora-campaign-card', { hasText: 'Branding Bold' }).locator('.gratora-campaign-card__link'));
+        expectInk(onDark, WHITE, CARD, 'navy card link on the QA card');
+        expect(onDark.ratio).toBeCloseTo(18, 0);
+        const onRed = await inkOf(host.locator('.gratora-campaign-card', { hasText: 'Branding Page' }).locator('.gratora-campaign-card__link'));
+        expectInk(onRed, INK, 'rgb(245, 81, 81)', 'pale card link on the Bold card');
+        expect(onRed.ratio).toBeCloseTo(5.22, 1);
+
+        // Every card, whatever campaign it shows.
+        for (const ink of await inksOf(page.locator('.gratora-campaign-card__link'))) expectReadable(ink, 'card link');
+        for (const ink of await inksOf(page.locator('.gratora-campaign-card__pct'))) expectReadable(ink, 'card percentage');
+
+        await expectNothingBelowTheBar(page, 'Bold host');
+    });
+});
+
+test.describe('grid on a page with no campaign', () => {
+    test.skip(! path('WHITE_GRID'), unseeded('WHITE_GRID'));
+
+    test('a pale card measures its tint on the white card', async ({ page }) => {
+        await open(page, path('WHITE_GRID'));
+
+        const pill = await inkOf(page.locator('.gratora-campaign-card', { hasText: 'Branding Page' }).locator('.gratora-campaign-card__pct'));
+        expectInk(pill, ON_ACCENT, 'rgb(255, 252, 241)', 'pale pill on a white grid');
+        expect(pill.ratio).toBeCloseTo(17.47, 1);
+        for (const ink of await inksOf(page.locator('.gratora-campaign-card__link'))) expectReadable(ink, 'card link');
+        for (const ink of await inksOf(page.locator('.gratora-campaign-card__pct'))) expectReadable(ink, 'card percentage');
+    });
+});
+
+test.describe('Classic accent panel', () => {
+    test.skip(! path('CLASSIC'), unseeded('CLASSIC'));
+
+    test('muted ink on the accent is measured, and the selected tile reads its tint', async ({ page }) => {
+        await open(page, path('CLASSIC'));
+        const panel = page.locator('.dp-panel--accent');
+
+        for (const selector of ['.gratora-progress__caption', '.gratora-progress__target', '.gratora-stat__label']) {
+            const inks = await inksOf(panel.locator(selector));
+            expect(inks.length, selector).toBeGreaterThan(0);
+            inks.forEach((ink) => {
+                expectInk(ink, 'rgba(255, 255, 255, 0.74)', 'rgb(69, 46, 245)', selector);
+                expect(ink.ratio, describeInk(ink)).toBeGreaterThanOrEqual(4.5);
+            });
+        }
+
+        const form = page.locator('form.gratora-donation-form').first();
+        if (await form.locator('.gratora-form__preset.is-selected').count() === 0) {
+            await form.locator('.gratora-form__preset').first().click();
+            await page.mouse.move(0, 0);
+        }
+        const tile = await inkOf(form.locator('.gratora-form__preset.is-selected'));
+        expectInk(tile, WHITE, 'rgb(121, 64, 87)', 'selected tile on Classic');
+        expect(tile.ratio).toBeCloseTo(7.82, 1);
+
+        await expectNothingBelowTheBar(page, 'Classic campaign');
+    });
+});
+
+test.describe('Site theme preset', () => {
+    test.skip(! path('THEME'), unseeded('THEME'));
+
+    test('the selected tile reads its tint', async ({ page }) => {
+        await open(page, path('THEME'));
+        const form = page.locator('form.gratora-donation-form').first();
+        if (await form.locator('.gratora-form__preset.is-selected').count() === 0) {
+            await form.locator('.gratora-form__preset').first().click();
+            await page.mouse.move(0, 0);
+        }
+
+        const tile = await inkOf(form.locator('.gratora-form__preset.is-selected'));
+        expect(tile.ratio, describeInk(tile)).toBeGreaterThanOrEqual(4.5);
+        const accent = await form.evaluate((el) => getComputedStyle(el).getPropertyValue('--gratora-accent').trim().toLowerCase());
+        if (accent === '#ffee58') {
+            expectInk(tile, ON_ACCENT, 'rgb(255, 253, 235)', 'selected tile on the twentytwentyfive accent');
+        }
+    });
+});
+
+test.describe('donate button modal', () => {
+    test.skip(! path('MODAL'), unseeded('MODAL'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`the panel fits the viewport and its form reads the card at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('MODAL'));
+            await page.locator('.gratora-donate-button').click();
+            const panel = page.locator('.gratora-donate-modal__panel');
+            await expect(panel).toBeVisible();
+            await expect(panel.locator('form.gratora-donation-form')).toHaveAttribute('data-gratora-ready', /.*/);
+
+            const fits = await panel.evaluate((el) => el.getBoundingClientRect().bottom <= window.innerHeight);
+            expect(fits, 'panel bottom within the viewport').toBe(true);
+
+            const label = await inkOf(panel.locator('span.gratora-form__label').first());
+            expectInk(label, 'rgba(255, 255, 255, 0.72)', CARD, 'field label in the modal');
+            await expectNothingBelowTheBar(page, 'donate modal');
+        });
+    }
+});
+
+test.describe('donor portal', () => {
+    const portal = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
+    test.skip(! portal, 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints');
+
+    test('what paints the card or the soft ground reads it, and the root reads the page', async ({ page }) => {
+        await page.goto(portal);
+        const root = page.locator('.gratora-donor-portal');
+        await expect(root.locator('.dp-kpi').first()).toBeVisible({ timeout: 15_000 });
+        await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+
+        // The root paints nothing, the figures sit on the soft ground.
+        expectInk(await inkOf(root.locator('.dp__head h1')), INK, WHITE, 'greeting');
+        expectInk(await inkOf(root.locator('.dp-kpi__value').first()), WHITE, 'rgb(34, 31, 61)', 'figure');
+        await expectNothingBelowTheBar(page, 'portal overview', '.gratora-donor-portal');
+
+        await root.getByRole('tab', { name: 'Donations' }).click();
+        const row = root.locator('.dp-list__row').first();
+        await expect(row).toBeVisible();
+        expectInk(await inkOf(row), WHITE, CARD, 'donation row');
+        await expectNothingBelowTheBar(page, 'portal donations', '.gratora-donor-portal');
+
+        await row.click();
+        const detail = root.locator('.dp-modal__panel');
+        await expect(detail).toBeVisible();
+        expectInk(await inkOf(detail), WHITE, CARD, 'donation detail');
+        await expectNothingBelowTheBar(page, 'portal donation detail', '.gratora-donor-portal');
+    });
+});
+
+test('the measuring agrees with WCAG', () => {
+    expect(contrast([255, 255, 255, 1], [0, 0, 0, 1])).toBeCloseTo(21, 5);
+    expect(contrast([107, 114, 128, 1], [255, 255, 255, 1])).toBeCloseTo(4.83, 2);
+});
