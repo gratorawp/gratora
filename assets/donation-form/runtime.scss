@@ -541,7 +541,8 @@
     }
 
     &__required {
-        color: var(--gratora-required, #d63384);
+        // Mixed with the text ink, as the field error is, so it reads on the form's ground.
+        color: color-mix(in srgb, var(--gratora-required, #d63384) 72%, var(--gratora-text));
         margin-left: 2px;
     }
 
