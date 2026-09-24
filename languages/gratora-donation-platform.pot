@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-24T07:57:43+00:00\n"
+"POT-Creation-Date: 2026-09-24T16:36:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -41,7 +41,7 @@ msgid "Clear color"
 msgstr ""
 
 #: components/CountrySelect.js:30
-#: src/Forms/Shortcode/DonationFormShortcode.php:833
+#: src/Forms/Shortcode/DonationFormShortcode.php:845
 #: assets/admin/donors/DonorProfile.jsx:174
 #: assets/admin/forms/blocks/country/index.js:32
 #: assets/admin/forms/blocks/country/index.js:53
@@ -116,8 +116,8 @@ msgstr ""
 #: components/Dialog.js:53
 #: components/Drawer.js:56
 #: src/Campaigns/Blocks/views/donate-button.php:49
-#: src/Forms/Shortcode/DonationFormShortcode.php:825
-#: assets/admin/campaigns/Detail.jsx:1546
+#: src/Forms/Shortcode/DonationFormShortcode.php:837
+#: assets/admin/campaigns/Detail.jsx:1547
 #: assets/admin/campaigns/List.jsx:476
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:51
 #: assets/admin/tools/tabs/LogsTab.jsx:318
@@ -144,7 +144,7 @@ msgstr ""
 #: components/KeyField.js:57
 #: assets/admin/donors/profile/IdentityCard.jsx:36
 #: assets/admin/donors/profile/IdentityCard.jsx:194
-#: assets/admin/forms/Editor.jsx:1702
+#: assets/admin/forms/Editor.jsx:1701
 msgid "Copy"
 msgstr ""
 
@@ -259,7 +259,7 @@ msgid "donors"
 msgstr ""
 
 #: styling/StylePreview.js:138
-#: assets/admin/campaigns/Detail.jsx:1091
+#: assets/admin/campaigns/Detail.jsx:1092
 #: assets/admin/donors/index.jsx:627
 #: assets/admin/donors/Insights.jsx:240
 msgid "No donors yet"
@@ -289,7 +289,7 @@ msgstr ""
 #: src/Exports/DonorExporter.php:165
 #: src/Forms/Blocks/views/email.php:8
 #: src/Forms/FormService.php:61
-#: src/Forms/Shortcode/DonationFormShortcode.php:751
+#: src/Forms/Shortcode/DonationFormShortcode.php:763
 #: assets/admin/donations/detail/helpers.js:32
 #: assets/admin/donors/DonorProfile.jsx:145
 #: assets/admin/donors/index.jsx:338
@@ -494,7 +494,7 @@ msgstr ""
 
 #: src/Admin/AdminGlobals.php:47
 #: src/Campaigns/DefaultCampaignTypeHandler.php:19
-#: assets/admin/campaigns/Detail.jsx:1815
+#: assets/admin/campaigns/Detail.jsx:1820
 #: assets/admin/_shared/components/FormTemplatePicker.jsx:21
 msgid "Standard"
 msgstr ""
@@ -529,7 +529,7 @@ msgstr ""
 
 #: src/Admin/Pages/CampaignsPage.php:28
 #: src/Rest/Admin/ToolsController.php:1313
-#: assets/admin/campaigns/Detail.jsx:435
+#: assets/admin/campaigns/Detail.jsx:436
 #: assets/admin/campaigns/List.jsx:376
 #: assets/admin/campaigns/List.jsx:380
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:14
@@ -548,7 +548,7 @@ msgstr ""
 #: src/Rest/Admin/RolesController.php:84
 #: assets/admin/campaign-blocks/index.jsx:271
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:21
-#: assets/admin/campaigns/Detail.jsx:770
+#: assets/admin/campaigns/Detail.jsx:771
 #: assets/admin/campaigns/List.jsx:219
 #: assets/admin/campaigns/List.jsx:509
 #: assets/admin/campaigns/widgets/DistributionHistogram.jsx:104
@@ -562,7 +562,7 @@ msgstr ""
 #: assets/admin/donors/index.jsx:376
 #: assets/admin/donors/Insights.jsx:207
 #: assets/admin/donors/profile/Tabs.jsx:8
-#: assets/admin/forms/Editor.jsx:1406
+#: assets/admin/forms/Editor.jsx:1405
 #: assets/admin/tools/tabs/ExportTab.jsx:168
 #: assets/donor-portal/index.jsx:526
 #: assets/donor-portal/index.jsx:682
@@ -576,7 +576,7 @@ msgstr ""
 #: src/Rest/Admin/ToolsController.php:1311
 #: assets/admin/campaign-blocks/index.jsx:272
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:22
-#: assets/admin/campaigns/Detail.jsx:774
+#: assets/admin/campaigns/Detail.jsx:775
 #: assets/admin/campaigns/List.jsx:229
 #: assets/admin/dashboard/widgets/KpiRow.jsx:47
 #: assets/admin/dashboard/widgets/QuickActions.jsx:66
@@ -585,7 +585,7 @@ msgstr ""
 #: assets/admin/donors/Insights.jsx:117
 #: assets/admin/donors/Insights.jsx:482
 #: assets/admin/donors/profile/Header.jsx:48
-#: assets/admin/forms/Editor.jsx:1407
+#: assets/admin/forms/Editor.jsx:1406
 #: assets/admin/tools/tabs/ExportTab.jsx:270
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:12
 msgid "Donors"
@@ -593,10 +593,10 @@ msgstr ""
 
 #: src/Admin/Pages/FormsPage.php:74
 #: src/Rest/Admin/ToolsController.php:1314
-#: assets/admin/campaigns/Detail.jsx:485
-#: assets/admin/campaigns/Detail.jsx:1490
+#: assets/admin/campaigns/Detail.jsx:486
+#: assets/admin/campaigns/Detail.jsx:1491
 #: assets/admin/campaigns/List.jsx:239
-#: assets/admin/forms/Editor.jsx:831
+#: assets/admin/forms/Editor.jsx:830
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:15
 msgid "Forms"
 msgstr ""
@@ -610,9 +610,9 @@ msgid "Funds"
 msgstr ""
 
 #: src/Admin/Pages/SettingsPage.php:28
-#: assets/admin/campaigns/Detail.jsx:486
+#: assets/admin/campaigns/Detail.jsx:487
 #: assets/admin/dashboard/widgets/QuickActions.jsx:69
-#: assets/admin/forms/Editor.jsx:799
+#: assets/admin/forms/Editor.jsx:798
 #: assets/admin/settings/Settings.jsx:303
 #: assets/admin/settings/Settings.jsx:310
 #: assets/admin/tools/tabs/ExportTab.jsx:357
@@ -693,8 +693,8 @@ msgstr ""
 #: src/Admin/SystemReport.php:102
 #: src/Admin/SystemReport.php:273
 #: src/Admin/SystemReport.php:352
-#: src/Campaigns/Styling/Tokens.php:237
-#: src/Campaigns/Styling/Tokens.php:287
+#: src/Campaigns/Styling/Tokens.php:228
+#: src/Campaigns/Styling/Tokens.php:278
 #: assets/admin/donations/detail/rail/QuickStatsCard.jsx:28
 #: assets/admin/forms/blocks/section/index.js:28
 #: assets/admin/forms/blocks/section/index.js:153
@@ -725,7 +725,7 @@ msgid "not configured"
 msgstr ""
 
 #: src/Admin/SystemReport.php:195
-#: assets/admin/forms/Editor.jsx:1200
+#: assets/admin/forms/Editor.jsx:1199
 msgid "Gateways"
 msgstr ""
 
@@ -959,16 +959,16 @@ msgid "Reactivating will not bring any of it back. Export anything you need firs
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:43
-#: src/Forms/Shortcode/DonationFormShortcode.php:807
+#: src/Forms/Shortcode/DonationFormShortcode.php:819
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:177
-#: assets/admin/campaigns/Detail.jsx:410
-#: assets/admin/campaigns/Detail.jsx:1833
+#: assets/admin/campaigns/Detail.jsx:411
+#: assets/admin/campaigns/Detail.jsx:1838
 #: assets/admin/donations/Detail.jsx:372
 #: assets/admin/donations/detail/RefundDialog.jsx:128
 #: assets/admin/donations/RecordDonationDrawer.jsx:184
 #: assets/admin/donors/DonorProfile.jsx:130
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:65
-#: assets/admin/forms/Editor.jsx:693
+#: assets/admin/forms/Editor.jsx:692
 #: assets/admin/funds/List.jsx:689
 #: assets/admin/funds/List.jsx:861
 #: assets/admin/settings/panels/EmailPanel.jsx:246
@@ -1035,8 +1035,8 @@ msgstr ""
 
 #. translators: %d: number of donations
 #: src/Analytics/AuditMessage.php:115
-#: assets/admin/campaigns/Detail.jsx:1016
-#: assets/admin/campaigns/Detail.jsx:1106
+#: assets/admin/campaigns/Detail.jsx:1017
+#: assets/admin/campaigns/Detail.jsx:1107
 #: assets/admin/campaigns/widgets/DowHourHeatmap.jsx:119
 #: assets/admin/dashboard/widgets/TodayStrip.jsx:14
 #: assets/admin/dashboard/widgets/TopCampaigns.jsx:63
@@ -1089,23 +1089,23 @@ msgstr[1] ""
 #: assets/admin/campaign-blocks/index.jsx:574
 #: assets/admin/campaign-blocks/index.jsx:683
 #: assets/admin/campaign-blocks/index.jsx:791
-#: assets/admin/campaigns/Detail.jsx:1304
+#: assets/admin/campaigns/Detail.jsx:1305
 #: assets/admin/campaigns/List.jsx:169
-#: assets/admin/forms/Editor.jsx:1278
+#: assets/admin/forms/Editor.jsx:1277
 msgid "Title"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:49
-#: assets/admin/campaigns/Detail.jsx:1938
+#: assets/admin/campaigns/Detail.jsx:1943
 msgid "Short description"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:50
 #: assets/admin/campaigns/CoverImageCard.jsx:76
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:318
-#: assets/admin/campaigns/Detail.jsx:1591
 #: assets/admin/campaigns/Detail.jsx:1592
-#: assets/admin/campaigns/Detail.jsx:1966
+#: assets/admin/campaigns/Detail.jsx:1593
+#: assets/admin/campaigns/Detail.jsx:1971
 msgid "Cover image"
 msgstr ""
 
@@ -1127,15 +1127,15 @@ msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:54
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:248
-#: assets/admin/campaigns/Detail.jsx:1342
-#: assets/admin/campaigns/Detail.jsx:1572
-#: assets/admin/campaigns/Detail.jsx:1596
+#: assets/admin/campaigns/Detail.jsx:1343
+#: assets/admin/campaigns/Detail.jsx:1573
 #: assets/admin/campaigns/Detail.jsx:1597
 #: assets/admin/campaigns/Detail.jsx:1598
+#: assets/admin/campaigns/Detail.jsx:1599
 #: assets/admin/campaigns/List.jsx:210
 #: assets/admin/forms/blocks/goal/index.js:110
 #: assets/admin/forms/blocks/goal/index.js:212
-#: assets/admin/forms/Editor.jsx:1199
+#: assets/admin/forms/Editor.jsx:1198
 msgid "Goal"
 msgstr ""
 
@@ -1241,9 +1241,9 @@ msgstr ""
 
 #: src/Campaigns/Blocks/DonateButtonBlock.php:87
 #: src/Forms/Blocks/SubmitButtonBlock.php:36
-#: src/Forms/Shortcode/DonationFormShortcode.php:772
-#: src/Forms/Shortcode/DonationFormShortcode.php:1386
-#: src/Forms/Shortcode/DonationFormShortcode.php:1543
+#: src/Forms/Shortcode/DonationFormShortcode.php:784
+#: src/Forms/Shortcode/DonationFormShortcode.php:1398
+#: src/Forms/Shortcode/DonationFormShortcode.php:1555
 #: assets/admin/campaign-blocks/index.jsx:496
 #: assets/admin/forms/blocks/submit-button/index.js:56
 msgid "Donate now"
@@ -1324,7 +1324,7 @@ msgstr ""
 #: src/Donors/DonorMetricsService.php:184
 #: src/Donors/DonorMetricsService.php:709
 #: src/Donors/DonorMetricsService.php:750
-#: src/Forms/Shortcode/DonationFormShortcode.php:760
+#: src/Forms/Shortcode/DonationFormShortcode.php:772
 #: src/Receipts/resources/views/generic.php:203
 #: src/Reports/TaxStatementBuilder.php:69
 #: assets/admin/donations/detail/Header.jsx:16
@@ -1431,7 +1431,7 @@ msgstr ""
 #: assets/admin/campaign-blocks/index.jsx:675
 #: assets/admin/campaign-blocks/index.jsx:686
 #: assets/admin/campaign-blocks/index.jsx:746
-#: assets/admin/campaigns/Detail.jsx:819
+#: assets/admin/campaigns/Detail.jsx:820
 #: assets/admin/dashboard/Dashboard.jsx:163
 msgid "Recent donations"
 msgstr ""
@@ -1439,7 +1439,7 @@ msgstr ""
 #: src/Campaigns/CampaignService.php:693
 #: assets/admin/campaign-blocks/index.jsx:544
 #: assets/admin/campaign-blocks/index.jsx:566
-#: assets/admin/campaigns/Detail.jsx:823
+#: assets/admin/campaigns/Detail.jsx:824
 msgid "Top donors"
 msgstr ""
 
@@ -1463,8 +1463,8 @@ msgstr ""
 
 #: src/Campaigns/CampaignStatMetrics.php:34
 #: assets/admin/campaign-blocks/index.jsx:267
-#: assets/admin/campaigns/Detail.jsx:766
-#: assets/admin/campaigns/Detail.jsx:1565
+#: assets/admin/campaigns/Detail.jsx:767
+#: assets/admin/campaigns/Detail.jsx:1566
 #: assets/admin/dashboard/widgets/KpiRow.jsx:31
 msgid "Amount raised"
 msgstr ""
@@ -1488,7 +1488,7 @@ msgstr ""
 #: src/Reports/CampaignReportBuilder.php:60
 #: src/Reports/RevenueReportBuilder.php:70
 #: assets/admin/campaign-blocks/index.jsx:273
-#: assets/admin/campaigns/Detail.jsx:778
+#: assets/admin/campaigns/Detail.jsx:779
 #: assets/admin/dashboard/widgets/KpiRow.jsx:55
 msgid "Average donation"
 msgstr ""
@@ -1693,8 +1693,8 @@ msgid "Balanced, friendly, accent green. The Gratora default."
 msgstr ""
 
 #: src/Campaigns/Styling/StylePresets.php:48
-#: src/Campaigns/Styling/Tokens.php:140
-#: src/Campaigns/Styling/Tokens.php:228
+#: src/Campaigns/Styling/Tokens.php:131
+#: src/Campaigns/Styling/Tokens.php:219
 #: assets/admin/onboarding/Onboarding.jsx:513
 msgid "Bold"
 msgstr ""
@@ -1720,238 +1720,238 @@ msgstr ""
 msgid "Picks up accent, background, and button styles from the active WordPress theme (theme.json)."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:62
-#: assets/admin/settings/panels/BrandPanel.jsx:282
+#: src/Campaigns/Styling/Tokens.php:53
+#: assets/admin/_shared/styling/ContrastNotice.jsx:14
 msgid "Accent"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:68
+#: src/Campaigns/Styling/Tokens.php:59
 msgid "Accent soft"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:71
+#: src/Campaigns/Styling/Tokens.php:62
 msgid "Translucent variant used for hover and selected tiles."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:75
+#: src/Campaigns/Styling/Tokens.php:66
 msgid "Body text"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:81
+#: src/Campaigns/Styling/Tokens.php:72
 msgid "Muted text"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:84
+#: src/Campaigns/Styling/Tokens.php:75
 msgid "Helper text, placeholders, captions."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:89
-#: assets/admin/settings/panels/BrandPanel.jsx:279
+#: src/Campaigns/Styling/Tokens.php:80
+#: assets/admin/_shared/styling/ContrastNotice.jsx:11
 msgid "Background"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:92
+#: src/Campaigns/Styling/Tokens.php:83
 msgid "The card behind the form, and the panels on the campaign page."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:96
-#: assets/admin/settings/panels/BrandPanel.jsx:281
+#: src/Campaigns/Styling/Tokens.php:87
+#: assets/admin/_shared/styling/ContrastNotice.jsx:13
 msgid "Field background"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:99
+#: src/Campaigns/Styling/Tokens.php:90
 msgid "Inside the boxes a donor types in or picks from."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:103
-#: assets/admin/settings/panels/BrandPanel.jsx:280
+#: src/Campaigns/Styling/Tokens.php:94
+#: assets/admin/_shared/styling/ContrastNotice.jsx:12
 msgid "Soft background"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:106
+#: src/Campaigns/Styling/Tokens.php:97
 msgid "Amount tile resting fill."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:110
+#: src/Campaigns/Styling/Tokens.php:101
 msgid "Border"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:117
+#: src/Campaigns/Styling/Tokens.php:108
 msgid "Font family"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:123
+#: src/Campaigns/Styling/Tokens.php:114
 msgid "Base font size"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:134
+#: src/Campaigns/Styling/Tokens.php:125
 msgid "Heading weight"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:138
-#: src/Campaigns/Styling/Tokens.php:150
-#: src/Campaigns/Styling/Tokens.php:226
+#: src/Campaigns/Styling/Tokens.php:129
+#: src/Campaigns/Styling/Tokens.php:141
+#: src/Campaigns/Styling/Tokens.php:217
 #: assets/admin/campaign-blocks/index.jsx:360
 #: assets/admin/campaign-blocks/index.jsx:515
 #: assets/admin/forms/blocks/section/index.js:31
 msgid "Medium"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:139
-#: src/Campaigns/Styling/Tokens.php:227
+#: src/Campaigns/Styling/Tokens.php:130
+#: src/Campaigns/Styling/Tokens.php:218
 msgid "Semibold"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:145
+#: src/Campaigns/Styling/Tokens.php:136
 msgid "Body weight"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:149
+#: src/Campaigns/Styling/Tokens.php:140
 msgid "Regular"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:156
+#: src/Campaigns/Styling/Tokens.php:147
 msgid "Corner radius"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:162
+#: src/Campaigns/Styling/Tokens.php:153
 msgid "Cards, panels and other surfaces."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:166
+#: src/Campaigns/Styling/Tokens.php:157
 msgid "Small corner radius"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:172
+#: src/Campaigns/Styling/Tokens.php:163
 msgid "Buttons, inputs, chips and other controls."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:182
+#: src/Campaigns/Styling/Tokens.php:173
 #: assets/admin/forms/blocks/section/index.js:116
 msgid "Border width"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:193
+#: src/Campaigns/Styling/Tokens.php:184
 msgid "Block spacing"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:199
+#: src/Campaigns/Styling/Tokens.php:190
 msgid "Vertical rhythm between blocks."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:203
+#: src/Campaigns/Styling/Tokens.php:194
 msgid "Label gap"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:213
+#: src/Campaigns/Styling/Tokens.php:204
 msgid "Button height"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:222
+#: src/Campaigns/Styling/Tokens.php:213
 msgid "Button text weight"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:233
+#: src/Campaigns/Styling/Tokens.php:224
 msgid "Button shadow"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:238
-#: src/Campaigns/Styling/Tokens.php:288
+#: src/Campaigns/Styling/Tokens.php:229
+#: src/Campaigns/Styling/Tokens.php:279
 #: assets/admin/forms/blocks/section/index.js:30
 msgid "Soft"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:239
+#: src/Campaigns/Styling/Tokens.php:230
 msgid "Strong"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:244
+#: src/Campaigns/Styling/Tokens.php:235
 msgid "Button background"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:247
+#: src/Campaigns/Styling/Tokens.php:238
 msgid "Leave empty to use the accent color."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:251
+#: src/Campaigns/Styling/Tokens.php:242
 msgid "Button text color"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:254
+#: src/Campaigns/Styling/Tokens.php:245
 msgid "Leave empty to use white or dark text, whichever reads on the accent color."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:258
+#: src/Campaigns/Styling/Tokens.php:249
 msgid "Button border"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:262
+#: src/Campaigns/Styling/Tokens.php:253
 msgid "None (filled)"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:263
+#: src/Campaigns/Styling/Tokens.php:254
 msgid "Outline thin"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:264
+#: src/Campaigns/Styling/Tokens.php:255
 msgid "Outline thick"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:269
+#: src/Campaigns/Styling/Tokens.php:260
 msgid "Button hover background"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:272
+#: src/Campaigns/Styling/Tokens.php:263
 msgid "Leave empty to inherit the button background."
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:277
+#: src/Campaigns/Styling/Tokens.php:268
 msgid "Focus ring color"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:283
+#: src/Campaigns/Styling/Tokens.php:274
 msgid "Card shadow"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:289
+#: src/Campaigns/Styling/Tokens.php:280
 msgid "Floating"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:290
+#: src/Campaigns/Styling/Tokens.php:281
 msgid "Dramatic"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:300
+#: src/Campaigns/Styling/Tokens.php:291
 msgid "Brand colors"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:301
+#: src/Campaigns/Styling/Tokens.php:292
 msgid "Surface"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:302
+#: src/Campaigns/Styling/Tokens.php:293
 msgid "Typography"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:303
+#: src/Campaigns/Styling/Tokens.php:294
 msgid "Radius + borders"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:304
+#: src/Campaigns/Styling/Tokens.php:295
 msgid "Spacing"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:305
+#: src/Campaigns/Styling/Tokens.php:296
 msgid "Buttons"
 msgstr ""
 
-#: src/Campaigns/Styling/Tokens.php:306
+#: src/Campaigns/Styling/Tokens.php:297
 msgid "Focus + elevation"
 msgstr ""
 
 #: src/Core/Activator.php:62
-#: assets/admin/campaigns/Detail.jsx:1571
-#: assets/admin/forms/Editor.jsx:1198
+#: assets/admin/campaigns/Detail.jsx:1572
+#: assets/admin/forms/Editor.jsx:1197
 #: assets/admin/_shared/components/CampaignTemplatePicker.jsx:12
 msgid "General"
 msgstr ""
@@ -2083,7 +2083,7 @@ msgstr ""
 
 #. translators: %s: minimum donation amount formatted
 #: src/Donations/AntiSpamGuard.php:630
-#: src/Forms/Shortcode/DonationFormShortcode.php:845
+#: src/Forms/Shortcode/DonationFormShortcode.php:857
 #, php-format
 msgid "Minimum donation is %s."
 msgstr ""
@@ -2358,7 +2358,7 @@ msgstr ""
 
 #: src/Donors/Portal/views/annual-statement.php:33
 #: src/Forms/Blocks/views/currency-switcher.php:14
-#: src/Forms/Shortcode/DonationFormShortcode.php:821
+#: src/Forms/Shortcode/DonationFormShortcode.php:833
 #: src/Rest/Admin/DonationsController.php:2051
 #: assets/admin/forms/blocks/currency-switcher/index.js:167
 #: assets/admin/onboarding/Onboarding.jsx:487
@@ -2373,7 +2373,7 @@ msgstr ""
 #: src/Donors/Privacy/WordPressPrivacy.php:294
 #: src/Forms/Blocks/views/donation-summary.php:13
 #: src/Forms/FormService.php:59
-#: src/Forms/Shortcode/DonationFormShortcode.php:754
+#: src/Forms/Shortcode/DonationFormShortcode.php:766
 #: src/Receipts/resources/views/donor-tax-statement.php:77
 #: src/Receipts/resources/views/generic.php:231
 #: src/Rest/Admin/DonationsController.php:2050
@@ -2387,7 +2387,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:109
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:115
 #: assets/admin/forms/blocks/donation-summary/index.js:19
-#: assets/admin/forms/Editor.jsx:1405
+#: assets/admin/forms/Editor.jsx:1404
 msgid "Amount"
 msgstr ""
 
@@ -2400,7 +2400,7 @@ msgstr ""
 #. translators: %s: currency code
 #: src/Donors/Portal/views/annual-statement.php:52
 #: src/Forms/Blocks/views/donation-summary.php:17
-#: src/Forms/Shortcode/DonationFormShortcode.php:757
+#: src/Forms/Shortcode/DonationFormShortcode.php:769
 #: src/Receipts/resources/views/generic.php:254
 #: assets/admin/campaigns/List.jsx:492
 #: assets/admin/donors/Insights.jsx:208
@@ -2451,7 +2451,7 @@ msgstr ""
 #: src/Exports/DonorExporter.php:163
 #: src/Forms/Blocks/views/name.php:11
 #: src/Forms/FormSubmissionValidator.php:246
-#: src/Forms/Shortcode/DonationFormShortcode.php:749
+#: src/Forms/Shortcode/DonationFormShortcode.php:761
 #: assets/admin/donations/RecordDonationDrawer.jsx:224
 #: assets/admin/donors/DonorProfile.jsx:161
 #: assets/admin/forms/blocks/name/index.js:26
@@ -2466,7 +2466,7 @@ msgstr ""
 #: src/Exports/DonorExporter.php:164
 #: src/Forms/Blocks/views/name.php:12
 #: src/Forms/FormSubmissionValidator.php:249
-#: src/Forms/Shortcode/DonationFormShortcode.php:750
+#: src/Forms/Shortcode/DonationFormShortcode.php:762
 #: assets/admin/donations/RecordDonationDrawer.jsx:227
 #: assets/admin/donors/DonorProfile.jsx:165
 #: assets/admin/forms/blocks/name/index.js:46
@@ -2488,13 +2488,13 @@ msgstr ""
 #: src/Exports/DonorExporter.php:166
 #: src/Forms/Blocks/views/phone.php:8
 #: src/Forms/FormSubmissionValidator.php:266
-#: src/Forms/Shortcode/DonationFormShortcode.php:811
+#: src/Forms/Shortcode/DonationFormShortcode.php:823
 #: assets/admin/donors/DonorProfile.jsx:206
 #: assets/admin/forms/blocks/phone/index.js:20
 #: assets/admin/forms/blocks/phone/index.js:25
 #: assets/admin/forms/blocks/phone/index.js:49
 #: assets/admin/forms/blocks/phone/index.js:63
-#: assets/admin/forms/Editor.jsx:932
+#: assets/admin/forms/Editor.jsx:931
 #: assets/donor-portal/index.jsx:1583
 msgid "Phone"
 msgstr ""
@@ -2514,8 +2514,8 @@ msgstr ""
 #: src/Forms/Blocks/views/country.php:8
 #: src/Forms/FormSubmissionValidator.php:272
 #: src/Forms/FormSubmissionValidator.php:383
-#: src/Forms/Shortcode/DonationFormShortcode.php:752
-#: src/Forms/Shortcode/DonationFormShortcode.php:817
+#: src/Forms/Shortcode/DonationFormShortcode.php:764
+#: src/Forms/Shortcode/DonationFormShortcode.php:829
 #: src/Rest/Admin/DonationsController.php:2063
 #: assets/admin/donors/DonorProfile.jsx:169
 #: assets/admin/donors/index.jsx:348
@@ -2563,8 +2563,8 @@ msgstr ""
 #: src/Donors/Privacy/WordPressPrivacy.php:229
 #: src/Donors/Privacy/WordPressPrivacy.php:243
 #: src/Rest/Admin/DonationsController.php:2049
-#: assets/admin/campaigns/Detail.jsx:1324
-#: assets/admin/campaigns/Detail.jsx:1986
+#: assets/admin/campaigns/Detail.jsx:1325
+#: assets/admin/campaigns/Detail.jsx:1991
 #: assets/admin/campaigns/List.jsx:193
 #: assets/admin/donations/detail/cards/RefundsCard.jsx:38
 #: assets/admin/donations/detail/cards/RelatedDonationsCard.jsx:18
@@ -2573,7 +2573,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:125
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:159
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:96
-#: assets/admin/forms/Editor.jsx:1293
+#: assets/admin/forms/Editor.jsx:1292
 #: assets/admin/funds/List.jsx:375
 #: assets/admin/subscriptions/List.jsx:648
 msgid "Status"
@@ -2582,7 +2582,7 @@ msgstr ""
 #: src/Donors/Privacy/WordPressPrivacy.php:230
 #: src/Donors/Privacy/WordPressPrivacy.php:244
 #: src/Forms/Blocks/views/payment-gateways.php:9
-#: src/Forms/Shortcode/DonationFormShortcode.php:761
+#: src/Forms/Shortcode/DonationFormShortcode.php:773
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:40
 #: assets/admin/forms/blocks/donation-summary/index.js:21
 #: assets/admin/forms/blocks/payment-gateways/index.js:117
@@ -2704,7 +2704,7 @@ msgid "Event"
 msgstr ""
 
 #: src/Exports/DonorExporter.php:170
-#: assets/admin/campaigns/Detail.jsx:1813
+#: assets/admin/campaigns/Detail.jsx:1818
 #: assets/admin/donors/DonorProfile.jsx:194
 #: assets/admin/funds/List.jsx:330
 #: assets/admin/funds/List.jsx:721
@@ -2749,15 +2749,15 @@ msgid "Hide my name from the public list of donors"
 msgstr ""
 
 #: src/Forms/Blocks/CommentBlock.php:32
-#: src/Forms/Shortcode/DonationFormShortcode.php:808
-#: src/Forms/Shortcode/DonationFormShortcode.php:1175
+#: src/Forms/Shortcode/DonationFormShortcode.php:820
+#: src/Forms/Shortcode/DonationFormShortcode.php:1187
 #: assets/admin/forms/blocks/comment/index.js:19
 #: assets/admin/forms/blocks/comment/index.js:31
 msgid "Add a message"
 msgstr ""
 
 #: src/Forms/Blocks/CommentBlock.php:33
-#: src/Forms/Shortcode/DonationFormShortcode.php:1176
+#: src/Forms/Shortcode/DonationFormShortcode.php:1188
 #: assets/admin/forms/blocks/comment/index.js:20
 #: assets/admin/forms/blocks/comment/index.js:38
 msgid "Anything you want to share?"
@@ -2768,7 +2768,7 @@ msgid "Pick which consent purposes this form asks for, or add one in Settings, C
 msgstr ""
 
 #: src/Forms/Blocks/CoverFeesBlock.php:35
-#: src/Forms/Shortcode/DonationFormShortcode.php:822
+#: src/Forms/Shortcode/DonationFormShortcode.php:834
 #: assets/admin/forms/blocks/cover-fees/index.js:35
 #: assets/admin/forms/blocks/cover-fees/index.js:86
 msgid "I'd like to help cover the transaction fee"
@@ -2810,7 +2810,7 @@ msgid "Mailing address"
 msgstr ""
 
 #: src/Forms/Blocks/views/address.php:24
-#: src/Forms/Shortcode/DonationFormShortcode.php:812
+#: src/Forms/Shortcode/DonationFormShortcode.php:824
 #: assets/admin/donors/DonorProfile.jsx:222
 #: assets/admin/forms/blocks/address/index.js:79
 #: assets/admin/forms/blocks/address/index.js:218
@@ -2818,7 +2818,7 @@ msgid "Address line 1"
 msgstr ""
 
 #: src/Forms/Blocks/views/address.php:25
-#: src/Forms/Shortcode/DonationFormShortcode.php:813
+#: src/Forms/Shortcode/DonationFormShortcode.php:825
 #: assets/admin/forms/blocks/address/index.js:102
 #: assets/admin/forms/blocks/address/index.js:219
 msgid "Apartment, suite, etc."
@@ -2826,7 +2826,7 @@ msgstr ""
 
 #: src/Forms/Blocks/views/address.php:26
 #: src/Forms/FormSubmissionValidator.php:380
-#: src/Forms/Shortcode/DonationFormShortcode.php:814
+#: src/Forms/Shortcode/DonationFormShortcode.php:826
 #: assets/admin/donors/DonorProfile.jsx:242
 #: assets/admin/forms/blocks/address/index.js:119
 #: assets/admin/forms/blocks/address/index.js:222
@@ -2835,7 +2835,7 @@ msgid "City"
 msgstr ""
 
 #: src/Forms/Blocks/views/address.php:27
-#: src/Forms/Shortcode/DonationFormShortcode.php:815
+#: src/Forms/Shortcode/DonationFormShortcode.php:827
 #: assets/admin/forms/blocks/address/index.js:143
 #: assets/admin/forms/blocks/address/index.js:223
 msgid "State / region"
@@ -2843,7 +2843,7 @@ msgstr ""
 
 #: src/Forms/Blocks/views/address.php:28
 #: src/Forms/FormSubmissionValidator.php:382
-#: src/Forms/Shortcode/DonationFormShortcode.php:816
+#: src/Forms/Shortcode/DonationFormShortcode.php:828
 #: assets/admin/donors/DonorProfile.jsx:260
 #: assets/admin/forms/blocks/address/index.js:167
 #: assets/admin/forms/blocks/address/index.js:228
@@ -2857,7 +2857,7 @@ msgid "How can we stay in touch?"
 msgstr ""
 
 #: src/Forms/Blocks/views/consent.php:36
-#: src/Forms/Shortcode/DonationFormShortcode.php:826
+#: src/Forms/Shortcode/DonationFormShortcode.php:838
 #: assets/admin/forms/blocks/checkbox/index.js:53
 #: assets/admin/forms/blocks/comment/index.js:43
 #: assets/admin/forms/blocks/country/index.js:36
@@ -2872,13 +2872,13 @@ msgid "Required"
 msgstr ""
 
 #: src/Forms/Blocks/views/donation-amount.php:12
-#: src/Forms/Shortcode/DonationFormShortcode.php:746
+#: src/Forms/Shortcode/DonationFormShortcode.php:758
 msgid "Choose an amount"
 msgstr ""
 
 #: src/Forms/Blocks/views/donation-amount.php:40
-#: src/Forms/Shortcode/DonationFormShortcode.php:747
-#: assets/admin/forms/blocks/donation-amount/index.js:270
+#: src/Forms/Shortcode/DonationFormShortcode.php:759
+#: assets/admin/forms/blocks/donation-amount/index.js:271
 msgid "Custom amount"
 msgstr ""
 
@@ -2893,7 +2893,7 @@ msgid "Direct my donation to"
 msgstr ""
 
 #: src/Forms/Blocks/views/fund-picker.php:12
-#: src/Forms/Shortcode/DonationFormShortcode.php:818
+#: src/Forms/Shortcode/DonationFormShortcode.php:830
 #: assets/admin/forms/blocks/fund-picker/index.js:59
 #: assets/admin/forms/blocks/fund-picker/index.js:186
 #: assets/admin/forms/blocks/fund-picker/index.js:263
@@ -2939,7 +2939,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: src/Forms/Blocks/views/number-input.php:13
-#: src/Forms/Shortcode/DonationFormShortcode.php:819
+#: src/Forms/Shortcode/DonationFormShortcode.php:831
 msgid "Number"
 msgstr ""
 
@@ -2949,14 +2949,14 @@ msgid "Make this recurring"
 msgstr ""
 
 #: src/Forms/Blocks/views/terms.php:10
-#: src/Forms/Shortcode/DonationFormShortcode.php:838
+#: src/Forms/Shortcode/DonationFormShortcode.php:850
 #: assets/admin/forms/blocks/terms/index.js:20
 #: assets/admin/forms/blocks/terms/index.js:30
 msgid "I agree to the terms"
 msgstr ""
 
 #: src/Forms/Blocks/views/terms.php:11
-#: src/Forms/Shortcode/DonationFormShortcode.php:839
+#: src/Forms/Shortcode/DonationFormShortcode.php:851
 #: assets/admin/forms/blocks/terms/index.js:53
 #: assets/admin/forms/blocks/terms/index.js:78
 msgid "Read the terms"
@@ -3178,8 +3178,8 @@ msgid "Name"
 msgstr ""
 
 #: src/Forms/FormService.php:97
-#: assets/admin/campaigns/Detail.jsx:1281
-#: assets/admin/forms/Editor.jsx:868
+#: assets/admin/campaigns/Detail.jsx:1282
+#: assets/admin/forms/Editor.jsx:867
 msgid "Untitled donation form"
 msgstr ""
 
@@ -3223,7 +3223,7 @@ msgstr ""
 #: src/Rest/Admin/CampaignsController.php:377
 #: src/Rest/Admin/CampaignsController.php:415
 #: src/Rest/Admin/ReportsController.php:86
-#: assets/admin/campaigns/Detail.jsx:206
+#: assets/admin/campaigns/Detail.jsx:207
 msgid "Campaign not found."
 msgstr ""
 
@@ -3490,7 +3490,7 @@ msgid "Your donation"
 msgstr ""
 
 #: src/Forms/FormTemplates.php:280
-#: src/Forms/Shortcode/DonationFormShortcode.php:748
+#: src/Forms/Shortcode/DonationFormShortcode.php:760
 msgid "Your details"
 msgstr ""
 
@@ -3592,7 +3592,7 @@ msgstr ""
 #: src/Forms/FormTemplates.php:406
 #: src/Rest/Admin/DonationsController.php:2062
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:293
-#: assets/admin/campaigns/Detail.jsx:2312
+#: assets/admin/campaigns/Detail.jsx:2318
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:66
 #: assets/admin/donations/RecordDonationDrawer.jsx:287
 #: assets/admin/funds/List.jsx:302
@@ -3659,163 +3659,163 @@ msgstr ""
 msgid "This donation form needs JavaScript enabled. Please turn it on and reload the page to donate."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:609
+#: src/Forms/Shortcode/DonationFormShortcode.php:621
 msgid "Thanks for your donation. A receipt is on the way to your inbox."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:753
+#: src/Forms/Shortcode/DonationFormShortcode.php:765
 msgid "Review your donation"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:755
+#: src/Forms/Shortcode/DonationFormShortcode.php:767
 msgid "Donation frequency"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:756
+#: src/Forms/Shortcode/DonationFormShortcode.php:768
 msgid "Processing fee"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:758
+#: src/Forms/Shortcode/DonationFormShortcode.php:770
 msgid "Manage your giving"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:759
+#: src/Forms/Shortcode/DonationFormShortcode.php:771
 #: assets/donor-portal/index.jsx:595
 msgid "Check your email"
 msgstr ""
 
 #. translators: %s: the selected currency code, e.g. INR.
-#: src/Forms/Shortcode/DonationFormShortcode.php:763
+#: src/Forms/Shortcode/DonationFormShortcode.php:775
 #, php-format
 msgid "No payment method here accepts %s. Choose another currency to continue."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:764
+#: src/Forms/Shortcode/DonationFormShortcode.php:776
 msgid "No payment method here can take a recurring donation. Choose a one-time donation to continue."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:768
+#: src/Forms/Shortcode/DonationFormShortcode.php:780
 msgid "Online donations are unavailable right now. Please try again later."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:769
+#: src/Forms/Shortcode/DonationFormShortcode.php:781
 msgid "Test mode is on. No real payment is taken and this donation is excluded from reporting."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:770
+#: src/Forms/Shortcode/DonationFormShortcode.php:782
 #: assets/admin/forms/blocks/steps/index.js:73
 #: assets/admin/onboarding/Onboarding.jsx:327
 msgid "Back"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:771
+#: src/Forms/Shortcode/DonationFormShortcode.php:783
 #: assets/admin/forms/blocks/steps/index.js:84
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:82
 #: assets/donor-portal/index.jsx:1189
 msgid "Continue"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:773
+#: src/Forms/Shortcode/DonationFormShortcode.php:785
 msgid "Processing…"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:774
+#: src/Forms/Shortcode/DonationFormShortcode.php:786
 msgid "Thank you for your donation!"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:775
+#: src/Forms/Shortcode/DonationFormShortcode.php:787
 msgid "Your donation is pending"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:776
+#: src/Forms/Shortcode/DonationFormShortcode.php:788
 msgid "Thank you. We have emailed you instructions to complete your payment."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:786
+#: src/Forms/Shortcode/DonationFormShortcode.php:798
 msgid "Thank you, your donation is on its way"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:787
+#: src/Forms/Shortcode/DonationFormShortcode.php:799
 msgid "Your payment is being processed. This can take a few working days, and we will email you once it completes."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:788
+#: src/Forms/Shortcode/DonationFormShortcode.php:800
 msgid "Donate again"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:789
+#: src/Forms/Shortcode/DonationFormShortcode.php:801
 msgid "Sorry, something went wrong. Please try again."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:795
+#: src/Forms/Shortcode/DonationFormShortcode.php:807
 msgid "Your payment was not completed, so nothing has been charged. Please try again when you are ready."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:800
+#: src/Forms/Shortcode/DonationFormShortcode.php:812
 msgid "We could not confirm your payment"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:801
+#: src/Forms/Shortcode/DonationFormShortcode.php:813
 msgid "We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:802
+#: src/Forms/Shortcode/DonationFormShortcode.php:814
 #: assets/admin/settings/panels/StripeKeysCard.jsx:269
 #: assets/admin/subscriptions/List.jsx:225
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:186
 msgid "Check again"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:803
+#: src/Forms/Shortcode/DonationFormShortcode.php:815
 msgid "Complete your donation"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:804
+#: src/Forms/Shortcode/DonationFormShortcode.php:816
 msgid "Loading secure payment…"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:805
+#: src/Forms/Shortcode/DonationFormShortcode.php:817
 msgid "Pay"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:806
+#: src/Forms/Shortcode/DonationFormShortcode.php:818
 msgid "Confirming your payment…"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:809
+#: src/Forms/Shortcode/DonationFormShortcode.php:821
 msgid "Show my message publicly on the supporter wall"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:810
-#: src/Forms/Shortcode/DonationFormShortcode.php:1186
+#: src/Forms/Shortcode/DonationFormShortcode.php:822
+#: src/Forms/Shortcode/DonationFormShortcode.php:1198
 #: assets/admin/forms/blocks/anonymous-toggle/index.js:11
 #: assets/admin/forms/blocks/anonymous-toggle/index.js:50
 msgid "Make this donation anonymous"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:820
+#: src/Forms/Shortcode/DonationFormShortcode.php:832
 msgid "Provides"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:823
+#: src/Forms/Shortcode/DonationFormShortcode.php:835
 msgid "Total with fees:"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:824
+#: src/Forms/Shortcode/DonationFormShortcode.php:836
 #: assets/admin/campaign-blocks/index.jsx:975
 #: assets/admin/campaign-blocks/index.jsx:997
 #: assets/admin/_shared/entities.js:25
 msgid "Donation form"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:827
+#: src/Forms/Shortcode/DonationFormShortcode.php:839
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:33
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:138
 #: assets/admin/forms/blocks/recurring-toggle/index.js:12
 msgid "One-time"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:828
+#: src/Forms/Shortcode/DonationFormShortcode.php:840
 #: src/Receipts/resources/views/generic.php:47
 #: assets/admin/donations/fields.jsx:31
 #: assets/admin/donations/fields.jsx:47
@@ -3824,7 +3824,7 @@ msgstr ""
 msgid "Weekly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:829
+#: src/Forms/Shortcode/DonationFormShortcode.php:841
 #: src/Receipts/resources/views/generic.php:48
 #: assets/admin/donations/fields.jsx:32
 #: assets/admin/donations/fields.jsx:48
@@ -3835,7 +3835,7 @@ msgstr ""
 msgid "Every 2 weeks"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:830
+#: src/Forms/Shortcode/DonationFormShortcode.php:842
 #: src/Receipts/resources/views/generic.php:49
 #: assets/admin/donations/fields.jsx:33
 #: assets/admin/donations/fields.jsx:45
@@ -3844,7 +3844,7 @@ msgstr ""
 msgid "Monthly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:831
+#: src/Forms/Shortcode/DonationFormShortcode.php:843
 #: src/Receipts/resources/views/generic.php:50
 #: assets/admin/donations/fields.jsx:34
 #: assets/admin/donations/fields.jsx:49
@@ -3853,7 +3853,7 @@ msgstr ""
 msgid "Quarterly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:832
+#: src/Forms/Shortcode/DonationFormShortcode.php:844
 #: src/Receipts/resources/views/generic.php:51
 #: assets/admin/donations/fields.jsx:35
 #: assets/admin/donations/fields.jsx:46
@@ -3862,117 +3862,117 @@ msgstr ""
 msgid "Yearly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:834
+#: src/Forms/Shortcode/DonationFormShortcode.php:846
 msgid "This donation form is being shown inside another website."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:835
+#: src/Forms/Shortcode/DonationFormShortcode.php:847
 msgid "Open the donation page"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:841
+#: src/Forms/Shortcode/DonationFormShortcode.php:853
 msgid "Required."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:842
+#: src/Forms/Shortcode/DonationFormShortcode.php:854
 msgid "Please agree to continue."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:843
+#: src/Forms/Shortcode/DonationFormShortcode.php:855
 msgid "Pick or enter an amount."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:846
+#: src/Forms/Shortcode/DonationFormShortcode.php:858
 msgid "Enter a valid email."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:847
+#: src/Forms/Shortcode/DonationFormShortcode.php:859
 msgid "Enter a name."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:848
+#: src/Forms/Shortcode/DonationFormShortcode.php:860
 msgid "Enter a number."
 msgstr ""
 
 #. translators: %s: minimum value
-#: src/Forms/Shortcode/DonationFormShortcode.php:850
+#: src/Forms/Shortcode/DonationFormShortcode.php:862
 #, php-format
 msgid "Must be at least %s."
 msgstr ""
 
 #. translators: %s: maximum value
-#: src/Forms/Shortcode/DonationFormShortcode.php:852
+#: src/Forms/Shortcode/DonationFormShortcode.php:864
 #, php-format
 msgid "Must be at most %s."
 msgstr ""
 
 #. translators: %s: earliest allowed date
-#: src/Forms/Shortcode/DonationFormShortcode.php:854
+#: src/Forms/Shortcode/DonationFormShortcode.php:866
 #, php-format
 msgid "On or after %s."
 msgstr ""
 
 #. translators: %s: latest allowed date
-#: src/Forms/Shortcode/DonationFormShortcode.php:856
+#: src/Forms/Shortcode/DonationFormShortcode.php:868
 #, php-format
 msgid "On or before %s."
 msgstr ""
 
 #. translators: %s: maximum length
-#: src/Forms/Shortcode/DonationFormShortcode.php:858
+#: src/Forms/Shortcode/DonationFormShortcode.php:870
 #, php-format
 msgid "Too long (max %s)."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:859
+#: src/Forms/Shortcode/DonationFormShortcode.php:871
 msgid "Invalid format."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:860
+#: src/Forms/Shortcode/DonationFormShortcode.php:872
 msgid "Pick at least one."
 msgstr ""
 
 #. translators: %s: minimum number of selections
-#: src/Forms/Shortcode/DonationFormShortcode.php:862
+#: src/Forms/Shortcode/DonationFormShortcode.php:874
 #, php-format
 msgid "Pick at least %s."
 msgstr ""
 
 #. translators: %s: maximum number of selections
-#: src/Forms/Shortcode/DonationFormShortcode.php:864
+#: src/Forms/Shortcode/DonationFormShortcode.php:876
 #, php-format
 msgid "Pick no more than %s."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1194
+#: src/Forms/Shortcode/DonationFormShortcode.php:1206
 msgid "Cover the processing fee so 100% of my donation reaches you"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1702
+#: src/Forms/Shortcode/DonationFormShortcode.php:1714
 msgid "This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1712
+#: src/Forms/Shortcode/DonationFormShortcode.php:1724
 msgid "The end date on this campaign has passed. Change the schedule to reopen it."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1713
+#: src/Forms/Shortcode/DonationFormShortcode.php:1725
 msgid "This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1714
+#: src/Forms/Shortcode/DonationFormShortcode.php:1726
 msgid "It opens on its start date. Only you can see this note."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1737
+#: src/Forms/Shortcode/DonationFormShortcode.php:1749
 msgid "This campaign has finished accepting donations. Thank you to everyone who gave."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1738
+#: src/Forms/Shortcode/DonationFormShortcode.php:1750
 msgid "This campaign has reached its goal. Thank you to everyone who gave."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1739
+#: src/Forms/Shortcode/DonationFormShortcode.php:1751
 msgid "This campaign is not open for donations yet. Please check back soon."
 msgstr ""
 
@@ -4763,7 +4763,7 @@ msgid "Donations received, by month"
 msgstr ""
 
 #: src/Receipts/resources/views/revenue-report.php:57
-#: assets/admin/campaigns/Detail.jsx:786
+#: assets/admin/campaigns/Detail.jsx:787
 #: assets/admin/dashboard/Dashboard.jsx:135
 msgid "Revenue"
 msgstr ""
@@ -5235,7 +5235,7 @@ msgstr ""
 #: src/Rest/Admin/FormsController.php:342
 #: src/Rest/Admin/FormsController.php:374
 #: src/Rest/Admin/FormsController.php:393
-#: assets/admin/forms/Editor.jsx:506
+#: assets/admin/forms/Editor.jsx:505
 msgid "Form not found."
 msgstr ""
 
@@ -6314,9 +6314,10 @@ msgstr ""
 #: assets/admin/donations/RecordDonationDrawer.jsx:256
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:103
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:143
-#: assets/admin/forms/Editor.jsx:1319
+#: assets/admin/forms/Editor.jsx:1318
 #: assets/admin/subscriptions/List.jsx:716
 #: assets/admin/tools/tabs/ExportTab.jsx:293
+#: assets/admin/_shared/components/FormTemplatePicker.jsx:24
 #: assets/admin/_shared/entities.js:19
 #: assets/donor-portal/index.jsx:828
 #: assets/donor-portal/index.jsx:997
@@ -6533,7 +6534,7 @@ msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:463
 #: assets/admin/campaign-blocks/index.jsx:485
-#: assets/admin/forms/blocks/submit-button/index.js:78
+#: assets/admin/forms/blocks/submit-button/index.js:83
 msgid "Donate button"
 msgstr ""
 
@@ -6587,7 +6588,7 @@ msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:589
 #: assets/admin/forms/blocks/radio/index.js:63
-#: assets/admin/forms/Editor.jsx:1369
+#: assets/admin/forms/Editor.jsx:1368
 msgid "Layout"
 msgstr ""
 
@@ -6601,7 +6602,7 @@ msgid "Podium"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:599
-#: assets/admin/campaigns/Detail.jsx:1567
+#: assets/admin/campaigns/Detail.jsx:1568
 msgid "Number of donors"
 msgstr ""
 
@@ -6631,7 +6632,7 @@ msgid "No donations yet, so the feed will be empty on the page."
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:698
-#: assets/admin/campaigns/Detail.jsx:1566
+#: assets/admin/campaigns/Detail.jsx:1567
 msgid "Number of donations"
 msgstr ""
 
@@ -6879,15 +6880,15 @@ msgid "Uploaded %s"
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:23
-#: assets/admin/campaigns/Detail.jsx:1564
-#: assets/admin/forms/Editor.jsx:1404
+#: assets/admin/campaigns/Detail.jsx:1565
+#: assets/admin/forms/Editor.jsx:1403
 #: assets/admin/funds/List.jsx:753
 #: assets/admin/_shared/components/GoalBar.jsx:33
 msgid "No goal"
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:27
-#: assets/admin/forms/Editor.jsx:1412
+#: assets/admin/forms/Editor.jsx:1411
 msgid "Track progress toward a fundraising total."
 msgstr ""
 
@@ -6943,7 +6944,7 @@ msgid "A few quick details, then you are live. You can change everything later."
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:204
-#: assets/admin/campaigns/Detail.jsx:1930
+#: assets/admin/campaigns/Detail.jsx:1935
 msgid "Campaign title"
 msgstr ""
 
@@ -6953,7 +6954,7 @@ msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:216
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:218
-#: assets/admin/campaigns/Detail.jsx:1810
+#: assets/admin/campaigns/Detail.jsx:1815
 msgid "Campaign type"
 msgstr ""
 
@@ -6975,8 +6976,8 @@ msgid "The starting arrangement of the campaign page. Blocks, so you can rearran
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:250
-#: assets/admin/campaigns/Detail.jsx:2045
-#: assets/admin/forms/Editor.jsx:1426
+#: assets/admin/campaigns/Detail.jsx:2050
+#: assets/admin/forms/Editor.jsx:1425
 msgid "Goal type"
 msgstr ""
 
@@ -6985,7 +6986,7 @@ msgid "Enter a number"
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:282
-#: assets/admin/campaigns/Detail.jsx:1939
+#: assets/admin/campaigns/Detail.jsx:1944
 msgid "One or two sentences. Shows on campaign cards and the page hero."
 msgstr ""
 
@@ -6998,7 +6999,7 @@ msgid "Search funds"
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:305
-#: assets/admin/campaigns/Detail.jsx:1992
+#: assets/admin/campaigns/Detail.jsx:1997
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:93
 msgid "Schedule"
 msgstr ""
@@ -7040,7 +7041,7 @@ msgid "campaign"
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:382
-#: assets/admin/campaigns/Detail.jsx:1372
+#: assets/admin/campaigns/Detail.jsx:1373
 #: assets/admin/funds/List.jsx:410
 #: assets/admin/settings/panels/EmailPanel.jsx:155
 #: assets/admin/settings/panels/EmailPanel.jsx:267
@@ -7048,49 +7049,49 @@ msgid "Edit"
 msgstr ""
 
 #. translators: %d: number of forms attached to the campaign.
-#: assets/admin/campaigns/Detail.jsx:71
+#: assets/admin/campaigns/Detail.jsx:72
 #, js-format
 msgid "Permanently delete this campaign? Its %d form will also be deleted."
 msgid_plural "Permanently delete this campaign? Its %d forms will also be deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:79
+#: assets/admin/campaigns/Detail.jsx:80
 msgid "Permanently delete this campaign?"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:84
+#: assets/admin/campaigns/Detail.jsx:85
 #: assets/admin/campaigns/List.jsx:61
 msgid "The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:87
+#: assets/admin/campaigns/Detail.jsx:88
 #: assets/admin/campaigns/List.jsx:75
 msgid "This cannot be undone."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:101
+#: assets/admin/campaigns/Detail.jsx:102
 #: assets/admin/campaigns/List.jsx:467
 msgid "This campaign cannot be deleted"
 msgid_plural "These campaigns cannot be deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:103
+#: assets/admin/campaigns/Detail.jsx:104
 msgid "Archive instead"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:109
-#: assets/admin/campaigns/Detail.jsx:2373
+#: assets/admin/campaigns/Detail.jsx:110
+#: assets/admin/campaigns/Detail.jsx:2379
 #: assets/admin/campaigns/List.jsx:331
 msgid "Delete campaign"
 msgid_plural "Delete campaigns"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:111
-#: assets/admin/campaigns/Detail.jsx:1422
-#: assets/admin/campaigns/Detail.jsx:1459
+#: assets/admin/campaigns/Detail.jsx:112
+#: assets/admin/campaigns/Detail.jsx:1423
+#: assets/admin/campaigns/Detail.jsx:1460
 #: assets/admin/campaigns/List.jsx:302
 #: assets/admin/campaigns/List.jsx:333
 #: assets/admin/donations/detail/cards/NotesCard.jsx:44
@@ -7104,51 +7105,51 @@ msgstr[1] ""
 msgid "Delete"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:130
+#: assets/admin/campaigns/Detail.jsx:131
 msgid "This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:131
+#: assets/admin/campaigns/Detail.jsx:132
 msgid "This campaign is archived and is not taking donations."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:132
+#: assets/admin/campaigns/Detail.jsx:133
 msgid "This campaign has not started yet, so it is not taking donations until its start date."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:133
+#: assets/admin/campaigns/Detail.jsx:134
 msgid "This campaign has ended and is no longer taking donations."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:134
+#: assets/admin/campaigns/Detail.jsx:135
 msgid "This campaign has reached its goal and is set to close when it does, so it is no longer taking donations. Raise the target or turn that setting off in Goal to reopen it."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:137
+#: assets/admin/campaigns/Detail.jsx:138
 msgid "This campaign is not taking donations."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:151
+#: assets/admin/campaigns/Detail.jsx:152
 msgid "Publish it now"
 msgstr ""
 
 #. translators: %s: source campaign title
-#: assets/admin/campaigns/Detail.jsx:175
+#: assets/admin/campaigns/Detail.jsx:176
 #, js-format
 msgid "Duplicated from \"%s\". Review and rename before publishing."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:193
+#: assets/admin/campaigns/Detail.jsx:194
 msgid "This campaign could not be loaded."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:196
-#: assets/admin/campaigns/Detail.jsx:896
+#: assets/admin/campaigns/Detail.jsx:197
+#: assets/admin/campaigns/Detail.jsx:897
 #: assets/admin/dashboard/Dashboard.jsx:238
 #: assets/admin/donations/Detail.jsx:82
 #: assets/admin/donors/DonorProfile.jsx:316
 #: assets/admin/forms/blocks/currency-switcher/index.js:71
-#: assets/admin/forms/Editor.jsx:512
+#: assets/admin/forms/Editor.jsx:511
 #: assets/admin/funds/List.jsx:927
 #: assets/admin/settings/panels/SetupPanel.jsx:45
 #: assets/admin/subscriptions/List.jsx:1045
@@ -7160,212 +7161,212 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:198
+#: assets/admin/campaigns/Detail.jsx:199
 msgid "Back to campaigns"
 msgstr ""
 
 #. translators: %d: number of subscriptions
-#: assets/admin/campaigns/Detail.jsx:236
+#: assets/admin/campaigns/Detail.jsx:237
 #, js-format
 msgid "Campaign archived. Cancelling %d subscription in the background."
 msgid_plural "Campaign archived. Cancelling %d subscriptions in the background."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:248
+#: assets/admin/campaigns/Detail.jsx:249
 msgid "Campaign archived."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:249
+#: assets/admin/campaigns/Detail.jsx:250
 msgid "Campaign restored to draft."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:252
-#: assets/admin/campaigns/Detail.jsx:307
+#: assets/admin/campaigns/Detail.jsx:253
+#: assets/admin/campaigns/Detail.jsx:308
 msgid "Update failed."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:270
+#: assets/admin/campaigns/Detail.jsx:271
 msgid "Duplicate failed."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:303
+#: assets/admin/campaigns/Detail.jsx:304
 msgid "Campaign published."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:304
+#: assets/admin/campaigns/Detail.jsx:305
 msgid "Campaign moved to draft."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:322
-#: assets/admin/campaigns/Detail.jsx:2349
+#: assets/admin/campaigns/Detail.jsx:323
+#: assets/admin/campaigns/Detail.jsx:2355
 msgid "Delete failed."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:377
-#: assets/admin/campaigns/Detail.jsx:420
-#: assets/admin/campaigns/Detail.jsx:603
+#: assets/admin/campaigns/Detail.jsx:378
+#: assets/admin/campaigns/Detail.jsx:421
+#: assets/admin/campaigns/Detail.jsx:604
 msgid "Archive campaign"
 msgstr ""
 
 #. translators: %d: number of live recurring donations
-#: assets/admin/campaigns/Detail.jsx:383
+#: assets/admin/campaigns/Detail.jsx:384
 #, js-format
 msgid "This campaign has %d live recurring donation."
 msgid_plural "This campaign has %d live recurring donations."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:392
+#: assets/admin/campaigns/Detail.jsx:393
 msgid "Live counts active, paused and past-due donations: a paused one resumes and a past-due one is still being retried."
 msgstr ""
 
 #. translators: %s: formatted monthly amount
-#: assets/admin/campaigns/Detail.jsx:395
+#: assets/admin/campaigns/Detail.jsx:396
 #, js-format
 msgid "About %s a month is at stake."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:400
+#: assets/admin/campaigns/Detail.jsx:401
 msgid "Archiving stops new donations. These subscriptions are left as they are and stay credited to this campaign unless you cancel them."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:403
+#: assets/admin/campaigns/Detail.jsx:404
 msgid "Also cancel these subscriptions (donors will be emailed)"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:484
+#: assets/admin/campaigns/Detail.jsx:485
 #: assets/admin/donors/profile/Tabs.jsx:7
 #: assets/donor-portal/index.jsx:525
 msgid "Overview"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:492
+#: assets/admin/campaigns/Detail.jsx:493
 msgid "Campaign sections"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:517
+#: assets/admin/campaigns/Detail.jsx:518
 msgid "Edit campaign page"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:521
+#: assets/admin/campaigns/Detail.jsx:522
 msgid "View page ↗"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:580
+#: assets/admin/campaigns/Detail.jsx:581
 msgid "Campaign actions"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:591
+#: assets/admin/campaigns/Detail.jsx:592
 msgid "Publish campaign"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:596
+#: assets/admin/campaigns/Detail.jsx:597
 msgid "Move to draft"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:600
+#: assets/admin/campaigns/Detail.jsx:601
 msgid "Duplicate campaign"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:603
+#: assets/admin/campaigns/Detail.jsx:604
 msgid "Restore to draft"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:606
+#: assets/admin/campaigns/Detail.jsx:607
 msgid "Delete…"
 msgstr ""
 
 #. translators: 1: first three section names, 2: count of remaining
 #. translators: 1: first three style setting names, 2: count of the remaining ones.
-#: assets/admin/campaigns/Detail.jsx:629
-#: assets/admin/forms/Editor.jsx:1612
+#: assets/admin/campaigns/Detail.jsx:630
+#: assets/admin/forms/Editor.jsx:1611
 #, js-format
 msgid "%1$s, and %2$d more"
 msgstr ""
 
 #. translators: %s: relative time ago, e.g. "4m ago"
-#: assets/admin/campaigns/Detail.jsx:645
+#: assets/admin/campaigns/Detail.jsx:646
 #, js-format
 msgid "Last saved %s"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:724
+#: assets/admin/campaigns/Detail.jsx:725
 msgid "Could not load campaign metrics."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:760
+#: assets/admin/campaigns/Detail.jsx:761
 #: assets/admin/dashboard/Dashboard.jsx:125
 msgid "Key metrics"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:798
+#: assets/admin/campaigns/Detail.jsx:799
 msgid "Donor cohort"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:802
+#: assets/admin/campaigns/Detail.jsx:803
 msgid "Donation shape"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:806
+#: assets/admin/campaigns/Detail.jsx:807
 msgid "When donors give"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:811
+#: assets/admin/campaigns/Detail.jsx:812
 msgid "Timeline"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:815
+#: assets/admin/campaigns/Detail.jsx:816
 msgid "Stories"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:827
+#: assets/admin/campaigns/Detail.jsx:828
 msgid "Top forms"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:831
+#: assets/admin/campaigns/Detail.jsx:832
 msgid "By channel"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:835
+#: assets/admin/campaigns/Detail.jsx:836
 msgid "By payment method"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:859
+#: assets/admin/campaigns/Detail.jsx:860
 msgid "Could not build the report."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:865
+#: assets/admin/campaigns/Detail.jsx:866
 msgid "Download report"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:892
+#: assets/admin/campaigns/Detail.jsx:893
 msgid "Could not load these metrics"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:893
+#: assets/admin/campaigns/Detail.jsx:894
 msgid "Nothing was measured, so nothing is shown. Check your connection and try again."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:922
+#: assets/admin/campaigns/Detail.jsx:923
 msgid "Days remaining"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:924
+#: assets/admin/campaigns/Detail.jsx:925
 msgid "Days since ended"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:925
+#: assets/admin/campaigns/Detail.jsx:926
 msgid "Days running"
 msgstr ""
 
 #. translators: %d: total days
-#: assets/admin/campaigns/Detail.jsx:937
+#: assets/admin/campaigns/Detail.jsx:938
 #, js-format
 msgid "of %d total"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:954
+#: assets/admin/campaigns/Detail.jsx:955
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:21
 #: assets/admin/donations/List.jsx:746
 #: assets/admin/donors/profile/LifetimeMetrics.jsx:106
@@ -7373,482 +7374,482 @@ msgstr ""
 msgid "No donations yet"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:955
+#: assets/admin/campaigns/Detail.jsx:956
 msgid "Recent donor activity will appear here once your form is live and the first donation lands."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:990
+#: assets/admin/campaigns/Detail.jsx:991
 msgid "No donations through a form yet"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:991
+#: assets/admin/campaigns/Detail.jsx:992
 msgid "No form data yet"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:993
+#: assets/admin/campaigns/Detail.jsx:994
 msgid "This campaign's donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:994
+#: assets/admin/campaigns/Detail.jsx:995
 msgid "Once donations come in, this card ranks your forms by total raised."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1042
+#: assets/admin/campaigns/Detail.jsx:1043
 msgid "No payments yet"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1043
+#: assets/admin/campaigns/Detail.jsx:1044
 msgid "Gateway breakdown shows up after the first paid donation."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1092
+#: assets/admin/campaigns/Detail.jsx:1093
 msgid "Top supporters appear here after the first donation completes."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1162
+#: assets/admin/campaigns/Detail.jsx:1163
 #: assets/admin/funds/List.jsx:352
 msgid "Goal progress"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1202
 #: assets/admin/campaigns/Detail.jsx:1203
+#: assets/admin/campaigns/Detail.jsx:1204
 msgid "Copy shortcode"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1208
+#: assets/admin/campaigns/Detail.jsx:1209
 #: assets/admin/donations/detail/cards/PaymentDetailsCard.jsx:17
 #: assets/admin/donors/profile/IdentityCard.jsx:21
 #: assets/admin/donors/profile/IdentityCard.jsx:194
-#: assets/admin/forms/Editor.jsx:1702
+#: assets/admin/forms/Editor.jsx:1701
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:64
 msgid "Copied"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1265
+#: assets/admin/campaigns/Detail.jsx:1266
 msgid "Failed to load forms."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1295
+#: assets/admin/campaigns/Detail.jsx:1296
 msgid "Could not create form."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1313
+#: assets/admin/campaigns/Detail.jsx:1314
 #: assets/admin/forms/blocks/_shared/OptionsEditor.jsx:109
 #: assets/admin/funds/List.jsx:320
 #: assets/admin/settings/panels/BrandPanel.jsx:145
 msgid "Default"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1331
+#: assets/admin/campaigns/Detail.jsx:1332
 #: assets/admin/campaigns/List.jsx:249
 #: assets/donor-portal/index.jsx:1964
 msgid "Updated"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1350
+#: assets/admin/campaigns/Detail.jsx:1351
 msgid "Shortcode"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1365
+#: assets/admin/campaigns/Detail.jsx:1366
 msgid "Could not set default form."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1380
+#: assets/admin/campaigns/Detail.jsx:1381
 #: assets/admin/funds/List.jsx:417
 msgid "Set as default"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1389
+#: assets/admin/campaigns/Detail.jsx:1390
 #: assets/admin/campaigns/List.jsx:284
 msgid "Duplicate"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1412
+#: assets/admin/campaigns/Detail.jsx:1413
 msgid "Could not duplicate one or more forms."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1445
+#: assets/admin/campaigns/Detail.jsx:1446
 msgid "Permanently delete this form? Nothing has been recorded against it, so no donation or total moves."
 msgstr ""
 
 #. translators: %d: number of forms to delete
-#: assets/admin/campaigns/Detail.jsx:1448
+#: assets/admin/campaigns/Detail.jsx:1449
 #, js-format
 msgid "Permanently delete %d form? Nothing has been recorded against it, so no donation or total moves."
 msgid_plural "Permanently delete %d forms? Nothing has been recorded against them, so no donation or total moves."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:1457
+#: assets/admin/campaigns/Detail.jsx:1458
 msgid "Delete form"
 msgid_plural "Delete forms"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:1469
+#: assets/admin/campaigns/Detail.jsx:1470
 msgid "Could not delete one or more forms."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1495
+#: assets/admin/campaigns/Detail.jsx:1496
 msgid "Add new form"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1506
+#: assets/admin/campaigns/Detail.jsx:1507
 msgid "No forms yet"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1507
+#: assets/admin/campaigns/Detail.jsx:1508
 msgid "Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1510
+#: assets/admin/campaigns/Detail.jsx:1511
 msgid "Add your first form"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1542
+#: assets/admin/campaigns/Detail.jsx:1543
 msgid "This form cannot be deleted"
 msgid_plural "These forms cannot be deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:1573
-#: assets/admin/campaigns/Detail.jsx:1599
+#: assets/admin/campaigns/Detail.jsx:1574
+#: assets/admin/campaigns/Detail.jsx:1600
 msgid "Appearance"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1574
+#: assets/admin/campaigns/Detail.jsx:1575
 msgid "Defaults"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1575
+#: assets/admin/campaigns/Detail.jsx:1576
 msgid "Advanced"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1588
 #: assets/admin/campaigns/Detail.jsx:1589
-#: assets/admin/campaigns/Detail.jsx:1925
-#: assets/admin/forms/Editor.jsx:1274
+#: assets/admin/campaigns/Detail.jsx:1590
+#: assets/admin/campaigns/Detail.jsx:1930
+#: assets/admin/forms/Editor.jsx:1273
 #: assets/admin/funds/List.jsx:702
 #: assets/admin/settings/panels/OrganizationPanel.jsx:40
 msgid "Identity"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1590
-#: assets/admin/campaigns/Detail.jsx:1877
+#: assets/admin/campaigns/Detail.jsx:1591
+#: assets/admin/campaigns/Detail.jsx:1882
 msgid "Public address"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1593
 #: assets/admin/campaigns/Detail.jsx:1594
 #: assets/admin/campaigns/Detail.jsx:1595
-#: assets/admin/campaigns/Detail.jsx:1981
+#: assets/admin/campaigns/Detail.jsx:1596
+#: assets/admin/campaigns/Detail.jsx:1986
 msgid "Status & schedule"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1600
 #: assets/admin/campaigns/Detail.jsx:1601
-#: assets/admin/campaigns/Detail.jsx:2236
+#: assets/admin/campaigns/Detail.jsx:1602
+#: assets/admin/campaigns/Detail.jsx:2242
 msgid "Page header & footer"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1602
-#: assets/admin/campaigns/Detail.jsx:2266
+#: assets/admin/campaigns/Detail.jsx:1603
+#: assets/admin/campaigns/Detail.jsx:2272
 msgid "Default form"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1603
-#: assets/admin/campaigns/Detail.jsx:2308
+#: assets/admin/campaigns/Detail.jsx:1604
+#: assets/admin/campaigns/Detail.jsx:2314
 #: assets/admin/donations/RecordDonationDrawer.jsx:294
-#: assets/admin/forms/Editor.jsx:1352
+#: assets/admin/forms/Editor.jsx:1351
 #: assets/admin/funds/List.jsx:120
 #: assets/admin/funds/List.jsx:779
 msgid "Default fund"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1625
-#: assets/admin/forms/Editor.jsx:259
+#: assets/admin/campaigns/Detail.jsx:1626
+#: assets/admin/forms/Editor.jsx:258
 msgid "Could not load funds."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1628
+#: assets/admin/campaigns/Detail.jsx:1629
 msgid "Could not load forms."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1663
+#: assets/admin/campaigns/Detail.jsx:1664
 msgid "Campaign saved."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1665
-#: assets/admin/forms/Editor.jsx:357
+#: assets/admin/campaigns/Detail.jsx:1666
+#: assets/admin/forms/Editor.jsx:356
 #: assets/admin/settings/Settings.jsx:278
 msgid "Save failed."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1692
+#: assets/admin/campaigns/Detail.jsx:1693
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:80
 #: assets/admin/settings/Settings.jsx:343
 msgid "Unsaved changes"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1752
+#: assets/admin/campaigns/Detail.jsx:1757
 msgid "unsaved change"
 msgid_plural "unsaved changes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:1754
+#: assets/admin/campaigns/Detail.jsx:1759
 msgid "in"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1763
+#: assets/admin/campaigns/Detail.jsx:1768
 #: assets/admin/settings/Settings.jsx:413
 msgid "Discard"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1771
+#: assets/admin/campaigns/Detail.jsx:1776
 #: assets/admin/settings/Settings.jsx:421
 msgid "Save changes"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1804
+#: assets/admin/campaigns/Detail.jsx:1809
 msgid "Conversion failed."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1811
+#: assets/admin/campaigns/Detail.jsx:1816
 msgid "Set when the campaign is created. A standard campaign can be converted to a richer type, but not back."
 msgstr ""
 
 #. translators: %s: campaign type label
-#: assets/admin/campaigns/Detail.jsx:1818
-#: assets/admin/campaigns/Detail.jsx:1826
+#: assets/admin/campaigns/Detail.jsx:1823
+#: assets/admin/campaigns/Detail.jsx:1831
 #, js-format
 msgid "Convert to %s"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1830
+#: assets/admin/campaigns/Detail.jsx:1835
 msgid "This can't be undone."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1836
+#: assets/admin/campaigns/Detail.jsx:1841
 msgid "Converting…"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1836
+#: assets/admin/campaigns/Detail.jsx:1841
 msgid "Convert"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1878
+#: assets/admin/campaigns/Detail.jsx:1883
 msgid "The URL donors land on. Changing this may break inbound links."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1882
-#: assets/admin/forms/Editor.jsx:1284
+#: assets/admin/campaigns/Detail.jsx:1887
+#: assets/admin/forms/Editor.jsx:1283
 msgid "Slug"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1883
+#: assets/admin/campaigns/Detail.jsx:1888
 msgid "Letters, numbers, and hyphens only."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1891
+#: assets/admin/campaigns/Detail.jsx:1896
 msgid "Public URL"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1893
+#: assets/admin/campaigns/Detail.jsx:1898
 msgid "Visit page ↗"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1898
+#: assets/admin/campaigns/Detail.jsx:1903
 msgid "Saving moves the page. WordPress adds a suffix if another page already holds the slug, so check this address again afterwards."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1903
+#: assets/admin/campaigns/Detail.jsx:1908
 msgid "This campaign has no page yet, so it has no public address. One is created when the campaign is published."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1926
+#: assets/admin/campaigns/Detail.jsx:1931
 msgid "Title and short description, used everywhere this campaign appears."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1931
+#: assets/admin/campaigns/Detail.jsx:1936
 msgid "Donor-facing. Appears in the page header, on cards, in receipts."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1932
+#: assets/admin/campaigns/Detail.jsx:1937
 msgid "Try to keep it under 6 words."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1954
+#: assets/admin/campaigns/Detail.jsx:1959
 msgid "How donors will see this:"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1967
+#: assets/admin/campaigns/Detail.jsx:1972
 msgid "Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1982
+#: assets/admin/campaigns/Detail.jsx:1987
 msgid "Whether donors can give right now, and when the campaign runs."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1987
+#: assets/admin/campaigns/Detail.jsx:1992
 msgid "Active campaigns accept donations. Drafts and archived campaigns don't. Archive from the campaign menu, which handles any recurring donations first."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:1993
+#: assets/admin/campaigns/Detail.jsx:1998
 msgid "Optional. Leave blank for an open-ended campaign."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2041
+#: assets/admin/campaigns/Detail.jsx:2046
 #: assets/admin/forms/blocks/goal/index.js:116
 msgid "Campaign goal"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2042
+#: assets/admin/campaigns/Detail.jsx:2047
 msgid "Drives the progress widget on the campaign page and the goal donut on the overview."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2058
-#: assets/admin/forms/Editor.jsx:1436
+#: assets/admin/campaigns/Detail.jsx:2063
+#: assets/admin/forms/Editor.jsx:1435
 msgid "Target amount"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2069
+#: assets/admin/campaigns/Detail.jsx:2074
 msgid "Target donations"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2075
+#: assets/admin/campaigns/Detail.jsx:2080
 msgid "Target donors"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2082
+#: assets/admin/campaigns/Detail.jsx:2087
 msgid "Close when the goal is met"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2084
+#: assets/admin/campaigns/Detail.jsx:2089
 msgid "The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2085
+#: assets/admin/campaigns/Detail.jsx:2090
 msgid "Set a target above first. Without one there is nothing to reach."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2094
+#: assets/admin/campaigns/Detail.jsx:2099
 msgid "This campaign has reached its goal and is not accepting donations."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2156
+#: assets/admin/campaigns/Detail.jsx:2161
 msgid "Discard token overrides"
 msgstr ""
 
 #. translators: %d: number of tokens this campaign overrides
-#: assets/admin/campaigns/Detail.jsx:2159
+#: assets/admin/campaigns/Detail.jsx:2164
 #, js-format
 msgid "Turning this off drops the %d token this campaign overrides. Saving makes that permanent."
 msgid_plural "Turning this off drops the %d tokens this campaign overrides. Saving makes that permanent."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/campaigns/Detail.jsx:2167
+#: assets/admin/campaigns/Detail.jsx:2172
 msgid "Discard overrides"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2186
+#: assets/admin/campaigns/Detail.jsx:2191
 msgid "Campaign appearance"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2187
+#: assets/admin/campaigns/Detail.jsx:2192
 msgid "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2190
-#: assets/admin/forms/Editor.jsx:1655
+#: assets/admin/campaigns/Detail.jsx:2195
+#: assets/admin/forms/Editor.jsx:1654
 msgid "Style preset"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2197
+#: assets/admin/campaigns/Detail.jsx:2202
 msgid "Use org default"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2208
+#: assets/admin/campaigns/Detail.jsx:2213
 msgid "Customize tokens for this campaign"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2210
+#: assets/admin/campaigns/Detail.jsx:2215
 msgid "Inline overrides applied on top of the chosen preset."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2211
+#: assets/admin/campaigns/Detail.jsx:2216
 msgid "Toggle on to tweak individual tokens without creating a new brand preset."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2237
+#: assets/admin/campaigns/Detail.jsx:2243
 msgid "Hide the theme's header or footer on every page this campaign renders on."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2241
+#: assets/admin/campaigns/Detail.jsx:2247
 msgid "Hide theme header"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2247
+#: assets/admin/campaigns/Detail.jsx:2253
 msgid "Hide theme footer"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2267
+#: assets/admin/campaigns/Detail.jsx:2273
 msgid "The form the campaign page and donate-button block submit to by default."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2271
+#: assets/admin/campaigns/Detail.jsx:2277
 #: assets/admin/donations/detail/cards/OverviewCard.jsx:72
 #: assets/admin/donations/fields.jsx:225
 #: assets/donor-portal/index.jsx:829
 msgid "Form"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2272
+#: assets/admin/campaigns/Detail.jsx:2278
 msgid "Only published forms that belong to this campaign appear here. A draft cannot be the default: the page would fall back to a different form without saying so."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2276
+#: assets/admin/campaigns/Detail.jsx:2282
 msgid "( None )"
 msgstr ""
 
 #. translators: %s: form title
-#: assets/admin/campaigns/Detail.jsx:2292
+#: assets/admin/campaigns/Detail.jsx:2298
 #, js-format
 msgid "%s (not published)"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2300
+#: assets/admin/campaigns/Detail.jsx:2306
 msgid "Edit form"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2309
+#: assets/admin/campaigns/Detail.jsx:2315
 msgid "Where donations from this campaign are routed. Useful when separating restricted donations from general operations."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2314
+#: assets/admin/campaigns/Detail.jsx:2320
 msgid "( Unassigned )"
 msgstr ""
 
 #. translators: %s: fund name
-#: assets/admin/campaigns/Detail.jsx:2320
+#: assets/admin/campaigns/Detail.jsx:2326
 #, js-format
 msgid "%s (inactive)"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2359
+#: assets/admin/campaigns/Detail.jsx:2365
 msgid "Danger zone"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2360
+#: assets/admin/campaigns/Detail.jsx:2366
 msgid "Irreversible actions. Use with care."
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2364
+#: assets/admin/campaigns/Detail.jsx:2370
 msgid "Delete this campaign"
 msgstr ""
 
-#: assets/admin/campaigns/Detail.jsx:2366
+#: assets/admin/campaigns/Detail.jsx:2372
 msgid "Removes the campaign, its forms, and the WordPress page it created. A campaign that has any donations or recurring plans is never deleted: archive it instead to keep its records."
 msgstr ""
 
@@ -8252,7 +8253,7 @@ msgid "Dismissed. It comes back if the situation changes."
 msgstr ""
 
 #: assets/admin/dashboard/widgets/NeedsAttention.jsx:27
-#: assets/admin/forms/Editor.jsx:850
+#: assets/admin/forms/Editor.jsx:849
 msgid "Undo"
 msgstr ""
 
@@ -9621,7 +9622,7 @@ msgid "Edit donor details"
 msgstr ""
 
 #: assets/admin/donors/DonorProfile.jsx:138
-#: assets/admin/forms/Editor.jsx:894
+#: assets/admin/forms/Editor.jsx:893
 #: assets/donor-portal/index.jsx:1588
 msgid "Save"
 msgstr ""
@@ -10843,7 +10844,7 @@ msgstr ""
 #: assets/admin/forms/blocks/number-input/index.js:43
 #: assets/admin/forms/blocks/number-input/index.js:102
 #: assets/admin/forms/blocks/recurring-toggle/index.js:73
-#: assets/admin/forms/blocks/recurring-toggle/index.js:184
+#: assets/admin/forms/blocks/recurring-toggle/index.js:190
 #: assets/admin/forms/blocks/text-input/index.js:43
 #: assets/admin/forms/blocks/text-input/index.js:97
 msgid "Help text"
@@ -11004,7 +11005,7 @@ msgid "base"
 msgstr ""
 
 #: assets/admin/forms/blocks/currency-switcher/index.js:162
-#: assets/admin/forms/blocks/currency-switcher/index.js:260
+#: assets/admin/forms/blocks/currency-switcher/index.js:261
 msgid "Currency switcher"
 msgstr ""
 
@@ -11025,7 +11026,7 @@ msgstr ""
 msgid "Pills"
 msgstr ""
 
-#: assets/admin/forms/blocks/currency-switcher/index.js:261
+#: assets/admin/forms/blocks/currency-switcher/index.js:262
 msgid "Lets the donor pick which currency to donate in."
 msgstr ""
 
@@ -11148,16 +11149,16 @@ msgid "Select a radio to preselect an amount."
 msgstr ""
 
 #: assets/admin/forms/blocks/donation-amount/index.js:212
-#: assets/admin/forms/blocks/donation-amount/index.js:281
+#: assets/admin/forms/blocks/donation-amount/index.js:282
 #: assets/admin/forms/blocks/index.js:43
 msgid "Donation amount"
 msgstr ""
 
-#: assets/admin/forms/blocks/donation-amount/index.js:244
+#: assets/admin/forms/blocks/donation-amount/index.js:245
 msgid "Add a caption"
 msgstr ""
 
-#: assets/admin/forms/blocks/donation-amount/index.js:282
+#: assets/admin/forms/blocks/donation-amount/index.js:283
 msgid "Amount picker with preset buttons and an optional custom-amount input."
 msgstr ""
 
@@ -11300,7 +11301,7 @@ msgid "Show"
 msgstr ""
 
 #: assets/admin/forms/blocks/goal/index.js:117
-#: assets/admin/forms/Editor.jsx:1422
+#: assets/admin/forms/Editor.jsx:1421
 msgid "Form goal"
 msgstr ""
 
@@ -11686,7 +11687,7 @@ msgid "Single-choice radio buttons. Donor picks one option from the list."
 msgstr ""
 
 #: assets/admin/forms/blocks/recurring-toggle/index.js:64
-#: assets/admin/forms/blocks/recurring-toggle/index.js:197
+#: assets/admin/forms/blocks/recurring-toggle/index.js:203
 msgid "Recurring toggle"
 msgstr ""
 
@@ -11710,7 +11711,7 @@ msgstr ""
 msgid "Default selection"
 msgstr ""
 
-#: assets/admin/forms/blocks/recurring-toggle/index.js:198
+#: assets/admin/forms/blocks/recurring-toggle/index.js:204
 msgid "Frequency selector (one-time / monthly / yearly / etc)."
 msgstr ""
 
@@ -11892,7 +11893,7 @@ msgstr ""
 msgid "Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. \"Donate {amount} {frequency}\"."
 msgstr ""
 
-#: assets/admin/forms/blocks/submit-button/index.js:79
+#: assets/admin/forms/blocks/submit-button/index.js:84
 msgid "The button that completes the donation."
 msgstr ""
 
@@ -12047,92 +12048,92 @@ msgstr ""
 msgid "Modal (button opens form)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:253
+#: assets/admin/forms/Editor.jsx:252
 msgid "Could not load campaigns."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:256
+#: assets/admin/forms/Editor.jsx:255
 msgid "Could not load payment gateways."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:332
+#: assets/admin/forms/Editor.jsx:331
 msgid "Preview failed."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:369
+#: assets/admin/forms/Editor.jsx:368
 msgid "Form saved."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:370
+#: assets/admin/forms/Editor.jsx:369
 msgid "Draft saved."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:451
+#: assets/admin/forms/Editor.jsx:450
 msgid "Form published."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:458
+#: assets/admin/forms/Editor.jsx:457
 msgid "Form moved to draft."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:505
+#: assets/admin/forms/Editor.jsx:504
 msgid "This form could not be loaded."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:517
+#: assets/admin/forms/Editor.jsx:516
 msgid "Back to forms"
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels (Name, Email).
-#: assets/admin/forms/Editor.jsx:566
+#: assets/admin/forms/Editor.jsx:565
 #, js-format
 msgid "This form is live and cannot be saved without these blocks: %s. Add them back, or move it to draft to keep editing."
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels (Name, Email).
-#: assets/admin/forms/Editor.jsx:571
+#: assets/admin/forms/Editor.jsx:570
 #, js-format
 msgid "Add these blocks before publishing: %s."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:663
+#: assets/admin/forms/Editor.jsx:662
 msgid "Form structure"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:677
+#: assets/admin/forms/Editor.jsx:676
 msgid "We didn't pre-build this form so you can pick a shape that fits. You can change it later."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:685
+#: assets/admin/forms/Editor.jsx:684
 msgid "Apply template"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:690
+#: assets/admin/forms/Editor.jsx:689
 msgid "Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:695
+#: assets/admin/forms/Editor.jsx:694
 msgid "Replace form"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:778
+#: assets/admin/forms/Editor.jsx:777
 msgid "Start building your donation form"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:779
+#: assets/admin/forms/Editor.jsx:778
 msgid "Add a heading, an amount block, and a submit button to take your first donation."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:785
+#: assets/admin/forms/Editor.jsx:784
 msgid "Add your first block"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:794
+#: assets/admin/forms/Editor.jsx:793
 #: assets/admin/onboarding/Onboarding.jsx:699
 msgid "Build"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:795
+#: assets/admin/forms/Editor.jsx:794
 #: assets/admin/settings/panels/CurrencyPanel.jsx:358
 #: assets/admin/settings/panels/EmailPanel.jsx:277
 #: assets/admin/tools/tabs/CsvImportCard.jsx:220
@@ -12140,97 +12141,97 @@ msgid "Preview"
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels.
-#: assets/admin/forms/Editor.jsx:818
+#: assets/admin/forms/Editor.jsx:817
 #, js-format
 msgid "Add these blocks first: %s."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:838
+#: assets/admin/forms/Editor.jsx:837
 msgid "Close block inserter"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:838
+#: assets/admin/forms/Editor.jsx:837
 msgid "Toggle block inserter"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:845
+#: assets/admin/forms/Editor.jsx:844
 msgid "Toggle block outline"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:851
+#: assets/admin/forms/Editor.jsx:850
 msgid "Redo"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:854
+#: assets/admin/forms/Editor.jsx:853
 msgid "Start from a template"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:894
+#: assets/admin/forms/Editor.jsx:893
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:133
 #: assets/admin/settings/panels/StripeKeysCard.jsx:96
 msgid "Saved"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:903
+#: assets/admin/forms/Editor.jsx:902
 msgid "Unpublish"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:914
+#: assets/admin/forms/Editor.jsx:913
 msgid "Publish"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:919
+#: assets/admin/forms/Editor.jsx:918
 msgid "Toggle side panel"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:930
+#: assets/admin/forms/Editor.jsx:929
 msgid "Desktop"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:931
+#: assets/admin/forms/Editor.jsx:930
 msgid "Tablet"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:965
+#: assets/admin/forms/Editor.jsx:964
 msgid "Form preview"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1003
+#: assets/admin/forms/Editor.jsx:1002
 msgid "Block"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1011
+#: assets/admin/forms/Editor.jsx:1010
 msgid "Block settings"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1012
+#: assets/admin/forms/Editor.jsx:1011
 msgid "Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1047
+#: assets/admin/forms/Editor.jsx:1046
 msgid "Could not load readiness checks."
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels.
-#: assets/admin/forms/Editor.jsx:1059
+#: assets/admin/forms/Editor.jsx:1058
 #, js-format
 msgid "Missing required fields: %s"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1062
+#: assets/admin/forms/Editor.jsx:1061
 msgid "Donors need these to complete a donation."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1068
+#: assets/admin/forms/Editor.jsx:1067
 msgid "Required fields present"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1103
+#: assets/admin/forms/Editor.jsx:1102
 msgid "Running checks…"
 msgstr ""
 
 #. translators: %d: number of failing required-field checks that block publishing.
-#: assets/admin/forms/Editor.jsx:1106
+#: assets/admin/forms/Editor.jsx:1105
 #, js-format
 msgid "%d issue blocks publishing"
 msgid_plural "%d issues block publishing"
@@ -12238,7 +12239,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of readiness issues to fix before the form can take donations.
-#: assets/admin/forms/Editor.jsx:1111
+#: assets/admin/forms/Editor.jsx:1110
 #, js-format
 msgid "%d issue to fix before donors can give"
 msgid_plural "%d issues to fix before donors can give"
@@ -12246,194 +12247,194 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of warning readiness checks.
-#: assets/admin/forms/Editor.jsx:1116
+#: assets/admin/forms/Editor.jsx:1115
 #, js-format
 msgid "%d thing to review"
 msgid_plural "%d things to review"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/forms/Editor.jsx:1119
+#: assets/admin/forms/Editor.jsx:1118
 msgid "Form is ready to publish"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1127
+#: assets/admin/forms/Editor.jsx:1126
 msgid "Pre-launch checks"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1145
+#: assets/admin/forms/Editor.jsx:1144
 msgid "Everything looks good. This form is safe to publish."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1201
+#: assets/admin/forms/Editor.jsx:1200
 msgid "After donation"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1202
-#: assets/admin/forms/Editor.jsx:1584
+#: assets/admin/forms/Editor.jsx:1201
+#: assets/admin/forms/Editor.jsx:1583
 msgid "Embed"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1218
+#: assets/admin/forms/Editor.jsx:1217
 #: assets/admin/settings/Settings.jsx:323
 msgid "Settings sections"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1256
+#: assets/admin/forms/Editor.jsx:1255
 msgid "(Use campaign or org default)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1275
+#: assets/admin/forms/Editor.jsx:1274
 msgid "The form name and the slug used in the URL and shortcode."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1287
+#: assets/admin/forms/Editor.jsx:1286
 msgid "Used in the shortcode and the form URL."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1294
+#: assets/admin/forms/Editor.jsx:1293
 msgid "Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1320
+#: assets/admin/forms/Editor.jsx:1319
 msgid "Every form lives under a campaign. Move this form to a different one here."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1338
+#: assets/admin/forms/Editor.jsx:1337
 msgid "Current campaign"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1353
+#: assets/admin/forms/Editor.jsx:1352
 msgid "Where donations land when this form has no fund picker, or the donor does not choose one."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1359
+#: assets/admin/forms/Editor.jsx:1358
 msgid "Leave on the default to fall back to the campaign fund, then the organization default."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1365
+#: assets/admin/forms/Editor.jsx:1364
 msgid "Layout & style"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1366
+#: assets/admin/forms/Editor.jsx:1365
 msgid "How the form is presented: its layout, style preset, width, and whether it sits in a card."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1381
+#: assets/admin/forms/Editor.jsx:1380
 msgid "Maximum width"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1389
+#: assets/admin/forms/Editor.jsx:1388
 msgid "Container"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1393
+#: assets/admin/forms/Editor.jsx:1392
 msgid "Frame"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1394
+#: assets/admin/forms/Editor.jsx:1393
 msgid "Plain"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1396
+#: assets/admin/forms/Editor.jsx:1395
 msgid "\"Frame\" wraps the form in a card with a shadow; \"Plain\" renders it flush with the page."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1411
+#: assets/admin/forms/Editor.jsx:1410
 msgid "No progress bar or target on this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1413
+#: assets/admin/forms/Editor.jsx:1412
 msgid "Track the number of completed donations to this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1414
+#: assets/admin/forms/Editor.jsx:1413
 msgid "Track the number of unique donors who give through this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1423
+#: assets/admin/forms/Editor.jsx:1422
 msgid "An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1437
+#: assets/admin/forms/Editor.jsx:1436
 msgid "In the currency this form uses."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1457
+#: assets/admin/forms/Editor.jsx:1456
 msgid "Target count"
 msgstr ""
 
 #. translators: %s: payment gateway name.
-#: assets/admin/forms/Editor.jsx:1479
+#: assets/admin/forms/Editor.jsx:1478
 #, js-format
 msgid "%s (off in Settings)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1511
+#: assets/admin/forms/Editor.jsx:1510
 msgid "Allowed gateways"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1512
+#: assets/admin/forms/Editor.jsx:1511
 msgid "Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings. A form needs at least one."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1533
+#: assets/admin/forms/Editor.jsx:1532
 msgid "Test mode (no real payment, excluded from reporting)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1543
+#: assets/admin/forms/Editor.jsx:1542
 msgid "Thank-you message"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1544
+#: assets/admin/forms/Editor.jsx:1543
 msgid "Shown to the donor after a successful donation, unless a redirect URL is set."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1554
+#: assets/admin/forms/Editor.jsx:1553
 msgid "Redirect URL"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1555
+#: assets/admin/forms/Editor.jsx:1554
 msgid "If set, donors are sent here instead of seeing the thank-you message."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1564
+#: assets/admin/forms/Editor.jsx:1563
 msgid "Use a full URL starting with http:// or https://"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1585
+#: assets/admin/forms/Editor.jsx:1584
 msgid "Paste this shortcode into any post or page to render the form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1590
+#: assets/admin/forms/Editor.jsx:1589
 msgid "Save the form to update this shortcode: the slug you typed is not the one the server will store."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1620
+#: assets/admin/forms/Editor.jsx:1619
 msgid "The campaign"
 msgstr ""
 
 #. translators: 1: campaign title, 2: comma-separated list of style setting names.
-#: assets/admin/forms/Editor.jsx:1624
+#: assets/admin/forms/Editor.jsx:1623
 #, js-format
 msgid "%1$s overrides %2$s. This form is on a preset of its own, so those overrides do not reach it."
 msgstr ""
 
 #. translators: 1: campaign title, 2: comma-separated list of style setting names.
-#: assets/admin/forms/Editor.jsx:1631
+#: assets/admin/forms/Editor.jsx:1630
 #, js-format
 msgid "%1$s overrides %2$s. Picking a preset here stops those overrides reaching this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1652
+#: assets/admin/forms/Editor.jsx:1651
 msgid "Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign's preset and the overrides it carries."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1660
+#: assets/admin/forms/Editor.jsx:1659
 msgid "Inherit (campaign or org default)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1689
+#: assets/admin/forms/Editor.jsx:1688
 msgid "Could not copy. Select the shortcode above and copy it by hand."
 msgstr ""
 
@@ -13024,12 +13025,6 @@ msgstr ""
 
 #: assets/admin/settings/panels/BrandPanel.jsx:234
 msgid "Clone"
-msgstr ""
-
-#. translators: 1: colour name, e.g. Background, 2: the hex the admin picked, 3: the contrast it reaches, e.g. 4.0
-#: assets/admin/settings/panels/BrandPanel.jsx:298
-#, js-format
-msgid "%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker."
 msgstr ""
 
 #: assets/admin/settings/panels/ConsentsPanel.jsx:53
@@ -15716,10 +15711,6 @@ msgstr ""
 msgid "Wizard"
 msgstr ""
 
-#: assets/admin/_shared/components/FormTemplatePicker.jsx:24
-msgid "Formal"
-msgstr ""
-
 #: assets/admin/_shared/components/FormTemplatePicker.jsx:65
 msgid "Choose a starter template"
 msgstr ""
@@ -16120,6 +16111,12 @@ msgstr ""
 
 #: assets/admin/_shared/recurring/planColumns.jsx:157
 msgid "Subscription id copied."
+msgstr ""
+
+#. translators: 1: colour name, e.g. Background, 2: the hex the admin picked, 3: the contrast it reaches, e.g. 4.0
+#: assets/admin/_shared/styling/ContrastNotice.jsx:30
+#, js-format
+msgid "%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker."
 msgstr ""
 
 #. translators: 1: token name, e.g. Small corner radius, 2: the value it holds, e.g. 1rem
