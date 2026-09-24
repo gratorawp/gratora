@@ -56,8 +56,11 @@ final class RevenueReportBuilder
 
         $orgName = OrgProfile::load()['name'];
 
+        $accent = (new CampaignStyleResolver())->accentFor(null);
+
         $html = View::load('Receipts.revenue-report', [
-            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
+            'accent'         => Tokens::printColor($accent, '#211d3f'),
+            'accent_ink'     => Tokens::printInk($accent, '#211d3f'),
             'org_name'       => $orgName,
             'year'           => (string) $year,
             'total'          => Money::format($totalCents, $currency),

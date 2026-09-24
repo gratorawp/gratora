@@ -74,6 +74,29 @@ final class PrintColorTest extends TestCase
     }
 
     /**
+     * The accent drawn as text on white paper has to read there. A pale
+     * accent gives way to dark ink; one that reads keeps its colour.
+     *
+     * @return array<string,array{0:string,1:string}>
+     */
+    public static function inks(): array
+    {
+        return [
+            'pale accent'      => ['#fde68a', '#10162a'],
+            'dark accent'      => ['#46277c', '#46277c'],
+            'dark hsl accent'  => ['hsl(262deg 52% 32%)', '#46277c'],
+            'pale hsl accent'  => ['hsl(160deg 60% 80%)', '#10162a'],
+            'unprintable'      => ['currentColor', self::FALLBACK],
+        ];
+    }
+
+    /** @dataProvider inks */
+    public function test_text_in_the_accent_reads_on_paper(string $value, string $expected): void
+    {
+        $this->assertSame($expected, Tokens::printInk($value, self::FALLBACK));
+    }
+
+    /**
      * @dataProvider converted
      */
     public function test_an_hsl_accent_reaches_the_page_as_the_colour_it_is(string $value, string $expected): void

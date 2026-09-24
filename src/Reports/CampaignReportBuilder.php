@@ -41,8 +41,11 @@ final class CampaignReportBuilder
 
         $orgName = OrgProfile::load()['name'];
 
+        $accent = (new CampaignStyleResolver())->accentFor($campaign);
+
         $html = View::load('Receipts.campaign-report', [
-            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor($campaign), '#211d3f'),
+            'accent'         => Tokens::printColor($accent, '#211d3f'),
+            'accent_ink'     => Tokens::printInk($accent, '#211d3f'),
             'org_name'       => $orgName,
             'campaign_title' => (string) $campaign->title,
             'range_label'    => $this->rangeLabel($range),

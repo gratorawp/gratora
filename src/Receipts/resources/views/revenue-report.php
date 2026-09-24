@@ -13,13 +13,15 @@ defined('ABSPATH') || exit;
  * @var array  $stats          list of ['label','value'] pairs (pre-formatted)
  * @var string $generated_date formatted generation date
  * @var string $accent     the org or campaign accent, print-safe
+ * @var string $accent_ink the accent where it reads on white, else dark ink
  */
-$accent = (string) ($accent ?? '#211d3f');
+$accent     = (string) ($accent ?? '#211d3f');
+$accent_ink = (string) ($accent_ink ?? $accent);
 ?>
 <html><head><meta charset="utf-8"><style>
 body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;margin:0 0 2px}
-h1{margin:0 0 2px;font-size:24px;line-height:1.15;color:<?php echo esc_attr($accent); ?>}
+h1{margin:0 0 2px;font-size:24px;line-height:1.15;color:<?php echo esc_attr($accent_ink); ?>}
 .range{font-size:12px;color:#666;margin:0 0 26px}
 .raised{font-size:34px;font-weight:700;margin:0 0 24px}
 table.stats{width:100%;border-collapse:collapse;border-top:2px solid <?php echo esc_attr($accent); ?>;margin-bottom:30px}

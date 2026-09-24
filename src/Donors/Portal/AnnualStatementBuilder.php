@@ -95,8 +95,11 @@ final class AnnualStatementBuilder
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
         if ($donorName === '') $donorName = __('Friend', 'gratora-donation-platform');
 
+        $accent = (new CampaignStyleResolver())->accentFor(null);
+
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
-            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
+            'accent'     => Tokens::printColor($accent, '#211d3f'),
+            'accent_ink' => Tokens::printInk($accent, '#211d3f'),
             'year'       => $year,
             'org_name'   => $orgName,
             'donor_name' => $donorName,

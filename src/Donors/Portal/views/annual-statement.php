@@ -11,12 +11,14 @@ defined('ABSPATH') || exit;
  * @var array  $lines      list of ['date','reference','currency','amount'] (pre-formatted, raw)
  * @var array  $totals     list of ['currency','amount'] (pre-formatted), one per currency
  * @var string $accent     the org or campaign accent, print-safe
+ * @var string $accent_ink the accent where it reads on white, else dark ink
  */
-$accent = (string) ($accent ?? '#211d3f');
+$accent     = (string) ($accent ?? '#211d3f');
+$accent_ink = (string) ($accent_ink ?? $accent);
 ?>
 <html><head><meta charset="utf-8"><style>
 body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px;padding:24px}
-h1{margin:0 0 4px;font-size:22px;color:<?php echo esc_attr($accent); ?>}h2{font-size:14px;color:#666;margin:0 0 24px;font-weight:normal}
+h1{margin:0 0 4px;font-size:22px;color:<?php echo esc_attr($accent_ink); ?>}h2{font-size:14px;color:#666;margin:0 0 24px;font-weight:normal}
 table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px 6px;border-bottom:1px solid #eee;text-align:left}
 tfoot td{font-weight:700;border-top:2px solid <?php echo esc_attr($accent); ?>;border-bottom:0}
 .total{font-size:18px;margin-top:18px;text-align:right}

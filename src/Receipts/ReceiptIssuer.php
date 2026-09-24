@@ -441,8 +441,9 @@ final class ReceiptIssuer
         }
 
         // The campaign's accent, the way the receipt PDF resolves it: a donor
-        // who gave on a branded page should not get admin blue back.
-        $accent = Tokens::printColor((new CampaignStyleResolver())->accentFor($ctx->campaign), '#211d3f');
+        // who gave on a branded page should not get admin blue back. It colours
+        // only link text, so it is the ink that reads on the white email.
+        $accent = Tokens::printInk((new CampaignStyleResolver())->accentFor($ctx->campaign), '#211d3f');
 
         $subject = (string) ($template['subject'] ?? '');
         $subject = strtr($subject, $tags);

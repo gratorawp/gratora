@@ -169,6 +169,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
             'show_donor_address' => array_key_exists('show_donor_address', $stored) ? (bool) $stored['show_donor_address'] : $defaults['show_donor_address'],
             'logo_url'           => $logoUrl,
             'accent_color'       => Tokens::printColor($accent, '#211d3f'),
+            'accent_ink'         => Tokens::printInk($accent, '#211d3f'),
         ];
     }
 
@@ -210,6 +211,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
             'show_donor_address' => (bool) $template['show_donor_address'],
             'logo_url'           => (string) $template['logo_url'],
             'accent_color'       => (string) $template['accent_color'],
+            'accent_ink'         => (string) $template['accent_ink'],
         ];
     }
 }

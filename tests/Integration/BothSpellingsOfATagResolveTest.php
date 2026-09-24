@@ -163,6 +163,7 @@ final class BothSpellingsOfATagResolveTest extends IntegrationTestCase
                 'show_donor_address' => false,
                 'logo_url'           => '',
                 'accent_color'       => '',
+                'accent_ink'         => '',
             ],
             $ctx,
             '$50.00'

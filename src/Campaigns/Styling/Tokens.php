@@ -367,6 +367,19 @@ final class Tokens
         return $fallback;
     }
 
+    /**
+     * printColor() for a colour drawn as text on white paper: one that does not
+     * reach 4.5:1 there gives way to dark ink.
+     *
+     * @since 1.0.0
+     */
+    public static function printInk(string $value, string $fallback): string
+    {
+        $color = self::printColor($value, $fallback);
+
+        return Ink::carries($color, '#ffffff') ? $color : (Ink::on('#ffffff')[0] ?? $fallback);
+    }
+
     public static function sanitize(array $tokens): array
     {
         $out = [];

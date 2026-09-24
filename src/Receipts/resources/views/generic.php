@@ -13,7 +13,8 @@ defined('ABSPATH') || exit;
  * @var string   $amount_display  e.g. "50,00 EUR"
  * @var string   $receipt_number
  * @var array    $receipt_template keys: header_title, intro, signoff, footer_note,
- *                                  show_tax_id, show_donor_address, logo_url, accent_color
+ *                                  show_tax_id, show_donor_address, logo_url, accent_color,
+ *                                  accent_ink (the accent where it reads on white, else dark ink)
  * @var int      $refunded_cents
  * @var string   $refunded_display empty when no refund
  * @var array    $custom_data
@@ -35,6 +36,7 @@ $showTaxId   = array_key_exists('show_tax_id', $tpl) ? (bool) $tpl['show_tax_id'
 $showDonorAddr = array_key_exists('show_donor_address', $tpl) ? (bool) $tpl['show_donor_address'] : false;
 $logoUrl     = (string) ($tpl['logo_url']     ?? '');
 $accent      = (string) ($tpl['accent_color'] ?? '#211d3f');
+$accentInk   = (string) ($tpl['accent_ink']   ?? $accent);
 
 $donorName = trim((string) ($donor_name ?? ''));
 if ($donorName === '') $donorName = '-';
@@ -110,7 +112,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
         .logo img { max-height: 56pt; }
         .org  { text-align: right; color: #555; font-size: 9pt; line-height: 1.5; }
         .org strong { color: #222; font-size: 11pt; }
-        h1    { font-size: 22pt; font-weight: 300; margin: 28pt 0 8pt; letter-spacing: .5pt; color: <?php echo esc_attr($accent); ?>; }
+        h1    { font-size: 22pt; font-weight: 300; margin: 28pt 0 8pt; letter-spacing: .5pt; color: <?php echo esc_attr($accentInk); ?>; }
         .lede { color: #777; margin: 0 0 8pt; font-size: 10pt; }
         .intro { color: #444; margin: 4pt 0 22pt; font-size: 10pt; line-height: 1.55; }
         .ref  { background:#f5f3ef; padding:14pt 16pt; border-radius:4pt; margin:0 0 22pt; border-left: 3pt solid <?php echo esc_attr($accent); ?>; }
