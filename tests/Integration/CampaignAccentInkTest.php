@@ -53,13 +53,29 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         );
 
         $this->assertMatchesRegularExpression('/--gratora-cover-image:url\(https?:[^)]+\.jpg\);/', $css);
+        $this->assertStringNotContainsString('--gratora-cover-ink', $css);
+        $this->assertStringNotContainsString('--gratora-cover-scrim', $css);
     }
 
-    public function test_a_campaign_with_no_image_emits_no_cover_token(): void
+    public function test_a_campaign_with_no_image_emits_no_cover_image(): void
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#14425f'));
 
         $this->assertStringNotContainsString('--gratora-cover-image', $css);
+    }
+
+    /**
+     * With no photo the cover paints the accent, and its text and scrim were
+     * still the ones chosen for a photo: white under a dark gradient.
+     */
+    public function test_a_cover_with_no_image_reads_ink_measured_on_the_accent(): void
+    {
+        $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#fde68a'));
+
+        $this->assertStringContainsString('--gratora-cover-ink:var(--gratora-on-accent);', $css);
+        $this->assertStringContainsString('--gratora-cover-ink-muted:var(--gratora-on-accent-muted);', $css);
+        $this->assertStringContainsString('--gratora-cover-line:var(--gratora-on-accent-line);', $css);
+        $this->assertStringContainsString('--gratora-cover-scrim:none;', $css);
     }
 
     public function test_a_pale_accent_gets_dark_ink(): void

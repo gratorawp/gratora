@@ -89,7 +89,7 @@ final class CampaignStyleVars
         $css .= Ink::softDeclarations($tokens);
         $css .= Ink::fieldDeclarations($tokens);
         $css .= Ink::groundDeclarations($tokens);
-        $css .= self::coverImage($campaign);
+        $css .= self::cover($campaign);
 
         // A pass-through token is unset so it inherits, which is right until this
         // map is written on a block nested in a page that already declared it for
@@ -112,7 +112,8 @@ final class CampaignStyleVars
     }
 
     /**
-     * The campaign's own photograph, as a value a stylesheet can use.
+     * The campaign's own photograph, as a value a stylesheet can use, or the
+     * ink for the accent the cover paints when there is none.
      *
      * A layout that wants the image as its ground reads this instead of placing
      * the image block and positioning it. The block carries an editor wrapper
@@ -121,16 +122,15 @@ final class CampaignStyleVars
      *
      * @since 1.0.0
      */
-    private static function coverImage(?Campaign $campaign): string
+    private static function cover(?Campaign $campaign): string
     {
-        $id = $campaign ? (int) ($campaign->image_attachment_id ?? 0) : 0;
-        if ($id <= 0) {
-            return '';
-        }
-
-        $url = wp_get_attachment_image_url($id, '2048x2048');
+        $id  = $campaign ? (int) ($campaign->image_attachment_id ?? 0) : 0;
+        $url = $id > 0 ? wp_get_attachment_image_url($id, '2048x2048') : false;
         if (! is_string($url) || $url === '') {
-            return '';
+            return '--gratora-cover-ink:var(--gratora-on-accent);'
+                . '--gratora-cover-ink-muted:var(--gratora-on-accent-muted);'
+                . '--gratora-cover-line:var(--gratora-on-accent-line);'
+                . '--gratora-cover-scrim:none;';
         }
 
         // A url() token, not a bare address: the stylesheet uses it directly and
