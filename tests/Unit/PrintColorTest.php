@@ -64,7 +64,7 @@ final class PrintColorTest extends TestCase
             'comma hsl'         => ['hsl(203, 60%, 21%)', '#153d56'],
             'space hsl'         => ['hsl(203 60% 21%)', '#153d56'],
             'hsl yellow'        => ['hsl(45, 90%, 60%)', '#f5c73d'],
-            'hsla loses alpha'  => ['hsla(280, 50%, 40%, .5)', '#773399'],
+            'hsla on the paper' => ['hsla(280, 50%, 40%, .5)', '#bb99cc'],
             'hue below zero'    => ['hsl(-30 100% 50%)', '#ff0080'],
             'hue in degrees'    => ['hsl(160deg 60% 80%)', '#adebd6'],
             'hue in turns'      => ['hsl(0.4444turn 60% 80%)', '#adebd6'],
@@ -75,7 +75,9 @@ final class PrintColorTest extends TestCase
 
     /**
      * The accent drawn as text on white paper has to read there. A pale
-     * accent gives way to dark ink; one that reads keeps its colour.
+     * accent gives way to dark ink; one that reads keeps its colour. A
+     * translucent one is what the paper shows through it, measured and
+     * printed as such.
      *
      * @return array<string,array{0:string,1:string}>
      */
@@ -87,6 +89,10 @@ final class PrintColorTest extends TestCase
             'dark hsl accent'  => ['hsl(262deg 52% 32%)', '#46277c'],
             'pale hsl accent'  => ['hsl(160deg 60% 80%)', '#10162a'],
             'unprintable'      => ['currentColor', self::FALLBACK],
+            'faint rgba'       => ['rgba(16,22,42,.15)', '#10162a'],
+            'faint hex'        => ['#10162a26', '#10162a'],
+            'faint hsla'       => ['hsl(262deg 52% 32% / .2)', '#10162a'],
+            'nearly opaque'    => ['rgba(16,22,42,.9)', '#282d3f'],
         ];
     }
 

@@ -22,6 +22,8 @@ const cases = [
     [ '#ed1212', '#10162a' ],
     [ 'rgb(20, 66, 95)', '#ffffff' ],
     [ 'rgba(255, 224, 102, 0.9)', '#10162a' ],
+    [ 'rgba(33, 29, 63, 0.12)', '#10162a' ],
+    [ '#0000001a', '#10162a' ],
 ];
 
 test.each( cases )( 'the ink on %p is the ink the server picks', ( ground, ink ) => {
@@ -152,6 +154,13 @@ describe( 'the ink for each ground the server would have emitted', () => {
         expect( out[ '--gratora-on-accent-soft' ] ).toBe( '#10162a' );
     } );
 
+    it( 'stands a faint accent down as text on the page and on the card', () => {
+        const out = derivedInk( { ...PAGE_INK, 'gratora-accent': 'rgba(16,22,42,.15)', 'gratora-bg': '#ffffff' } );
+
+        expect( out[ '--gratora-text-accent' ] ).toBe( 'var(--gratora-text)' );
+        expect( out[ '--gratora-on-bg-accent' ] ).toBe( 'var(--gratora-on-bg)' );
+    } );
+
     it( 'reverses out of a dark tint mixed from the accent and the card', () => {
         const out = derivedInk( { ...PAGE_INK, 'gratora-accent': '#452ef5', 'gratora-bg': '#804242' } );
 
@@ -175,6 +184,8 @@ describe( 'the required marker the server would have emitted', () => {
 
 test( 'a malformed number is a colour to neither side', () => {
     expect( rgb( 'hsl(1.2.3, 50%, 50%)' ) ).toBeNull();
+    expect( rgb( 'hsl(160 deg 60% 80%)' ) ).toBeNull();
+    expect( rgb( 'hsl(160 60% 80% 90%)' ) ).toBeNull();
 } );
 
 test( 'the channels are the channels the server reads', () => {
@@ -182,6 +193,8 @@ test( 'the channels are the channels the server reads', () => {
     expect( rgb( 'rgb(70%, 90%, 60%)' ) ).toEqual( [ 179, 230, 153 ] );
     expect( rgb( 'hsl(0, 100%, 5%)' ) ).toEqual( [ 26, 0, 0 ] );
     expect( rgb( 'hsl(0, 100%, 95%)' ) ).toEqual( [ 255, 230, 230 ] );
+    expect( rgb( '#10162a26' ) ).toEqual( [ 219, 220, 223 ] );
+    expect( rgb( 'hsla(280, 50%, 40%, .5)' ) ).toEqual( [ 187, 153, 204 ] );
 } );
 
 // The theme preset lifts palette colours out of theme.json, which takes any CSS

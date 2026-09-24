@@ -40,6 +40,8 @@ final class InkTest extends TestCase
             'hex with alpha'    => ['#000000ff', true],
             'rgb notation'      => ['rgb(20, 66, 95)', true],
             'rgb with spaces'   => ['rgba(255, 224, 102, 0.9)', false],
+            'translucent navy'  => ['rgba(33, 29, 63, 0.12)', false],
+            'faint black hex'   => ['#0000001a', false],
         ];
     }
 
@@ -174,7 +176,8 @@ final class InkTest extends TestCase
     {
         return [
             'hsl'            => ['hsl(203 60% 21%)', '#153d56'],
-            'hsla'           => ['hsla(280, 50%, 40%, .5)', '#773399'],
+            'hsla'           => ['hsla(280, 50%, 40%, .5)', '#bb99cc'],
+            'faint hex'      => ['#10162a26', '#dbdcdf'],
             'rgb'            => ['rgb(20, 66, 95)', '#14425f'],
             'shorthand hex'  => ['#fff', '#ffffff'],
             'black'          => ['hsl(0 0% 0%)', '#000000'],
@@ -221,6 +224,32 @@ final class InkTest extends TestCase
     public function test_a_hue_in_any_unit_is_the_colour_it_names(string $value, string $expected): void
     {
         $this->assertSame($expected, Ink::hex($value));
+    }
+
+    /** A translucent ink is what it paints over the ground, not the colour it is mixed from. */
+    public function test_a_translucent_ink_is_measured_as_it_paints(): void
+    {
+        $this->assertFalse(Ink::carries('rgba(16,22,42,.15)', '#ffffff'));
+        $this->assertFalse(Ink::carries('#10162a26', '#ffffff'));
+        $this->assertTrue(Ink::carries('rgba(16,22,42,.9)', '#ffffff'));
+        $this->assertFalse(Ink::carries('rgba(255,255,255,.2)', '#15142b'));
+    }
+
+    public function test_a_faint_accent_is_not_page_text_or_card_text(): void
+    {
+        $css = Ink::groundDeclarations(['gratora-accent' => 'rgba(16,22,42,.15)'] + array_diff_key(self::SHIPPED, ['gratora-accent-soft' => 1]));
+
+        $this->assertStringContainsString('--gratora-text-accent:var(--gratora-text);', $css);
+        $this->assertStringContainsString('--gratora-on-bg-accent:var(--gratora-on-bg);', $css);
+    }
+
+    /** color-mix() over an opaque ground paints the translucent colour over that ground first. */
+    public function test_a_translucent_colour_mixes_as_it_lies_on_the_other(): void
+    {
+        $this->assertSame(
+            Ink::mix(Ink::mix('#fde68a', '#15142b', .5) ?? '', '#15142b', .12),
+            Ink::mix('rgba(253,230,138,.5)', '#15142b', .12)
+        );
     }
 
     /** @return array<string,array{0:string}> */

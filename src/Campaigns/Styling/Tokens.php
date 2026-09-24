@@ -359,16 +359,17 @@ final class Tokens
     }
 
     /**
-     * printColor() for a colour drawn as text on white paper: one that does not
-     * reach 4.5:1 there gives way to dark ink.
+     * printColor() for a colour drawn as text on white paper, as the paper
+     * shows it: a translucent colour is printed as it lands on white, and one
+     * that does not reach 4.5:1 there gives way to dark ink.
      *
      * @since 1.0.0
      */
     public static function printInk(string $value, string $fallback): string
     {
-        $color = self::printColor($value, $fallback);
+        $paper = Ink::hex(self::printColor($value, $fallback));
 
-        return Ink::carries($color, '#ffffff') ? $color : (Ink::on('#ffffff')[0] ?? $fallback);
+        return $paper !== null && Ink::carries($paper, '#ffffff') ? $paper : (Ink::on('#ffffff')[0] ?? $fallback);
     }
 
     public static function sanitize(array $tokens): array

@@ -107,6 +107,18 @@ final class DocumentsCarryTheBrandTest extends IntegrationTestCase
         $this->assertSame('#fde68a', $template['accent_color']);
     }
 
+    /** A see-through accent is measured as the paper shows it, so the heading does not print at 15% ink. */
+    public function test_a_faint_accent_gives_the_receipt_heading_dark_ink(): void
+    {
+        $this->orgAccent('rgba(16,22,42,.15)');
+
+        $renderer = Plugin::instance()->container->get(GenericReceiptRenderer::class);
+        $ref      = new \ReflectionMethod($renderer, 'loadTemplate');
+        $ref->setAccessible(true);
+
+        $this->assertSame('#10162a', ((array) $ref->invoke($renderer))['accent_ink']);
+    }
+
     public function test_the_receipt_heading_takes_ink_and_its_rule_the_accent(): void
     {
         $this->orgAccent('#fde68a');

@@ -15,7 +15,9 @@ namespace Gratora\Campaigns\Styling;
  *
  * Hex, rgb() and hsl() are what a colour reaches this in: the control stores the
  * first two and a theme.json palette can state the third. A keyword yields
- * nothing, and the stylesheet's own fallback stands.
+ * nothing, and the stylesheet's own fallback stands. A translucent ground is
+ * read as it lands on white, the page the shipped ink is chosen for and the
+ * paper a receipt prints on; translucent ink is read over the ground it is on.
  *
  * @since 1.0.0
  */
@@ -89,13 +91,13 @@ final class Ink
      */
     public static function mix(string $a, string $b, float $share): ?string
     {
-        $x = self::rgb($a);
+        $x = self::rgba($a);
         $y = self::rgb($b);
         if ($x === null || $y === null) {
             return null;
         }
 
-        return self::hexOf(self::blend($x, $y, $share));
+        return self::hexOf(self::blend(self::over($x, $y), $y, $share));
     }
 
     /**
@@ -231,7 +233,8 @@ final class Ink
     }
 
     /**
-     * The same colour as opaque #rrggbb, or null when it cannot be read.
+     * The colour as it lands on white, as opaque #rrggbb, or null when it
+     * cannot be read.
      *
      * Built from the measured channels, so the return carries no character of
      * the input and is safe wherever a colour literal is.
@@ -323,13 +326,13 @@ final class Ink
      */
     public static function carries(string $ink, string $ground): bool
     {
-        $a = self::rgb($ink);
+        $a = self::rgba($ink);
         $b = self::rgb($ground);
         if ($a === null || $b === null) {
             return false;
         }
 
-        return self::ratio($a, $b) >= 4.5;
+        return self::ratio(self::over($a, $b), $b) >= 4.5;
     }
 
     private static function accentOnCard(string $accent, string $card, string $tint): string
@@ -369,11 +372,12 @@ final class Ink
     {
         /** @var array{0:int,1:int,2:int} $marker */
         $marker = self::rgb($color);
-        $inkRgb = self::rgb($ink);
+        $inkRgb = self::rgba($ink);
         $bg     = self::rgb($ground);
         if ($inkRgb === null || $bg === null) {
             return $ink;
         }
+        $inkRgb = self::over($inkRgb, $bg);
 
         for ($n = $from; $n > 0; $n--) {
             $mixed = self::blend($marker, $inkRgb, $n / 100);
@@ -427,14 +431,45 @@ final class Ink
     }
 
     /**
+     * The colour as it lands on white.
+     *
      * @return array{0:int,1:int,2:int}|null
      */
     private static function rgb(string $value): ?array
     {
+        $rgba = self::rgba($value);
+
+        return $rgba === null ? null : self::over($rgba, [255, 255, 255]);
+    }
+
+    /**
+     * A colour, translucent or not, painted over an opaque one.
+     *
+     * @param array{0:int,1:int,2:int,3:float} $top
+     * @param array{0:int,1:int,2:int} $under
+     * @return array{0:int,1:int,2:int}
+     */
+    private static function over(array $top, array $under): array
+    {
+        $rgb = [$top[0], $top[1], $top[2]];
+
+        return $top[3] >= 1 ? $rgb : self::blend($rgb, $under, $top[3]);
+    }
+
+    /**
+     * @return array{0:int,1:int,2:int,3:float}|null
+     */
+    private static function rgba(string $value): ?array
+    {
         $value = trim($value);
 
         if (preg_match('/^#([0-9a-fA-F]{3,8})$/', $value, $m) === 1) {
-            $hex = $m[1];
+            $hex   = $m[1];
+            $alpha = match (strlen($hex)) {
+                4       => hexdec($hex[3] . $hex[3]) / 255,
+                8       => hexdec(substr($hex, 6, 2)) / 255,
+                default => 1.0,
+            };
             if (strlen($hex) === 3 || strlen($hex) === 4) {
                 $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
             }
@@ -445,6 +480,7 @@ final class Ink
                 (int) hexdec(substr($hex, 0, 2)),
                 (int) hexdec(substr($hex, 2, 2)),
                 (int) hexdec(substr($hex, 4, 2)),
+                (float) $alpha,
             ];
         }
 
@@ -468,11 +504,34 @@ final class Ink
                 $n = (float) rtrim($part, '%');
                 $out[] = (int) round(str_contains($part, '%') ? $n * 2.55 : $n);
             }
-            /** @var array{0:int,1:int,2:int} $out */
+            $alpha = self::alpha($parts[3] ?? null);
+            if ($alpha === null) {
+                return null;
+            }
+            $out[] = $alpha;
+            /** @var array{0:int,1:int,2:int,3:float} $out */
             return $out;
         }
 
         return null;
+    }
+
+    /** Opacity from 0 to 1, or null when the bit is not one. */
+    private static function alpha(?string $bit): ?float
+    {
+        if ($bit === null) {
+            return 1.0;
+        }
+        if (strtolower($bit) === 'none') {
+            return 0.0;
+        }
+        if (! is_numeric(rtrim($bit, '%'))) {
+            return null;
+        }
+
+        $n = (float) rtrim($bit, '%');
+
+        return max(0.0, min(1.0, str_ends_with($bit, '%') ? $n / 100 : $n));
     }
 
     /**
@@ -480,7 +539,7 @@ final class Ink
      * can read leaves every derived ink at its stylesheet fallback: white on a
      * pale accent, exactly what the measuring exists to prevent.
      *
-     * @return array{0:int,1:int,2:int}|null
+     * @return array{0:int,1:int,2:int,3:float}|null
      */
     private static function fromHsl(string $parts): ?array
     {
@@ -493,7 +552,8 @@ final class Ink
         $hue   = self::hue($bits[0]);
         $sat   = self::percent($bits[1]);
         $light = self::percent($bits[2]);
-        if ($hue === null || $sat === null || $light === null) {
+        $alpha = self::alpha($bits[3] ?? null);
+        if ($hue === null || $sat === null || $light === null || $alpha === null) {
             return null;
         }
 
@@ -518,6 +578,7 @@ final class Ink
             (int) round(($rgb[0] + $m) * 255),
             (int) round(($rgb[1] + $m) * 255),
             (int) round(($rgb[2] + $m) * 255),
+            $alpha,
         ];
     }
 
