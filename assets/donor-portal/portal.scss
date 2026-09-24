@@ -216,7 +216,15 @@
             cursor: pointer;
             transition: border-color .15s, background .15s;
 
-            &:hover { border-color: var(--dp-accent); background: var(--dp-bg-soft); }
+            // Hovered, the row paints the soft ground and reads its ink.
+            &:hover {
+                border-color: var(--dp-accent);
+                background: var(--dp-bg-soft);
+                --dp-text: var(--gratora-on-soft, #111827);
+                --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+                --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
+                --dp-danger: var(--gratora-on-soft-danger, #b91c1c);
+            }
         }
     }
     &__sub  { font-size: 12px; color: var(--dp-muted); margin-top: 2px; }
@@ -726,7 +734,11 @@
         gap: 12px;
         color: var(--dp-text);
 
-        &:hover { background: var(--dp-bg-soft); }
+        &:hover {
+            background: var(--dp-bg-soft);
+            --dp-text: var(--gratora-on-soft, #111827);
+            --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+        }
     }
     &__code {
         font-size: 12px;

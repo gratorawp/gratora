@@ -985,6 +985,36 @@ test.describe('donor portal', () => {
         expect(n, 'statement controls the ring was read on').toBeGreaterThanOrEqual(2);
     });
 
+    // A dark card beside the soft ground as it ships, as the server would state it for #f8fafb.
+    test('a hovered row and a hovered country read the soft ground they paint', async () => {
+        const shipped = await page.addStyleTag({
+            content: '.gratora-donor-portal{--gratora-bg-soft:#f8fafb;--gratora-on-soft:#10162a;--gratora-on-soft-muted:rgba(16,22,42,.62);--gratora-on-soft-accent:#10162a;--gratora-on-soft-danger:#b91c1c}',
+        });
+        const PALE_SOFT = 'rgb(248, 250, 251)';
+        try {
+            await tab('Donations');
+            const row = root.locator('.dp-list__row').first();
+            await expect(row).toBeVisible();
+            expectInk(await inkOf(row), WHITE, CARD, 'row');
+            await row.hover();
+            const hovered = await inkOf(row);
+            expectInk(hovered, ON_ACCENT, PALE_SOFT, 'hovered row');
+            expectReadable(hovered, 'hovered row');
+            await page.mouse.move(0, 0);
+
+            await tab('Profile');
+            await root.locator('.dp-country input').click();
+            const option = root.locator('.dp-country__list button').first();
+            await option.hover();
+            expectInk(await inkOf(option), ON_ACCENT, PALE_SOFT, 'hovered country');
+            expectInk(await inkOf(option.locator('.dp-country__code')), 'rgba(16, 22, 42, 0.62)', PALE_SOFT, 'hovered country code');
+            await page.mouse.move(0, 0);
+            await page.keyboard.press('Escape');
+        } finally {
+            await shipped.evaluate((el) => el.remove());
+        }
+    });
+
     test('danger reads on the ground it stands on', async () => {
         // On the page the red reads, 6.47:1, and stands.
         const donations = await answer(page, 'donations', 500, { message: 'The donations could not be loaded.' });
