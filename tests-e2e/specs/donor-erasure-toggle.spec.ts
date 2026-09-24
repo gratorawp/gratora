@@ -19,17 +19,8 @@ const TOGGLE = 'Erase inactive donors automatically';
 const YEARS = 'Erase donors inactive for (years)';
 const WINDOW = 'Reunite window after redaction (days)';
 
-/**
- * The Switch puts its accessible name on the label wrapping the input, and the
- * input itself is hidden behind the track, so state is read from the input and
- * flipped by clicking what a person clicks.
- */
 function switchFor(page: Page): Locator {
-    return page.locator(`.gratora-switch[aria-label="${ TOGGLE }"]`);
-}
-
-function toggleState(page: Page): Locator {
-    return switchFor(page).locator('input');
+    return page.getByRole('switch', { name: TOGGLE });
 }
 
 function field(page: Page, label: string): Locator {
@@ -52,10 +43,10 @@ test.describe('automatic donor erasure', () => {
         // Whatever this site has saved, drive it to off first: the shipped
         // default is pinned by the integration suite, and a stored option would
         // make an assertion about it pass without testing anything.
-        if (await toggleState(page).isChecked()) {
+        if (await switchFor(page).isChecked()) {
             await switchFor(page).click();
         }
-        await expect(toggleState(page)).not.toBeChecked();
+        await expect(switchFor(page)).not.toBeChecked();
         await expect(field(page, YEARS)).toHaveCount(0);
 
         await switchFor(page).click();
@@ -76,10 +67,10 @@ test.describe('automatic donor erasure', () => {
 
     test('switching it on reveals the window and what it would take', async ({ page }) => {
         await openPrivacy(page);
-        if (! await toggleState(page).isChecked()) {
+        if (! await switchFor(page).isChecked()) {
             await switchFor(page).click();
         }
-        await expect(toggleState(page)).toBeChecked();
+        await expect(switchFor(page)).toBeChecked();
 
         const years = field(page, YEARS);
         await expect(years).toBeVisible();
@@ -94,10 +85,10 @@ test.describe('automatic donor erasure', () => {
 
     test('clearing the window does not fall back to erasing everyone', async ({ page }) => {
         await openPrivacy(page);
-        if (! await toggleState(page).isChecked()) {
+        if (! await switchFor(page).isChecked()) {
             await switchFor(page).click();
         }
-        await expect(toggleState(page)).toBeChecked();
+        await expect(switchFor(page)).toBeChecked();
 
         const input = field(page, YEARS).locator('input');
         await input.fill('');
