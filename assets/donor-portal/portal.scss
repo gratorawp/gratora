@@ -94,8 +94,9 @@
         align-items: center;
         gap: 8px;
 
-        &:hover     { color: var(--dp-text); background: var(--dp-bg-soft); }
-        &.is-active { color: var(--dp-accent); background: var(--dp-bg-soft); font-weight: 600; }
+        // Hovered or active, the tab paints the soft ground and reads its ink.
+        &:hover     { color: var(--gratora-on-soft, var(--dp-text)); background: var(--dp-bg-soft); }
+        &.is-active { color: var(--gratora-on-soft-accent, var(--dp-accent)); background: var(--dp-bg-soft); font-weight: 600; }
     }
 
     &__main { min-width: 0; }
@@ -129,8 +130,13 @@
         margin-bottom: -1px;
         padding: 10px 16px;
 
-        &:hover     { background: transparent; }
-        &.is-active { background: transparent; border-bottom-color: var(--dp-accent); }
+        // Painting nothing, the tab reads the page, and the accent as text is measured there.
+        &:hover     { background: transparent; color: var(--dp-text); }
+        &.is-active {
+            background: transparent;
+            color: var(--gratora-text-accent, var(--dp-accent));
+            border-bottom-color: var(--gratora-text-accent, var(--dp-accent));
+        }
     }
 }
 

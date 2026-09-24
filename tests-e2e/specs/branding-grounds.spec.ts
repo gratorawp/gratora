@@ -556,6 +556,23 @@ test.describe('donor portal', () => {
         expectInk(await inkOf(root.locator('.dp-kpi__value').first()), WHITE, 'rgb(34, 31, 61)', 'figure');
         await expectNothingBelowTheBar(page, 'portal overview', '.gratora-donor-portal');
 
+        // A wide tab paints the soft ground when active or hovered, a narrow one nothing.
+        const active = root.locator('.dp__tab.is-active');
+        expectInk(await inkOf(active), ACCENT, 'rgb(34, 31, 61)', 'active tab');
+        const other = root.locator('.dp__tab:not(.is-active)').first();
+        await other.hover();
+        expectInk(await inkOf(other), WHITE, 'rgb(34, 31, 61)', 'hovered tab');
+        await page.mouse.move(0, 0);
+
+        await page.setViewportSize({ width: 390, height: 844 });
+        expectInk(await inkOf(active), INK, WHITE, 'active tab on a narrow screen');
+        expectRgb((await inkOf(active, 'border-bottom-color')).color, INK, 'active tab underline on a narrow screen');
+        await other.hover();
+        expectInk(await inkOf(other), INK, WHITE, 'hovered tab on a narrow screen');
+        await page.mouse.move(0, 0);
+        await expectNothingBelowTheBar(page, 'portal overview on a narrow screen', '.gratora-donor-portal');
+        await page.setViewportSize({ width: 1280, height: 720 });
+
         await root.getByRole('tab', { name: 'Donations' }).click();
         const row = root.locator('.dp-list__row').first();
         await expect(row).toBeVisible();
