@@ -889,6 +889,35 @@ test.describe('donor portal', () => {
         await expect(sheet).toHaveCount(0);
         await plans();
     });
+
+    test('a consent with new terms reads the pale ground it paints', async () => {
+        const PALE = 'rgb(255, 251, 235)';
+        const consents = await answer(page, 'consents', 200, [
+            { key: 'e2e-news', label: 'Newsletter', description: 'News about the work, once a month.', granted: true, required: false, stale: true, has_record: true, occurred_at: '2026-01-05T10:00:00Z' },
+            { key: 'e2e-terms', label: 'Terms', description: 'The terms every donor accepts.', granted: true, required: true, stale: false, has_record: true, occurred_at: '2026-01-05T10:00:00Z' },
+        ]);
+        await tab('Consents');
+        const stale = root.locator('.dp-consent.is-stale');
+        await expect(stale).toHaveCSS('background-color', PALE);
+
+        expectInk(await inkOf(stale.locator('strong')), ON_ACCENT, PALE, 'stale label');
+        for (const selector of ['.dp-consent__desc', '.dp-consent__meta']) {
+            const ink = await inkOf(stale.locator(selector));
+            expectInk(ink, 'rgba(16, 22, 42, 0.62)', PALE, selector);
+            expect(ink.ratio, describeInk(ink)).toBeGreaterThanOrEqual(4.5);
+        }
+
+        const keep = stale.locator('.dp-consent__confirm');
+        expectInk(await inkOf(keep), ON_ACCENT, PALE, 'keep as is');
+        await keep.hover();
+        expectInk(await inkOf(keep), ON_ACCENT, PALE, 'keep as is hovered');
+        const edge = await inkOf(keep, 'border-top-color');
+        expect(edge.ratio, `hovered edge ${describeInk(edge)}`).toBeGreaterThanOrEqual(3);
+        await page.mouse.move(0, 0);
+
+        await expectNothingBelowTheBar(page, 'consents', '.gratora-donor-portal');
+        await consents();
+    });
 });
 
 test('the measuring agrees with WCAG', () => {

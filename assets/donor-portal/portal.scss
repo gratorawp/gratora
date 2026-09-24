@@ -601,8 +601,8 @@
         cursor: pointer;
 
         &:hover, &:focus-visible {
-            border-color: var(--dp-accent);
-            color: var(--dp-accent);
+            border-color: var(--dp-text-accent);
+            color: var(--dp-text-accent);
         }
     }
     &__saving {
@@ -619,9 +619,13 @@
         --dp-danger: var(--gratora-on-soft-danger, #b91c1c);
         cursor: default;
     }
+    // A pale yellow whatever the brand, so the dark ink and its muted alpha that read on it.
     &.is-stale {
         border-color: #fbbf24;
         background: #fffbeb;
+        --dp-text: #10162a;
+        --dp-muted: rgba(16, 22, 42, .62);
+        --dp-text-accent: #10162a;
     }
 }
 
