@@ -72,6 +72,64 @@ final class ThemePresetIsSanitisedTest extends IntegrationTestCase
         $this->assertSame('700', $tokens['gratora-button-weight'] ?? null);
     }
 
+    /**
+     * Only a palette, replacing the active theme's data so its own palette
+     * cannot answer instead.
+     *
+     * @param array<string,string> $slugs slug => colour, in palette order
+     * @return array<string,string>
+     */
+    private function paletteTokens(array $slugs): array
+    {
+        $palette = [];
+        foreach ($slugs as $slug => $color) {
+            $palette[] = ['slug' => $slug, 'name' => $slug, 'color' => $color];
+        }
+
+        $this->filter = static fn () => new \WP_Theme_JSON_Data([
+            'version'  => 3,
+            'settings' => ['color' => ['palette' => $palette]],
+        ], 'theme');
+        add_filter('wp_theme_json_data_theme', $this->filter, 10);
+        WP_Theme_JSON_Resolver::clean_cached_data();
+
+        $preset = StylePresets::themePreset();
+
+        return is_array($preset) ? (array) ($preset['tokens'] ?? []) : [];
+    }
+
+    /** @return array<string,array{0:string}> */
+    public static function hueSpellings(): array
+    {
+        return [
+            'degrees'  => ['hsl(160deg 60% 80%)'],
+            'turns'    => ['hsl(0.4444turn 60% 80%)'],
+            'radians'  => ['hsl(2.7925rad 60% 80%)'],
+            'gradians' => ['hsl(177.78grad 60% 80%)'],
+        ];
+    }
+
+    /**
+     * A palette may state a hue in any CSS angle unit. Reading only bare
+     * degrees dropped the primary and, with nothing else derived, the preset.
+     *
+     * @dataProvider hueSpellings
+     */
+    public function test_a_primary_in_any_hue_unit_is_the_accent(string $primary): void
+    {
+        $tokens = $this->paletteTokens(['primary' => $primary]);
+
+        $this->assertSame($primary, $tokens['gratora-accent'] ?? null);
+    }
+
+    public function test_a_primary_nothing_can_read_gives_way_to_the_next_candidate(): void
+    {
+        $tokens = $this->paletteTokens(['primary' => 'oklch(0.7 0.1 200)', 'accent-1' => '#0f766e']);
+
+        $this->assertSame('#0f766e', $tokens['gratora-accent'] ?? null);
+        $this->assertSame('#0f766e', $tokens['gratora-focus-ring'] ?? null);
+    }
+
     /** Whatever the active theme happens to supply, both surfaces see the same map. */
     public function test_the_preset_is_what_both_surfaces_would_keep(): void
     {

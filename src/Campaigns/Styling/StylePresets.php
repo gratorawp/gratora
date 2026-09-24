@@ -186,13 +186,15 @@ final class StylePresets
                 $bySlug[(string) $entry['slug']] = (string) $entry['color'];
             }
         }
-        $accent = $bySlug['primary']
-            ?? $bySlug['accent']
-            ?? $bySlug['accent-1']
-            ?? ($colors[0]['color'] ?? null);
-        if (is_string($accent) && $accent !== '') {
-            $tokens['gratora-accent']     = $accent;
-            $tokens['gratora-focus-ring'] = $accent;
+        // The first candidate the catalogue can read: a primary in a notation
+        // it refuses gives way to the next instead of leaving no accent.
+        $candidates = [$bySlug['primary'] ?? null, $bySlug['accent'] ?? null, $bySlug['accent-1'] ?? null, $colors[0]['color'] ?? null];
+        foreach ($candidates as $accent) {
+            if (is_string($accent) && Tokens::sanitize(['gratora-accent' => $accent]) !== []) {
+                $tokens['gratora-accent']     = $accent;
+                $tokens['gratora-focus-ring'] = $accent;
+                break;
+            }
         }
         if (isset($bySlug['background'])) $tokens['gratora-bg']   = $bySlug['background'];
         if (isset($bySlug['foreground'])) $tokens['gratora-text'] = $bySlug['foreground'];
