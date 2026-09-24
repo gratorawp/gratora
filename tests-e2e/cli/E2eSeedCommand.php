@@ -424,6 +424,7 @@ final class E2eSeedCommand
             'BOLD_HOST'  => $this->brandingPage('e2e-branding-bold-host', 'Branding Bold Host', self::boldHostBlocks((int) $page->id, (int) $bold->id), $bold),
             'WHITE_GRID' => $this->brandingPage('e2e-branding-white-grid', 'Branding White Grid', '<!-- wp:gratora/campaign-grid {"count":12} /-->', null),
             'MODAL'      => $this->brandingPage('e2e-branding-modal', 'Branding Modal', '<!-- wp:gratora/donate-button {"campaignId":' . (int) $page->id . ',"label":"Donate in a modal"} /-->', $guest),
+            'QUIET_HOST' => $this->brandingPage('e2e-branding-quiet-host', 'Branding Quiet Host', self::quietHostBlocks((int) $page->id, $shortcode($plain)), $white),
             'CLASSIC'    => $this->campaignPath($classic),
             'COVER'      => $this->campaignPath($cover),
             'THEME'      => $this->campaignPath($theme),
@@ -1095,6 +1096,15 @@ BLOCKS;
             '<!-- wp:gratora/campaign-stat {"campaignId":' . $guest . ',"metric":"goal"} /-->',
             '<!-- wp:gratora/recent-donations {"campaignId":' . $guest . ',"title":"Recent guest","limit":5} /-->',
             '<!-- wp:gratora/top-donors {"campaignId":' . $guest . ',"title":"Top guest","limit":5,"layout":"list"} /-->',
+        ]);
+    }
+
+    /** A guest campaign's donate button and form on Quiet, which sets the button colours the guest leaves to its accent. */
+    private static function quietHostBlocks(int $guest, string $form): string
+    {
+        return implode("\n", [
+            '<!-- wp:gratora/donate-button {"campaignId":' . $guest . ',"label":"Donate in a modal"} /-->',
+            $form,
         ]);
     }
 

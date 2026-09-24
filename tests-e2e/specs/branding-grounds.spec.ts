@@ -507,6 +507,32 @@ test.describe('donate button modal', () => {
     }
 });
 
+test.describe('guest button and form on a Quiet host', () => {
+    test.skip(! path('QUIET_HOST'), unseeded('QUIET_HOST'));
+
+    // Quiet sets a transparent button under dark text; the guest leaves both to its accent.
+    test('the guest\'s donate button and its modal draw the guest\'s own buttons', async ({ page }) => {
+        await open(page, path('QUIET_HOST'));
+
+        const trigger = page.locator('.gratora-donate-button');
+        await expect(trigger).toHaveCSS('background-color', ACCENT);
+        expectInk(await inkOf(trigger), ON_ACCENT, ACCENT, 'donate button');
+
+        await trigger.click();
+        const panel = page.locator('.gratora-donate-modal__panel');
+        await expect(panel).toBeVisible();
+        await expect(panel.locator('form.gratora-donation-form')).toHaveAttribute('data-gratora-ready', /.*/);
+
+        const submit = panel.locator('.gratora-form__button--primary').first();
+        await expect(submit).toHaveCSS('background-color', ACCENT);
+        const ink = await inkOf(submit);
+        expectInk(ink, ON_ACCENT, ACCENT, 'modal submit');
+        expect(ink.ratio).toBeCloseTo(14.41, 1);
+
+        await expectNothingBelowTheBar(page, 'Quiet host with its modal open');
+    });
+});
+
 test.describe('donor portal', () => {
     const portal = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
     test.skip(! portal, 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints');
