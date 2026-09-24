@@ -27,8 +27,11 @@ final class Ink
      */
     private const FLIP = 0.1791;
 
-    private const ON_DARK  = ['#ffffff', 'rgba(255,255,255,.72)', 'rgba(255,255,255,.26)'];
-    private const ON_LIGHT = ['#10162a', 'rgba(16,22,42,.62)',    'rgba(16,22,42,.16)'];
+    private const ON_DARK  = ['#ffffff', 'rgba(255,255,255,.26)'];
+    private const ON_LIGHT = ['#10162a', 'rgba(16,22,42,.16)'];
+
+    /** The alpha muted ink starts from, in hundredths. */
+    private const MUTED_FROM = ['#ffffff' => 72, '#10162a' => 62];
 
     private const NUMBER = '[+-]?(?:\d+\.?\d*|\.\d+)';
 
@@ -49,7 +52,26 @@ final class Ink
             return null;
         }
 
-        return self::luminance($rgb) > self::FLIP ? self::ON_LIGHT : self::ON_DARK;
+        [$ink, $line] = self::luminance($rgb) > self::FLIP ? self::ON_LIGHT : self::ON_DARK;
+
+        return [$ink, self::muted($rgb, $ink), $line];
+    }
+
+    /**
+     * What color-mix(in srgb, a share, b) paints, as #rrggbb, or null when
+     * either colour cannot be read. The share is a's part, from 0 to 1.
+     *
+     * @since 1.0.0
+     */
+    public static function mix(string $a, string $b, float $share): ?string
+    {
+        $x = self::rgb($a);
+        $y = self::rgb($b);
+        if ($x === null || $y === null) {
+            return null;
+        }
+
+        return self::hexOf(self::blend($x, $y, $share));
     }
 
     /**
@@ -63,16 +85,8 @@ final class Ink
     public static function hex(string $value): ?string
     {
         $rgb = self::rgb($value);
-        if ($rgb === null) {
-            return null;
-        }
 
-        $out = '#';
-        foreach ($rgb as $channel) {
-            $out .= sprintf('%02x', max(0, min(255, $channel)));
-        }
-
-        return $out;
+        return $rgb === null ? null : self::hexOf($rgb);
     }
 
     /**
@@ -151,7 +165,7 @@ final class Ink
      *
      * @since 1.0.0
      */
-    private static function carries(string $ink, string $ground): bool
+    public static function carries(string $ink, string $ground): bool
     {
         $a = self::rgb($ink);
         $b = self::rgb($ground);
@@ -159,10 +173,68 @@ final class Ink
             return false;
         }
 
+        return self::ratio($a, $b) >= 4.5;
+    }
+
+    /**
+     * The ink at the lowest alpha, from the shipped one up, whose composite on
+     * the ground reaches 4.5:1. Where none below opaque does, the ink itself.
+     *
+     * @param array{0:int,1:int,2:int} $ground
+     */
+    private static function muted(array $ground, string $ink): string
+    {
+        /** @var array{0:int,1:int,2:int} $channels */
+        $channels = self::rgb($ink);
+
+        for ($n = self::MUTED_FROM[$ink]; $n < 100; $n++) {
+            if (self::ratio(self::blend($channels, $ground, $n / 100), $ground) >= 4.5) {
+                return sprintf('rgba(%d,%d,%d,.%d)', $channels[0], $channels[1], $channels[2], $n % 10 === 0 ? $n / 10 : $n);
+            }
+        }
+
+        return $ink;
+    }
+
+    /**
+     * @param array{0:int,1:int,2:int} $a
+     * @param array{0:int,1:int,2:int} $b
+     * @return array{0:int,1:int,2:int}
+     */
+    private static function blend(array $a, array $b, float $share): array
+    {
+        $out = [];
+        foreach ([0, 1, 2] as $i) {
+            $out[] = (int) round($share * max(0, min(255, $a[$i])) + (1 - $share) * max(0, min(255, $b[$i])));
+        }
+
+        /** @var array{0:int,1:int,2:int} $out */
+        return $out;
+    }
+
+    /**
+     * @param array{0:int,1:int,2:int} $a
+     * @param array{0:int,1:int,2:int} $b
+     */
+    private static function ratio(array $a, array $b): float
+    {
         $l1 = self::luminance($a);
         $l2 = self::luminance($b);
 
-        return ((max($l1, $l2) + 0.05) / (min($l1, $l2) + 0.05)) >= 4.5;
+        return (max($l1, $l2) + 0.05) / (min($l1, $l2) + 0.05);
+    }
+
+    /**
+     * @param array{0:int,1:int,2:int} $rgb
+     */
+    private static function hexOf(array $rgb): string
+    {
+        $out = '#';
+        foreach ($rgb as $channel) {
+            $out .= sprintf('%02x', max(0, min(255, $channel)));
+        }
+
+        return $out;
     }
 
     /**

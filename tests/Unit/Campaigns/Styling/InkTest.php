@@ -217,4 +217,71 @@ final class InkTest extends TestCase
         $this->assertNull(Ink::hex('hsl(160 60deg 80%)'));
         $this->assertNull(Ink::hex('hsl(160turnx 60% 80%)'));
     }
+
+    /**
+     * Muted ink is the ink at the lowest alpha, from the shipped one up, that
+     * still reads on the ground. A fixed alpha tuned against white fell under
+     * 4.5:1 on a mid ground while the full ink passed.
+     *
+     * @return array<string,array{0:string,1:string}>
+     */
+    public function mutedGrounds(): array
+    {
+        return [
+            'white'          => ['#ffffff', 'rgba(16,22,42,.62)'],
+            'QA card'        => ['#15142b', 'rgba(255,255,255,.72)'],
+            'QA soft'        => ['#221f3d', 'rgba(255,255,255,.72)'],
+            'pale yellow'    => ['#fde68a', 'rgba(16,22,42,.62)'],
+            'coral'          => ['#f55151', 'rgba(16,22,42,.86)'],
+            'violet'         => ['#452ef5', 'rgba(255,255,255,.74)'],
+            'mid blue'       => ['#2563eb', 'rgba(255,255,255,.91)'],
+            'mid red'        => ['#ed1212', '#10162a'],
+            'mid grey'       => ['#777777', '#10162a'],
+        ];
+    }
+
+    /** @dataProvider mutedGrounds */
+    public function test_muted_ink_is_measured_on_its_ground(string $ground, string $expected): void
+    {
+        $this->assertSame($expected, Ink::on($ground)[1] ?? null);
+    }
+
+    public function test_muted_ink_reads_on_every_grey(): void
+    {
+        for ($v = 0; $v <= 255; $v++) {
+            $ground = sprintf('#%1$02x%1$02x%1$02x', $v);
+            [$ink, $muted] = Ink::on($ground) ?? ['', ''];
+
+            if ($muted === $ink) {
+                $this->assertFalse(Ink::carries(Ink::mix($ink, $ground, .99) ?? '', $ground), $ground);
+                continue;
+            }
+
+            $this->assertSame(1, preg_match('/^rgba\(\d+,\d+,\d+,\.(\d+)\)$/', $muted, $m), $ground . ' spelled ' . $muted);
+            $alpha = (float) ('0.' . $m[1]);
+
+            $this->assertTrue(Ink::carries(Ink::mix($ink, $ground, $alpha) ?? '', $ground), $ground . ' muted ' . $muted);
+            if ($alpha > ($ink === '#ffffff' ? .72 : .62)) {
+                $this->assertFalse(
+                    Ink::carries(Ink::mix($ink, $ground, round($alpha - .01, 2)) ?? '', $ground),
+                    $ground . ' takes more ink than it needs'
+                );
+            }
+        }
+    }
+
+    public function test_whether_ink_carries_on_a_ground_is_asked_directly(): void
+    {
+        $this->assertTrue(Ink::carries('#111827', '#ffffff'));
+        $this->assertFalse(Ink::carries('#fde68a', '#ffffff'));
+        $this->assertFalse(Ink::carries('inherit', '#ffffff'));
+    }
+
+    public function test_a_mix_is_what_color_mix_paints(): void
+    {
+        $this->assertSame('#312d36', Ink::mix('#fde68a', '#15142b', .12));
+        $this->assertSame('#fffdeb', Ink::mix('#ffee58', '#ffffff', .12));
+        $this->assertSame('#794057', Ink::mix('#452ef5', '#804242', .12));
+        $this->assertNull(Ink::mix('inherit', '#ffffff', .12));
+    }
 }

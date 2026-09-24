@@ -45,14 +45,14 @@ final class InkFollowsTheGroundTest extends IntegrationTestCase
 
     /**
      * The muted line is the one that disappears: #6b7280 on this red measures
-     * 1.08:1, which is no line at all. Ink measured against the ground reaches
-     * 3.9:1 on it, the most any ink can do at this luminance.
+     * 1.08:1, which is no line at all. No ink below opaque reaches 4.5:1 on it,
+     * so the muted line is the ink, 4.0:1, the most any ink can do here.
      */
     public function test_the_muted_line_stops_vanishing_on_a_coloured_ground(): void
     {
         $css = $this->css(['gratora-bg' => '#ed1212']);
 
-        $this->assertStringContainsString('--gratora-text-muted:rgba(16,22,42,.62);', $css);
+        $this->assertStringContainsString('--gratora-text-muted:#10162a;', $css);
         $this->assertStringNotContainsString('--gratora-text-muted:#6b7280;', $css);
     }
 
