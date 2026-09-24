@@ -47,15 +47,23 @@ it( 'says nothing about a palette that reads', () => {
     expect( mount( {} ).querySelector( '.gratora-preset-editor__contrast' ) ).toBeNull();
 } );
 
+/** White reaches 4.47:1 on this red, the better of the two inks. */
 it( 'names a ground no ink can carry, and what it measures', () => {
     const text = mount( { 'gratora-bg': '#ed1212' } ).textContent;
 
     expect( text ).toContain( '#ED1212' );
-    expect( text ).toContain( '4.0:1' );
+    expect( text ).toContain( '4.4:1' );
+} );
+
+/** White reaches 4.50, 4.51 and 4.54:1 on these, where the dark ink stops under 4.0. */
+it( 'says nothing about a ground white text reads on', () => {
+    for ( const ground of [ '#0072f0', '#006ffa', '#767676' ] ) {
+        expect( mount( { 'gratora-accent': ground, 'gratora-bg': ground } ).querySelector( '.gratora-preset-editor__contrast' ) ).toBeNull();
+    }
 } );
 
 it( 'names each failing ground once', () => {
-    const items = mount( { 'gratora-bg': '#ed1212', 'gratora-bg-soft': '#767676' } )
+    const items = mount( { 'gratora-bg': '#ed1212', 'gratora-bg-soft': '#777777' } )
         .querySelectorAll( '.gratora-preset-editor__contrast li' );
 
     expect( items ).toHaveLength( 2 );

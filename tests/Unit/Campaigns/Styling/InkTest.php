@@ -278,6 +278,57 @@ final class InkTest extends TestCase
     }
 
     /**
+     * White and the dark ink reach the same contrast where (L + .05)^2 equals
+     * 1.05 times the dark ink's L + .05, about .198, not at black's .179.
+     * Between the two white reads better, and on the first three only white
+     * reaches 4.5:1.
+     *
+     * @return array<string,array{0:string}>
+     */
+    public function whiteReadsBetter(): array
+    {
+        return [
+            'blue'      => ['#0072f0'],
+            'bluer'     => ['#006ffa'],
+            'grey'      => ['#767676'],
+            'mid grey'  => ['#777777'],
+            'mid red'   => ['#ed1212'],
+        ];
+    }
+
+    /** @dataProvider whiteReadsBetter */
+    public function test_a_ground_takes_white_where_white_reads_better(string $ground): void
+    {
+        $this->assertSame('#ffffff', Ink::on($ground)[0] ?? null);
+        $this->assertStringContainsString('--gratora-on-accent:#ffffff;', Ink::declarationsFor($ground));
+    }
+
+    public function test_white_reaches_the_bar_on_the_grounds_the_dark_ink_misses(): void
+    {
+        foreach (['#0072f0', '#006ffa', '#767676'] as $ground) {
+            $this->assertTrue(Ink::carries('#ffffff', $ground), $ground);
+            $this->assertFalse(Ink::carries('#10162a', $ground), $ground);
+        }
+    }
+
+    public function test_the_ink_reads_at_least_as_well_as_the_other_on_every_grey(): void
+    {
+        for ($v = 0; $v <= 255; $v++) {
+            $ground = sprintf('#%1$02x%1$02x%1$02x', $v);
+            $ink    = Ink::on($ground)[0] ?? '';
+            $other  = $ink === '#ffffff' ? '#10162a' : '#ffffff';
+
+            // Whichever the other carries, the chosen ink carries too.
+            if (Ink::carries($other, $ground)) {
+                $this->assertTrue(Ink::carries($ink, $ground), $ground . ' took ' . $ink);
+            }
+        }
+
+        $this->assertSame('#10162a', Ink::on('#7b7b7b')[0] ?? null);
+        $this->assertSame('#10162a', Ink::on('#f55151')[0] ?? null);
+    }
+
+    /**
      * Muted ink is the ink at the lowest alpha, from the shipped one up, that
      * still reads on the ground. A fixed alpha tuned against white fell under
      * 4.5:1 on a mid ground while the full ink passed.
@@ -294,8 +345,8 @@ final class InkTest extends TestCase
             'coral'          => ['#f55151', 'rgba(16,22,42,.86)'],
             'violet'         => ['#452ef5', 'rgba(255,255,255,.74)'],
             'mid blue'       => ['#2563eb', 'rgba(255,255,255,.91)'],
-            'mid red'        => ['#ed1212', '#10162a'],
-            'mid grey'       => ['#777777', '#10162a'],
+            'mid red'        => ['#ed1212', '#ffffff'],
+            'mid grey'       => ['#777777', '#ffffff'],
         ];
     }
 

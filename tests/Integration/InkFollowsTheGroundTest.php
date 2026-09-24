@@ -46,14 +46,15 @@ final class InkFollowsTheGroundTest extends IntegrationTestCase
     }
 
     /**
-     * #6b7280 on this red measures 1.08:1, which is no line at all, and no ink
-     * below opaque reaches 4.5:1 on it, so the card's muted line is the ink.
+     * #6b7280 on this red measures 1.08:1, which is no line at all. White is
+     * the better ink there, 4.47:1, and no alpha of it below opaque reaches
+     * 4.5:1, so the card's muted line is the ink.
      */
     public function test_the_muted_line_stops_vanishing_on_a_coloured_card(): void
     {
         $css = $this->css(['gratora-bg' => '#ed1212']);
 
-        $this->assertStringContainsString('--gratora-on-bg-muted:#10162a;', $css);
+        $this->assertStringContainsString('--gratora-on-bg-muted:#ffffff;', $css);
         $this->assertStringContainsString('--gratora-text-muted:#6b7280;', $css);
     }
 

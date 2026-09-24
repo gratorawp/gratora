@@ -23,12 +23,6 @@ namespace Gratora\Campaigns\Styling;
  */
 final class Ink
 {
-    /**
-     * Relative luminance at which black and white contrast equally against the
-     * same background: (L + 0.05)^2 = 1.05 * 0.05. Above it, dark ink wins.
-     */
-    private const FLIP = 0.1791;
-
     private const ON_DARK  = ['#ffffff', 'rgba(255,255,255,.26)'];
     private const ON_LIGHT = ['#10162a', 'rgba(16,22,42,.16)'];
 
@@ -66,6 +60,7 @@ final class Ink
 
     /**
      * Ink, muted ink and hairline for a ground, or null when it cannot be read.
+     * The ink is white or the dark one, whichever reaches the higher contrast.
      *
      * @return array{0:string,1:string,2:string}|null
      *
@@ -78,7 +73,12 @@ final class Ink
             return null;
         }
 
-        [$ink, $line] = self::luminance($rgb) > self::FLIP ? self::ON_LIGHT : self::ON_DARK;
+        /** @var array{0:int,1:int,2:int} $white */
+        $white = self::rgb(self::ON_DARK[0]);
+        /** @var array{0:int,1:int,2:int} $dark */
+        $dark = self::rgb(self::ON_LIGHT[0]);
+
+        [$ink, $line] = self::ratio($white, $rgb) >= self::ratio($dark, $rgb) ? self::ON_DARK : self::ON_LIGHT;
 
         return [$ink, self::muted($rgb, $ink), $line];
     }

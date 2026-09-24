@@ -19,7 +19,10 @@ const cases = [
     [ '#fff', '#10162a' ],
     [ '#f8fafb', '#10162a' ],
     [ '#05a2f0', '#10162a' ],
-    [ '#ed1212', '#10162a' ],
+    [ '#ed1212', '#ffffff' ],
+    [ '#0072f0', '#ffffff' ],
+    [ '#767676', '#ffffff' ],
+    [ '#7b7b7b', '#10162a' ],
     [ 'rgb(20, 66, 95)', '#ffffff' ],
     [ 'rgba(255, 224, 102, 0.9)', '#10162a' ],
     [ 'rgba(33, 29, 63, 0.12)', '#10162a' ],
@@ -47,6 +50,19 @@ test( 'white and black are the extremes the scale is anchored on', () => {
  */
 test( 'a mid red carries no body text either way', () => {
     expect( bestOn( '#ed1212' ) ).toBeLessThan( 4.5 );
+} );
+
+/**
+ * White and the dark ink cross where each reaches the same contrast, about
+ * L .198 for #10162a, so what the panel reports is the better of the two.
+ */
+test( 'the best any ink does is the better of white and the dark ink', () => {
+    for ( let v = 0; v <= 255; v++ ) {
+        const grey = '#' + v.toString( 16 ).padStart( 2, '0' ).repeat( 3 );
+
+        expect( bestOn( grey ) ).toBeCloseTo( Math.max( ratio( '#ffffff', grey ), ratio( '#10162a', grey ) ), 10 );
+    }
+    expect( bestOn( '#0072f0' ) ).toBeGreaterThanOrEqual( 4.5 );
 } );
 
 test( 'the shipped page ground carries it comfortably', () => {
@@ -105,8 +121,8 @@ test.each( [
     [ '#f55151', 'rgba(16,22,42,.86)' ],
     [ '#452ef5', 'rgba(255,255,255,.74)' ],
     [ '#2563eb', 'rgba(255,255,255,.91)' ],
-    [ '#ed1212', '#10162a' ],
-    [ '#777777', '#10162a' ],
+    [ '#ed1212', '#ffffff' ],
+    [ '#777777', '#ffffff' ],
 ] )( 'the muted ink on %p is the one the server measures', ( ground, muted ) => {
     expect( inkPair( ground )[ 1 ] ).toBe( muted );
 } );

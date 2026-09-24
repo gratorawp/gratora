@@ -106,7 +106,7 @@ it( 'never pins the shipped tint under an accent nothing paired it with', () => 
     expect( read( el, '--gratora-accent-soft' ) ).toBe( '' );
 } );
 
-/** #ed1212 sits just above the flip, so it is the case a wrong constant loses first. */
+/** #ed1212 sits just under the crossing, where white reads better, so it is the case a wrong crossing loses first. */
 it( 'drops a built-in tint when the brand panel repaints that preset', () => {
     const el = frame( {
         layer:    'brand',
@@ -115,7 +115,7 @@ it( 'drops a built-in tint when the brand panel repaints that preset', () => {
     } );
 
     expect( read( el, '--gratora-accent-soft' ) ).toBe( '' );
-    expect( read( el, '--gratora-on-accent' ) ).toBe( '#10162a' );
+    expect( read( el, '--gratora-on-accent' ) ).toBe( '#ffffff' );
 } );
 
 // StylePresets::tokensFor hands a campaign naming a deleted preset the org

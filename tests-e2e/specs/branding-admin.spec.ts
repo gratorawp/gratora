@@ -283,7 +283,8 @@ test.describe('campaign Appearance', () => {
         await openGroup(page, 'Surface');
         await setColour(page, 'Background', '777777');
 
-        await expect(page.locator('.gratora-custom-style-body')).toContainText('Background (#777777) reaches 4.0:1, under the 4.5:1 that text needs.');
+        // White, the better ink on this grey, reaches 4.48:1.
+        await expect(page.locator('.gratora-custom-style-body')).toContainText('Background (#777777) reaches 4.4:1, under the 4.5:1 that text needs.');
     });
 
     test('the switches are reached and worked from the keyboard', async ({ page }) => {

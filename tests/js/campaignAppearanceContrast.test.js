@@ -53,7 +53,8 @@ const notice = ( host ) => host.querySelector( '.gratora-custom-style-body .grat
 it( 'names a ground the campaign chose that no ink carries, and what it reaches', () => {
     const host = mount( { tokens: { 'gratora-bg': '#777777' } } );
 
-    expect( notice( host )?.textContent ).toContain( 'Background (#777777) reaches 4.0:1, under the 4.5:1 that text needs.' );
+    // White, the better ink here, reaches 4.48:1.
+    expect( notice( host )?.textContent ).toContain( 'Background (#777777) reaches 4.4:1, under the 4.5:1 that text needs.' );
 } );
 
 it( 'measures a ground the chosen preset brings, under the campaign overrides', () => {
