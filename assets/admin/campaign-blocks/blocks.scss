@@ -244,6 +244,7 @@ body.gratora-modal-open { overflow: hidden; }
 
     &__panel {
         position: relative;
+        box-sizing: border-box;
         max-width: 540px;
         margin: 5vh auto;
         max-height: 90vh;
