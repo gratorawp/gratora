@@ -383,12 +383,7 @@
         background: #f8fafb;
         border-bottom: 1px dashed $border-mid;
 
-        .dashicons {
-            font-size: 36px;
-            width: 36px;
-            height: 36px;
-            color: $text-muted;
-        }
+        svg { color: $text-muted; }
     }
 }
 
