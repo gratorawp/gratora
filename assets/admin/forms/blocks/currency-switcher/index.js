@@ -224,7 +224,7 @@ function Edit( { attributes, setAttributes } ) {
                                         fontSize:     13,
                                         fontWeight:   500,
                                         background:   on ? 'var(--gratora-accent, #211d3f)' : 'transparent',
-                                        color:        on ? 'var(--gratora-on-accent, #fff)' : '#6b7280',
+                                        color:        on ? 'var(--gratora-on-accent, #fff)' : 'var(--gratora-on-soft-muted, var(--gratora-text-muted, #6b7280))',
                                     } }
                                 >
                                     { c }
@@ -239,14 +239,15 @@ function Edit( { attributes, setAttributes } ) {
                             alignItems:   'center',
                             gap:          8,
                             padding:      '6px 10px',
-                            border:       '1px solid var(--gratora-border, #e5e7eb)',
+                            border:       'var(--gratora-stroke, 1px) solid var(--gratora-border, #e5e7eb)',
                             borderRadius: 'var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px))',
                             fontSize:     13,
-                            background:   'var(--gratora-bg, #fff)',
+                            background:   'var(--gratora-field-bg, #fff)',
+                            color:        'var(--gratora-on-field, var(--gratora-text))',
                         } }
                     >
                         { previewCodes[ 0 ] || '-' }
-                        <span aria-hidden="true" style={ { color: '#9ca3af' } }>▾</span>
+                        <span aria-hidden="true" style={ { color: 'var(--gratora-on-field-muted, #9ca3af)' } }>▾</span>
                     </span>
                 ) }
             </div>

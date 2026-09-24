@@ -223,7 +223,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             key={ p.id || i }
                             style={ {
                                 padding:      '10px 12px',
-                                background:   '#f0f0f1',
+                                background:   selected ? 'var(--gratora-accent-soft)' : 'var(--gratora-bg-soft, #f8fafb)',
+                                color:        selected ? 'var(--gratora-on-accent-soft, var(--gratora-accent))' : 'var(--gratora-on-soft, var(--gratora-text))',
                                 borderRadius: 'var(--gratora-radius-sm, 6px)',
                                 textAlign:    'center',
                                 display:      'flex',
@@ -245,7 +246,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 allowedFormats={ [] }
                                 style={ {
                                     fontSize: 11,
-                                    color:    '#666',
+                                    color:    selected ? 'inherit' : 'var(--gratora-on-soft-muted, var(--gratora-text-muted))',
                                     minHeight: 14,
                                 } }
                             />

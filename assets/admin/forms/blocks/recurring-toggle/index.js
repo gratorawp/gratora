@@ -131,10 +131,16 @@ function Edit( { attributes, setAttributes } ) {
                     style={ { fontSize: 13, fontWeight: 500, marginBottom: 6 } }
                 />
                 <div
-                    style={ {
-                        display:       'flex',
-                        gap:           style === 'tabs' ? 0 : 6,
-                        borderBottom:  style === 'tabs' ? '1px solid var(--gratora-border, #e5e7eb)' : 'none',
+                    style={ style === 'tabs' ? {
+                        display:      'flex',
+                        gap:          0,
+                        borderBottom: '1px solid var(--gratora-border, #e5e7eb)',
+                    } : {
+                        display:      'inline-flex',
+                        gap:          6,
+                        padding:      4,
+                        background:   'var(--gratora-bg-soft, #f8fafb)',
+                        borderRadius: 'var(--gratora-radius-sm, 8px)',
                     } }
                 >
                     { previewKeys.map( ( key ) => {
@@ -148,10 +154,10 @@ function Edit( { attributes, setAttributes } ) {
                                     key={ key }
                                     style={ {
                                         padding:      '8px 14px',
-                                        fontSize:     12,
-                                        fontWeight:   selected ? 600 : 400,
-                                        color:        selected ? 'var(--gratora-accent, #211d3f)' : 'var(--gratora-text-muted, #555)',
-                                        borderBottom: selected ? '2px solid var(--gratora-accent, #211d3f)' : '2px solid transparent',
+                                        fontSize:     13,
+                                        fontWeight:   selected ? 600 : 500,
+                                        color:        selected ? 'var(--gratora-text-accent, var(--gratora-accent, #211d3f))' : 'var(--gratora-text-muted, #6b7280)',
+                                        borderBottom: selected ? '2px solid var(--gratora-text-accent, var(--gratora-accent, #211d3f))' : '2px solid transparent',
                                         marginBottom: -1,
                                     } }
                                 >
@@ -163,12 +169,12 @@ function Edit( { attributes, setAttributes } ) {
                             <span
                                 key={ key }
                                 style={ {
-                                    padding:      '6px 14px',
-                                    fontSize:     12,
+                                    padding:      '8px 14px',
+                                    fontSize:     13,
                                     fontWeight:   500,
                                     borderRadius: 'var(--gratora-radius-sm, 8px)',
-                                    background:   selected ? 'var(--gratora-accent, #211d3f)' : 'var(--gratora-bg-soft, #f0f0f1)',
-                                    color:        selected ? 'var(--gratora-on-accent, #fff)' : 'var(--gratora-text-muted, #333)',
+                                    background:   selected ? 'var(--gratora-accent, #211d3f)' : 'transparent',
+                                    color:        selected ? 'var(--gratora-on-accent, #fff)' : 'var(--gratora-on-soft, var(--gratora-text))',
                                 } }
                             >
                                 { opt.label }

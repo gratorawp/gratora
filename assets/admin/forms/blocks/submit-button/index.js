@@ -56,15 +56,20 @@ function Edit( { attributes, setAttributes } ) {
                     placeholder={ __( 'Donate now', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ {
-                        display:       'inline-block',
-                        padding:       '10px 20px',
-                        background:    'var(--gratora-button-bg, var(--gratora-accent, #211d3f))',
-                        color:         'var(--gratora-button-fg, var(--gratora-on-accent, #fff))',
-                        borderRadius:  'var(--gratora-radius-sm, 4px)',
-                        fontWeight:    500,
-                        fontSize:      '14px',
-                        width:         align === 'full' ? '100%' : 'auto',
-                        textAlign:     'center',
+                        display:        'inline-flex',
+                        alignItems:     'center',
+                        justifyContent: 'center',
+                        minHeight:      'var(--gratora-button-size, 48px)',
+                        padding:        '0 22px',
+                        border:         'var(--gratora-button-border, 0)',
+                        background:     'var(--gratora-button-bg, var(--gratora-accent, #211d3f))',
+                        color:          'var(--gratora-button-fg, var(--gratora-on-accent, #fff))',
+                        borderRadius:   'var(--gratora-button-radius, var(--gratora-radius-sm, 8px))',
+                        fontWeight:     'var(--gratora-button-weight, 600)',
+                        fontSize:       '14px',
+                        boxShadow:      'var(--gratora-button-shadow, 0 1px 2px rgba(0,0,0,.08))',
+                        width:          align === 'full' ? '100%' : 'auto',
+                        textAlign:      'center',
                     } }
                 />
             </div>
