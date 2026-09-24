@@ -12,6 +12,15 @@ namespace Gratora\Campaigns\Styling;
 final class Tokens
 {
     /**
+     * What an hsl() colour may hold: digits, separators and the words CSS
+     * gives a hue. The words are the only letters, so nothing that ends a
+     * declaration or opens a function gets through with them.
+     *
+     * @since 1.0.0
+     */
+    public const HSL_ARGS = '(?:[0-9.,\s%\/-]|deg|grad|rad|turn|none)';
+
+    /**
      * @return array<string, array{
      *   group: string,
      *   label: string,
@@ -353,7 +362,7 @@ final class Tokens
         // inside a PDF template's stylesheet, so neither pattern may carry ';', '{' or '}'.
         if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $v) === 1) return $v;
         if (preg_match('/^rgba?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return $v;
-        if (preg_match('/^hsla?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return Ink::hex($v) ?? $fallback;
+        if (preg_match('/^hsla?\(\s*' . self::HSL_ARGS . '+\s*\)$/i', $v) === 1) return Ink::hex($v) ?? $fallback;
 
         return $fallback;
     }
@@ -386,7 +395,8 @@ final class Tokens
                 if (is_string($hex) && $hex !== '') return $hex;
                 // Accept alpha hex variants rejected by sanitize_hex_color.
                 if (preg_match('/^#(?:[0-9a-fA-F]{4}|[0-9a-fA-F]{8})$/', $value)) return strtolower($value);
-                if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[0-9.,\s%\/-]+\s*\)$/i', $value)) return $value;
+                if (preg_match('/^rgba?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $value)) return $value;
+                if (preg_match('/^hsla?\(\s*' . self::HSL_ARGS . '+\s*\)$/i', $value)) return $value;
                 if (in_array(strtolower($value), ['transparent', 'currentcolor', 'inherit'], true)) {
                     return strtolower($value) === 'currentcolor' ? 'currentColor' : strtolower($value);
                 }

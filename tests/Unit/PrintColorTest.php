@@ -66,6 +66,10 @@ final class PrintColorTest extends TestCase
             'hsl yellow'        => ['hsl(45, 90%, 60%)', '#f5c73d'],
             'hsla loses alpha'  => ['hsla(280, 50%, 40%, .5)', '#773399'],
             'hue below zero'    => ['hsl(-30 100% 50%)', '#ff0080'],
+            'hue in degrees'    => ['hsl(160deg 60% 80%)', '#adebd6'],
+            'hue in turns'      => ['hsl(0.4444turn 60% 80%)', '#adebd6'],
+            'hue in radians'    => ['hsl(2.7925rad 60% 80%)', '#adebd6'],
+            'hue in gradians'   => ['hsl(177.78grad 60% 80%)', '#adebd6'],
         ];
     }
 

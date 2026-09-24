@@ -30,6 +30,11 @@ final class Ink
     private const ON_DARK  = ['#ffffff', 'rgba(255,255,255,.72)', 'rgba(255,255,255,.26)'];
     private const ON_LIGHT = ['#10162a', 'rgba(16,22,42,.62)',    'rgba(16,22,42,.16)'];
 
+    private const NUMBER = '[+-]?(?:\d+\.?\d*|\.\d+)';
+
+    /** Degrees in one of each CSS angle unit. */
+    private const PER_DEGREE = ['deg' => 1.0, 'grad' => 0.9, 'rad' => 180 / M_PI, 'turn' => 360.0];
+
     /**
      * Ink, muted ink and hairline for a ground, or null when it cannot be read.
      *
@@ -222,18 +227,19 @@ final class Ink
             return null;
         }
 
-        foreach (array_slice($bits, 0, 3) as $bit) {
-            if (! is_numeric(rtrim($bit, '%deg'))) {
-                return null;
-            }
+        $hue   = self::hue($bits[0]);
+        $sat   = self::percent($bits[1]);
+        $light = self::percent($bits[2]);
+        if ($hue === null || $sat === null || $light === null) {
+            return null;
         }
 
-        $h = fmod((float) rtrim($bits[0], 'deg'), 360);
+        $h = fmod($hue, 360);
         if ($h < 0) {
             $h += 360;
         }
-        $s = max(0, min(100, (float) rtrim($bits[1], '%'))) / 100;
-        $l = max(0, min(100, (float) rtrim($bits[2], '%'))) / 100;
+        $s = max(0, min(100, $sat)) / 100;
+        $l = max(0, min(100, $light)) / 100;
 
         $c = (1 - abs(2 * $l - 1)) * $s;
         $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
@@ -250,6 +256,29 @@ final class Ink
             (int) round(($rgb[1] + $m) * 255),
             (int) round(($rgb[2] + $m) * 255),
         ];
+    }
+
+    /** Degrees, or null when the bit is not an angle. */
+    private static function hue(string $bit): ?float
+    {
+        if (strtolower($bit) === 'none') {
+            return 0.0;
+        }
+
+        if (preg_match('/^(' . self::NUMBER . ')(deg|grad|rad|turn)?$/i', $bit, $m) !== 1) {
+            return null;
+        }
+
+        return (float) $m[1] * self::PER_DEGREE[strtolower($m[2] ?? '') ?: 'deg'];
+    }
+
+    private static function percent(string $bit): ?float
+    {
+        if (strtolower($bit) === 'none') {
+            return 0.0;
+        }
+
+        return preg_match('/^(' . self::NUMBER . ')%?$/', $bit, $m) === 1 ? (float) $m[1] : null;
     }
 
     /**

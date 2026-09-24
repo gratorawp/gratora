@@ -138,5 +138,23 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         ]);
 
         $this->assertSame('', $style);
+        $this->assertSame('', SectionBlock::sectionStyle(['shadow' => '0 0 0 hsl(url(javascript:alert(1)))']));
+    }
+
+    /**
+     * A Site theme accent can state its hue in any CSS angle unit, and a block
+     * for another campaign carries it through kses on its wrapper.
+     */
+    public function test_a_theme_hsl_accent_reaches_a_block_for_another_campaign(): void
+    {
+        $c = $this->campaign();
+        $c->style = ['tokens' => ['gratora-accent' => 'hsl(0.4444turn 60% 80%)']];
+        $c->save();
+        CampaignStyleVars::flush();
+
+        $html = do_blocks('<!-- wp:gratora/campaign-progress {"campaignId":' . (int) $c->id . '} /-->');
+
+        $this->assertStringContainsString('--gratora-accent:hsl(0.4444turn 60% 80%)', $html);
+        $this->assertStringContainsString('--gratora-on-accent:#10162a', $html);
     }
 }

@@ -91,6 +91,17 @@ if (! function_exists('__')) {
     function esc_html_e(string $text, string $domain = 'default'): void { echo $text; }
 }
 
+// Core's own body, so Tokens::sanitize() reads a colour here as it does live.
+if (! function_exists('sanitize_hex_color')) {
+    function sanitize_hex_color(string $color): ?string
+    {
+        if ('' === $color) {
+            return '';
+        }
+        return preg_match('|^#([A-Fa-f0-9]{3}){1,2}$|', $color) ? $color : null;
+    }
+}
+
 // is_email
 if (! function_exists('is_email')) {
     function is_email(string $email): false|string

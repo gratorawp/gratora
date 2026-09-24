@@ -35,8 +35,9 @@ final class CampaignStyleVars
      * to what is left, so a colour function is treated exactly as var() and
      * calc() already are and nothing else loosens.
      *
-     * The body is digits and separators only, so rgb(url(x)) is not a colour
-     * function, is not removed, and core still rejects it.
+     * The body is digits and separators only, and for hsl() the words CSS gives
+     * a hue, so rgb(url(x)) is not a colour function, is not removed, and core
+     * still rejects it.
      *
      * @since 1.0.0
      */
@@ -46,7 +47,7 @@ final class CampaignStyleVars
             return true;
         }
 
-        $bare = preg_replace('/\b(?:rgba?|hsla?)\([0-9.,%\/\s-]*\)/i', '', $declaration);
+        $bare = preg_replace('/\b(?:rgba?\([0-9.,%\/\s-]*\)|hsla?\(' . Tokens::HSL_ARGS . '*\))/i', '', $declaration);
 
         return is_string($bare) && preg_match('%[\\\\(&=}]|/\*%', $bare) === 0;
     }

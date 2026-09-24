@@ -187,4 +187,34 @@ final class InkTest extends TestCase
         $this->assertNull(Ink::hex('currentColor'));
         $this->assertNull(Ink::hex('#fff}body{display:none'));
     }
+
+    /**
+     * A theme.json palette states its colours in whatever CSS accepts, and a
+     * hue in turns, radians or gradians is the same colour as one in degrees.
+     *
+     * @return array<string,array{0:string,1:string}>
+     */
+    public function hueUnits(): array
+    {
+        return [
+            'turn'      => ['hsl(0.4444turn 60% 80%)', '#adebd6'],
+            'rad'       => ['hsl(2.7925rad 60% 80%)', '#adebd6'],
+            'grad'      => ['hsl(177.78grad 60% 80%)', '#adebd6'],
+            'deg'       => ['hsl(160deg 60% 80%)', '#adebd6'],
+            'upper'     => ['HSL(160DEG 60% 80%)', '#adebd6'],
+            'none hue'  => ['hsl(none 0% 80%)', '#cccccc'],
+        ];
+    }
+
+    /** @dataProvider hueUnits */
+    public function test_a_hue_in_any_unit_is_the_colour_it_names(string $value, string $expected): void
+    {
+        $this->assertSame($expected, Ink::hex($value));
+    }
+
+    public function test_a_unit_on_a_percentage_is_not_a_colour(): void
+    {
+        $this->assertNull(Ink::hex('hsl(160 60deg 80%)'));
+        $this->assertNull(Ink::hex('hsl(160turnx 60% 80%)'));
+    }
 }
