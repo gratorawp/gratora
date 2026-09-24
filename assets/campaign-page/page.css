@@ -28,6 +28,12 @@ body,
     --dp-on-accent-muted: var(--gratora-on-accent-muted, rgba(255, 255, 255, .72));
     --dp-on-accent-line:  var(--gratora-on-accent-line, rgba(255, 255, 255, .26));
 
+    /* White over a scrim on a photo; a cover without one names the accent's ink. */
+    --dp-cover-ink:       var(--gratora-cover-ink, #fff);
+    --dp-cover-ink-muted: var(--gratora-cover-ink-muted, rgba(255, 255, 255, .76));
+    --dp-cover-line:      var(--gratora-cover-line, rgba(255, 255, 255, .28));
+    --dp-cover-scrim:     var(--gratora-cover-scrim, linear-gradient(180deg, rgba(6, 10, 20, .10) 0%, rgba(6, 10, 20, .55) 58%, rgba(6, 10, 20, .84) 100%));
+
     --dp-text:        var(--gratora-text, #141821);
     /* Mix body and muted tokens for intermediate text contrast. */
     --dp-text-2:      color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
@@ -133,6 +139,20 @@ body,
 .dp-page *,
 .dp-page *::before,
 .dp-page *::after { box-sizing: border-box; }
+
+/* These paint the card, so text on them reads the ink measured on it. */
+.dp-page,
+.dp-profile,
+.dp-card,
+.dp-hero-card,
+.dp-sharesheet {
+    --gratora-text: var(--gratora-on-bg, #141821);
+    --gratora-text-muted: var(--gratora-on-bg-muted, #7a8398);
+    --gratora-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
+    --dp-text: var(--gratora-text);
+    --dp-muted: var(--gratora-text-muted);
+    --dp-text-2: color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
+}
 
 
 .dp-band{ max-width: var(--dp-measure, 1200px); margin: 0 auto; padding: 0 24px 72px; }
@@ -348,6 +368,8 @@ body,
     border-radius: var(--dp-radius);
     background: var(--dp-page);
     overflow: hidden;
+    --dp-text: var(--gratora-on-soft, #141821);
+    --dp-muted: var(--gratora-on-soft-muted, #7a8398);
 }
 
 .dp-profile__stat { margin: 0; padding: 9px 10px; min-width: 0; }
@@ -382,7 +404,7 @@ body,
 
 .dp-money { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 28px; font-variant-numeric: tabular-nums; }
 
-.dp-raised { font-size: 36px; font-weight: var(--gratora-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
+.dp-raised { font-size: 36px; font-weight: var(--gratora-heading-weight, 650); letter-spacing: -.022em; color: var(--gratora-text-accent, var(--dp-accent)); }
 
 .dp-goal { font-size: 15px; color: var(--dp-muted); }
 
@@ -599,12 +621,24 @@ body,
 .dp-panel--accent {
     background: var(--dp-accent);
     color: var(--dp-on-accent);
+}
 
-    /* Set panel ink without overriding --gratora-accent, which also controls the background. */
-    --gratora-text:       var(--dp-on-accent);
-    --gratora-text-muted: var(--dp-on-accent-muted);
-    --gratora-bg-soft:    var(--dp-on-accent-line);
-    --gratora-border:     var(--dp-on-accent-line);
+/*
+ * Panel ink, leaving --gratora-accent alone since it paints the panel. A guest
+ * block's wrapper states its campaign's tokens inline, so its children restate
+ * the panel's from the --dp- aliases the wrapper does not touch, at zero extra
+ * specificity so a card inside still reads its own ground.
+ */
+.dp-panel--accent,
+.dp-panel--accent :where(.gratora-block > *) {
+    --gratora-text:          var(--dp-on-accent);
+    --gratora-text-muted:    var(--dp-on-accent-muted);
+    --gratora-text-accent:   var(--dp-on-accent);
+    --gratora-bg-soft:       var(--dp-on-accent-line);
+    --gratora-border:        var(--dp-on-accent-line);
+    --gratora-on-soft:       var(--dp-on-accent);
+    --gratora-on-soft-muted: var(--dp-on-accent-muted);
+    --gratora-on-soft-accent: var(--dp-on-accent);
 }
 .dp-panel--accent .dp-money,
 .dp-panel--accent .dp-raised,
@@ -647,22 +681,25 @@ body,
     background-position: center;
     background-repeat: no-repeat;
 
-    /* Use light ink against the photo scrim independently of the accent. */
-    color: #fff;
-    --gratora-text:       #fff;
-    --gratora-text-muted: rgba(255, 255, 255, .76);
-    --gratora-bg-soft:    rgba(255, 255, 255, .28);
-    --gratora-border:     rgba(255, 255, 255, .28);
+    color: var(--dp-cover-ink);
+}
+.dp-cover,
+.dp-cover :where(.gratora-block > *) {
+    --gratora-text:          var(--dp-cover-ink);
+    --gratora-text-muted:    var(--dp-cover-ink-muted);
+    --gratora-text-accent:   var(--dp-cover-ink);
+    --gratora-bg-soft:       var(--dp-cover-line);
+    --gratora-border:        var(--dp-cover-line);
+    --gratora-on-soft:       var(--dp-cover-ink);
+    --gratora-on-soft-muted: var(--dp-cover-ink-muted);
+    --gratora-on-soft-accent: var(--dp-cover-ink);
 }
 .dp-cover::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(180deg,
-        rgba(6, 10, 20, .10) 0%,
-        rgba(6, 10, 20, .55) 58%,
-        rgba(6, 10, 20, .84) 100%);
+    background: var(--dp-cover-scrim);
 }
 .dp-cover__body { position: relative; z-index: 2; }
 .dp-cover__body h1 {
@@ -672,13 +709,13 @@ body,
     letter-spacing: -.02em;
 }
 /* Set color directly to override editor preview tokens. */
-.dp-cover .gratora-block--progress .gratora-progress__value { color: #fff; }
-.dp-cover .gratora-block--progress .gratora-progress__bar-fill { background: #fff; }
-.dp-cover .gratora-stat__value { color: #fff; }
+.dp-cover .gratora-block--progress .gratora-progress__value { color: var(--dp-cover-ink); }
+.dp-cover .gratora-block--progress .gratora-progress__bar-fill { background: var(--dp-cover-ink); }
+.dp-cover .gratora-stat__value { color: var(--dp-cover-ink); }
 .dp-cover .gratora-stat__label,
 .dp-cover .gratora-progress__caption,
-.dp-cover .gratora-progress__target { color: rgba(255, 255, 255, .76); }
-.dp-cover .gratora-progress__bar { background: rgba(255, 255, 255, .28); }
+.dp-cover .gratora-progress__target { color: var(--dp-cover-ink-muted); }
+.dp-cover .gratora-progress__bar { background: var(--dp-cover-line); }
 
 .dp-panel--soft { background: var(--dp-accent-soft); }
 
