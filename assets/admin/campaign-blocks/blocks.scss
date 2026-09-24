@@ -2,8 +2,10 @@
 
 $accent-fallback:     #211d3f;
 $accent-soft-fallback: rgba(33, 29, 63, .12);
-// Derive accent-soft unless explicitly paired by the preset.
-$accent-soft: var(--gratora-accent-soft, color-mix(in srgb, var(--gratora-accent, #{$accent-fallback}) 12%, #fff));
+// Derive accent-soft unless explicitly paired by the preset. Its users sit on a card.
+$accent-soft: var(--gratora-accent-soft, color-mix(in srgb, var(--gratora-accent, #{$accent-fallback}) 12%, var(--gratora-bg, #fff)));
+// The accent drawn as text, measured on the ground it sits on.
+$text-accent: var(--gratora-text-accent, var(--gratora-accent, #{$accent-fallback}));
 $text-fallback:       #1e1e1e;
 $text-muted-fallback: #6b7280;
 $border-fallback:     #e5e7eb;
@@ -25,6 +27,27 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
     // Reset borders to override theme selectors matching inline style substrings.
     border: 0;
+}
+
+// What paints the card or the soft ground reads the ink measured on it. The
+// card rule outranks the soft one, so the empty state, which carries both
+// classes, reads the card it paints. A grid card names --gratora-on-bg for an
+// accent that does not carry, which a page with no campaign never declares, so
+// the accent falls back to the card's own ink.
+.gratora-block :is(.gratora-empty, .gratora-top-donors__podium-tier, .gratora-supporter-wall__card, .gratora-campaign-card, .gratora-donate-modal__panel) {
+    --gratora-text: var(--gratora-on-bg, #{$text-fallback});
+    --gratora-text-muted: var(--gratora-on-bg-muted, #{$text-muted-fallback});
+    --gratora-text-accent: var(--gratora-on-bg-accent, var(--gratora-text));
+}
+.gratora-block__empty,
+.gratora-stat-empty,
+.gratora-block-note__pill,
+.gratora-top-donors__podium-rank,
+.gratora-recent-donations__message,
+.gratora-avatar--anon {
+    --gratora-text: var(--gratora-on-soft, #{$text-fallback});
+    --gratora-text-muted: var(--gratora-on-soft-muted, #{$text-muted-fallback});
+    --gratora-text-accent: var(--gratora-on-soft-accent, var(--gratora-accent, #{$accent-fallback}));
 }
 
 .gratora-block-notice {
@@ -139,7 +162,7 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     .gratora-progress__value {
         font-size: 24px;
         font-weight: 700;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: #{$text-accent};
         font-variant-numeric: tabular-nums;
     }
     .gratora-progress__caption {
@@ -248,7 +271,7 @@ body.gratora-modal-open { overflow: hidden; }
 
         &:hover {
             background: var(--gratora-bg-soft, #{$bg-soft-fallback});
-            color: var(--gratora-text, #{$text-fallback});
+            color: var(--gratora-on-soft, var(--gratora-text, #{$text-fallback}));
         }
     }
 }
@@ -294,14 +317,14 @@ body.gratora-modal-open { overflow: hidden; }
     margin-bottom: 4px;
 }
 
-.gratora-empty__title {
+.gratora-empty .gratora-empty__title {
     margin: 0;
     font-size: 17px;
     font-weight: var(--gratora-heading-weight, 600);
     color: var(--gratora-text, #{$text-fallback});
 }
 
-.gratora-empty__sub {
+.gratora-empty .gratora-empty__sub {
     margin: 0;
     font-size: 14px;
     color: var(--gratora-text-muted, #{$text-muted-fallback});
@@ -371,7 +394,7 @@ body.gratora-modal-open { overflow: hidden; }
         flex: 0 0 auto;
         font-size: 14px;
         font-weight: 600;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: #{$text-accent};
         font-variant-numeric: tabular-nums;
     }
 
@@ -444,7 +467,7 @@ body.gratora-modal-open { overflow: hidden; }
     .gratora-top-donors__podium-amount {
         font-size: 14px;
         font-weight: 600;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: #{$text-accent};
         font-variant-numeric: tabular-nums;
     }
 
@@ -512,7 +535,7 @@ body.gratora-modal-open { overflow: hidden; }
         flex: 0 0 auto;
         font-size: 14px;
         font-weight: 600;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: #{$text-accent};
         font-variant-numeric: tabular-nums;
     }
 
@@ -583,7 +606,7 @@ body.gratora-modal-open { overflow: hidden; }
     .gratora-supporter-wall__amount {
         font-size: 12px;
         font-weight: 600;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: #{$text-accent};
         font-variant-numeric: tabular-nums;
     }
 
@@ -755,14 +778,14 @@ body.gratora-modal-open { overflow: hidden; }
     }
     &__pct {
         font-size: 12.5px; font-weight: 700;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: var(--gratora-on-accent-soft, var(--gratora-accent, #{$accent-fallback}));
         background: #{$accent-soft};
         padding: 3px 10px; border-radius: 999px;
     }
     &__link {
         display: inline-flex; align-items: center; gap: 6px;
         font-size: 13.5px; font-weight: 700;
-        color: var(--gratora-accent, #{$accent-fallback});
+        color: #{$text-accent};
 
         svg { display: block; transition: transform .12s; }
     }
