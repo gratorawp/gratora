@@ -191,7 +191,14 @@ export function contrast(a: Rgba, b: Rgba): number {
     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
 
+/** A computed colour: rgb(), or the color(srgb) a color-mix() computes to. */
 export function parseRgb(value: string): Rgba {
+    const srgb = /^color\(srgb\s+([^)]*)\)$/i.exec(value.trim());
+    if (srgb) {
+        const [channels, alpha] = srgb[1].split('/');
+        const p = channels.trim().split(/\s+/).map((c) => parseFloat(c) * 255);
+        return [p[0], p[1], p[2], alpha === undefined ? 1 : parseFloat(alpha)];
+    }
     const m = /^rgba?\(([^)]*)\)$/i.exec(value.trim());
     if (! m) throw new Error(`Not an rgb() colour: ${value}`);
     const p = m[1].split(/[\s,/]+/).filter(Boolean).map(parseFloat);

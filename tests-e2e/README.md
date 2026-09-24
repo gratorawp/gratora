@@ -174,6 +174,14 @@ The administrator check on the campaign page logs in with
 `GRATORA_E2E_ADMIN_USER` / `GRATORA_E2E_ADMIN_PASS`, or reuses a saved session
 from `GRATORA_E2E_ADMIN_STORAGE_STATE`, and skips without either.
 
+`specs/branding-admin.spec.ts` runs the same brand through the admin: the Brand
+preview, the campaign Appearance rail and token editor, the form Develop canvas
+against its Preview, and the template picker. It needs one of the administrator
+settings above, and reads `GRATORA_E2E_BRANDING_CAMPAIGN_ID` and
+`GRATORA_E2E_BRANDING_CANVAS_FORM_ID` from the same seed. It makes unsaved edits
+only, and refuses every write the screens would send except the form editor's
+preview and readiness requests.
+
 ## Demo data for screenshots
 
 The admin screens are only worth photographing against a site that has a year

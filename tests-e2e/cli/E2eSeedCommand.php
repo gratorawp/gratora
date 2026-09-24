@@ -332,8 +332,9 @@ final class E2eSeedCommand
 
     /**
      * `wp gratora e2e-seed-branding`, the fixture specs/branding-grounds.spec.ts
-     * runs against: the QA brand and a page for each surface that paints a
-     * ground of its own.
+     * and specs/branding-admin.spec.ts run against: the QA brand, a page for
+     * each surface that paints a ground of its own, and a form whose Develop
+     * canvas draws the blocks that stand in for the runtime stylesheet.
      *
      * Replaces the org brand. The first run keeps the one it replaced in
      * gratora_org_brand_e2e_backup and later runs leave that backup alone, so
@@ -409,6 +410,7 @@ final class E2eSeedCommand
         $plain = $this->brandingForm($forms, 'e2e-branding-plain-form', 'Branding Plain', (int) $page->id, 'plain');
         $frame = $this->brandingForm($forms, 'e2e-branding-frame-form', 'Branding Frame', (int) $page->id, 'frame');
         $frameBold = $this->brandingForm($forms, 'e2e-branding-frame-bold-form', 'Branding Frame Bold', (int) $bold->id, 'frame');
+        $canvas    = $this->brandingForm($forms, 'e2e-branding-canvas-form', 'Branding Canvas', (int) $page->id, 'plain', self::brandingCanvasBlocks());
 
         $shortcode = static fn (Form $form): string => "<!-- wp:shortcode -->\n[gratora_donation_form slug=\"" . esc_attr($form->slug) . "\"]\n<!-- /wp:shortcode -->";
 
@@ -432,6 +434,8 @@ final class E2eSeedCommand
         foreach ($paths as $name => $path) {
             WP_CLI::log('  export GRATORA_E2E_BRANDING_' . $name . '_PATH="' . $path . '"');
         }
+        WP_CLI::log('  export GRATORA_E2E_BRANDING_CAMPAIGN_ID="' . (int) $page->id . '"');
+        WP_CLI::log('  export GRATORA_E2E_BRANDING_CANVAS_FORM_ID="' . (int) $canvas->id . '"');
         WP_CLI::log('  export GRATORA_E2E_BRANDING_PORTAL_URL="'
             . $this->mintPortalLink('e2e-branding-1@example.test', ['first_name' => 'Ada', 'last_name' => 'Branding']) . '"');
     }
@@ -978,11 +982,11 @@ BLOCKS;
         }
     }
 
-    private function brandingForm(FormService $forms, string $slug, string $title, int $campaignId, string $container): Form
+    private function brandingForm(FormService $forms, string $slug, string $title, int $campaignId, string $container, ?string $blocks = null): Form
     {
         $input = [
             'campaign_id' => $campaignId,
-            'blocks'      => self::brandingFormBlocks(),
+            'blocks'      => $blocks ?? self::brandingFormBlocks(),
             'status'      => 'published',
             'settings'    => [
                 'layout'    => 'inline',
@@ -1050,6 +1054,21 @@ BLOCKS;
             '<!-- wp:gratora/cover-fees {"label":"Cover the processing fee","defaultOn":true} /-->',
             '<!-- wp:gratora/payment-gateways /-->',
             '<!-- wp:gratora/donation-summary /-->',
+            '<!-- wp:gratora/submit-button {"label":"Donate {amount}"} /-->',
+        ]);
+    }
+
+    /** The blocks the Develop canvas draws with inline styles, each in the style the runtime draws on the soft ground. */
+    private static function brandingCanvasBlocks(): string
+    {
+        return implode("\n", [
+            '<!-- wp:gratora/heading {"text":"Support the branding fixture","level":2} /-->',
+            '<!-- wp:gratora/donation-amount {"presets":[{"cents":2500,"impact":"A week of meals","preselected":false},{"cents":5000,"impact":"A month of meals","preselected":true},{"cents":10000,"impact":"","preselected":false}]} /-->',
+            '<!-- wp:gratora/recurring-toggle {"label":"Make this a recurring donation","style":"pills","frequencies":["one-time","monthly"]} /-->',
+            '<!-- wp:gratora/currency-switcher {"style":"pills","currencies":["USD","EUR","GBP","CHF"]} /-->',
+            '<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:gratora/email {"required":true} /-->',
+            '<!-- wp:gratora/payment-gateways /-->',
             '<!-- wp:gratora/submit-button {"label":"Donate {amount}"} /-->',
         ]);
     }
