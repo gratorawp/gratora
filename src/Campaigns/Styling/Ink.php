@@ -44,6 +44,21 @@ final class Ink
 
     private const NUMBER = '[+-]?(?:\d+\.?\d*|\.\d+)';
 
+    private const ANGLE = self::NUMBER . '(?:deg|grad|rad|turn)?';
+
+    /**
+     * An hsl() CSS parses, as a pattern to match without regard to case: the
+     * space form, where any slot may be none and an alpha may follow a slash,
+     * or the comma form with percentages. Nothing else reads as hsl() here.
+     *
+     * @since 1.0.0
+     */
+    public const HSL = 'hsla?\(\s*(?:'
+        . '(?:' . self::ANGLE . '|none)\s+(?:' . self::NUMBER . '%|none)\s+(?:' . self::NUMBER . '%|none)'
+        . '(?:\s*\/\s*(?:' . self::NUMBER . '%?|none))?'
+        . '|' . self::ANGLE . '\s*,\s*' . self::NUMBER . '%\s*,\s*' . self::NUMBER . '%(?:\s*,\s*' . self::NUMBER . '%?)?'
+        . ')\s*\)';
+
     /** Degrees in one of each CSS angle unit. */
     private const PER_DEGREE = ['deg' => 1.0, 'grad' => 0.9, 'rad' => 180 / M_PI, 'turn' => 360.0];
 
@@ -433,8 +448,10 @@ final class Ink
             ];
         }
 
-        if (preg_match('/^hsla?\(([^)]*)\)$/i', $value, $m) === 1) {
-            return self::fromHsl($m[1]);
+        if (preg_match('/^hsla?\(/i', $value) === 1) {
+            return preg_match('/^' . self::HSL . '$/i', $value) === 1
+                ? self::fromHsl(substr($value, (int) strpos($value, '(') + 1, -1))
+                : null;
         }
 
         if (preg_match('/^rgba?\(([^)]*)\)$/i', $value, $m) === 1) {

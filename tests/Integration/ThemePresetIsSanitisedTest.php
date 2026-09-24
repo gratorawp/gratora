@@ -130,6 +130,28 @@ final class ThemePresetIsSanitisedTest extends IntegrationTestCase
         $this->assertSame('#0f766e', $tokens['gratora-focus-ring'] ?? null);
     }
 
+    /** @return array<string,array{0:string}> */
+    public static function malformedPrimaries(): array
+    {
+        return [
+            'a unit apart from its hue' => ['hsl(160 deg 60% 80%)'],
+            'a unit and nothing else'   => ['hsl(deg)'],
+        ];
+    }
+
+    /**
+     * An hsl() CSS cannot parse paints nothing, so the next candidate the
+     * theme offers is the accent rather than a colour no surface draws.
+     *
+     * @dataProvider malformedPrimaries
+     */
+    public function test_a_primary_css_cannot_parse_gives_way_to_the_next_candidate(string $primary): void
+    {
+        $tokens = $this->paletteTokens(['primary' => $primary, 'accent-1' => '#ffee58']);
+
+        $this->assertSame('#ffee58', $tokens['gratora-accent'] ?? null);
+    }
+
     /** Whatever the active theme happens to supply, both surfaces see the same map. */
     public function test_the_preset_is_what_both_surfaces_would_keep(): void
     {

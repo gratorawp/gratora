@@ -223,6 +223,25 @@ final class InkTest extends TestCase
         $this->assertSame($expected, Ink::hex($value));
     }
 
+    /** @return array<string,array{0:string}> */
+    public static function malformedHsl(): array
+    {
+        return [
+            'a unit apart from its hue' => ['hsl(160 deg 60% 80%)'],
+            'a unit and nothing else'   => ['hsl(deg)'],
+            'a fourth channel'          => ['hsl(160 60% 80% 90%)'],
+            'none in the comma form'    => ['hsl(none, 60%, 80%)'],
+            'commas and spaces mixed'   => ['hsl(160deg, 60% 80%)'],
+        ];
+    }
+
+    /** @dataProvider malformedHsl */
+    public function test_an_hsl_css_cannot_parse_is_no_colour(string $value): void
+    {
+        $this->assertNull(Ink::hex($value));
+        $this->assertNull(Ink::on($value));
+    }
+
     public function test_a_unit_on_a_percentage_is_not_a_colour(): void
     {
         $this->assertNull(Ink::hex('hsl(160 60deg 80%)'));
