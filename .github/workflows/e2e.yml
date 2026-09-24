@@ -102,13 +102,15 @@ jobs:
           fi
           echo "$VARS" >> "$GITHUB_ENV"
 
+      # Loaded from the add-on's checkout for the same reason as core's: the
+      # seed is not in the add-on's zip either.
       - name: Seed P2P fixtures
         if: vars.GRATORA_P2P_REPO != ''
         run: |
           # The step runs under `bash -e`, so a failing seed would abort the
           # assignment before the echo and take its own explanation with it.
           set +e
-          OUT="$(npx wp-env run cli wp gratora-p2p e2e-seed 2>&1)"
+          OUT="$(npx wp-env run cli --env-cwd="wp-content/plugins/gratora-p2p" wp --require=tests-e2e/cli/E2eSeedCommand.php gratora-p2p e2e-seed 2>&1)"
           CODE=$?
           set -e
           echo "$OUT"

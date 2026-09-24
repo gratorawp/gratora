@@ -18,7 +18,7 @@ core is self-contained and an add-on can be tested without it:
 
 - **Peer-to-peer** (start page, fundraiser/team/campaign pages, sandbox
   donation, hide-chrome, wp-admin, donor portal) - `gratora-p2p/tests-e2e/`, with
-  its own `playwright.config.ts` and `wp gratora-p2p e2e-seed`.
+  its own `playwright.config.ts` and `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora-p2p e2e-seed`.
 - **Tributes** (the tribute field, functional + visual) -
   `gratora-tributes/tests-e2e/`.
 
@@ -243,7 +243,7 @@ run that suite from the add-on's own directory:
 echo '{ "plugins": [ ".", "../gratora-p2p" ] }' > .wp-env.override.json
 npx wp-env start
 npx wp-env run cli --env-cwd="wp-content/plugins/$(basename "$PWD")" wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed
-npx wp-env run cli wp gratora-p2p e2e-seed
+npx wp-env run cli --env-cwd="wp-content/plugins/gratora-p2p" wp --require=tests-e2e/cli/E2eSeedCommand.php gratora-p2p e2e-seed
 ```
 
 > macOS note: a Docker Desktop named-volume bug can leave the mounted plugin
