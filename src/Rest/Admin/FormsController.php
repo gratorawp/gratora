@@ -470,6 +470,7 @@ final class FormsController
             // as far as the confirmation and then failed.
             'deletable'       => $refusal === null,
             'delete_blocked'  => $refusal,
+            'settings'        => $f->settings,
         ];
     }
 
@@ -479,7 +480,6 @@ final class FormsController
         return $this->shapeFormSummary($f, $c) + [
             'default_fund_id' => $f->default_fund_id,
             'blocks'          => $f->blocks,
-            'settings'        => $f->settings,
             'spec'            => $f->spec,
             'spec_version'    => $f->spec_version,
         ];

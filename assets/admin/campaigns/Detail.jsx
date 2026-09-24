@@ -1729,6 +1729,9 @@ function SettingsTab( { campaign, onArchive, onError } ) {
                             const style    = ( c.record?.style && typeof c.record.style === 'object' ) ? c.record.style : {};
                             const presetId = String( style.preset_id || '' );
                             const inline   = ( style.tokens && typeof style.tokens === 'object' ) ? style.tokens : {};
+                            // The page paints the card behind its default form only when that form is framed.
+                            const railContainer = forms.find( ( f ) => Number( f.id ) === Number( c.value( 'default_form_id', 0 ) ) )
+                                ?.settings?.container?.style === 'frame' ? 'frame' : 'plain';
                             return (
                                 <aside className="gratora-settings-layout__rail">
                                     <StylePreview
@@ -1737,6 +1740,7 @@ function SettingsTab( { campaign, onArchive, onError } ) {
                                         campaign={ c.record }
                                         layer="campaign"
                                         styling={ window.gratora?.styling || {} }
+                                        container={ railContainer }
                                     />
                                 </aside>
                             );

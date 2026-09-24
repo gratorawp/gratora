@@ -25,6 +25,25 @@ final class AdminFormsTest extends IntegrationTestCase
         $this->assertSame('1', $res->get_headers()['X-WP-Total'] ?? '0');
     }
 
+    /**
+     * The campaign rail previews the default form on the ground it paints, and
+     * only a framed form paints the card, so the list carries each container.
+     */
+    public function test_index_carries_each_form_container(): void
+    {
+        $framed = $this->post('/gratora/v1/admin/forms', [
+            'title'       => 'Framed',
+            'campaign_id' => $this->campaignId,
+            'settings'    => ['container' => ['style' => 'frame', 'width' => 540]],
+        ])->get_data();
+
+        $rows = $this->get('/gratora/v1/admin/forms', ['campaign_id' => $this->campaignId, 'per_page' => 100])->get_data();
+        $row  = array_values(array_filter($rows, fn (array $r): bool => $r['id'] === $framed['id']))[0] ?? null;
+
+        $this->assertNotNull($row);
+        $this->assertSame('frame', $row['settings']['container']['style'] ?? null);
+    }
+
     public function test_campaigns_endpoint_returns_pickable_list(): void
     {
         $res = $this->get('/gratora/v1/admin/forms/campaigns');
