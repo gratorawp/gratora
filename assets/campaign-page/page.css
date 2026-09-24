@@ -142,7 +142,7 @@ body,
 .dp-page *::before,
 .dp-page *::after { box-sizing: border-box; }
 
-/* These paint the card, so text on them reads the ink measured on it. */
+/* These paint the card, so text on them reads the ink measured on it, including a heading that only inherits its colour. */
 .dp-page,
 .dp-profile,
 .dp-card,
@@ -154,6 +154,7 @@ body,
     --dp-text: var(--gratora-text);
     --dp-muted: var(--gratora-text-muted);
     --dp-text-2: color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
+    color: var(--dp-text);
 }
 
 

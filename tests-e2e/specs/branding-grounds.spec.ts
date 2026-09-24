@@ -544,6 +544,18 @@ test.describe('guest button and form on a Quiet host', () => {
 test.describe('the campaign page foundation an add-on draws with', () => {
     test.skip(! path('LAYOUT'), unseeded('LAYOUT'));
 
+    // A theme heading takes the colour it inherits, not the ink token the card restates.
+    test('text that only inherits reads the card it sits in', async ({ page }) => {
+        await open(page, path('LAYOUT'));
+
+        const card = page.locator('.e2e-layout-card');
+        await expect(card).toHaveCSS('background-color', CARD);
+        expectInk(await inkOf(card.locator('h3')), WHITE, CARD, 'theme heading in a card');
+        expectInk(await inkOf(page.locator('.dp-profile .dp-display')), WHITE, CARD, 'name on a profile');
+
+        await expectNothingBelowTheBar(page, 'layout cards', '.dp-card, .dp-profile');
+    });
+
     test('an avatar and a tag read the tint they paint', async ({ page }) => {
         await open(page, path('LAYOUT'));
 
