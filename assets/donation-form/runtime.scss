@@ -319,7 +319,7 @@
     &__preset-impact {
         font-size: 11px;
         font-weight: 500;
-        color: var(--gratora-text-muted);
+        color: var(--gratora-on-soft-muted, var(--gratora-text-muted));
         line-height: 1.3;
     }
 
@@ -490,7 +490,7 @@
 
     &__code {
         font-size: 13px;
-        color: var(--gratora-text-muted);
+        color: var(--gratora-on-field-muted, var(--gratora-text-muted));
         font-weight: 500;
     }
 
@@ -580,6 +580,7 @@
         margin: 0;
         padding: 16px;
         background: var(--gratora-bg-soft);
+        color: var(--gratora-on-soft, var(--gratora-text));
         border-radius: var(--gratora-radius);
         display: flex;
         flex-direction: column;
