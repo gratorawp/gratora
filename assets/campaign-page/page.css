@@ -583,7 +583,7 @@ body,
     padding: 9px 12px; cursor: pointer; text-decoration: none;
 }
 
-.dp-sharesheet__item:hover { background: var(--dp-accent-soft); color: var(--dp-text); }
+.dp-sharesheet__item:hover { background: var(--dp-accent-soft); color: var(--dp-on-accent-soft); }
 
 /* The form’s own Frame/Plain setting controls its card. */
 

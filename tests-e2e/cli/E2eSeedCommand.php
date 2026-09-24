@@ -1158,8 +1158,9 @@ BLOCKS;
 
     /**
      * The campaign page foundation as an add-on writes it into a campaign's
-     * page: a card holding a theme heading, as P2P's layout blocks do, and
-     * the avatar, tag and profile of its list and hero views.
+     * page: a card holding a theme heading, as P2P's layout blocks do, the
+     * avatar, tag and profile of its list and hero views, and the share sheet
+     * its share button opens.
      */
     private static function foundationBlocks(): string
     {
@@ -1179,6 +1180,8 @@ BLOCKS;
                 . '<span class="dp-row-main"><span class="dp-row-name">Ada Branding<span class="dp-tag">Featured</span></span></span></div></div>',
             '<header class="dp-profile"><div class="dp-profile__cover"></div><div class="dp-profile__body">'
                 . '<span class="dp-profile__avatar" aria-hidden="true">AB</span><h2 class="dp-display">Ada Branding</h2></div></header>',
+            '<div class="e2e-share" style="position:relative;margin-bottom:140px"><div class="dp-sharesheet">'
+                . '<a class="dp-sharesheet__item" href="#share">Facebook</a><button type="button" class="dp-sharesheet__item">Copy link</button></div></div>',
             '<!-- /wp:html -->',
         ]);
     }

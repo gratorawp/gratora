@@ -614,6 +614,17 @@ test.describe('the campaign page foundation an add-on draws with', () => {
             expect(ink.ratio, describeInk(ink)).toBeGreaterThanOrEqual(4.5);
         }
     });
+
+    test('a share item reads the card, and hovered the tint it paints', async ({ page }) => {
+        await open(page, path('LAYOUT'));
+
+        const item = page.locator('.dp-sharesheet__item').first();
+        expectInk(await inkOf(item), WHITE, CARD, 'share item');
+        await item.hover();
+        const hovered = await inkOf(item);
+        expectInk(hovered, ON_ACCENT, 'rgb(255, 252, 241)', 'share item hovered');
+        expectReadable(hovered, 'share item hovered');
+    });
 });
 
 const PORTAL = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
