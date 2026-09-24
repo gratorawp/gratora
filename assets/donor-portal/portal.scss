@@ -11,6 +11,7 @@
     --dp-text:     var(--gratora-text, #111827);
     --dp-muted:    var(--gratora-text-muted, #6b7280);
     --dp-text-accent: var(--gratora-text-accent, var(--dp-accent));
+    --dp-ring:     var(--gratora-text-ring, var(--dp-text-accent));
     --dp-danger:   var(--gratora-text-danger, #b91c1c);
     --dp-border:   var(--gratora-border, #e5e7eb);
     --dp-rule:     var(--gratora-border-soft, #eef0f2);
@@ -146,6 +147,9 @@
             border-bottom-color: var(--gratora-text-accent, var(--dp-accent));
         }
     }
+
+    // The strip scrolls, which clips a ring drawn outside the tab.
+    .gratora-donor-portal .dp__tab:focus-visible { outline-offset: -2px; }
 }
 
 .dp-loading,
@@ -171,6 +175,7 @@
     --dp-text: var(--gratora-on-soft, #111827);
     --dp-muted: var(--gratora-on-soft-muted, #6b7280);
     --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
+    --dp-ring: var(--gratora-on-soft-ring, var(--dp-text-accent));
     --dp-danger: var(--gratora-on-soft-danger, #b91c1c);
     color: var(--dp-text);
 
@@ -204,16 +209,14 @@
 
         strong  { font-variant-numeric: tabular-nums; font-weight: 600; }
 
+        // A row that is itself the control keeps the ring of the ground around it.
+        &:not([role="button"]) { --dp-ring: var(--gratora-on-bg-ring, var(--dp-text-accent)); }
+
         &[role="button"] {
             cursor: pointer;
             transition: border-color .15s, background .15s;
 
             &:hover { border-color: var(--dp-accent); background: var(--dp-bg-soft); }
-            // Drawn outside the row, on the page, so measured there.
-            &:focus-visible {
-                outline: 2px solid var(--gratora-focus-ring, var(--gratora-text-accent, var(--dp-accent)));
-                outline-offset: 2px;
-            }
         }
     }
     &__sub  { font-size: 12px; color: var(--dp-muted); margin-top: 2px; }
@@ -323,6 +326,7 @@
         --dp-text: var(--gratora-on-bg, #111827);
         --dp-muted: var(--gratora-on-bg-muted, #6b7280);
         --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
+        --dp-ring: var(--gratora-on-bg-ring, var(--dp-text-accent));
         --dp-danger: var(--gratora-on-bg-danger, #b91c1c);
         color: var(--dp-text);
         max-width: 480px;
@@ -471,6 +475,7 @@
     --dp-text: var(--gratora-on-soft, #111827);
     --dp-muted: var(--gratora-on-soft-muted, #6b7280);
     --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
+    --dp-ring: var(--gratora-on-soft-ring, var(--dp-text-accent));
     --dp-danger: var(--gratora-on-soft-danger, #b91c1c);
     color: var(--dp-text);
 }
@@ -556,6 +561,7 @@
     --dp-text: var(--gratora-on-bg, #111827);
     --dp-muted: var(--gratora-on-bg-muted, #6b7280);
     --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
+    --dp-ring: var(--gratora-on-bg-ring, var(--dp-text-accent));
     --dp-danger: var(--gratora-on-bg-danger, #b91c1c);
     color: var(--dp-text);
     cursor: pointer;
@@ -616,6 +622,7 @@
         --dp-text: var(--gratora-on-soft, #111827);
         --dp-muted: var(--gratora-on-soft-muted, #6b7280);
         --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
+        --dp-ring: var(--gratora-on-soft-ring, var(--dp-text-accent));
         --dp-danger: var(--gratora-on-soft-danger, #b91c1c);
         cursor: default;
     }
@@ -626,6 +633,7 @@
         --dp-text: #10162a;
         --dp-muted: rgba(16, 22, 42, .62);
         --dp-text-accent: #10162a;
+        --dp-ring: #10162a;
     }
 }
 
@@ -694,6 +702,7 @@
         --dp-text: var(--gratora-on-bg, #111827);
         --dp-muted: var(--gratora-on-bg-muted, #6b7280);
         --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
+        --dp-ring: var(--gratora-on-bg-ring, var(--dp-text-accent));
         --dp-danger: var(--gratora-on-bg-danger, #b91c1c);
         color: var(--dp-text);
         border: 1px solid var(--dp-border);
@@ -950,4 +959,10 @@
     font-size: 14px;
     font-weight: 400;
     color: var(--dp-muted, #6b7280);
+}
+
+// Drawn outside the control, on the ground around it, in the ring measured there.
+.gratora-donor-portal :where(button, a[href], input:not([type="hidden"]), select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--dp-ring);
+    outline-offset: 2px;
 }

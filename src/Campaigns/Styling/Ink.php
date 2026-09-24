@@ -133,6 +133,37 @@ final class Ink
     }
 
     /**
+     * The keyboard ring on each ground, drawn outside a control on the ground
+     * around it: the ring the org chose where it reads there, else the accent
+     * as that ground reads it. The page is measured as the accent is, against
+     * the ground the page ink was chosen for.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function ringDeclarations(array $tokens): string
+    {
+        $ring = (string) ($tokens['gratora-focus-ring'] ?? '');
+        $page = self::on((string) ($tokens['gratora-text'] ?? ''));
+
+        $grounds = [
+            'text-ring'      => [$page[0] ?? '', 'var(--gratora-text-accent)'],
+            'on-bg-ring'     => [(string) ($tokens['gratora-bg'] ?? ''), 'var(--gratora-on-bg-accent)'],
+            'on-soft-ring'   => [(string) ($tokens['gratora-bg-soft'] ?? ''), 'var(--gratora-on-soft-accent)'],
+            'on-accent-ring' => [(string) ($tokens['gratora-accent'] ?? ''), 'var(--gratora-on-accent)'],
+            'on-field-ring'  => [(string) ($tokens['gratora-field-bg'] ?? ''), 'var(--gratora-on-field)'],
+        ];
+
+        $css = '';
+        foreach ($grounds as $name => [$ground, $own]) {
+            $css .= '--gratora-' . $name . ':' . ($ring !== '' && self::carries($ring, $ground) ? 'var(--gratora-focus-ring)' : $own) . ';';
+        }
+
+        return $css;
+    }
+
+    /**
      * The required marker on the page and on the card, mixed toward the ink
      * each reads. Mixing alone cannot lift it on a mid-tone card, so the share
      * of the marker colour is measured there. A ground that cannot be read

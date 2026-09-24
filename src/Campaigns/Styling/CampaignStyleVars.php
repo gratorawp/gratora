@@ -89,6 +89,7 @@ final class CampaignStyleVars
         $css .= Ink::softDeclarations($tokens);
         $css .= Ink::fieldDeclarations($tokens);
         $css .= Ink::groundDeclarations($tokens);
+        $css .= Ink::ringDeclarations($tokens);
         $css .= Ink::pageTintDeclarations($tokens);
         $css .= self::cardSoft();
         $css .= self::cover($campaign);
@@ -147,7 +148,8 @@ final class CampaignStyleVars
             return '--gratora-cover-ink:var(--gratora-on-accent);'
                 . '--gratora-cover-ink-muted:var(--gratora-on-accent-muted);'
                 . '--gratora-cover-line:var(--gratora-on-accent-line);'
-                . '--gratora-cover-scrim:none;';
+                . '--gratora-cover-scrim:none;'
+                . '--gratora-cover-ring:var(--gratora-on-accent-ring);';
         }
 
         // A url() token, not a bare address: the stylesheet uses it directly and

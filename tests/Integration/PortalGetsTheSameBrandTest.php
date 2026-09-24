@@ -60,6 +60,18 @@ final class PortalGetsTheSameBrandTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-on-bg-danger:#cd5c5c;', $css);
     }
 
+    /** The account's cards and soft panels hold controls, so their rings are measured too. */
+    public function test_the_keyboard_ring_is_measured_on_each_ground(): void
+    {
+        $this->brand(['gratora-bg' => '#15142b', 'gratora-focus-ring' => '#15142b']);
+
+        $css = $this->css();
+
+        $this->assertStringContainsString('--gratora-text-ring:var(--gratora-focus-ring);', $css);
+        $this->assertStringContainsString('--gratora-on-bg-ring:var(--gratora-on-bg-accent);', $css);
+        $this->assertStringContainsString('--gratora-on-soft-ring:var(--gratora-focus-ring);', $css);
+    }
+
     public function test_the_fields_keep_ink_of_their_own(): void
     {
         $this->brand(['gratora-bg' => '#0f172a']);

@@ -169,6 +169,20 @@ final class InkFollowsTheGroundTest extends IntegrationTestCase
         $this->assertStringNotContainsString('--gratora-focus-ring:#', $css);
     }
 
+    /**
+     * A ring drawn outside a control lies on the ground around it, so each
+     * ground states its own: the chosen one where it reads, here on the page,
+     * and the ground's own where it does not, here on its own accent.
+     */
+    public function test_each_ground_states_the_ring_that_reads_on_it(): void
+    {
+        $css = $this->css(['gratora-accent' => '#0f3d5c', 'gratora-focus-ring' => '#0f3d5c']);
+
+        $this->assertStringContainsString('--gratora-text-ring:var(--gratora-focus-ring);', $css);
+        $this->assertStringContainsString('--gratora-on-accent-ring:var(--gratora-on-accent);', $css);
+        $this->assertStringContainsString('--gratora-on-bg-ring:var(--gratora-focus-ring);', $css);
+    }
+
     /** A ring the org paired with something is still theirs. */
     public function test_a_focus_ring_the_org_chose_is_emitted(): void
     {

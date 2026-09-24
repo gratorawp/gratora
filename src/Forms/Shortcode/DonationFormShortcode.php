@@ -375,6 +375,7 @@ JS;
         $out .= Ink::softDeclarations($tokens);
         $out .= Ink::fieldDeclarations($tokens);
         $out .= Ink::groundDeclarations($tokens);
+        $out .= Ink::ringDeclarations($tokens);
         $out .= Ink::requiredDeclarations($tokens);
 
         // A pass-through token is unset so it inherits, which is right until the

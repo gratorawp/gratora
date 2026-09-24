@@ -19,11 +19,14 @@ import {
     contrast,
     decodePng,
     describeInk,
+    describeRing,
     expectReadable,
     expectRgb,
     inkOf,
     inksOf,
     installInk,
+    parseRgb,
+    ringPixels,
     sweep,
     waitForForms,
     type Ink,
@@ -65,6 +68,59 @@ async function expectNothingBelowTheBar(page: Page, what: string, roots = GRATOR
 function expectInk(ink: Ink, color: string, ground: string, what: string): void {
     expectRgb(ink.color, color, `${what} ink (${describeInk(ink)})`);
     expectRgb(ink.ground, ground, `${what} ground (${describeInk(ink)})`);
+}
+
+/** Controls a ring does not mark: a field shows focus on its border, and a hidden radio on its label. */
+const MARKED_ELSEWHERE = 'input:not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable]';
+
+/**
+ * Tab through the whole page from its top, once round, and hand each control
+ * that takes keyboard focus inside the root to the check.
+ */
+async function tabThrough(page: Page, root: string, check: (control: Locator, name: string) => Promise<void>, limit = 200): Promise<number> {
+    await page.evaluate(() => document.querySelectorAll('[data-e2e-seen]').forEach((el) => el.removeAttribute('data-e2e-seen')));
+    await page.locator('body').click({ position: { x: 1, y: 1 } });
+    let checked = 0;
+    for (let i = 0; i < limit; i++) {
+        await page.keyboard.press('Tab');
+        const name = await page.evaluate(([rootSel, skip]) => {
+            document.querySelectorAll('[data-e2e-focus]').forEach((el) => el.removeAttribute('data-e2e-focus'));
+            const el = document.activeElement;
+            if (! el || el === document.body || el.hasAttribute('data-e2e-seen')) return null;
+            el.setAttribute('data-e2e-seen', '');
+            if (! el.closest(rootSel) || el.matches(skip) || getComputedStyle(el).opacity === '0') return '';
+            el.setAttribute('data-e2e-focus', '');
+            return (el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 40) || el.tagName;
+        }, [root, MARKED_ELSEWHERE]);
+        if (name === null) break;
+        if (name === '') continue;
+        await check(page.locator('[data-e2e-focus]'), name);
+        checked++;
+    }
+
+    return checked;
+}
+
+/** Channels within 12 of the colour: a ring on a fractional edge blends a little into its neighbours. */
+function near(actual: [number, number, number, number], expected: string): boolean {
+    const want = parseRgb(expected);
+    return [0, 1, 2].every((i) => Math.abs(actual[i] - want[i]) <= 12);
+}
+
+/**
+ * The ring on a focused control: 2px, 2px outside it, in the colour measured on
+ * the ground around it, and at least 3:1 against that ground in the pixels.
+ */
+async function expectRing(page: Page, control: Locator, color: string, what: string, inset = false): Promise<void> {
+    await expect(control, what).toHaveCSS('outline-style', 'solid');
+    await expect(control, what).toHaveCSS('outline-width', '2px');
+    await expect(control, what).toHaveCSS('outline-offset', inset ? '-4px' : '2px');
+    const ring = await inkOf(control, 'outline-color');
+    expectRgb(ring.color, color, `${what} ring colour`);
+    for (const read of await ringPixels(page, control, inset)) {
+        expect(near(read.ring, color), `${what} ring pixel ${describeRing(read)}, wanted ${color}`).toBe(true);
+        expect(read.ratio, `${what} ring pixels ${describeRing(read)}`).toBeGreaterThanOrEqual(3);
+    }
 }
 
 /** Tab from the top of the page until an amount tile has keyboard focus. */
@@ -627,6 +683,89 @@ test.describe('the campaign page foundation an add-on draws with', () => {
     });
 });
 
+const BOLD_ACCENT = 'rgb(15, 61, 92)';
+const CLASSIC_ACCENT = 'rgb(69, 46, 245)';
+
+test.describe('keyboard rings', () => {
+    test('every control in a Plain form rings in the page ink', async ({ page }) => {
+        test.skip(! path('PLAIN'), unseeded('PLAIN'));
+        await open(page, path('PLAIN'));
+
+        const n = await tabThrough(page, 'form.gratora-donation-form', (control, name) => expectRing(page, control, INK, `plain form ${name}`));
+        expect(n, 'controls the ring was read on').toBeGreaterThanOrEqual(8);
+    });
+
+    test('every control in a framed form rings in the accent measured on the card', async ({ page }) => {
+        test.skip(! path('FRAME'), unseeded('FRAME'));
+        await open(page, path('FRAME'));
+
+        const n = await tabThrough(page, 'form.gratora-donation-form', (control, name) => expectRing(page, control, ACCENT, `framed form ${name}`));
+        expect(n, 'controls the ring was read on').toBeGreaterThanOrEqual(8);
+    });
+
+    test('a pill rings on the soft track it sits in', async ({ page }) => {
+        test.skip(! path('PILLS'), unseeded('PILLS'));
+        await open(page, path('PILLS'));
+
+        const tracks = '.gratora-form__frequency-options, .gratora-form__currency-pills';
+        let pills = 0;
+        await tabThrough(page, 'form.gratora-donation-form', async (control, name) => {
+            const onTrack = await control.evaluate((el, sel) => !! el.closest(sel), tracks);
+            if (onTrack) pills++;
+            await expectRing(page, control, onTrack ? ACCENT : INK, `pills form ${name}`);
+        });
+        expect(pills, 'pills the ring was read on').toBeGreaterThanOrEqual(2);
+    });
+
+    for (const viewport of VIEWPORTS) {
+        test(`a grid card rings in the ink of the panel and the cover it sits in at ${viewport.width}`, async ({ page }) => {
+            test.skip(! path('LISTS'), unseeded('LISTS'));
+            await page.setViewportSize(viewport);
+            await open(page, path('LISTS'));
+
+            let cards = 0;
+            await tabThrough(page, '.dp-panel--accent, .dp-cover', async (control, name) => {
+                cards++;
+                await expectRing(page, control, ON_ACCENT, `card ${name}`);
+            }, 200);
+            expect(cards, 'cards the ring was read on').toBeGreaterThanOrEqual(2);
+        });
+    }
+
+    test('on Classic the panel rings in its ink and the page in the accent', async ({ page }) => {
+        test.skip(! path('CLASSIC_PANEL'), unseeded('CLASSIC_PANEL'));
+        await open(page, path('CLASSIC_PANEL'));
+
+        const inPanel = await tabThrough(page, '.dp-panel--accent', (control, name) => expectRing(page, control, WHITE, `Classic panel ${name}`));
+        expect(inPanel, 'panel controls the ring was read on').toBeGreaterThanOrEqual(3);
+        const onPage = await tabThrough(page, '.e2e-on-page', (control, name) => expectRing(page, control, CLASSIC_ACCENT, `Classic page ${name}`));
+        expect(onPage).toBe(1);
+    });
+
+    // Bold chose a navy ring beside its navy accent: it reads on the page and not on the panel it paints.
+    test('on Bold the chosen ring stands on the page and gives way on the panel', async ({ page }) => {
+        test.skip(! path('BOLD_PANEL'), unseeded('BOLD_PANEL'));
+        await open(page, path('BOLD_PANEL'));
+
+        const inPanel = await tabThrough(page, '.dp-panel--accent', (control, name) => expectRing(page, control, WHITE, `Bold panel ${name}`));
+        expect(inPanel, 'panel controls the ring was read on').toBeGreaterThanOrEqual(3);
+        const onPage = await tabThrough(page, '.e2e-on-page', (control, name) => expectRing(page, control, BOLD_ACCENT, `Bold page ${name}`));
+        expect(onPage).toBe(1);
+    });
+
+    test('the campaign page buttons ring on the card, and on a photo inside the button', async ({ page }) => {
+        test.skip(! path('LAYOUT'), unseeded('LAYOUT'));
+        await open(page, path('LAYOUT'));
+
+        const onCard = await tabThrough(page, '.dp-profile, .e2e-flat-hero, .dp-sharesheet', (control, name) => expectRing(page, control, ACCENT, `card ${name}`));
+        expect(onCard, 'card controls the ring was read on').toBeGreaterThanOrEqual(5);
+
+        // The page cannot measure a photo, so the white button rings inside itself in its own ink.
+        const onPhoto = await tabThrough(page, '.e2e-photo-hero', (control, name) => expectRing(page, control, INK, `photo ${name}`, true));
+        expect(onPhoto).toBe(1);
+    });
+});
+
 const PORTAL = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
 const PORTAL_UNSEEDED = 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints';
 const NO_MOTION = '*, *::before, *::after { transition: none !important; animation: none !important; }';
@@ -789,6 +928,14 @@ test.describe('donor portal', () => {
         const ring = await inkOf(row, 'outline-color');
         expectInk(ring, INK, WHITE, 'row focus ring');
         expect(ring.ratio).toBeGreaterThanOrEqual(3);
+    });
+
+    test('the statement controls ring on the soft card they sit in', async () => {
+        await tab('Receipts & tax');
+        await expect(root.locator('.dp-card__row select')).toBeVisible();
+
+        const n = await tabThrough(page, '.gratora-donor-portal .dp-card', (control, name) => expectRing(page, control, ACCENT, `statement ${name}`));
+        expect(n, 'statement controls the ring was read on').toBeGreaterThanOrEqual(2);
     });
 
     test('danger reads on the ground it stands on', async () => {

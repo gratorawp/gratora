@@ -172,6 +172,7 @@ final class PortalShortcode extends HookProvider
             . Ink::softDeclarations($tokens)
             . Ink::fieldDeclarations($tokens)
             . Ink::groundDeclarations($tokens)
+            . Ink::ringDeclarations($tokens)
             . Ink::dangerDeclarations($tokens);
 
         return '.gratora-donor-portal{' . implode(' ', $vars) . $derived . '}';

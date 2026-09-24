@@ -99,10 +99,10 @@ describe( 'the inks the server would have emitted', () => {
         expect( derivedInk( { 'gratora-field-bg': '#101828' } )[ '--gratora-on-field' ] ).toBe( '#ffffff' );
     } );
 
-    /** Only the ground tokens remain, each naming a token, so the stylesheet chain stands. */
+    /** Only the ground and ring tokens remain, each naming a token, so the stylesheet chain stands. */
     it( 'measures nothing for a ground it cannot read', () => {
         for ( const out of [ derivedInk( { 'gratora-accent': 'inherit' } ), derivedInk( {} ) ] ) {
-            expect( Object.keys( out ).sort() ).toEqual( Object.keys( GROUND_TOKENS ).sort() );
+            expect( Object.keys( out ).sort() ).toEqual( [ ...Object.keys( GROUND_TOKENS ), ...Object.keys( RING_TOKENS ) ].sort() );
             Object.values( out ).forEach( ( v ) => expect( v ).toMatch( /^var\(--gratora-[a-z-]+\)$/ ) );
         }
     } );
@@ -134,6 +134,40 @@ const GROUND_TOKENS = {
     '--gratora-on-bg-accent':   'var(--gratora-accent)',
     '--gratora-on-accent-soft': 'var(--gratora-accent)',
 };
+
+const RING_TOKENS = {
+    '--gratora-text-ring':      'var(--gratora-text-accent)',
+    '--gratora-on-bg-ring':     'var(--gratora-on-bg-accent)',
+    '--gratora-on-soft-ring':   'var(--gratora-on-soft-accent)',
+    '--gratora-on-accent-ring': 'var(--gratora-on-accent)',
+    '--gratora-on-field-ring':  'var(--gratora-on-field)',
+};
+
+/** The keyboard ring on each ground, as Ink::ringDeclarations emits it: InkTest pins the same maps. */
+describe( 'the ring the server would have emitted', () => {
+    const rings = ( out ) => Object.fromEntries( Object.keys( RING_TOKENS ).map( ( k ) => [ k, out[ k ] ] ) );
+
+    it( 'is each ground\'s accent as text where nothing chose one', () => {
+        expect( rings( derivedInk( { ...PAGE_INK, 'gratora-accent': '#211d3f', 'gratora-bg': '#ffffff' } ) ) ).toEqual( RING_TOKENS );
+    } );
+
+    it( 'is the chosen one only where it reads', () => {
+        expect( rings( derivedInk( {
+            ...PAGE_INK,
+            'gratora-accent':     '#0f3d5c',
+            'gratora-focus-ring': '#0F3D5C',
+            'gratora-bg':         '#f55151',
+            'gratora-bg-soft':    '#f8fafb',
+            'gratora-field-bg':   '#ffffff',
+        } ) ) ).toEqual( {
+            '--gratora-text-ring':      'var(--gratora-focus-ring)',
+            '--gratora-on-bg-ring':     'var(--gratora-on-bg-accent)',
+            '--gratora-on-soft-ring':   'var(--gratora-focus-ring)',
+            '--gratora-on-accent-ring': 'var(--gratora-on-accent)',
+            '--gratora-on-field-ring':  'var(--gratora-focus-ring)',
+        } );
+    } );
+} );
 
 const pick = ( out ) => Object.fromEntries( Object.keys( GROUND_TOKENS ).map( ( k ) => [ k, out[ k ] ] ) );
 

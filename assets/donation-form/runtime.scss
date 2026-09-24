@@ -83,6 +83,11 @@
     --gratora-on-bg-muted:    var(--gratora-text-muted);
     --gratora-on-bg-accent:   var(--gratora-accent);
     --gratora-on-accent-soft: var(--gratora-accent);
+    // The keyboard ring on each ground, measured by the server where it writes the map.
+    --gratora-text-ring:      var(--gratora-text-accent);
+    --gratora-on-bg-ring:     var(--gratora-on-bg-accent);
+    --gratora-on-soft-ring:   var(--gratora-on-soft-accent, var(--gratora-on-soft, var(--gratora-text)));
+    --gratora-on-field-ring:  var(--gratora-on-field, var(--gratora-text));
     --gratora-border:         #e5e7eb;
     --gratora-bg:             #ffffff;
     // Keep field backgrounds separate from the form surface.
@@ -153,6 +158,7 @@
     --gratora-text-muted:    var(--gratora-on-bg-muted);
     --gratora-text-accent:   var(--gratora-on-bg-accent);
     --gratora-text-required: var(--gratora-on-bg-required);
+    --gratora-text-ring:     var(--gratora-on-bg-ring);
 }
 
 // A Plain form inside a Gratora card paints the card too, so the card ink it
@@ -308,7 +314,7 @@
 
         // Drawn outside the tile, on the form's ground, selected or not.
         &:focus-visible {
-            outline-color: var(--gratora-focus-ring, var(--gratora-text-accent, var(--gratora-accent)));
+            outline-color: var(--gratora-text-ring, var(--gratora-text-accent, var(--gratora-accent)));
             outline-offset: 2px;
         }
     }
@@ -359,6 +365,7 @@
             padding: 4px;
             background: var(--gratora-bg-soft, #f8fafb);
             border-radius: var(--gratora-radius-sm, 8px);
+            --gratora-text-ring: var(--gratora-on-soft-ring);
         }
         .gratora-form__frequency-option {
             border-radius: var(--gratora-radius-sm, 8px);
@@ -1141,6 +1148,7 @@
         padding: 4px;
         background: var(--gratora-bg-soft, #f8fafb);
         border-radius: var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px));
+        --gratora-text-ring: var(--gratora-on-soft-ring);
     }
     &__currency-pill {
         appearance: none;
@@ -1538,6 +1546,7 @@
 .gratora-form__country-select-list {
     --gratora-text:       var(--gratora-on-field, #111827);
     --gratora-text-muted: var(--gratora-on-field-muted, #6b7280);
+    --gratora-text-ring:  var(--gratora-on-field-ring, var(--gratora-on-field, #111827));
 }
 .gratora-donation-form .gratora-form__fund-option.is-selected,
 .gratora-form__country-select-option.is-active,
@@ -1545,4 +1554,17 @@
     --gratora-text:       var(--gratora-on-accent-soft, #111827);
     --gratora-text-muted: var(--gratora-on-accent-soft, #6b7280);
     color: var(--gratora-text);
+}
+
+// Drawn outside the control, on the ground around it, in the ring measured there.
+// A field shows focus on its border instead.
+.gratora-donation-form :where(button, a[href], select, summary, [tabindex]:not([tabindex="-1"])):focus-visible,
+.gratora-donation-form .gratora-form :is(input[type="checkbox"], input[type="radio"]):focus-visible {
+    outline: 2px solid var(--gratora-text-ring, var(--gratora-text-accent, var(--gratora-accent)));
+    outline-offset: 2px;
+}
+
+// A box inside a field would take the field's focus halo under its ring.
+.gratora-donation-form .gratora-form :is(input[type="checkbox"], input[type="radio"]):focus-visible {
+    box-shadow: none;
 }

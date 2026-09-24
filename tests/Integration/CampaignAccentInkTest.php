@@ -76,6 +76,7 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-cover-ink-muted:var(--gratora-on-accent-muted);', $css);
         $this->assertStringContainsString('--gratora-cover-line:var(--gratora-on-accent-line);', $css);
         $this->assertStringContainsString('--gratora-cover-scrim:none;', $css);
+        $this->assertStringContainsString('--gratora-cover-ring:var(--gratora-on-accent-ring);', $css);
     }
 
     public function test_a_pale_accent_gets_dark_ink(): void

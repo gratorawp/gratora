@@ -288,3 +288,35 @@ export function decodePng(png: Buffer): { width: number; height: number; pixel: 
         },
     };
 }
+
+/** A ring read from the pixels at the middle of one vertical edge of the control, and the ground beside it. */
+export type RingRead = { side: string; ring: Rgba; ground: Rgba; ratio: number };
+
+/**
+ * The 2px ring a focused control draws 2px outside its edge, and the ground in
+ * the gap between the two, read from the screenshot at the middle of the left
+ * and right edges. An inset ring, 2px wide and 2px inside the edge, is read
+ * against the control's own fill just inside it.
+ */
+export async function ringPixels(page: Page, control: Locator, inset = false): Promise<RingRead[]> {
+    const box = await control.boundingBox();
+    if (! box) throw new Error('The focused control has no box.');
+    const shot = decodePng(await page.screenshot());
+    const y = Math.round(box.y + box.height / 2);
+    const left = box.x;
+    const right = box.x + box.width;
+
+    const reads: Array<[string, number, number]> = inset
+        ? [['left', Math.ceil(left) + 2, Math.ceil(left) + 6], ['right', Math.floor(right) - 3, Math.floor(right) - 7]]
+        : [['left', Math.floor(left) - 3, Math.floor(left) - 1], ['right', Math.ceil(right) + 2, Math.ceil(right)]];
+
+    return reads.map(([side, ringX, groundX]) => {
+        const ring = shot.pixel(ringX, y);
+        const ground = shot.pixel(groundX, y);
+        return { side, ring, ground, ratio: contrast(ring, ground) };
+    });
+}
+
+export function describeRing(read: RingRead): string {
+    return `${read.side} ${show(read.ring)} on ${show(read.ground)} = ${read.ratio.toFixed(2)}:1`;
+}

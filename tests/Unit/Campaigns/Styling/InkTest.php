@@ -509,6 +509,68 @@ final class InkTest extends TestCase
     }
 
     /**
+     * @param array<string,string> $tokens
+     * @return array<string,string>
+     */
+    private function rings(array $tokens): array
+    {
+        preg_match_all('/(--[a-z-]+):([^;]*);/', Ink::ringDeclarations($tokens), $m, PREG_SET_ORDER);
+
+        $out = [];
+        foreach ($m as $decl) {
+            $out[$decl[1]] = $decl[2];
+        }
+
+        return $out;
+    }
+
+    /** With no ring chosen, each ground's ring is the accent measured as text there. */
+    public function test_a_ring_nothing_chose_is_the_accent_as_each_ground_reads_it(): void
+    {
+        $expected = [
+            '--gratora-text-ring'      => 'var(--gratora-text-accent)',
+            '--gratora-on-bg-ring'     => 'var(--gratora-on-bg-accent)',
+            '--gratora-on-soft-ring'   => 'var(--gratora-on-soft-accent)',
+            '--gratora-on-accent-ring' => 'var(--gratora-on-accent)',
+            '--gratora-on-field-ring'  => 'var(--gratora-on-field)',
+        ];
+
+        $this->assertSame($expected, $this->rings(self::SHIPPED));
+        $this->assertSame($expected, $this->rings(['gratora-bg' => '#15142b', 'gratora-accent' => '#fde68a'] + self::SHIPPED));
+    }
+
+    /**
+     * Bold pairs a navy ring with a navy accent. It reads on the white page,
+     * the soft ground and the fields, and not on its own accent or a red card,
+     * where the ground's own ring takes over.
+     */
+    public function test_a_ring_the_org_chose_stands_only_where_it_reads(): void
+    {
+        $bold = ['gratora-accent' => '#0f3d5c', 'gratora-focus-ring' => '#0F3D5C', 'gratora-bg' => '#f55151'] + self::SHIPPED;
+
+        $this->assertSame([
+            '--gratora-text-ring'      => 'var(--gratora-focus-ring)',
+            '--gratora-on-bg-ring'     => 'var(--gratora-on-bg-accent)',
+            '--gratora-on-soft-ring'   => 'var(--gratora-focus-ring)',
+            '--gratora-on-accent-ring' => 'var(--gratora-on-accent)',
+            '--gratora-on-field-ring'  => 'var(--gratora-focus-ring)',
+        ], $this->rings($bold));
+    }
+
+    /** A ring nothing can read is no choice at all, and the page ring is measured only once the page ink is. */
+    public function test_a_ring_it_cannot_read_leaves_each_ground_its_own(): void
+    {
+        $out = $this->rings(['gratora-focus-ring' => 'transparent'] + self::SHIPPED);
+        $this->assertSame('var(--gratora-text-accent)', $out['--gratora-text-ring']);
+        $this->assertSame('var(--gratora-on-field)', $out['--gratora-on-field-ring']);
+
+        $this->assertSame(
+            'var(--gratora-text-accent)',
+            $this->rings(['gratora-focus-ring' => '#0f3d5c', 'gratora-text' => 'inherit'])['--gratora-text-ring']
+        );
+    }
+
+    /**
      * @return array<string,string>
      */
     private function markers(array $tokens): array

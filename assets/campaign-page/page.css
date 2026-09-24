@@ -29,12 +29,14 @@ body,
     --dp-on-accent:       var(--gratora-on-accent, #ffffff);
     --dp-on-accent-muted: var(--gratora-on-accent-muted, rgba(255, 255, 255, .72));
     --dp-on-accent-line:  var(--gratora-on-accent-line, rgba(255, 255, 255, .26));
+    --dp-on-accent-ring:  var(--gratora-on-accent-ring, var(--dp-on-accent));
 
     /* White over a scrim on a photo; a cover without one names the accent's ink. */
     --dp-cover-ink:       var(--gratora-cover-ink, #fff);
     --dp-cover-ink-muted: var(--gratora-cover-ink-muted, rgba(255, 255, 255, .76));
     --dp-cover-line:      var(--gratora-cover-line, rgba(255, 255, 255, .28));
     --dp-cover-scrim:     var(--gratora-cover-scrim, linear-gradient(180deg, rgba(6, 10, 20, .10) 0%, rgba(6, 10, 20, .55) 58%, rgba(6, 10, 20, .84) 100%));
+    --dp-cover-ring:      var(--gratora-cover-ring, var(--dp-cover-ink));
 
     --dp-text:        var(--gratora-text, #141821);
     /* Mix body and muted tokens for intermediate text contrast. */
@@ -151,6 +153,7 @@ body,
     --gratora-text: var(--gratora-on-bg, #141821);
     --gratora-text-muted: var(--gratora-on-bg-muted, #7a8398);
     --gratora-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
+    --gratora-text-ring: var(--gratora-on-bg-ring, var(--gratora-text-accent));
     --dp-text: var(--gratora-text);
     --dp-muted: var(--gratora-text-muted);
     --dp-text-2: color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
@@ -446,6 +449,16 @@ body,
 
 .dp-link--quiet { color: var(--dp-muted); font-weight: 500; }
 
+/* Drawn outside the control, on the ground around it, in the ring measured there. */
+.dp-btn:focus-visible,
+.dp-link:focus-visible,
+.dp-inline-link:focus-visible,
+.dp-sharesheet__item:focus-visible,
+.dp-cta .wp-block-button__link:focus-visible {
+    outline: 2px solid var(--gratora-text-ring, var(--gratora-text-accent, var(--dp-accent)));
+    outline-offset: 2px;
+}
+
 .dp-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--dp-rule); }
 
 .dp-row:last-of-type { border-bottom: 0; }
@@ -521,6 +534,9 @@ body,
 .dp-hero-top .dp-btn { background: #fff; color: var(--dp-text); font-size: 13.5px; padding: 9px 16px; box-shadow: 0 2px 12px rgba(15, 23, 42, .2); }
 
 .dp-hero-top .dp-btn:hover { background: var(--dp-page); color: var(--dp-text); }
+
+/* Nothing measures a photo, so the white button rings inside itself, in its own ink. */
+.dp-hero:not(.dp-hero--flat) .dp-hero-top .dp-btn:focus-visible { outline-color: currentColor; outline-offset: -4px; }
 
 .dp-hero-card .dp-money { margin-top: 0; gap: 7px; flex-wrap: nowrap; }
 
@@ -637,6 +653,7 @@ body,
     --gratora-text:          var(--dp-on-accent);
     --gratora-text-muted:    var(--dp-on-accent-muted);
     --gratora-text-accent:   var(--dp-on-accent);
+    --gratora-text-ring:     var(--dp-on-accent-ring);
     --gratora-bg-soft:       var(--dp-on-accent-line);
     --gratora-border:        var(--dp-on-accent-line);
     --gratora-on-soft:       var(--dp-on-accent);
@@ -691,6 +708,7 @@ body,
     --gratora-text:          var(--dp-cover-ink);
     --gratora-text-muted:    var(--dp-cover-ink-muted);
     --gratora-text-accent:   var(--dp-cover-ink);
+    --gratora-text-ring:     var(--dp-cover-ring);
     --gratora-bg-soft:       var(--dp-cover-line);
     --gratora-border:        var(--dp-cover-line);
     --gratora-on-soft:       var(--dp-cover-ink);

@@ -428,6 +428,9 @@ final class E2eSeedCommand
             'MODAL'      => $this->brandingPage('e2e-branding-modal', 'Branding Modal', '<!-- wp:gratora/donate-button {"campaignId":' . (int) $page->id . ',"label":"Donate in a modal"} /-->', $guest),
             'QUIET_HOST' => $this->brandingPage('e2e-branding-quiet-host', 'Branding Quiet Host', self::quietHostBlocks((int) $page->id, $shortcode($plain)), $white),
             'LAYOUT'     => $this->brandingPage('e2e-branding-layout', 'Branding Layout', self::foundationBlocks(), $page),
+            'PILLS'      => $this->brandingPage('e2e-branding-pills', 'Branding Pills', $shortcode($canvas), null),
+            'CLASSIC_PANEL' => $this->brandingPage('e2e-branding-classic-panel', 'Branding Classic Panel', self::panelControlBlocks((int) $classic->id), $classic),
+            'BOLD_PANEL' => $this->brandingPage('e2e-branding-bold-panel', 'Branding Bold Panel', self::panelControlBlocks((int) $bold->id), $bold),
             'CLASSIC'    => $this->campaignPath($classic),
             'COVER'      => $this->campaignPath($cover),
             'THEME'      => $this->campaignPath($theme),
@@ -1179,10 +1182,28 @@ BLOCKS;
             '<div class="dp-card"><div class="dp-row"><span class="dp-avatar dp-avatar--sm" aria-hidden="true">AB</span>'
                 . '<span class="dp-row-main"><span class="dp-row-name">Ada Branding<span class="dp-tag">Featured</span></span></span></div></div>',
             '<header class="dp-profile"><div class="dp-profile__cover"></div><div class="dp-profile__body">'
-                . '<span class="dp-profile__avatar" aria-hidden="true">AB</span><h2 class="dp-display">Ada Branding</h2></div></header>',
+                . '<span class="dp-profile__avatar" aria-hidden="true">AB</span><h2 class="dp-display">Ada Branding</h2>'
+                . '<div class="dp-profile__actions"><a class="dp-btn" href="#donate">Donate</a><a class="dp-btn dp-btn--ghost" href="#join">Join team</a></div></div></header>',
+            '<div class="dp-card e2e-flat-hero"><div class="dp-hero dp-hero--flat"><div class="dp-hero-top"><a class="dp-btn" href="#start">Start fundraising</a></div></div></div>',
+            '<div class="dp-hero e2e-photo-hero"><div class="dp-hero-media"><div class="dp-figure" style="background:#3b3b3b"></div>'
+                . '<div class="dp-hero-top"><a class="dp-btn" href="#share">Share</a></div></div></div>',
             '<div class="e2e-share" style="position:relative;margin-bottom:140px"><div class="dp-sharesheet">'
                 . '<a class="dp-sharesheet__item" href="#share">Facebook</a><button type="button" class="dp-sharesheet__item">Copy link</button></div></div>',
             '<!-- /wp:html -->',
+        ]);
+    }
+
+    /** A grid and a donate button in the campaign's accent panel, and a donate button on the page beside it. */
+    private static function panelControlBlocks(int $campaign): string
+    {
+        return implode("\n", [
+            '<!-- wp:group {"className":"dp-panel dp-panel--accent"} -->',
+            '<div class="wp-block-group dp-panel dp-panel--accent">',
+            '<!-- wp:gratora/campaign-grid {"campaignId":' . $campaign . ',"count":2} /-->',
+            '<!-- wp:gratora/donate-button {"campaignId":' . $campaign . ',"label":"Donate in the panel","className":"e2e-in-panel"} /-->',
+            '</div>',
+            '<!-- /wp:group -->',
+            '<!-- wp:gratora/donate-button {"campaignId":' . $campaign . ',"label":"Donate on the page","className":"e2e-on-page"} /-->',
         ]);
     }
 

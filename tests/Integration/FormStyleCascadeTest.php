@@ -127,6 +127,9 @@ final class FormStyleCascadeTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-text:#111827;', $m[1]);
         $this->assertStringContainsString('--gratora-on-bg:#ffffff;', $m[1]);
         $this->assertStringContainsString('--gratora-on-bg-accent:var(--gratora-accent);', $m[1]);
+        $this->assertStringContainsString('--gratora-text-ring:var(--gratora-text-accent);', $m[1]);
+        $this->assertStringContainsString('--gratora-on-bg-ring:var(--gratora-on-bg-accent);', $m[1]);
+        $this->assertStringContainsString('--gratora-on-soft-ring:var(--gratora-on-soft-accent);', $m[1]);
     }
 
     /** On a red card the pink mixed toward the ink reads 2.04:1, so the form carries the marker measured there. */
