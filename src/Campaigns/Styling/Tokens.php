@@ -251,7 +251,7 @@ final class Tokens
                 'label'   => __('Button text color', 'gratora-donation-platform'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to use white on filled buttons.', 'gratora-donation-platform'),
+                'help'    => __('Leave empty to use white or dark text, whichever reads on the accent color.', 'gratora-donation-platform'),
             ],
             'gratora-button-border' => [
                 'group'   => 'buttons',
