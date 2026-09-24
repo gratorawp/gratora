@@ -218,6 +218,17 @@ describe( 'the ink for each ground the server would have emitted', () => {
     } );
 } );
 
+/** What a hovered tile and secondary button paint, as Ink::softDeclarations emits it: InkTest pins the same cases. */
+test.each( [
+    [ '#221f3d', '#3a3660', '#34314d', '#2d294d' ],
+    [ '#e8590c', '#e5e7eb', '#ea661f', '#e79970' ],
+    [ '#221f3d', '#e5e7eb', '#34314d', '#34314d' ],
+] )( 'a hovered tile and button on %p under %p paint the fills the server measures', ( soft, border, tile, button ) => {
+    const out = derivedInk( { 'gratora-bg-soft': soft, 'gratora-border': border, 'gratora-accent': '#211d3f' } );
+
+    expect( [ out[ '--gratora-soft-hover' ], out[ '--gratora-secondary-hover' ] ] ).toEqual( [ tile, button ] );
+} );
+
 /** A hovered button's ink, as Ink::hoverDeclarations emits it: InkTest pins the same cases. */
 test.each( [
     [ { 'gratora-accent': '#211d3f' }, 'var(--gratora-on-accent)' ],

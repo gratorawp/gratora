@@ -802,6 +802,16 @@ test.describe('hovered buttons', () => {
         await expectHover(page, page.locator('form.gratora-donation-form:not(.gratora-donate-modal form) .gratora-form__button--primary').first(), WHITE, CORAL_DARK, 'form submit');
     });
 
+    // #10162a reads 5.01:1 on this orange soft ground and 4.41:1 on the fill 8% darker, so the tile lightens instead.
+    test('a hovered tile keeps a fill its ink reads on', async ({ page }) => {
+        test.skip(! path('CORAL'), unseeded('CORAL'));
+        await open(page, path('CORAL'));
+
+        const tile = page.locator('form.gratora-donation-form:not(.gratora-donate-modal form) .gratora-form__preset:not(.is-selected)').first();
+        expectInk(await inkOf(tile), ON_ACCENT, 'rgb(232, 89, 12)', 'tile');
+        await expectHover(page, tile, ON_ACCENT, 'rgb(234, 102, 31)', 'tile');
+    });
+
     test('a donate button on Classic and on Bold reads its hover fill, in the panel and on the page', async ({ page }) => {
         for (const [name, dark] of [['CLASSIC_PANEL', 'rgb(54, 36, 191)'], ['BOLD_PANEL', 'rgb(12, 48, 72)']] as const) {
             test.skip(! path(name), unseeded(name));

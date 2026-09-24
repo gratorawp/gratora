@@ -132,6 +132,67 @@ final class InkTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string,string>
+     */
+    private function soft(array $tokens): array
+    {
+        preg_match_all('/(--[a-z-]+):([^;]*);/', Ink::softDeclarations($tokens), $m, PREG_SET_ORDER);
+
+        $out = [];
+        foreach ($m as $decl) {
+            $out[$decl[1]] = $decl[2];
+        }
+
+        return $out;
+    }
+
+    /**
+     * A hovered tile moves its fill 8% toward its ink, and a hovered secondary
+     * button mixes in the border, both where the ink still reads there. On the
+     * QA soft ground that is the fill the stylesheet paints.
+     */
+    public function test_a_soft_hover_keeps_the_fill_the_stylesheet_paints_where_the_ink_reads(): void
+    {
+        $out = $this->soft(['gratora-bg-soft' => '#221f3d', 'gratora-border' => '#3a3660', 'gratora-accent' => '#fde68a']);
+
+        $this->assertSame('#34314d', $out['--gratora-soft-hover']);
+        $this->assertSame(Ink::mix('#3a3660', '#221f3d', .45), $out['--gratora-secondary-hover']);
+    }
+
+    /** #10162a reads 5.01:1 on this orange and 4.41:1 once 8% of it is mixed in, so the tile lightens instead. */
+    public function test_a_tile_hover_moves_away_from_ink_it_would_lose(): void
+    {
+        $out = $this->soft(['gratora-bg-soft' => '#e8590c', 'gratora-border' => '#e5e7eb', 'gratora-accent' => '#211d3f']);
+
+        $this->assertFalse(Ink::carries('#10162a', Ink::mix('#10162a', '#e8590c', .08) ?? ''));
+        $this->assertSame(Ink::mix('#ffffff', '#e8590c', .08), $out['--gratora-soft-hover']);
+        $this->assertTrue(Ink::carries('#10162a', $out['--gratora-soft-hover']));
+    }
+
+    /** The shipped border mixed into a dark soft ground lands mid-grey, 4.2:1 under white, so the button takes the tile's hover. */
+    public function test_a_secondary_hover_the_ink_loses_takes_the_tile_hover(): void
+    {
+        $out = $this->soft(['gratora-bg-soft' => '#221f3d', 'gratora-border' => '#e5e7eb', 'gratora-accent' => '#fde68a']);
+
+        $this->assertFalse(Ink::carries('#ffffff', Ink::mix('#e5e7eb', '#221f3d', .45) ?? ''));
+        $this->assertSame('#34314d', $out['--gratora-secondary-hover']);
+    }
+
+    public function test_every_grey_soft_hover_reads_where_its_rest_does(): void
+    {
+        for ($v = 0; $v <= 255; $v++) {
+            $grey = sprintf('#%1$02x%1$02x%1$02x', $v);
+            $out  = $this->soft(['gratora-bg-soft' => $grey, 'gratora-border' => '#e5e7eb', 'gratora-accent' => '#211d3f']);
+            if (! Ink::carries($out['--gratora-on-soft'], $grey)) {
+                continue;
+            }
+
+            $this->assertTrue(Ink::carries($out['--gratora-on-soft'], $out['--gratora-soft-hover']), $grey . ' tile');
+            $this->assertTrue(Ink::carries($out['--gratora-on-soft'], $out['--gratora-secondary-hover']), $grey . ' button');
+        }
+    }
+
     public function test_an_unreadable_soft_ground_leaves_the_stylesheet_its_fallback(): void
     {
         $this->assertSame('', Ink::softDeclarations(['gratora-bg-soft' => 'var(--wp--preset--color--x)']));

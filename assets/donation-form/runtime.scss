@@ -107,7 +107,8 @@
     --gratora-radius-sm:      8px;
     // Leave button and switcher radii unset to inherit radius-sm unless overridden.
     --gratora-pill-radius:    999px;
-    --gratora-preset-hover:   color-mix(in srgb, var(--gratora-on-soft, #000) 8%, var(--gratora-bg-soft));
+    // Where the server measured it, a fill the ink still reads on.
+    --gratora-preset-hover:   var(--gratora-soft-hover, color-mix(in srgb, var(--gratora-on-soft, #000) 8%, var(--gratora-bg-soft)));
     --gratora-stroke:   1px;
     --gratora-gap:            20px;
     --gratora-field-gap:      6px;
@@ -275,7 +276,7 @@
             background: var(--gratora-bg-soft);
             color: var(--gratora-on-soft, var(--gratora-text));
 
-            &:hover:not(:disabled) { background: color-mix(in srgb, var(--gratora-border) 45%, var(--gratora-bg-soft)); }
+            &:hover:not(:disabled) { background: var(--gratora-secondary-hover, color-mix(in srgb, var(--gratora-border) 45%, var(--gratora-bg-soft))); }
         }
     }
 

@@ -354,7 +354,33 @@ final class Ink
             . (self::carries($accent, (string) ($tokens['gratora-bg-soft'] ?? '')) ? $accent : $on[0])
             . ';';
 
-        return $css;
+        return $css . self::softHovers($tokens, $on[0]);
+    }
+
+    /**
+     * What a hovered tile and a hovered secondary button paint. The tile moves
+     * its fill 8% toward its ink and the button mixes in 45% of the border,
+     * which on a mid-tone ground can take the ink under 4.5:1: there the tile
+     * moves toward the other ink instead, and the button paints the tile's.
+     *
+     * @param array<string,string> $tokens
+     */
+    private static function softHovers(array $tokens, string $ink): string
+    {
+        $soft  = (string) ($tokens['gratora-bg-soft'] ?? '');
+        $tile  = self::mix($ink, $soft, .08);
+        $other = $ink === self::ON_DARK[0] ? self::ON_LIGHT[0] : self::ON_DARK[0];
+        if ($tile === null || ! self::carries($ink, $tile)) {
+            $tile = self::mix($other, $soft, .08);
+        }
+        if ($tile === null) {
+            return '';
+        }
+
+        $button = self::mix((string) ($tokens['gratora-border'] ?? ''), $soft, .45);
+
+        return '--gratora-soft-hover:' . $tile . ';'
+            . '--gratora-secondary-hover:' . ($button !== null && self::carries($ink, $button) ? $button : $tile) . ';';
     }
 
     /**

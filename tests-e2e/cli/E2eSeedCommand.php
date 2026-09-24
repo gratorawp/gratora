@@ -399,7 +399,7 @@ final class E2eSeedCommand
         $classic = $this->brandingCampaign('e2e-branding-classic', 'Branding Classic', 'hero', ['preset_id' => 'classic'], 200000);
         $cover   = $this->brandingCampaign('e2e-branding-cover', 'Branding Cover', 'cover', null, 200000);
         $theme   = $this->brandingCampaign('e2e-branding-theme', 'Branding Site Theme', 'standard', ['preset_id' => 'theme'], 200000);
-        $coral   = $this->brandingCampaign('e2e-branding-coral', 'Branding Coral', 'standard', ['tokens' => ['gratora-accent' => '#f55151']], 200000);
+        $coral   = $this->brandingCampaign('e2e-branding-coral', 'Branding Coral', 'standard', ['tokens' => ['gratora-accent' => '#f55151', 'gratora-bg-soft' => '#e8590c']], 200000);
 
         $this->brandingDonations([
             ['key' => 'e2e-branding-1', 'campaign' => $page, 'email' => 'e2e-branding-1@example.test', 'first' => 'Ada', 'last' => 'Branding', 'cents' => 12000],
@@ -1198,8 +1198,8 @@ BLOCKS;
 
     /**
      * The campaign page's buttons, a donate button and a form under a mid-tone
-     * accent, where the ink measured on the accent does not read on the darker
-     * fill a hover paints.
+     * accent and soft ground, where the ink measured at rest does not read on
+     * the fill a hover paints.
      */
     private static function hoverBlocks(int $campaign, string $form): string
     {
