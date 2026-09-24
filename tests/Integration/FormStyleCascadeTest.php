@@ -91,6 +91,44 @@ final class FormStyleCascadeTest extends IntegrationTestCase
         $this->assertSame('#c62828', $resolved['tokens']['gratora-accent']);
     }
 
+    /**
+     * The form wrapper paints nothing, so the text on it is the page's ink;
+     * the card it paints when framed restates its ink from --gratora-on-bg.
+     */
+    public function test_the_rendered_form_keeps_page_ink_and_carries_card_ink(): void
+    {
+        update_option('gratora_org_brand', [
+            'presets'    => [['id' => 'midnight', 'name' => 'Midnight', 'tokens' => ['gratora-bg' => '#15142b', 'gratora-accent' => '#fde68a']]],
+            'default_id' => 'midnight',
+        ]);
+        $campaign = Campaign::make();
+        $campaign->title      = 'Cascade ' . uniqid();
+        $campaign->slug       = 'cascade-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = gmdate('Y-m-d H:i:s');
+        $campaign->updated_at = $campaign->created_at;
+        $campaign->save();
+
+        $form = Form::make();
+        $form->title       = 'Cascade ' . uniqid();
+        $form->slug        = 'cascade-' . uniqid();
+        $form->status      = 'published';
+        $form->campaign_id = (int) $campaign->id;
+        $form->blocks     = '<!-- wp:gratora/donation-amount {"presets":[1000]} /-->';
+        $form->settings   = [];
+        $form->created_at = gmdate('Y-m-d H:i:s');
+        $form->updated_at = $form->created_at;
+        $form->save();
+
+        $html = do_shortcode('[gratora_donation_form slug="' . $form->slug . '"]');
+
+        $this->assertSame(1, preg_match('/<form class="gratora-donation-form[^"]*"[^>]* style="([^"]*)"/', $html, $m));
+        $this->assertStringContainsString('--gratora-text:#111827;', $m[1]);
+        $this->assertStringContainsString('--gratora-on-bg:#ffffff;', $m[1]);
+        $this->assertStringContainsString('--gratora-on-bg-accent:var(--gratora-accent);', $m[1]);
+    }
+
     /** A preset that does exist still gates them out, which is the contract. */
     public function test_a_form_pinned_to_a_real_preset_still_gates_them_out(): void
     {

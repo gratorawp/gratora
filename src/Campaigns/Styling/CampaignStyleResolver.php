@@ -60,7 +60,6 @@ final class CampaignStyleResolver
 
         $inline = $formPresetId === '' ? $campaignInline : [];
         $tokens = $this->dropStalePairs($tokens, array_merge($presetLayers, [$inline]));
-        $tokens = $this->inkFollowsGround($tokens, $presetTokens, $inline);
 
         return [
             'tokens'        => $tokens,
@@ -107,11 +106,7 @@ final class CampaignStyleResolver
 
         $tokens = (array) apply_filters('gratora.campaign_style.tokens', $tokens, $campaign);
 
-        return $this->inkFollowsGround(
-            $this->dropStalePairs($tokens, array_merge($presetLayers, [$campaignInline])),
-            $presetTokens,
-            $campaignInline
-        );
+        return $this->dropStalePairs($tokens, array_merge($presetLayers, [$campaignInline]));
     }
 
     /**
@@ -154,44 +149,6 @@ final class CampaignStyleResolver
 
             if ($stale) {
                 unset($tokens[$key]);
-            }
-        }
-
-        return $tokens;
-    }
-
-    /**
-     * Body and muted ink track the background the same way accent-soft tracks
-     * the accent: the shipped values are chosen against a white page, so an org
-     * that colours the ground and says nothing about the ink gets #111827 on
-     * whatever it picked. Measured here rather than in CSS, which cannot read
-     * a colour's luminance, and only when no layer chose ink of its own.
-     *
-     * @param array<string,string> $tokens
-     * @param array<string,string> $presetTokens
-     * @param array<string,string> $inline
-     * @return array<string,string>
-     *
-     * @since 1.0.0
-     */
-    private function inkFollowsGround(array $tokens, array $presetTokens, array $inline): array
-    {
-        $defaults = Tokens::defaults();
-        $ground   = (string) ($tokens['gratora-bg'] ?? '');
-
-        if ($ground === '' || $ground === ($defaults['gratora-bg'] ?? null)) {
-            return $tokens;
-        }
-
-        $on = Ink::on($ground);
-        if ($on === null) {
-            return $tokens;
-        }
-
-        foreach (['gratora-text' => 0, 'gratora-text-muted' => 1] as $key => $slot) {
-            $chosen = isset($presetTokens[$key]) || isset($inline[$key]);
-            if (! $chosen && ($tokens[$key] ?? null) === ($defaults[$key] ?? null)) {
-                $tokens[$key] = $on[$slot];
             }
         }
 

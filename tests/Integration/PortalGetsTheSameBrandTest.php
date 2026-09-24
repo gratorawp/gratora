@@ -33,13 +33,14 @@ final class PortalGetsTheSameBrandTest extends IntegrationTestCase
         return (string) $method->invoke($shortcode);
     }
 
-    public function test_a_dark_ground_reaches_the_portal_with_light_ink(): void
+    public function test_a_dark_card_reaches_the_portal_with_light_ink(): void
     {
         $this->brand(['gratora-bg' => '#0f172a']);
 
         $css = $this->css();
 
-        $this->assertStringContainsString('--gratora-text: #ffffff', str_replace(':#', ': #', $css));
+        $this->assertStringContainsString('--gratora-on-bg:#ffffff;', $css);
+        $this->assertStringContainsString('--gratora-text: #111827', $css);
     }
 
     public function test_a_pale_accent_reaches_the_portal_with_dark_ink(): void
