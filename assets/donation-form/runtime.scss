@@ -149,9 +149,10 @@
 .gratora-donation-form--framed .gratora-form,
 .gratora-donation-form .gratora-modal__panel,
 :where(.gratora-donate-modal__panel, .dp-page, .dp-card) .gratora-donation-form .gratora-form {
-    --gratora-text:        var(--gratora-on-bg);
-    --gratora-text-muted:  var(--gratora-on-bg-muted);
-    --gratora-text-accent: var(--gratora-on-bg-accent);
+    --gratora-text:          var(--gratora-on-bg);
+    --gratora-text-muted:    var(--gratora-on-bg-muted);
+    --gratora-text-accent:   var(--gratora-on-bg-accent);
+    --gratora-text-required: var(--gratora-on-bg-required);
 }
 
 // A Plain form inside a Gratora card paints the card too, so the card ink it
@@ -541,8 +542,8 @@
     }
 
     &__required {
-        // Mixed with the text ink, as the field error is, so it reads on the form's ground.
-        color: color-mix(in srgb, var(--gratora-required, #d63384) 72%, var(--gratora-text));
+        // Measured on the ground the form stands on; the mix with the text ink stands where nothing measured it.
+        color: var(--gratora-text-required, color-mix(in srgb, var(--gratora-required, #d63384) 72%, var(--gratora-text)));
         margin-left: 2px;
     }
 

@@ -375,6 +375,7 @@ JS;
         $out .= Ink::softDeclarations($tokens);
         $out .= Ink::fieldDeclarations($tokens);
         $out .= Ink::groundDeclarations($tokens);
+        $out .= Ink::requiredDeclarations($tokens);
 
         // A pass-through token is unset so it inherits, which is right until the
         // form sits on a campaign page that has already declared it for its own

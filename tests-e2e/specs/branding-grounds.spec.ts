@@ -285,11 +285,12 @@ test.describe('framed form on Bold', () => {
         expectReadable(await inkOf(frame.locator('span.gratora-form__label').first()), 'field label on Bold');
     });
 
-    // Mixing the pink toward the card ink cannot lift it on a red card: 2.04:1.
-    // The marker needs ink measured on the card, which only the server can do.
-    test.fixme('the required marker reads on the red card', async ({ page }) => {
+    // The pink mixed toward the card ink reads 2.04:1 on the red card, so more of the ink is taken there.
+    test('the required marker reads on the red card', async ({ page }) => {
         await open(page, path('FRAME_BOLD'));
-        expectReadable(await inkOf(page.locator('.gratora-form__required').first()), 'required marker on Bold');
+        const required = await inkOf(page.locator('.gratora-form__required').first());
+        expectInk(required, 'rgb(50, 29, 55)', 'rgb(245, 81, 81)', 'required marker on Bold');
+        expectReadable(required, 'required marker on Bold');
     });
 });
 

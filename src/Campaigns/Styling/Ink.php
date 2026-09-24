@@ -33,6 +33,12 @@ final class Ink
     /** The alpha muted ink starts from, in hundredths. */
     private const MUTED_FROM = ['#ffffff' => 72, '#10162a' => 62];
 
+    /** The required marker's colour, as --gratora-required ships it. */
+    private const REQUIRED = '#d63384';
+
+    /** The share of it the stylesheet mixes toward the ink, in hundredths. */
+    private const REQUIRED_FROM = 72;
+
     private const NUMBER = '[+-]?(?:\d+\.?\d*|\.\d+)';
 
     /** Degrees in one of each CSS angle unit. */
@@ -104,6 +110,35 @@ final class Ink
             . '--gratora-on-bg-muted:'
                 . (self::carries($muted, $card) || $onCard === null ? 'var(--gratora-text-muted)' : $onCard[1]) . ';'
             . self::accentOnCard($accent, $card, $tint !== '' ? $tint : (self::mix($accent, $card, .12) ?? ''));
+    }
+
+    /**
+     * The required marker on the page and on the card, mixed toward the ink
+     * each reads. Mixing alone cannot lift it on a mid-tone card, so the share
+     * of the marker colour is measured there. A ground that cannot be read
+     * emits nothing, and the stylesheet's own mix stands.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function requiredDeclarations(array $tokens): string
+    {
+        $text = (string) ($tokens['gratora-text'] ?? '');
+        $card = (string) ($tokens['gratora-bg'] ?? '');
+        $css  = '';
+
+        $page = self::on($text);
+        if ($page !== null) {
+            $css .= '--gratora-text-required:' . self::marker($text, $page[0]) . ';';
+        }
+
+        $onCard = self::on($card);
+        if ($onCard !== null) {
+            $css .= '--gratora-on-bg-required:' . self::marker(self::carries($text, $card) ? $text : $onCard[0], $card) . ';';
+        }
+
+        return $css;
     }
 
     /**
@@ -245,6 +280,30 @@ final class Ink
         }
 
         return $ink;
+    }
+
+    /**
+     * The marker mixed toward the ink at the largest share, from the shipped
+     * one down, that reaches 4.5:1 on the ground. Where none does, the ink.
+     */
+    private static function marker(string $ink, string $ground): string
+    {
+        /** @var array{0:int,1:int,2:int} $marker */
+        $marker = self::rgb(self::REQUIRED);
+        $inkRgb = self::rgb($ink);
+        $bg     = self::rgb($ground);
+        if ($inkRgb === null || $bg === null) {
+            return $ink;
+        }
+
+        for ($n = self::REQUIRED_FROM; $n > 0; $n--) {
+            $mixed = self::blend($marker, $inkRgb, $n / 100);
+            if (self::ratio($mixed, $bg) >= 4.5) {
+                return self::hexOf($mixed);
+            }
+        }
+
+        return self::hexOf($inkRgb);
     }
 
     /**

@@ -408,4 +408,64 @@ final class InkTest extends TestCase
             Ink::cardAccentDeclarations('#fde68a', '#15142b')
         );
     }
+
+    /**
+     * @return array<string,string>
+     */
+    private function markers(array $tokens): array
+    {
+        preg_match_all('/(--[a-z-]+):([^;]*);/', Ink::requiredDeclarations($tokens), $m, PREG_SET_ORDER);
+
+        $out = [];
+        foreach ($m as $decl) {
+            $out[$decl[1]] = $decl[2];
+        }
+
+        return $out;
+    }
+
+    /** Where the pink mixed toward the ink already reads, it is the colour the stylesheet paints. */
+    public function test_the_required_marker_keeps_its_mix_where_it_reads(): void
+    {
+        $qa = ['gratora-bg' => '#15142b', 'gratora-accent' => '#fde68a'] + self::SHIPPED;
+
+        $this->assertSame(
+            ['--gratora-text-required' => '#9f2b6a', '--gratora-on-bg-required' => '#e16ca6'],
+            $this->markers($qa)
+        );
+        $this->assertSame(
+            ['--gratora-text-required' => '#9f2b6a', '--gratora-on-bg-required' => '#9f2b6a'],
+            $this->markers(self::SHIPPED)
+        );
+    }
+
+    /** Bold's red card: the same mix reads 2.04:1 there, so more of the ink is taken. */
+    public function test_the_required_marker_takes_more_ink_on_a_card_that_defeats_the_mix(): void
+    {
+        $bold = $this->markers(['gratora-bg' => '#f55151'] + self::SHIPPED);
+
+        $this->assertSame('#321d37', $bold['--gratora-on-bg-required']);
+        $this->assertTrue(Ink::carries($bold['--gratora-on-bg-required'], '#f55151'));
+        $this->assertFalse(Ink::carries(Ink::mix('#d63384', '#111827', .18) ?? '', '#f55151'), 'takes more ink than it needs');
+    }
+
+    public function test_the_required_marker_reads_on_every_grey_card(): void
+    {
+        for ($v = 0; $v <= 255; $v++) {
+            $card   = sprintf('#%1$02x%1$02x%1$02x', $v);
+            $ink    = Ink::carries('#111827', $card) ? '#111827' : (Ink::on($card)[0] ?? '');
+            $marker = $this->markers(['gratora-bg' => $card] + self::SHIPPED)['--gratora-on-bg-required'] ?? '';
+
+            $this->assertTrue(Ink::carries($marker, $card) || $marker === $ink, $card . ' marker ' . $marker);
+        }
+    }
+
+    public function test_a_ground_it_cannot_read_leaves_the_stylesheet_its_mix(): void
+    {
+        $this->assertSame('', Ink::requiredDeclarations(['gratora-text' => 'inherit', 'gratora-bg' => 'transparent']));
+        $this->assertSame(
+            ['--gratora-on-bg-required' => '#e16ca6'],
+            $this->markers(['gratora-text' => 'inherit', 'gratora-bg' => '#15142b'])
+        );
+    }
 }

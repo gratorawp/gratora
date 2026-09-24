@@ -129,6 +129,40 @@ final class FormStyleCascadeTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-on-bg-accent:var(--gratora-accent);', $m[1]);
     }
 
+    /** On a red card the pink mixed toward the ink reads 2.04:1, so the form carries the marker measured there. */
+    public function test_the_rendered_form_carries_the_required_marker_measured_on_its_card(): void
+    {
+        update_option('gratora_org_brand', [
+            'presets'    => [['id' => 'red', 'name' => 'Red', 'tokens' => ['gratora-bg' => '#f55151']]],
+            'default_id' => 'red',
+        ]);
+        $campaign = Campaign::make();
+        $campaign->title      = 'Marker ' . uniqid();
+        $campaign->slug       = 'marker-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = gmdate('Y-m-d H:i:s');
+        $campaign->updated_at = $campaign->created_at;
+        $campaign->save();
+
+        $form = Form::make();
+        $form->title       = 'Marker ' . uniqid();
+        $form->slug        = 'marker-' . uniqid();
+        $form->status      = 'published';
+        $form->campaign_id = (int) $campaign->id;
+        $form->blocks      = '<!-- wp:gratora/email {"required":true} /-->';
+        $form->settings    = ['container' => ['style' => 'frame']];
+        $form->created_at  = gmdate('Y-m-d H:i:s');
+        $form->updated_at  = $form->created_at;
+        $form->save();
+
+        $html = do_shortcode('[gratora_donation_form slug="' . $form->slug . '"]');
+
+        $this->assertSame(1, preg_match('/<form class="gratora-donation-form[^"]*"[^>]* style="([^"]*)"/', $html, $m));
+        $this->assertStringContainsString('--gratora-text-required:#9f2b6a;', $m[1]);
+        $this->assertStringContainsString('--gratora-on-bg-required:#321d37;', $m[1]);
+    }
+
     /** A preset that does exist still gates them out, which is the contract. */
     public function test_a_form_pinned_to_a_real_preset_still_gates_them_out(): void
     {

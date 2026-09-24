@@ -159,6 +159,20 @@ describe( 'the ink for each ground the server would have emitted', () => {
     } );
 } );
 
+/** The required marker on the page and on the card, as Ink::requiredDeclarations emits it. */
+describe( 'the required marker the server would have emitted', () => {
+    it( 'keeps the mix where it reads', () => {
+        const out = derivedInk( { ...PAGE_INK, 'gratora-bg': '#15142b' } );
+
+        expect( out[ '--gratora-text-required' ] ).toBe( '#9f2b6a' );
+        expect( out[ '--gratora-on-bg-required' ] ).toBe( '#e16ca6' );
+    } );
+
+    it( 'takes more ink on a card that defeats the mix', () => {
+        expect( derivedInk( { ...PAGE_INK, 'gratora-bg': '#f55151' } )[ '--gratora-on-bg-required' ] ).toBe( '#321d37' );
+    } );
+} );
+
 test( 'a malformed number is a colour to neither side', () => {
     expect( rgb( 'hsl(1.2.3, 50%, 50%)' ) ).toBeNull();
 } );

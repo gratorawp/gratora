@@ -43,6 +43,16 @@ it( 'measures the card ink and leaves the page ink alone', () => {
     expect( read( el, '--gratora-on-bg' ) ).toBe( '#ffffff' );
 } );
 
+/** On a red card the pink mixed toward the ink reads 2.04:1, so the preview measures the marker as the server does. */
+it( 'measures the required marker on the card', () => {
+    const el = form();
+
+    applyPreviewTokens( el, { 'gratora-bg': '#f55151', 'gratora-text': '#111827' } );
+
+    expect( read( el, '--gratora-text-required' ) ).toBe( '#9f2b6a' );
+    expect( read( el, '--gratora-on-bg-required' ) ).toBe( '#321d37' );
+} );
+
 /** A preset that omits a token must not leave the previous preset's value behind. */
 it( 'clears what the previous preset set', () => {
     const el = form();
