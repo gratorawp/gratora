@@ -737,6 +737,22 @@ test.describe('donor portal', () => {
         expectInk(await inkOf(download), ACCENT, CARD, 'download link in a row');
         await receipts();
     });
+
+    test('the keyboard ring on a row reads on the page around it', async () => {
+        await tab('Donations');
+        await expect(root.locator('.dp-list__row').first()).toBeVisible();
+        for (let i = 0; i < 30 && ! await page.evaluate(() => document.activeElement?.classList.contains('dp-list__row') ?? false); i++) {
+            await page.keyboard.press('Tab');
+        }
+
+        // Drawn 2px outside the row, on the page.
+        const row = root.locator('.dp-list__row:focus-visible');
+        await expect(row).toHaveCount(1);
+        await expect(row).toHaveCSS('outline-offset', '2px');
+        const ring = await inkOf(row, 'outline-color');
+        expectInk(ring, INK, WHITE, 'row focus ring');
+        expect(ring.ratio).toBeGreaterThanOrEqual(3);
+    });
 });
 
 test('the measuring agrees with WCAG', () => {
