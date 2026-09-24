@@ -171,7 +171,8 @@ final class PortalShortcode extends HookProvider
         $derived = Ink::declarationsFor((string) ($tokens['gratora-accent'] ?? ''))
             . Ink::softDeclarations($tokens)
             . Ink::fieldDeclarations($tokens)
-            . Ink::groundDeclarations($tokens);
+            . Ink::groundDeclarations($tokens)
+            . Ink::dangerDeclarations($tokens);
 
         return '.gratora-donor-portal{' . implode(' ', $vars) . $derived . '}';
     }

@@ -619,6 +619,8 @@ test.describe('the campaign page foundation an add-on draws with', () => {
 const PORTAL = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
 const PORTAL_UNSEEDED = 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints';
 const NO_MOTION = '*, *::before, *::after { transition: none !important; animation: none !important; }';
+const RED = 'rgb(185, 28, 28)';
+const CARD_RED = 'rgb(205, 92, 92)';
 
 /** Answer one portal route with a body of the test's choosing, leaving the rest to the server. Returns the undo. */
 async function answer(page: Page, route: string, status: number, body: unknown, method = 'GET'): Promise<() => Promise<void>> {
@@ -650,6 +652,18 @@ test.describe('donor portal signed out', () => {
 
         await expectNothingBelowTheBar(page, 'signed-out portal', '.gratora-donor-portal');
     });
+
+    test('an error reads on the page in the red that reads there', async ({ page }) => {
+        await page.goto(new URL(PORTAL).pathname);
+        await expect(page.locator('.dp-signin')).toBeVisible({ timeout: 15_000 });
+        await answer(page, 'send-link', 500, { message: 'The link could not be sent.' }, 'POST');
+
+        await page.locator('.dp-signin input[type="email"]').fill('nobody@example.test');
+        await page.locator('.dp-signin button[type="submit"]').click();
+        const error = page.locator('.dp-signin__error');
+        await expect(error).toHaveText('The link could not be sent.');
+        expectInk(await inkOf(error), RED, WHITE, 'sign-in error');
+    });
 });
 
 test.describe('donor portal', () => {
@@ -659,8 +673,13 @@ test.describe('donor portal', () => {
     let page: Page;
     let root: Locator;
 
+    /** Opens a tab afresh, so it loads what the routes answer now. */
     const tab = async (name: string): Promise<void> => {
-        await root.getByRole('tab', { name }).click();
+        const target = root.getByRole('tab', { name, exact: true });
+        if (await target.getAttribute('aria-selected') === 'true') {
+            await root.getByRole('tab', { name: 'Overview', exact: true }).click();
+        }
+        await target.click();
     };
 
     test.beforeAll(async ({ browser }) => {
@@ -752,6 +771,73 @@ test.describe('donor portal', () => {
         const ring = await inkOf(row, 'outline-color');
         expectInk(ring, INK, WHITE, 'row focus ring');
         expect(ring.ratio).toBeGreaterThanOrEqual(3);
+    });
+
+    test('danger reads on the ground it stands on', async () => {
+        // On the page the red reads, 6.47:1, and stands.
+        const donations = await answer(page, 'donations', 500, { message: 'The donations could not be loaded.' });
+        await tab('Donations');
+        const onPage = root.locator('.dp__main > .dp-error');
+        await expect(onPage).toBeVisible();
+        expectInk(await inkOf(onPage), RED, WHITE, 'error on the page');
+        await donations();
+
+        // A receipt that will not download says so in its row, on the card.
+        const receipts = await answer(page, 'receipts', 200, { items: [{ id: 9001, receipt_number: 'R-9001', issued_at: '2026-09-01T10:00:00Z' }], total: 1 });
+        const download = await answer(page, 'receipts/9001/download-url', 500, { message: 'The receipt could not be prepared.' });
+        const statement = await answer(page, 'annual-statement/\\d+', 500, { message: 'The statement could not be prepared.' });
+        await tab('Receipts & tax');
+        await root.locator('.dp-list__row .dp-link').click();
+        const inRow = root.locator('.dp-list__row .dp-error');
+        await expect(inRow).toHaveText('The receipt could not be prepared.');
+        expectInk(await inkOf(inRow), CARD_RED, CARD, 'error in a row');
+        expect((await inkOf(inRow)).ratio).toBeGreaterThanOrEqual(4.5);
+
+        // The annual statement sits on the soft ground.
+        await root.locator('.dp-card .dp-action.is-primary').click();
+        const onSoft = root.locator('.dp-card .dp-error');
+        await expect(onSoft).toHaveText('The statement could not be prepared.');
+        expectInk(await inkOf(onSoft), 'rgb(210, 107, 107)', SOFT, 'error on the soft ground');
+        await receipts();
+        await download();
+        await statement();
+
+        // Deleting the account is offered on a card, and its hover paints a pale red of its own.
+        await tab('Profile');
+        const destructive = root.locator('.dp-action.is-destructive');
+        expectInk(await inkOf(destructive), CARD_RED, CARD, 'delete my account');
+        await destructive.hover();
+        expectInk(await inkOf(destructive), RED, 'rgb(254, 242, 242)', 'delete my account hovered');
+        await page.mouse.move(0, 0);
+
+        // The confirming button in the dialog reads on the dialog's card once it is enabled.
+        await destructive.click();
+        const dialog = root.locator('.dp-modal__panel');
+        await expect(dialog).toBeVisible();
+        const confirm = dialog.locator('.dp-action--danger');
+        await expect(confirm).toBeDisabled();
+        expectInk(await inkOf(confirm), CARD_RED, CARD, 'confirm delete');
+        await page.keyboard.press('Escape');
+        await expect(dialog).toHaveCount(0);
+
+        // A plan's cancel action and a refused change, on the plan's dialog.
+        const plans = await answer(page, 'recurring', 200, [{
+            id: 9002, amount_cents: 2500, currency: 'USD', interval_count: 1, interval_unit: 'month',
+            status: 'active', next_payment_at: '2026-10-01T10:00:00Z', can_pause: true,
+        }]);
+        const refused = await answer(page, 'recurring/9002/action', 422, { message: 'The processor refused the change.' }, 'POST');
+        await tab('Recurring');
+        await root.locator('.dp-list__row').click();
+        const sheet = root.locator('.dp-modal__panel');
+        expectInk(await inkOf(sheet.locator('.dp-action--danger')), CARD_RED, CARD, 'cancel subscription');
+        await sheet.getByRole('button', { name: 'Skip next charge' }).click();
+        const sheetError = sheet.locator('.dp-error');
+        await expect(sheetError).toHaveText('The processor refused the change.');
+        expectInk(await inkOf(sheetError), CARD_RED, CARD, 'error in a dialog');
+        await page.keyboard.press('Escape');
+        await expect(sheet).toHaveCount(0);
+        await plans();
+        await refused();
     });
 });
 

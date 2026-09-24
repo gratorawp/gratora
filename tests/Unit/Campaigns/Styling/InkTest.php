@@ -470,6 +470,65 @@ final class InkTest extends TestCase
     }
 
     /**
+     * @return array<string,string>
+     */
+    private function dangers(array $tokens): array
+    {
+        preg_match_all('/(--[a-z-]+):([^;]*);/', Ink::dangerDeclarations($tokens), $m, PREG_SET_ORDER);
+
+        $out = [];
+        foreach ($m as $decl) {
+            $out[$decl[1]] = $decl[2];
+        }
+
+        return $out;
+    }
+
+    /** The red stands wherever it reads, and on a dark card it moves toward the white ink until it does. */
+    public function test_danger_ink_keeps_the_red_where_it_reads(): void
+    {
+        $this->assertSame(
+            ['--gratora-text-danger' => '#b91c1c', '--gratora-on-bg-danger' => '#b91c1c', '--gratora-on-soft-danger' => '#b91c1c'],
+            $this->dangers(self::SHIPPED)
+        );
+
+        $qa = $this->dangers(['gratora-bg' => '#15142b', 'gratora-bg-soft' => '#221f3d', 'gratora-accent' => '#fde68a'] + self::SHIPPED);
+        $this->assertSame(
+            ['--gratora-text-danger' => '#b91c1c', '--gratora-on-bg-danger' => '#cd5c5c', '--gratora-on-soft-danger' => '#d26b6b'],
+            $qa
+        );
+        $this->assertTrue(Ink::carries($qa['--gratora-on-bg-danger'], '#15142b'));
+        $this->assertFalse(Ink::carries(Ink::mix('#b91c1c', '#ffffff', .73) ?? '', '#15142b'), 'takes more ink than it needs');
+    }
+
+    /** No red reads on Bold's red card, so the ink it moves toward is most of it. */
+    public function test_danger_ink_on_a_red_card_is_nearly_the_card_ink(): void
+    {
+        $bold = $this->dangers(['gratora-bg' => '#f55151'] + self::SHIPPED);
+
+        $this->assertSame('#3e1924', $bold['--gratora-on-bg-danger']);
+        $this->assertTrue(Ink::carries($bold['--gratora-on-bg-danger'], '#f55151'));
+    }
+
+    public function test_danger_ink_reads_on_every_grey(): void
+    {
+        for ($v = 0; $v <= 255; $v++) {
+            $grey  = sprintf('#%1$02x%1$02x%1$02x', $v);
+            $inks  = $this->dangers(['gratora-bg' => $grey, 'gratora-bg-soft' => $grey] + self::SHIPPED);
+            $card  = Ink::carries('#111827', $grey) ? '#111827' : (Ink::on($grey)[0] ?? '');
+            $soft  = Ink::on($grey)[0] ?? '';
+
+            $this->assertTrue(Ink::carries($inks['--gratora-on-bg-danger'], $grey) || $inks['--gratora-on-bg-danger'] === $card, $grey . ' card ' . $inks['--gratora-on-bg-danger']);
+            $this->assertTrue(Ink::carries($inks['--gratora-on-soft-danger'], $grey) || $inks['--gratora-on-soft-danger'] === $soft, $grey . ' soft ' . $inks['--gratora-on-soft-danger']);
+        }
+    }
+
+    public function test_a_ground_it_cannot_read_leaves_the_stylesheet_its_red(): void
+    {
+        $this->assertSame('', Ink::dangerDeclarations(['gratora-text' => 'inherit', 'gratora-bg' => 'transparent', 'gratora-bg-soft' => 'transparent']));
+    }
+
+    /**
      * Avatars and tags draw the accent darkened on the tint the campaign page
      * mixes into white. A pale accent leaves that at 2.03:1.
      */

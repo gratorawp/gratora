@@ -50,6 +50,16 @@ final class PortalGetsTheSameBrandTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-on-accent:#10162a;', $this->css());
     }
 
+    public function test_danger_ink_is_measured_on_the_card(): void
+    {
+        $this->brand(['gratora-bg' => '#15142b']);
+
+        $css = $this->css();
+
+        $this->assertStringContainsString('--gratora-text-danger:#b91c1c;', $css);
+        $this->assertStringContainsString('--gratora-on-bg-danger:#cd5c5c;', $css);
+    }
+
     public function test_the_fields_keep_ink_of_their_own(): void
     {
         $this->brand(['gratora-bg' => '#0f172a']);

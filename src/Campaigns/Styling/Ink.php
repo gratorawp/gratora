@@ -39,6 +39,9 @@ final class Ink
     /** The share of it the stylesheet mixes toward the ink, in hundredths. */
     private const REQUIRED_FROM = 72;
 
+    /** The danger red the portal ships. */
+    private const DANGER = '#b91c1c';
+
     private const NUMBER = '[+-]?(?:\d+\.?\d*|\.\d+)';
 
     /** Degrees in one of each CSS angle unit. */
@@ -130,12 +133,48 @@ final class Ink
 
         $page = self::on($text);
         if ($page !== null) {
-            $css .= '--gratora-text-required:' . self::marker($text, $page[0]) . ';';
+            $css .= '--gratora-text-required:' . self::toward(self::REQUIRED, self::REQUIRED_FROM, $text, $page[0]) . ';';
         }
 
         $onCard = self::on($card);
         if ($onCard !== null) {
-            $css .= '--gratora-on-bg-required:' . self::marker(self::carries($text, $card) ? $text : $onCard[0], $card) . ';';
+            $css .= '--gratora-on-bg-required:'
+                . self::toward(self::REQUIRED, self::REQUIRED_FROM, self::carries($text, $card) ? $text : $onCard[0], $card) . ';';
+        }
+
+        return $css;
+    }
+
+    /**
+     * The danger red on the page, the card and the soft ground: the red where
+     * it reads, moved toward the ink each ground reads until it does. A ground
+     * that cannot be read emits nothing, and the stylesheet's red stands.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function dangerDeclarations(array $tokens): string
+    {
+        $text = (string) ($tokens['gratora-text'] ?? '');
+        $card = (string) ($tokens['gratora-bg'] ?? '');
+        $soft = (string) ($tokens['gratora-bg-soft'] ?? '');
+        $css  = '';
+
+        $page = self::on($text);
+        if ($page !== null) {
+            $css .= '--gratora-text-danger:' . self::toward(self::DANGER, 100, $text, $page[0]) . ';';
+        }
+
+        $onCard = self::on($card);
+        if ($onCard !== null) {
+            $css .= '--gratora-on-bg-danger:'
+                . self::toward(self::DANGER, 100, self::carries($text, $card) ? $text : $onCard[0], $card) . ';';
+        }
+
+        $onSoft = self::on($soft);
+        if ($onSoft !== null) {
+            $css .= '--gratora-on-soft-danger:' . self::toward(self::DANGER, 100, $onSoft[0], $soft) . ';';
         }
 
         return $css;
@@ -307,20 +346,21 @@ final class Ink
     }
 
     /**
-     * The marker mixed toward the ink at the largest share, from the shipped
-     * one down, that reaches 4.5:1 on the ground. Where none does, the ink.
+     * The colour mixed toward the ink at the largest share, from the one given
+     * in hundredths down, that reaches 4.5:1 on the ground. Where none does,
+     * the ink.
      */
-    private static function marker(string $ink, string $ground): string
+    private static function toward(string $color, int $from, string $ink, string $ground): string
     {
         /** @var array{0:int,1:int,2:int} $marker */
-        $marker = self::rgb(self::REQUIRED);
+        $marker = self::rgb($color);
         $inkRgb = self::rgb($ink);
         $bg     = self::rgb($ground);
         if ($inkRgb === null || $bg === null) {
             return $ink;
         }
 
-        for ($n = self::REQUIRED_FROM; $n > 0; $n--) {
+        for ($n = $from; $n > 0; $n--) {
             $mixed = self::blend($marker, $inkRgb, $n / 100);
             if (self::ratio($mixed, $bg) >= 4.5) {
                 return self::hexOf($mixed);
