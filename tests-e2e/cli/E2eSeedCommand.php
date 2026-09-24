@@ -399,6 +399,7 @@ final class E2eSeedCommand
         $classic = $this->brandingCampaign('e2e-branding-classic', 'Branding Classic', 'hero', ['preset_id' => 'classic'], 200000);
         $cover   = $this->brandingCampaign('e2e-branding-cover', 'Branding Cover', 'cover', null, 200000);
         $theme   = $this->brandingCampaign('e2e-branding-theme', 'Branding Site Theme', 'standard', ['preset_id' => 'theme'], 200000);
+        $coral   = $this->brandingCampaign('e2e-branding-coral', 'Branding Coral', 'standard', ['tokens' => ['gratora-accent' => '#f55151']], 200000);
 
         $this->brandingDonations([
             ['key' => 'e2e-branding-1', 'campaign' => $page, 'email' => 'e2e-branding-1@example.test', 'first' => 'Ada', 'last' => 'Branding', 'cents' => 12000],
@@ -412,6 +413,7 @@ final class E2eSeedCommand
         $frame = $this->brandingForm($forms, 'e2e-branding-frame-form', 'Branding Frame', (int) $page->id, 'frame');
         $frameBold = $this->brandingForm($forms, 'e2e-branding-frame-bold-form', 'Branding Frame Bold', (int) $bold->id, 'frame');
         $canvas    = $this->brandingForm($forms, 'e2e-branding-canvas-form', 'Branding Canvas', (int) $page->id, 'plain', self::brandingCanvasBlocks());
+        $coralForm = $this->brandingForm($forms, 'e2e-branding-coral-form', 'Branding Coral', (int) $coral->id, 'plain');
 
         $shortcode = static fn (Form $form): string => "<!-- wp:shortcode -->\n[gratora_donation_form slug=\"" . esc_attr($form->slug) . "\"]\n<!-- /wp:shortcode -->";
 
@@ -429,6 +431,7 @@ final class E2eSeedCommand
             'QUIET_HOST' => $this->brandingPage('e2e-branding-quiet-host', 'Branding Quiet Host', self::quietHostBlocks((int) $page->id, $shortcode($plain)), $white),
             'LAYOUT'     => $this->brandingPage('e2e-branding-layout', 'Branding Layout', self::foundationBlocks(), $page),
             'PILLS'      => $this->brandingPage('e2e-branding-pills', 'Branding Pills', $shortcode($canvas), null),
+            'CORAL'      => $this->brandingPage('e2e-branding-coral-page', 'Branding Coral Page', self::hoverBlocks((int) $coral->id, $shortcode($coralForm)), $coral),
             'CLASSIC_PANEL' => $this->brandingPage('e2e-branding-classic-panel', 'Branding Classic Panel', self::panelControlBlocks((int) $classic->id), $classic),
             'BOLD_PANEL' => $this->brandingPage('e2e-branding-bold-panel', 'Branding Bold Panel', self::panelControlBlocks((int) $bold->id), $bold),
             'CLASSIC'    => $this->campaignPath($classic),
@@ -1190,6 +1193,29 @@ BLOCKS;
             '<div class="e2e-share" style="position:relative;margin-bottom:140px"><div class="dp-sharesheet">'
                 . '<a class="dp-sharesheet__item" href="#share">Facebook</a><button type="button" class="dp-sharesheet__item">Copy link</button></div></div>',
             '<!-- /wp:html -->',
+        ]);
+    }
+
+    /**
+     * The campaign page's buttons, a donate button and a form under a mid-tone
+     * accent, where the ink measured on the accent does not read on the darker
+     * fill a hover paints.
+     */
+    private static function hoverBlocks(int $campaign, string $form): string
+    {
+        return implode("\n", [
+            '<!-- wp:buttons -->',
+            '<div class="wp-block-buttons"><!-- wp:button {"className":"dp-cta"} -->',
+            '<div class="wp-block-button dp-cta"><a class="wp-block-button__link wp-element-button" href="#give">Give today</a></div>',
+            '<!-- /wp:button --></div>',
+            '<!-- /wp:buttons -->',
+            '<!-- wp:html -->',
+            '<div class="dp-hero dp-hero--flat e2e-flat-hero"><div class="dp-hero-top"><a class="dp-btn" href="#start">Start fundraising</a></div></div>',
+            '<header class="dp-profile"><div class="dp-profile__body"><h2 class="dp-display">Cy Coral</h2>'
+                . '<div class="dp-profile__actions"><a class="dp-btn" href="#donate">Donate</a><a class="dp-btn dp-btn--ghost" href="#join">Join team</a></div></div></header>',
+            '<!-- /wp:html -->',
+            '<!-- wp:gratora/donate-button {"campaignId":' . $campaign . ',"label":"Donate in a modal"} /-->',
+            $form,
         ]);
     }
 

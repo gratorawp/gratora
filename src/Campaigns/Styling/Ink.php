@@ -164,6 +164,35 @@ final class Ink
     }
 
     /**
+     * Ink for a hovered button, which paints the hover colour the org chose or
+     * else its own fill darkened to 78%: the button's ink where it still reads
+     * there, measured ink where it does not. A fill it cannot read emits
+     * nothing, and the button keeps its ink.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function hoverDeclarations(array $tokens): string
+    {
+        $fill  = (string) ($tokens['gratora-button-bg'] ?? '');
+        $fill  = $fill !== '' ? $fill : (string) ($tokens['gratora-accent'] ?? '');
+        $hover = (string) ($tokens['gratora-button-hover-bg'] ?? '');
+        $hover = $hover !== '' ? $hover : (self::mix($fill, '#000000', .78) ?? '');
+        $on    = self::on($hover);
+        if ($on === null) {
+            return '';
+        }
+
+        $chosen = (string) ($tokens['gratora-button-fg'] ?? '');
+        [$ink, $name] = $chosen !== ''
+            ? [$chosen, 'var(--gratora-button-fg)']
+            : [self::on((string) ($tokens['gratora-accent'] ?? ''))[0] ?? '', 'var(--gratora-on-accent)'];
+
+        return '--gratora-on-button-hover:' . (self::carries($ink, $hover) ? $name : $on[0]) . ';';
+    }
+
+    /**
      * The required marker on the page and on the card, mixed toward the ink
      * each reads. Mixing alone cannot lift it on a mid-tone card, so the share
      * of the marker colour is measured there. A ground that cannot be read

@@ -571,6 +571,48 @@ final class InkTest extends TestCase
     }
 
     /**
+     * A hovered button paints its fill darkened to 78%, or the hover colour the
+     * org chose, and keeps its ink only where that still reads there.
+     *
+     * @return array<string,array{0:array<string,string>,1:string}>
+     */
+    public function hovers(): array
+    {
+        return [
+            'shipped navy'        => [['gratora-accent' => '#211d3f'], 'var(--gratora-on-accent)'],
+            'pale accent'         => [['gratora-accent' => '#fde68a'], 'var(--gratora-on-accent)'],
+            'coral, 3.42 dark'    => [['gratora-accent' => '#f55151'], '#ffffff'],
+            'chosen ink reads'    => [['gratora-accent' => '#111827', 'gratora-button-bg' => 'transparent', 'gratora-button-fg' => '#111827', 'gratora-button-hover-bg' => '#f3f4f6'], 'var(--gratora-button-fg)'],
+            'chosen ink does not' => [['gratora-accent' => '#f55151', 'gratora-button-fg' => '#10162a'], '#ffffff'],
+            'chosen fill'         => [['gratora-accent' => '#211d3f', 'gratora-button-bg' => '#fef9c3'], '#10162a'],
+            'chosen hover fill'   => [['gratora-accent' => '#211d3f', 'gratora-button-hover-bg' => '#fde68a'], '#10162a'],
+        ];
+    }
+
+    /**
+     * @dataProvider hovers
+     * @param array<string,string> $tokens
+     */
+    public function test_a_hovered_button_takes_ink_that_reads_on_its_hover_fill(array $tokens, string $ink): void
+    {
+        $this->assertSame('--gratora-on-button-hover:' . $ink . ';', Ink::hoverDeclarations($tokens));
+    }
+
+    public function test_the_hover_fill_is_the_one_the_stylesheets_paint(): void
+    {
+        $this->assertSame('#bf3f3f', Ink::mix('#f55151', '#000000', .78));
+        $this->assertSame('#c5b36c', Ink::mix('#fde68a', '#000000', .78));
+        $this->assertFalse(Ink::carries('#10162a', '#bf3f3f'));
+        $this->assertTrue(Ink::carries('#ffffff', '#bf3f3f'));
+    }
+
+    public function test_a_hover_fill_it_cannot_read_leaves_the_stylesheet_its_ink(): void
+    {
+        $this->assertSame('', Ink::hoverDeclarations(['gratora-accent' => 'inherit']));
+        $this->assertSame('', Ink::hoverDeclarations(['gratora-accent' => '#211d3f', 'gratora-button-bg' => 'transparent']));
+    }
+
+    /**
      * @return array<string,string>
      */
     private function markers(array $tokens): array

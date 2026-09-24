@@ -123,6 +123,16 @@ async function expectRing(page: Page, control: Locator, color: string, what: str
     }
 }
 
+/** A hovered control's ink against the ground it paints then, with no filter repainting either. */
+async function expectHover(page: Page, control: Locator, color: string, ground: string, what: string): Promise<void> {
+    await control.hover();
+    await expect(control, what).toHaveCSS('filter', 'none');
+    const ink = await inkOf(control);
+    expectInk(ink, color, ground, `${what} hovered`);
+    expectReadable(ink, `${what} hovered`);
+    await page.mouse.move(0, 0);
+}
+
 /** Tab from the top of the page until an amount tile has keyboard focus. */
 async function tabToFirstTile(page: Page): Promise<void> {
     await page.locator('body').click({ position: { x: 1, y: 1 } });
@@ -685,6 +695,8 @@ test.describe('the campaign page foundation an add-on draws with', () => {
 
 const BOLD_ACCENT = 'rgb(15, 61, 92)';
 const CLASSIC_ACCENT = 'rgb(69, 46, 245)';
+const CORAL_DARK = 'rgb(191, 63, 63)';
+const QA_DARK = 'rgb(197, 179, 108)';
 
 test.describe('keyboard rings', () => {
     test('every control in a Plain form rings in the page ink', async ({ page }) => {
@@ -763,6 +775,41 @@ test.describe('keyboard rings', () => {
         // The page cannot measure a photo, so the white button rings inside itself in its own ink.
         const onPhoto = await tabThrough(page, '.e2e-photo-hero', (control, name) => expectRing(page, control, INK, `photo ${name}`, true));
         expect(onPhoto).toBe(1);
+    });
+});
+
+test.describe('hovered buttons', () => {
+    test('on the QA brand each hover reads the ground it paints', async ({ page }) => {
+        test.skip(! path('LAYOUT'), unseeded('LAYOUT'));
+        await open(page, path('LAYOUT'));
+
+        await expectHover(page, page.locator('.dp-profile .dp-btn:not(.dp-btn--ghost)'), ON_ACCENT, QA_DARK, 'profile donate');
+        await expectHover(page, page.locator('.dp-profile .dp-btn--ghost'), WHITE, CARD, 'profile ghost');
+        await expectHover(page, page.locator('.e2e-flat-hero .dp-btn'), ON_ACCENT, QA_DARK, 'flat hero in a card');
+        await expectHover(page, page.locator('.e2e-photo-hero .dp-btn'), WHITE, SOFT, 'white button on a photo');
+    });
+
+    // The dark ink measured on #f55151 reads 3.42:1 on the darker fill a hover paints; white reads 5.25:1 there.
+    test('under a mid-tone accent the hover takes the ink measured on its fill', async ({ page }) => {
+        test.skip(! path('CORAL'), unseeded('CORAL'));
+        await open(page, path('CORAL'));
+
+        await expectHover(page, page.locator('.dp-cta .wp-block-button__link'), WHITE, CORAL_DARK, 'call to action');
+        await expectHover(page, page.locator('.e2e-flat-hero .dp-btn'), WHITE, CORAL_DARK, 'flat hero on the page');
+        await expectHover(page, page.locator('.dp-profile .dp-btn:not(.dp-btn--ghost)'), WHITE, CORAL_DARK, 'profile donate');
+        await expectHover(page, page.locator('.dp-profile .dp-btn--ghost'), WHITE, CARD, 'profile ghost');
+        await expectHover(page, page.locator('.gratora-donate-button'), WHITE, CORAL_DARK, 'donate button');
+        await expectHover(page, page.locator('form.gratora-donation-form:not(.gratora-donate-modal form) .gratora-form__button--primary').first(), WHITE, CORAL_DARK, 'form submit');
+    });
+
+    test('a donate button on Classic and on Bold reads its hover fill, in the panel and on the page', async ({ page }) => {
+        for (const [name, dark] of [['CLASSIC_PANEL', 'rgb(54, 36, 191)'], ['BOLD_PANEL', 'rgb(12, 48, 72)']] as const) {
+            test.skip(! path(name), unseeded(name));
+            await open(page, path(name));
+            for (const where of ['.e2e-in-panel', '.e2e-on-page']) {
+                await expectHover(page, page.locator(`${where} .gratora-donate-button`), WHITE, dark, `${name} ${where}`);
+            }
+        }
     });
 });
 

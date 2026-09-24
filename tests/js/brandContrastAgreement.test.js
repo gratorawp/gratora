@@ -218,6 +218,16 @@ describe( 'the ink for each ground the server would have emitted', () => {
     } );
 } );
 
+/** A hovered button's ink, as Ink::hoverDeclarations emits it: InkTest pins the same cases. */
+test.each( [
+    [ { 'gratora-accent': '#211d3f' }, 'var(--gratora-on-accent)' ],
+    [ { 'gratora-accent': '#f55151' }, '#ffffff' ],
+    [ { 'gratora-accent': '#111827', 'gratora-button-bg': 'transparent', 'gratora-button-fg': '#111827', 'gratora-button-hover-bg': '#f3f4f6' }, 'var(--gratora-button-fg)' ],
+    [ { 'gratora-accent': '#211d3f', 'gratora-button-bg': '#fef9c3' }, '#10162a' ],
+] )( 'a hovered button on %o takes the ink the server measures', ( tokens, ink ) => {
+    expect( derivedInk( tokens )[ '--gratora-on-button-hover' ] ).toBe( ink );
+} );
+
 /** The required marker on the page and on the card, as Ink::requiredDeclarations emits it. */
 describe( 'the required marker the server would have emitted', () => {
     it( 'keeps the mix where it reads', () => {

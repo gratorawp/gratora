@@ -166,6 +166,35 @@ final class FormStyleCascadeTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-on-bg-required:#321d37;', $m[1]);
     }
 
+    /** The form's button darkens on hover, so it carries the ink measured on that fill. */
+    public function test_the_rendered_form_carries_the_hover_ink(): void
+    {
+        $campaign = $this->campaignWithInlineAccent('#f55151');
+        $campaign->title      = 'Hover ' . uniqid();
+        $campaign->slug       = 'hover-' . uniqid();
+        $campaign->status     = 'published';
+        $campaign->currency   = 'USD';
+        $campaign->created_at = gmdate('Y-m-d H:i:s');
+        $campaign->updated_at = $campaign->created_at;
+        $campaign->save();
+
+        $form = Form::make();
+        $form->title       = 'Hover ' . uniqid();
+        $form->slug        = 'hover-' . uniqid();
+        $form->status      = 'published';
+        $form->campaign_id = (int) $campaign->id;
+        $form->blocks      = '<!-- wp:gratora/donation-amount {"presets":[1000]} /-->';
+        $form->settings    = [];
+        $form->created_at  = gmdate('Y-m-d H:i:s');
+        $form->updated_at  = $form->created_at;
+        $form->save();
+
+        $html = do_shortcode('[gratora_donation_form slug="' . $form->slug . '"]');
+
+        $this->assertSame(1, preg_match('/<form class="gratora-donation-form[^"]*"[^>]* style="([^"]*)"/', $html, $m));
+        $this->assertStringContainsString('--gratora-on-button-hover:#ffffff;', $m[1]);
+    }
+
     /** A preset that does exist still gates them out, which is the contract. */
     public function test_a_form_pinned_to_a_real_preset_still_gates_them_out(): void
     {

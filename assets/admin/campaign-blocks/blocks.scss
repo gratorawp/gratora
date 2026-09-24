@@ -222,9 +222,13 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
         box-shadow: var(--gratora-button-shadow, none);
         cursor: pointer;
         text-decoration: none;
-        transition: filter .15s;
+        transition: background .15s, color .15s;
 
-        &:hover { filter: brightness(.92); }
+        // The fill darkened, under the ink the server measured on it.
+        &:hover:not(.is-disabled) {
+            background: var(--gratora-button-hover-bg, color-mix(in srgb, var(--gratora-button-bg, var(--gratora-accent, #{$accent-fallback})) 78%, #000));
+            color: var(--gratora-on-button-hover, var(--gratora-button-fg, var(--gratora-on-accent, #fff)));
+        }
         &.is-disabled {
             background: var(--gratora-text-muted, #{$text-muted-fallback});
             cursor: not-allowed;

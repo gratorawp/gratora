@@ -47,6 +47,7 @@ body,
     --dp-rule:        color-mix(in srgb, var(--dp-border) 55%, var(--dp-card));
     --dp-card:        var(--gratora-bg, #ffffff);
     --dp-page:        var(--gratora-bg-soft, #fafbfc);
+    --dp-on-page:     var(--gratora-on-soft, var(--dp-text));
 
     --dp-radius:      var(--gratora-radius, 14px);
     --dp-radius-sm:   var(--gratora-radius-sm, 10px);
@@ -56,7 +57,9 @@ body,
     --dp-btn-bg:             var(--gratora-button-bg, var(--dp-accent));
     /* Through the measured ink, not a literal: a pale accent takes dark. */
     --dp-btn-fg:             var(--gratora-button-fg, var(--dp-on-accent));
-    --dp-btn-hover-bg:       var(--gratora-button-hover-bg, var(--dp-accent-dark));
+    /* The fill darkened, as Ink::hoverDeclarations measures the hover ink on it. */
+    --dp-btn-hover-bg:       var(--gratora-button-hover-bg, color-mix(in srgb, var(--dp-btn-bg) 78%, #000));
+    --dp-btn-hover-fg:       var(--gratora-on-button-hover, var(--dp-btn-fg));
     --dp-btn-radius:         var(--gratora-button-radius, var(--dp-radius-sm));
     --dp-btn-border:         var(--gratora-button-border, 0);
     --dp-btn-shadow:         var(--gratora-button-shadow, none);
@@ -210,7 +213,7 @@ body,
 }
 
 .dp-cta .wp-block-button__link:hover,
-.wp-block-button.dp-cta .wp-block-button__link:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-fg); }
+.wp-block-button.dp-cta .wp-block-button__link:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-hover-fg); }
 
 .dp-cta--quiet .wp-block-button__link,
 .wp-block-button.dp-cta--quiet .wp-block-button__link {
@@ -323,6 +326,7 @@ body,
 .dp-profile__actions .dp-btn--ghost:hover {
     background: var(--dp-card);
     border-color: var(--dp-accent-dark);
+    color: var(--dp-text);
 }
 
 .dp-profile__money {
@@ -437,7 +441,7 @@ body,
     font: inherit; font-size: 15px; font-weight: var(--gratora-button-weight, 650); cursor: pointer; text-decoration: none;
 }
 
-.dp-btn:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-fg); }
+.dp-btn:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-hover-fg); }
 
 .dp-link {
     font-size: 14.5px; font-weight: 600; color: var(--dp-text); text-decoration: underline;
@@ -533,7 +537,7 @@ body,
 
 .dp-hero-top .dp-btn { background: #fff; color: var(--dp-text); font-size: 13.5px; padding: 9px 16px; box-shadow: 0 2px 12px rgba(15, 23, 42, .2); }
 
-.dp-hero-top .dp-btn:hover { background: var(--dp-page); color: var(--dp-text); }
+.dp-hero-top .dp-btn:hover { background: var(--dp-page); color: var(--dp-on-page); }
 
 /* Nothing measures a photo, so the white button rings inside itself, in its own ink. */
 .dp-hero:not(.dp-hero--flat) .dp-hero-top .dp-btn:focus-visible { outline-color: currentColor; outline-offset: -4px; }
@@ -568,7 +572,7 @@ body,
 
 .dp-hero--flat .dp-hero-top .dp-btn { background: var(--dp-btn-bg); color: var(--dp-btn-fg); box-shadow: none; }
 
-.dp-hero--flat .dp-hero-top .dp-btn:hover { background: var(--dp-btn-hover-bg); }
+.dp-hero--flat .dp-hero-top .dp-btn:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-hover-fg); }
 
 @container (max-width: 900px) {
     .dp-hero-card { margin: -38px 36px 0; }

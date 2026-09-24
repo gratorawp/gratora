@@ -90,6 +90,7 @@ final class CampaignStyleVars
         $css .= Ink::fieldDeclarations($tokens);
         $css .= Ink::groundDeclarations($tokens);
         $css .= Ink::ringDeclarations($tokens);
+        $css .= Ink::hoverDeclarations($tokens);
         $css .= Ink::pageTintDeclarations($tokens);
         $css .= self::cardSoft();
         $css .= self::cover($campaign);

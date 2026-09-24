@@ -79,6 +79,15 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-cover-ring:var(--gratora-on-accent-ring);', $css);
     }
 
+    /** #10162a reads 5.28:1 on this accent and 3.42:1 on the #bf3f3f its buttons paint when hovered. */
+    public function test_a_hovered_button_carries_ink_measured_on_its_hover_fill(): void
+    {
+        $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#f55151'));
+
+        $this->assertStringContainsString('--gratora-on-accent:#10162a;', $css);
+        $this->assertStringContainsString('--gratora-on-button-hover:#ffffff;', $css);
+    }
+
     public function test_a_pale_accent_gets_dark_ink(): void
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#ffe066'));
