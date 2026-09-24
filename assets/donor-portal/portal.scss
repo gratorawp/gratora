@@ -1,5 +1,7 @@
 .gratora-donor-portal {
     --dp-accent:   var(--gratora-accent, #211d3f);
+    // The page's ink, since the root paints nothing. A surface that paints the
+    // card or the soft ground restates --dp-text and --dp-muted from its own.
     --dp-text:     var(--gratora-text, #111827);
     --dp-muted:    var(--gratora-text-muted, #6b7280);
     --dp-border:   var(--gratora-border, #e5e7eb);
@@ -152,6 +154,9 @@
     background: var(--dp-bg-soft);
     border-radius: var(--dp-radius);
     padding: 18px 20px;
+    --dp-text: var(--gratora-on-soft, #111827);
+    --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+    color: var(--dp-text);
 
     &__label { font-size: 12px; color: var(--dp-muted); text-transform: uppercase; letter-spacing: .04em; }
     &__value { font-size: 22px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
@@ -175,6 +180,9 @@
         background: var(--dp-bg);
         border: 1px solid var(--dp-border);
         border-radius: 10px;
+        --dp-text: var(--gratora-on-bg, #111827);
+        --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+        color: var(--dp-text);
 
         strong  { font-variant-numeric: tabular-nums; font-weight: 600; }
 
@@ -194,6 +202,8 @@
     &__pill {
         margin-left: 10px;
         font-size: 11px;
+        --dp-text: var(--gratora-on-soft, #111827);
+        --dp-muted: var(--gratora-on-soft-muted, #6b7280);
         color: var(--dp-muted);
         background: var(--dp-bg-soft);
         padding: 2px 8px;
@@ -207,6 +217,8 @@
     border-radius: 999px;
     text-transform: capitalize;
     background: var(--dp-bg-soft);
+    --dp-text: var(--gratora-on-soft, #111827);
+    --dp-muted: var(--gratora-on-soft-muted, #6b7280);
     color: var(--dp-muted);
 
     &--one_time { background: #eef2ff; color: #4338ca; }
@@ -284,6 +296,9 @@
     &__panel {
         position: relative;
         background: var(--dp-bg);
+        --dp-text: var(--gratora-on-bg, #111827);
+        --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+        color: var(--dp-text);
         max-width: 480px;
         width: calc(100% - 32px);
         max-height: calc(100vh - 64px);
@@ -370,6 +385,9 @@
     border-radius: 10px;
     border: 1px solid var(--dp-border);
     background: var(--dp-bg);
+    --dp-text: var(--gratora-on-bg, #111827);
+    --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+    color: var(--dp-text);
     text-align: left;
     font: inherit;
     cursor: pointer;
@@ -420,6 +438,13 @@
     }
 }
 
+// Scoped past the campaign page's card of the same name, which paints the card ground.
+.gratora-donor-portal .dp-card {
+    --dp-text: var(--gratora-on-soft, #111827);
+    --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+    color: var(--dp-text);
+}
+
 .dp-form {
     display: flex;
     flex-direction: column;
@@ -442,6 +467,8 @@
 
             &:disabled {
                 background: var(--dp-bg-soft);
+                --dp-text: var(--gratora-on-soft, #111827);
+                --dp-muted: var(--gratora-on-soft-muted, #6b7280);
                 color: var(--dp-muted);
                 cursor: not-allowed;
             }
@@ -494,6 +521,9 @@
     border: 1px solid var(--dp-border);
     border-radius: 10px;
     background: var(--dp-bg);
+    --dp-text: var(--gratora-on-bg, #111827);
+    --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+    color: var(--dp-text);
     cursor: pointer;
 
     input[type="checkbox"] {
@@ -547,7 +577,12 @@
         text-align: right;
     }
 
-    &.is-required { background: var(--dp-bg-soft); cursor: default; }
+    &.is-required {
+        background: var(--dp-bg-soft);
+        --dp-text: var(--gratora-on-soft, #111827);
+        --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+        cursor: default;
+    }
     &.is-stale {
         border-color: #fbbf24;
         background: #fffbeb;
@@ -616,6 +651,9 @@
         margin: 0;
         padding: 4px;
         background: var(--dp-bg);
+        --dp-text: var(--gratora-on-bg, #111827);
+        --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+        color: var(--dp-text);
         border: 1px solid var(--dp-border);
         border-radius: 8px;
         box-shadow: 0 12px 28px rgba(0,0,0,.08);
