@@ -1112,6 +1112,18 @@ test.describe('donor portal', () => {
             expect(ink.ratio, describeInk(ink)).toBeGreaterThanOrEqual(4.5);
         }
 
+        // Checked, the box fills with the ink that reads on the pale ground rather than the pale accent.
+        const box = stale.locator('input[type="checkbox"]');
+        await expect(box).toBeChecked();
+        expectRgb(parseRgb(await box.evaluate((el) => getComputedStyle(el).accentColor)), ON_ACCENT, 'stale checkbox fill');
+        const square = await box.boundingBox();
+        if (! square) throw new Error('The stale checkbox has no box.');
+        const shot = decodePng(await page.screenshot());
+        const y = Math.round(square.y + square.height / 2);
+        const fill = shot.pixel(Math.ceil(square.x) + 2, y);
+        const pale = shot.pixel(Math.floor(square.x) - 2, y);
+        expect(contrast(fill, pale), `stale checkbox ${fill.join(',')} on ${pale.join(',')}`).toBeGreaterThanOrEqual(3);
+
         const keep = stale.locator('.dp-consent__confirm');
         expectInk(await inkOf(keep), ON_ACCENT, PALE, 'keep as is');
         await keep.hover();

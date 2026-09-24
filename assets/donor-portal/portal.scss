@@ -566,11 +566,12 @@
     color: var(--dp-text);
     cursor: pointer;
 
+    // Filled in the accent measured on the consent's own ground.
     input[type="checkbox"] {
         margin-top: 4px;
         width: 16px;
         height: 16px;
-        accent-color: var(--dp-accent);
+        accent-color: var(--dp-text-accent);
         flex-shrink: 0;
     }
     strong { font-size: 14px; color: var(--dp-text); }
