@@ -270,7 +270,8 @@ export function FormTemplateThumb( { template } ) {
     // The sheet stands for a form about four times its width, so the template's
     // own radius has to come down with it: 8px on an 11px tile is a capsule,
     // and every template would look equally round.
-    const scaled = Math.max( 1, Math.round( ( parseFloat( radius ) || 8 ) / 4 ) );
+    const px     = parseFloat( radius );
+    const scaled = Number.isFinite( px ) ? ( px > 0 ? Math.max( 1, Math.round( px / 4 ) ) : 0 ) : 2;
 
     const shape = thumbFor( template );
 
