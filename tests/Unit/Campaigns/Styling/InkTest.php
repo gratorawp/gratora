@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Tests\Unit\Campaigns\Styling;
 
 use Gratora\Campaigns\Styling\Ink;
+use Gratora\Campaigns\Styling\Tokens;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,6 +15,16 @@ use PHPUnit\Framework\TestCase;
  */
 final class InkTest extends TestCase
 {
+    private const SHIPPED = [
+        'gratora-accent'      => '#211d3f',
+        'gratora-accent-soft' => '#efedf8',
+        'gratora-text'        => '#111827',
+        'gratora-text-muted'  => '#6b7280',
+        'gratora-bg'          => '#ffffff',
+        'gratora-field-bg'    => '#ffffff',
+        'gratora-bg-soft'     => '#f8fafb',
+    ];
+
     /** @return array<string,array{0:string,1:bool}> accent, expects light ink */
     public function accents(): array
     {
@@ -283,5 +294,118 @@ final class InkTest extends TestCase
         $this->assertSame('#fffdeb', Ink::mix('#ffee58', '#ffffff', .12));
         $this->assertSame('#794057', Ink::mix('#452ef5', '#804242', .12));
         $this->assertNull(Ink::mix('inherit', '#ffffff', .12));
+    }
+
+    /**
+     * @param array<string,string> $tokens
+     * @return array<string,string>
+     */
+    private function grounds(array $tokens): array
+    {
+        preg_match_all('/(--[a-z-]+):([^;]*);/', Ink::groundDeclarations($tokens), $m, PREG_SET_ORDER);
+
+        $out = [];
+        foreach ($m as $decl) {
+            $out[$decl[1]] = $decl[2];
+        }
+
+        return $out;
+    }
+
+    /**
+     * QA Dark Pale: a navy card under a pale accent. The page keeps the ink it
+     * was chosen for; the card, the tint and the accent as text are measured.
+     */
+    public function test_each_ground_gets_ink_that_reads_on_it(): void
+    {
+        $qa = [
+            'gratora-accent'     => '#fde68a',
+            'gratora-text'       => '#111827',
+            'gratora-text-muted' => '#6b7280',
+            'gratora-bg'         => '#15142b',
+            'gratora-bg-soft'    => '#221f3d',
+        ];
+
+        $this->assertSame([
+            '--gratora-text-accent'    => 'var(--gratora-text)',
+            '--gratora-on-bg'          => '#ffffff',
+            '--gratora-on-bg-muted'    => 'rgba(255,255,255,.72)',
+            '--gratora-on-bg-accent'   => 'var(--gratora-accent)',
+            '--gratora-on-accent-soft' => 'var(--gratora-accent)',
+        ], $this->grounds($qa));
+    }
+
+    public function test_the_shipped_brand_names_only_what_the_page_already_paints(): void
+    {
+        $expected = [
+            '--gratora-text-accent'    => 'var(--gratora-accent)',
+            '--gratora-on-bg'          => 'var(--gratora-text)',
+            '--gratora-on-bg-muted'    => 'var(--gratora-text-muted)',
+            '--gratora-on-bg-accent'   => 'var(--gratora-accent)',
+            '--gratora-on-accent-soft' => 'var(--gratora-accent)',
+        ];
+
+        $this->assertSame($expected, $this->grounds(self::SHIPPED));
+        $this->assertSame($expected, $this->grounds(Tokens::defaults()));
+    }
+
+    public function test_chosen_ink_stays_on_a_card_it_reads_on(): void
+    {
+        $out = $this->grounds(['gratora-bg' => '#f55151'] + self::SHIPPED);
+
+        $this->assertSame('var(--gratora-text)', $out['--gratora-on-bg']);
+        $this->assertSame('rgba(16,22,42,.86)', $out['--gratora-on-bg-muted']);
+    }
+
+    public function test_a_pale_accent_on_its_own_tint_takes_measured_ink(): void
+    {
+        $site = ['gratora-accent' => '#ffee58'] + self::SHIPPED;
+        unset($site['gratora-accent-soft']);
+
+        $this->assertSame('#10162a', $this->grounds($site)['--gratora-on-accent-soft']);
+    }
+
+    public function test_a_mid_accent_on_a_tinted_card_takes_white(): void
+    {
+        $classic = ['gratora-accent' => '#452ef5', 'gratora-bg' => '#804242'] + self::SHIPPED;
+        unset($classic['gratora-accent-soft']);
+
+        $this->assertSame('#ffffff', $this->grounds($classic)['--gratora-on-accent-soft']);
+    }
+
+    public function test_a_tint_the_map_states_is_the_one_measured(): void
+    {
+        $out = $this->grounds(['gratora-accent' => '#ffee58', 'gratora-accent-soft' => '#211d3f'] + self::SHIPPED);
+
+        $this->assertSame('var(--gratora-accent)', $out['--gratora-on-accent-soft']);
+    }
+
+    public function test_the_accent_as_page_text_is_measured_against_the_ground_the_page_ink_reads_on(): void
+    {
+        $this->assertSame(
+            'var(--gratora-accent)',
+            $this->grounds(['gratora-text' => '#ffffff', 'gratora-accent' => '#fde68a'] + self::SHIPPED)['--gratora-text-accent']
+        );
+        $this->assertSame(
+            'var(--gratora-text)',
+            $this->grounds(['gratora-accent' => '#fde68a'] + self::SHIPPED)['--gratora-text-accent']
+        );
+    }
+
+    /** A grid card paints the page's card under its own campaign's accent. */
+    public function test_a_card_accent_is_measured_on_the_card_it_sits_on(): void
+    {
+        $this->assertSame(
+            '--gratora-on-bg-accent:var(--gratora-on-bg);--gratora-on-accent-soft:#ffffff;',
+            Ink::cardAccentDeclarations('#0f3d5c', '#15142b')
+        );
+        $this->assertSame(
+            '--gratora-on-bg-accent:var(--gratora-on-bg);--gratora-on-accent-soft:#10162a;',
+            Ink::cardAccentDeclarations('#fde68a', '#ffffff')
+        );
+        $this->assertSame(
+            '--gratora-on-bg-accent:var(--gratora-accent);--gratora-on-accent-soft:var(--gratora-accent);',
+            Ink::cardAccentDeclarations('#fde68a', '#15142b')
+        );
     }
 }

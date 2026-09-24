@@ -75,6 +75,49 @@ final class Ink
     }
 
     /**
+     * Ink for the grounds the page ink was not chosen for: the card behind the
+     * form and the panels, the selected tint, and the accent drawn as text on
+     * the page. A surface that paints one of these restates its ink from here.
+     * Where the authored ink already reads, the value names it.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function groundDeclarations(array $tokens): string
+    {
+        $text   = (string) ($tokens['gratora-text'] ?? '');
+        $muted  = (string) ($tokens['gratora-text-muted'] ?? '');
+        $accent = (string) ($tokens['gratora-accent'] ?? '');
+        $card   = (string) ($tokens['gratora-bg'] ?? '');
+        $tint   = (string) ($tokens['gratora-accent-soft'] ?? '');
+
+        // The page's colour is not known, so the accent is measured against the
+        // ground the page ink was chosen for: white under dark ink, dark under light.
+        $page   = self::on($text);
+        $onCard = self::on($card);
+
+        return '--gratora-text-accent:'
+                . ($page !== null && self::carries($accent, $page[0]) ? 'var(--gratora-accent)' : 'var(--gratora-text)') . ';'
+            . '--gratora-on-bg:'
+                . (self::carries($text, $card) || $onCard === null ? 'var(--gratora-text)' : $onCard[0]) . ';'
+            . '--gratora-on-bg-muted:'
+                . (self::carries($muted, $card) || $onCard === null ? 'var(--gratora-text-muted)' : $onCard[1]) . ';'
+            . self::accentOnCard($accent, $card, $tint !== '' ? $tint : (self::mix($accent, $card, .12) ?? ''));
+    }
+
+    /**
+     * A grid card paints the page's card under its own campaign's accent, so
+     * the accent as text and its selected tint are measured on that card.
+     *
+     * @since 1.0.0
+     */
+    public static function cardAccentDeclarations(string $accent, string $ground): string
+    {
+        return self::accentOnCard($accent, $ground, self::mix($accent, $ground, .12) ?? '');
+    }
+
+    /**
      * The same colour as opaque #rrggbb, or null when it cannot be read.
      *
      * Built from the measured channels, so the return carries no character of
@@ -174,6 +217,14 @@ final class Ink
         }
 
         return self::ratio($a, $b) >= 4.5;
+    }
+
+    private static function accentOnCard(string $accent, string $card, string $tint): string
+    {
+        return '--gratora-on-bg-accent:'
+                . (self::carries($accent, $card) ? 'var(--gratora-accent)' : 'var(--gratora-on-bg)') . ';'
+            . '--gratora-on-accent-soft:'
+                . (self::carries($accent, $tint) ? 'var(--gratora-accent)' : (self::on($tint)[0] ?? 'var(--gratora-accent)')) . ';';
     }
 
     /**

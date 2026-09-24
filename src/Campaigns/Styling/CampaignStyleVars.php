@@ -88,6 +88,7 @@ final class CampaignStyleVars
         $css .= Ink::declarationsFor((string) ($tokens['gratora-accent'] ?? ''));
         $css .= Ink::softDeclarations($tokens);
         $css .= Ink::fieldDeclarations($tokens);
+        $css .= Ink::groundDeclarations($tokens);
         $css .= self::coverImage($campaign);
 
         // A pass-through token is unset so it inherits, which is right until this
