@@ -1,3 +1,9 @@
+// A field paints its own ground on whatever surface holds it, under the ink measured on that ground.
+@mixin field {
+    background: var(--gratora-field-bg, #fff);
+    color: var(--gratora-on-field, #111827);
+}
+
 .gratora-donor-portal {
     --dp-accent:   var(--gratora-accent, #211d3f);
     // The page's ink, since the root paints nothing. A surface that paints the
@@ -265,6 +271,7 @@
     margin-top: 12px;
 
     input {
+        @include field;
         padding: 10px 12px;
         border: 1px solid var(--dp-border);
         border-radius: 8px;
@@ -330,12 +337,11 @@
     }
     select,
     textarea {
+        @include field;
         width: 100%;
         padding: 10px 12px;
         border: 1px solid var(--dp-border);
         border-radius: 8px;
-        background: var(--dp-bg);
-        color: var(--dp-text);
         font: inherit;
         font-size: 15px;
     }
@@ -450,6 +456,7 @@
         margin-top: 8px;
 
         select {
+            @include field;
             padding: 8px 10px;
             border-radius: 8px;
             border: 1px solid var(--dp-border);
@@ -482,11 +489,11 @@
         color: var(--dp-muted);
 
         input {
+            @include field;
             padding: 8px 10px;
             border-radius: 8px;
             border: 1px solid var(--dp-border);
             font: inherit;
-            color: var(--dp-text);
 
             &:disabled {
                 background: var(--dp-bg-soft);
@@ -888,13 +895,13 @@
     padding: 0 12px;
     border: 1px solid var(--dp-border);
     border-radius: 8px;
-    background: #fff;
+    @include field;
 
     &:focus-within { border-color: var(--dp-accent); }
 
     &__code {
         font-size: 13px;
-        color: var(--dp-muted, #6b7280);
+        color: var(--gratora-on-field-muted, #6b7280);
     }
 
     &__input {
@@ -902,6 +909,7 @@
         border: 0;
         padding: 10px 0;
         font: inherit;
+        color: var(--gratora-on-field, #111827);
         background: none;
 
         &:focus { outline: none; box-shadow: none; }

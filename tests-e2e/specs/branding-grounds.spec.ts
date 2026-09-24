@@ -664,6 +664,13 @@ test.describe('donor portal signed out', () => {
         await expect(error).toHaveText('The link could not be sent.');
         expectInk(await inkOf(error), RED, WHITE, 'sign-in error');
     });
+
+    test('the email field paints the field ground under its ink', async ({ page }) => {
+        await page.goto(new URL(PORTAL).pathname);
+        const email = page.locator('.dp-signin input[type="email"]');
+        await email.fill('nobody@example.test');
+        expectInk(await inkOf(email), ON_ACCENT, WHITE, 'email field');
+    });
 });
 
 test.describe('donor portal', () => {
@@ -817,7 +824,7 @@ test.describe('donor portal', () => {
         const confirm = dialog.locator('.dp-action--danger');
         await expect(confirm).toBeDisabled();
         expectInk(await inkOf(confirm), CARD_RED, CARD, 'confirm delete');
-        await page.keyboard.press('Escape');
+        await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
         await expect(dialog).toHaveCount(0);
 
         // A plan's cancel action and a refused change, on the plan's dialog.
@@ -834,10 +841,53 @@ test.describe('donor portal', () => {
         const sheetError = sheet.locator('.dp-error');
         await expect(sheetError).toHaveText('The processor refused the change.');
         expectInk(await inkOf(sheetError), CARD_RED, CARD, 'error in a dialog');
-        await page.keyboard.press('Escape');
+        await sheet.locator('.dp-modal__close').click();
         await expect(sheet).toHaveCount(0);
         await plans();
         await refused();
+    });
+
+    test('a field paints the field ground under the field ink, wherever it stands', async () => {
+        await tab('Profile');
+        const first = root.locator('.dp-form__row input').first();
+        expectInk(await inkOf(first), ON_ACCENT, WHITE, 'first name on the page');
+        expectInk(await inkOf(root.locator('.dp-form input[type="email"]')), CARD_MUTED, SOFT, 'the email that cannot change');
+
+        // Typed into on the dialog's dark card.
+        await root.locator('.dp-action.is-destructive').click();
+        const confirm = root.locator('.dp-modal__panel .dp-form input');
+        await confirm.fill('abc');
+        expectInk(await inkOf(confirm), ON_ACCENT, WHITE, 'typed confirmation');
+        await root.locator('.dp-modal__panel').getByRole('button', { name: 'Cancel', exact: true }).click();
+        await expect(confirm).toHaveCount(0);
+
+        // The statement year sits on the soft ground.
+        await tab('Receipts & tax');
+        expectInk(await inkOf(root.locator('.dp-card__row select')), ON_ACCENT, WHITE, 'statement year');
+
+        const plans = await answer(page, 'recurring', 200, [{
+            id: 9002, amount_cents: 2500, currency: 'USD', interval_count: 1, interval_unit: 'month',
+            status: 'active', next_payment_at: '2026-10-01T10:00:00Z', can_pause: true,
+        }]);
+        await tab('Recurring');
+        const sheet = root.locator('.dp-modal__panel');
+
+        await root.locator('.dp-list__row').click();
+        await sheet.getByRole('button', { name: 'Change amount' }).click();
+        expectInk(await inkOf(sheet.locator('.gratora-amount__input')), ON_ACCENT, WHITE, 'new amount');
+        expectInk(await inkOf(sheet.locator('.gratora-amount__code')), 'rgba(16, 22, 42, 0.62)', WHITE, 'currency code');
+        await sheet.locator('.dp-modal__close').click();
+        await expect(sheet).toHaveCount(0);
+
+        await root.locator('.dp-list__row').click();
+        await sheet.getByRole('button', { name: 'Cancel subscription' }).click();
+        await sheet.getByRole('button', { name: 'Continue to cancel' }).click();
+        const reason = sheet.locator('textarea');
+        await reason.fill('Moving abroad');
+        expectInk(await inkOf(reason), ON_ACCENT, WHITE, 'reason');
+        await sheet.locator('.dp-modal__close').click();
+        await expect(sheet).toHaveCount(0);
+        await plans();
     });
 });
 
