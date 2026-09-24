@@ -30,7 +30,8 @@ export default function ContrastNotice( { tokens } ) {
                         __( '%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker.', 'gratora-donation-platform' ),
                         g.label,
                         String( g.value ).toUpperCase(),
-                        g.best.toFixed( 1 )
+                        // Floored: 4.49 rounds to the very 4.5 it misses.
+                        ( Math.floor( g.best * 10 ) / 10 ).toFixed( 1 )
                     ) }
                 </li>
             ) ) }

@@ -69,3 +69,10 @@ it( 'stays quiet on the palette that ships', () => {
 it( 'says nothing about a colour it cannot read', () => {
     expect( mount( { 'gratora-bg': 'inherit' } ).querySelector( '.gratora-preset-editor__contrast' ) ).toBeNull();
 } );
+
+/** Red measures 4.497:1 with dark ink. Rounded, it would read as the very bar it misses. */
+it( 'never states a figure that meets the bar it says is missed', () => {
+    const text = mount( { 'gratora-accent': '#ff0000' } ).textContent;
+
+    expect( text ).toContain( 'Accent (#FF0000) reaches 4.4:1, under the 4.5:1 that text needs.' );
+} );
