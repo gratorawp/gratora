@@ -321,6 +321,21 @@ test.describe('campaign Appearance', () => {
             await expect(input).toBeChecked({ checked: ! before });
         }
     });
+
+    test('a pointer anywhere on a switch works it', async ({ page }) => {
+        for (const name of ['Customize tokens for this campaign', 'Hide theme header', 'Hide theme footer']) {
+            const control = page.getByRole('switch', { name });
+            const track = page.locator('.gratora-switch', { has: control }).locator('.gratora-switch__track');
+            const box = await track.boundingBox();
+            expect(box, name).not.toBeNull();
+            const before = await control.isChecked();
+
+            await control.click({ position: { x: 3, y: box!.height / 2 } });
+            await expect(control, `${name} from its start`).toBeChecked({ checked: ! before });
+            await control.click({ position: { x: box!.width - 3, y: box!.height / 2 } });
+            await expect(control, `${name} from its end`).toBeChecked({ checked: before });
+        }
+    });
 });
 
 async function customize(page: Page): Promise<void> {
