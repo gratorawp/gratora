@@ -386,6 +386,15 @@ JS;
             }
         }
 
+        // A colour left to the accent is unset on a page of its own, so it is
+        // stated rather than taken from the campaign page the form sits on. The
+        // rest of the catalogue the wrapper's stylesheet declares itself.
+        foreach (Tokens::defaults() as $key => $default) {
+            if ($default === '' && trim((string) ($tokens[$key] ?? '')) === '') {
+                $out .= '--' . $key . ':initial;';
+            }
+        }
+
         return $out;
     }
 

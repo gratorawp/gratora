@@ -531,6 +531,14 @@ test.describe('guest button and form on a Quiet host', () => {
 
         await expectNothingBelowTheBar(page, 'Quiet host with its modal open');
     });
+
+    test('a form of another campaign draws its own button', async ({ page }) => {
+        await open(page, path('QUIET_HOST'));
+
+        const submit = page.locator('form.gratora-donation-form:not(.gratora-donate-modal form) .gratora-form__button--primary').first();
+        await expect(submit).toHaveCSS('background-color', ACCENT);
+        expectInk(await inkOf(submit), ON_ACCENT, ACCENT, 'the form\'s own submit');
+    });
 });
 
 test.describe('donor portal', () => {

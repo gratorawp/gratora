@@ -7,6 +7,7 @@ namespace Gratora\Tests\Integration;
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\Styling\CampaignStyleVars;
 use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Forms\Form;
 
 /**
  * A block naming another campaign writes that campaign's map on its wrapper,
@@ -61,6 +62,36 @@ final class GuestWrapperStatesItsWholeLookTest extends IntegrationTestCase
 
         $this->assertStringContainsString('--gratora-button-bg:initial;', $css);
         $this->assertSame(rtrim($css, ';'), safecss_filter_attr($css));
+    }
+
+    /**
+     * A form on another campaign's page reads the button colours its own map
+     * leaves to the accent from that page. The rest of the catalogue the
+     * wrapper's stylesheet declares itself, so only those are stated.
+     */
+    public function test_a_form_states_the_button_colours_its_map_leaves_to_the_accent(): void
+    {
+        $campaign = $this->saved([]);
+        $form = Form::make();
+        $form->title       = 'Guest ' . uniqid();
+        $form->slug        = 'guest-' . uniqid();
+        $form->status      = 'published';
+        $form->campaign_id = (int) $campaign->id;
+        $form->blocks      = '<!-- wp:gratora/submit-button /-->';
+        $form->settings    = [];
+        $form->created_at  = gmdate('Y-m-d H:i:s');
+        $form->updated_at  = $form->created_at;
+        $form->save();
+
+        $html = do_shortcode('[gratora_donation_form slug="' . $form->slug . '"]');
+
+        $this->assertSame(1, preg_match('/<form class="gratora-donation-form[^"]*"[^>]* style="([^"]*)"/', $html, $m));
+        $decl = self::declarations(html_entity_decode($m[1]));
+        $this->assertSame('initial', $decl['gratora-button-bg'] ?? null);
+        $this->assertSame('initial', $decl['gratora-button-fg'] ?? null);
+        $this->assertSame('initial', $decl['gratora-button-hover-bg'] ?? null);
+        $this->assertArrayNotHasKey('gratora-accent-soft', $decl);
+        $this->assertArrayNotHasKey('gratora-focus-ring', $decl);
     }
 
     private function saved(array $style): Campaign
