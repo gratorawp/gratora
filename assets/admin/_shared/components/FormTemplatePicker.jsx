@@ -21,7 +21,7 @@ const CATEGORY_LABELS = {
     Standard:  __( 'Standard', 'gratora-donation-platform' ),
     Recurring: __( 'Recurring', 'gratora-donation-platform' ),
     Wizard:    __( 'Wizard', 'gratora-donation-platform' ),
-    Formal:    __( 'Formal', 'gratora-donation-platform' ),
+    Campaign:  __( 'Campaign', 'gratora-donation-platform' ),
     Other:     __( 'Other', 'gratora-donation-platform' ),
 };
 
@@ -49,7 +49,7 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     const categories = useMemo( () => {
         const seen  = new Set();
-        const order = [ 'Blank', 'Starter', 'Standard', 'Recurring', 'Wizard', 'Formal' ];
+        const order = [ 'Blank', 'Starter', 'Standard', 'Recurring', 'Wizard', 'Campaign' ];
         for ( const t of templates ) seen.add( t.category || 'Other' );
         const found = order.filter( ( c ) => seen.has( c ) );
         const extra = [ ...seen ].filter( ( c ) => ! order.includes( c ) );
