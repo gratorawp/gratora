@@ -109,8 +109,8 @@
     --gratora-button-size:  48px;
     --gratora-button-weight:  600;
     --gratora-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
-    // Derived, so a dropped ring tracks the accent instead of this literal.
-    --gratora-focus-ring:     var(--gratora-accent, #211d3f);
+    // Unset unless a layer chose it: each ring names its own fallback.
+    --gratora-focus-ring:     initial;
     --gratora-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
     &--framed {
@@ -297,15 +297,18 @@
 
         &:hover { background: var(--gratora-preset-hover, rgba(0, 0, 0, .04)); }
 
+        // Drawn outside the tile, on the form's ground.
         &:focus-visible {
-            outline-color: var(--gratora-focus-ring, var(--gratora-accent));
+            outline-color: var(--gratora-focus-ring, var(--gratora-text-accent, var(--gratora-accent)));
             outline-offset: 2px;
         }
 
         &.is-selected {
             outline-color: var(--gratora-accent);
             background: var(--gratora-accent-soft);
-            color: var(--gratora-accent);
+            color: var(--gratora-on-accent-soft, var(--gratora-accent));
+
+            .gratora-form__preset-impact { color: inherit; }
         }
     }
     &__preset-amount {
@@ -379,8 +382,8 @@
 
             &:hover { color: var(--gratora-text); }
             &.is-selected {
-                color: var(--gratora-accent);
-                border-bottom-color: var(--gratora-accent);
+                color: var(--gratora-text-accent, var(--gratora-accent));
+                border-bottom-color: var(--gratora-text-accent, var(--gratora-accent));
                 font-weight: 600;
             }
         }
@@ -456,7 +459,7 @@
     &--right  { text-align: right;  }
 
     &__link {
-        color: var(--gratora-accent);
+        color: var(--gratora-text-accent, var(--gratora-accent));
         text-decoration: underline;
 
         &:hover, &:focus-visible {
@@ -847,7 +850,7 @@
     &__cover-fees-math {
         font-style: normal;
         margin-left: 6px;
-        color: var(--gratora-accent);
+        color: var(--gratora-text-accent, var(--gratora-accent));
         font-weight: 500;
         font-variant-numeric: tabular-nums;
     }
@@ -1243,7 +1246,7 @@
         &--center { text-align: center; }
         &--right  { text-align: right; }
 
-        a { color: var(--gratora-accent); }
+        a { color: var(--gratora-text-accent, var(--gratora-accent)); }
     }
 
     &__progress {
@@ -1409,7 +1412,7 @@
         margin: 0 0 16px;
         font-size: 22px;
         font-weight: 700;
-        color: var(--gratora-accent);
+        color: var(--gratora-text-accent, var(--gratora-accent));
     }
     &__payment-element {
         min-height: 44px;
