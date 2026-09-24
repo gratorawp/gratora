@@ -1,9 +1,10 @@
 .gratora-donor-portal {
     --dp-accent:   var(--gratora-accent, #211d3f);
     // The page's ink, since the root paints nothing. A surface that paints the
-    // card or the soft ground restates --dp-text and --dp-muted from its own.
+    // card or the soft ground restates these from its own.
     --dp-text:     var(--gratora-text, #111827);
     --dp-muted:    var(--gratora-text-muted, #6b7280);
+    --dp-text-accent: var(--gratora-text-accent, var(--dp-accent));
     --dp-border:   var(--gratora-border, #e5e7eb);
     --dp-rule:     var(--gratora-border-soft, #eef0f2);
     --dp-bg:       var(--gratora-bg, #fff);
@@ -162,6 +163,7 @@
     padding: 18px 20px;
     --dp-text: var(--gratora-on-soft, #111827);
     --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+    --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
     color: var(--dp-text);
 
     &__label { font-size: 12px; color: var(--dp-muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -188,6 +190,7 @@
         border-radius: 10px;
         --dp-text: var(--gratora-on-bg, #111827);
         --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+        --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
         color: var(--dp-text);
 
         strong  { font-variant-numeric: tabular-nums; font-weight: 600; }
@@ -210,6 +213,7 @@
         font-size: 11px;
         --dp-text: var(--gratora-on-soft, #111827);
         --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+        --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
         color: var(--dp-muted);
         background: var(--dp-bg-soft);
         padding: 2px 8px;
@@ -225,6 +229,7 @@
     background: var(--dp-bg-soft);
     --dp-text: var(--gratora-on-soft, #111827);
     --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+    --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
     color: var(--dp-muted);
 
     &--one_time { background: #eef2ff; color: #4338ca; }
@@ -304,6 +309,7 @@
         background: var(--dp-bg);
         --dp-text: var(--gratora-on-bg, #111827);
         --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+        --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
         color: var(--dp-text);
         max-width: 480px;
         width: calc(100% - 32px);
@@ -393,6 +399,7 @@
     background: var(--dp-bg);
     --dp-text: var(--gratora-on-bg, #111827);
     --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+    --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
     color: var(--dp-text);
     text-align: left;
     font: inherit;
@@ -409,7 +416,7 @@
     appearance: none;
     background: none;
     border: 0;
-    color: var(--dp-accent);
+    color: var(--dp-text-accent);
     cursor: pointer;
     padding: 0;
     font: inherit;
@@ -448,6 +455,7 @@
 .gratora-donor-portal .dp-card {
     --dp-text: var(--gratora-on-soft, #111827);
     --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+    --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
     color: var(--dp-text);
 }
 
@@ -475,6 +483,7 @@
                 background: var(--dp-bg-soft);
                 --dp-text: var(--gratora-on-soft, #111827);
                 --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+                --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
                 color: var(--dp-muted);
                 cursor: not-allowed;
             }
@@ -500,7 +509,7 @@
         }
     }
     &__saved {
-        color: var(--dp-accent);
+        color: var(--dp-text-accent);
         font-size: 13px;
     }
 }
@@ -529,6 +538,7 @@
     background: var(--dp-bg);
     --dp-text: var(--gratora-on-bg, #111827);
     --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+    --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
     color: var(--dp-text);
     cursor: pointer;
 
@@ -587,6 +597,7 @@
         background: var(--dp-bg-soft);
         --dp-text: var(--gratora-on-soft, #111827);
         --dp-muted: var(--gratora-on-soft-muted, #6b7280);
+        --dp-text-accent: var(--gratora-on-soft-accent, var(--dp-accent));
         cursor: default;
     }
     &.is-stale {
@@ -659,6 +670,7 @@
         background: var(--dp-bg);
         --dp-text: var(--gratora-on-bg, #111827);
         --dp-muted: var(--gratora-on-bg-muted, #6b7280);
+        --dp-text-accent: var(--gratora-on-bg-accent, var(--dp-accent));
         color: var(--dp-text);
         border: 1px solid var(--dp-border);
         border-radius: 8px;

@@ -11,7 +11,7 @@
  * and restore the brand afterwards with `--restore`.
  */
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { AdminPage } from '../helpers/AdminPage';
 import {
@@ -616,27 +616,78 @@ test.describe('the campaign page foundation an add-on draws with', () => {
     });
 });
 
+const PORTAL = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
+const PORTAL_UNSEEDED = 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints';
+const NO_MOTION = '*, *::before, *::after { transition: none !important; animation: none !important; }';
+
+/** Answer one portal route with a body of the test's choosing, leaving the rest to the server. Returns the undo. */
+async function answer(page: Page, route: string, status: number, body: unknown, method = 'GET'): Promise<() => Promise<void>> {
+    const url = new RegExp(`/wp-json/gratora/v1/portal/${route}(\\?.*)?$`);
+    await page.route(url, (r) => (
+        r.request().method() === method
+            ? r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
+            : r.fallback()
+    ));
+
+    return () => page.unroute(url);
+}
+
+test.describe('donor portal signed out', () => {
+    test.skip(! PORTAL, PORTAL_UNSEEDED);
+
+    test('the links read on the page', async ({ page }) => {
+        await page.goto(new URL(PORTAL).pathname);
+        const signin = page.locator('.gratora-donor-portal .dp-signin');
+        await expect(signin).toBeVisible({ timeout: 15_000 });
+        await page.addStyleTag({ content: NO_MOTION });
+
+        const create = signin.locator('.dp-link');
+        await expect(create).toHaveText('Create an account');
+        expectInk(await inkOf(create), INK, WHITE, 'create an account');
+        await create.click();
+        await expect(create).toHaveText('Sign in');
+        expectInk(await inkOf(create), INK, WHITE, 'sign in');
+
+        await expectNothingBelowTheBar(page, 'signed-out portal', '.gratora-donor-portal');
+    });
+});
+
 test.describe('donor portal', () => {
-    const portal = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
-    test.skip(! portal, 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints');
+    test.skip(! PORTAL, PORTAL_UNSEEDED);
+    test.describe.configure({ mode: 'serial' });
 
-    test('what paints the card or the soft ground reads it, and the root reads the page', async ({ page }) => {
-        await page.goto(portal);
-        const root = page.locator('.gratora-donor-portal');
+    let page: Page;
+    let root: Locator;
+
+    const tab = async (name: string): Promise<void> => {
+        await root.getByRole('tab', { name }).click();
+    };
+
+    test.beforeAll(async ({ browser }) => {
+        page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+        await page.addInitScript(installInk);
+        await page.goto(PORTAL);
+        root = page.locator('.gratora-donor-portal');
         await expect(root.locator('.dp-kpi').first()).toBeVisible({ timeout: 15_000 });
-        await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
+        await page.addStyleTag({ content: NO_MOTION });
+    });
 
+    test.afterAll(async () => {
+        await page?.close();
+    });
+
+    test('what paints the card or the soft ground reads it, and the root reads the page', async () => {
         // The root paints nothing, the figures sit on the soft ground.
         expectInk(await inkOf(root.locator('.dp__head h1')), INK, WHITE, 'greeting');
-        expectInk(await inkOf(root.locator('.dp-kpi__value').first()), WHITE, 'rgb(34, 31, 61)', 'figure');
+        expectInk(await inkOf(root.locator('.dp-kpi__value').first()), WHITE, SOFT, 'figure');
         await expectNothingBelowTheBar(page, 'portal overview', '.gratora-donor-portal');
 
         // A wide tab paints the soft ground when active or hovered, a narrow one nothing.
         const active = root.locator('.dp__tab.is-active');
-        expectInk(await inkOf(active), ACCENT, 'rgb(34, 31, 61)', 'active tab');
+        expectInk(await inkOf(active), ACCENT, SOFT, 'active tab');
         const other = root.locator('.dp__tab:not(.is-active)').first();
         await other.hover();
-        expectInk(await inkOf(other), WHITE, 'rgb(34, 31, 61)', 'hovered tab');
+        expectInk(await inkOf(other), WHITE, SOFT, 'hovered tab');
         await page.mouse.move(0, 0);
 
         await page.setViewportSize({ width: 390, height: 844 });
@@ -648,7 +699,7 @@ test.describe('donor portal', () => {
         await expectNothingBelowTheBar(page, 'portal overview on a narrow screen', '.gratora-donor-portal');
         await page.setViewportSize({ width: 1280, height: 720 });
 
-        await root.getByRole('tab', { name: 'Donations' }).click();
+        await tab('Donations');
         const row = root.locator('.dp-list__row').first();
         await expect(row).toBeVisible();
         expectInk(await inkOf(row), WHITE, CARD, 'donation row');
@@ -659,6 +710,32 @@ test.describe('donor portal', () => {
         await expect(detail).toBeVisible();
         expectInk(await inkOf(detail), WHITE, CARD, 'donation detail');
         await expectNothingBelowTheBar(page, 'portal donation detail', '.gratora-donor-portal');
+        await detail.locator('.dp-modal__close').click();
+        await expect(detail).toHaveCount(0);
+    });
+
+    test('a link and a saved note read the accent measured on their ground', async () => {
+        await tab('Profile');
+        await root.locator('.dp-form__actions .dp-action.is-primary').click();
+        const saved = root.locator('.dp-form__saved');
+        await expect(saved).toBeVisible();
+        expectInk(await inkOf(saved), INK, WHITE, 'saved note on the page');
+
+        // A tab that could not load offers to try again, on the page.
+        const donations = await answer(page, 'donations', 500, { message: 'The donations could not be loaded.' });
+        await tab('Donations');
+        const retry = root.locator('.dp-error .dp-link');
+        await expect(retry).toHaveText('Try again');
+        expectInk(await inkOf(retry), INK, WHITE, 'try again');
+        await donations();
+
+        // In a row the link stands on the card, where the pale accent reads.
+        const receipts = await answer(page, 'receipts', 200, { items: [{ id: 9001, receipt_number: 'R-9001', issued_at: '2026-09-01T10:00:00Z' }], total: 1 });
+        await tab('Receipts & tax');
+        const download = root.locator('.dp-list__row .dp-link');
+        await expect(download).toHaveText('Download');
+        expectInk(await inkOf(download), ACCENT, CARD, 'download link in a row');
+        await receipts();
     });
 });
 
