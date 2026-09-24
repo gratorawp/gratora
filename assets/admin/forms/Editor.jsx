@@ -117,8 +117,8 @@ export function templateApplication( currentSettings, template ) {
  * The custom properties the canvas renders a form under.
  *
  * A form on a resolvable preset gates the campaign's inline tokens out, which
- * is the one rule the shared resolver does not model. The sheet paints #fff
- * whatever --gratora-bg says, so no ink is measured against it.
+ * is the one rule the shared resolver does not model. The sheet paints #fff,
+ * the page a Plain form sits on.
  *
  * @since 1.0.0
  */
@@ -134,11 +134,10 @@ export function canvasStyle( settings = {}, campaign = null, styling = window.gr
         ? campaignStyle.tokens : {};
 
     const sx = resolveEffectiveStyle( {
-        tokens:       inline,
-        presetId:     formPresetId || String( campaignStyle.preset_id || '' ),
-        layer:        'campaign',
+        tokens:   inline,
+        presetId: formPresetId || String( campaignStyle.preset_id || '' ),
+        layer:    'campaign',
         styling,
-        paintsGround: false,
     } );
 
     const cw = Number( settings.container?.width );
