@@ -235,15 +235,27 @@ describe( 'a colour typed back in the other case', () => {
         expect( resettable( host ) ).toEqual( [] );
     } );
 
+    const typeIn = ( host, label, value ) => {
+        const picker = row( host, label ).querySelector( '.picker' );
+        picker.value = value;
+        picker.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+    };
+
     it( 'is cleared back to the value the built-in ships', () => {
+        const { host, onTokens } = mountPreset( { edits: { 'gratora-accent-soft': '#c62828' } } );
+
+        typeIn( host, 'Accent soft', QUIET[ 'gratora-accent-soft' ].toUpperCase() );
+
+        expect( onTokens ).toHaveBeenCalledTimes( 1 );
+        expect( onTokens.mock.calls[ 0 ][ 0 ][ 'gratora-accent-soft' ] ).toBe( QUIET[ 'gratora-accent-soft' ] );
+    } );
+
+    it( 'is no edit on a row that already holds it', () => {
         const { host, onTokens } = mountPreset();
 
-        const picker = row( host, 'Accent soft' ).querySelector( '.picker' );
-        picker.value = QUIET[ 'gratora-accent-soft' ].toUpperCase();
-        picker.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+        typeIn( host, 'Accent soft', QUIET[ 'gratora-accent-soft' ].toUpperCase() );
 
-        expect( onTokens ).toHaveBeenCalled();
-        expect( onTokens.mock.calls[ 0 ][ 0 ][ 'gratora-accent-soft' ] ).toBe( QUIET[ 'gratora-accent-soft' ] );
+        expect( onTokens ).not.toHaveBeenCalled();
     } );
 
     it( 'still tells two different colours apart', () => {

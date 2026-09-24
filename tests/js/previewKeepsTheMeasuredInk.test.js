@@ -33,6 +33,16 @@ it( 'gives the fields ink of their own', () => {
     expect( read( el, '--gratora-on-field' ) ).toBe( '#10162a' );
 } );
 
+/** The page ink is the page's; the card a dark map chooses takes ink of its own. */
+it( 'measures the card ink and leaves the page ink alone', () => {
+    const el = form();
+
+    applyPreviewTokens( el, { 'gratora-bg': '#15142b', 'gratora-text': '#111827' } );
+
+    expect( read( el, '--gratora-text' ) ).toBe( '#111827' );
+    expect( read( el, '--gratora-on-bg' ) ).toBe( '#ffffff' );
+} );
+
 /** A preset that omits a token must not leave the previous preset's value behind. */
 it( 'clears what the previous preset set', () => {
     const el = form();

@@ -2,7 +2,7 @@
 /**
  * The Live preview paints a token map that has not reached the server, so it
  * applies the same derivations or it promises a look the published page will
- * not have: black body text on a ground the page reverses out of, and the
+ * not have: page ink measured for a card the page never paints, and the
  * shipped tint under an accent the stylesheet mixes its own from.
  */
 
@@ -68,17 +68,21 @@ it( 'gives the soft and field grounds ink of their own', () => {
     expect( read( el, '--gratora-on-soft' ) ).toBe( '#10162a' );
 } );
 
-it( 'measures body ink against a ground the campaign chose', () => {
+/** The page is the theme's, so a card the campaign chose moves the card ink only. */
+it( 'keeps the page ink and measures the card ink on a ground the campaign chose', () => {
     const el = frame( { tokens: { 'gratora-bg': '#101828' } } );
 
-    expect( read( el, '--gratora-text' ) ).toBe( '#ffffff' );
-    expect( read( el, '--gratora-text-muted' ) ).toBe( 'rgba(255,255,255,.72)' );
+    expect( read( el, '--gratora-text' ) ).toBe( '#111827' );
+    expect( read( el, '--gratora-text-muted' ) ).toBe( '#6b7280' );
+    expect( read( el, '--gratora-on-bg' ) ).toBe( '#ffffff' );
+    expect( read( el, '--gratora-on-bg-muted' ) ).toBe( 'rgba(255,255,255,.72)' );
 } );
 
-it( 'leaves ink a layer chose alone', () => {
+it( 'leaves ink a layer chose alone, and on the card where it reads', () => {
     const el = frame( { tokens: { 'gratora-bg': '#101828', 'gratora-text': '#ffd400' } } );
 
     expect( read( el, '--gratora-text' ) ).toBe( '#ffd400' );
+    expect( read( el, '--gratora-on-bg' ) ).toBe( 'var(--gratora-text)' );
 } );
 
 /** A tint belongs to the accent it was chosen beside; the stylesheet mixes the rest. */

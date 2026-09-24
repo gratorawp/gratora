@@ -4,7 +4,7 @@
  * promises a contrast the page does not have.
  */
 
-import { rgb, inkOn, ratio, bestOn, derivedInk } from '../../assets/_shared/ink';
+import { rgb, inkOn, inkPair, mix, ratio, bestOn, derivedInk } from '../../assets/_shared/ink';
 
 /** The cases InkTest pins on the PHP side, with the ink it chooses. */
 const cases = [
@@ -81,9 +81,81 @@ describe( 'the inks the server would have emitted', () => {
         expect( derivedInk( { 'gratora-field-bg': '#101828' } )[ '--gratora-on-field' ] ).toBe( '#ffffff' );
     } );
 
-    it( 'contributes nothing for a ground it cannot read', () => {
-        expect( derivedInk( { 'gratora-accent': 'inherit' } ) ).toEqual( {} );
-        expect( derivedInk( {} ) ).toEqual( {} );
+    /** Only the ground tokens remain, each naming a token, so the stylesheet chain stands. */
+    it( 'measures nothing for a ground it cannot read', () => {
+        for ( const out of [ derivedInk( { 'gratora-accent': 'inherit' } ), derivedInk( {} ) ] ) {
+            expect( Object.keys( out ).sort() ).toEqual( Object.keys( GROUND_TOKENS ).sort() );
+            Object.values( out ).forEach( ( v ) => expect( v ).toMatch( /^var\(--gratora-[a-z-]+\)$/ ) );
+        }
+    } );
+} );
+
+/**
+ * Muted ink is the ink at the lowest alpha that still reaches 4.5:1 on its
+ * ground, and the ink itself where none below opaque does. InkTest pins the
+ * same table.
+ */
+test.each( [
+    [ '#ffffff', 'rgba(16,22,42,.62)' ],
+    [ '#15142b', 'rgba(255,255,255,.72)' ],
+    [ '#221f3d', 'rgba(255,255,255,.72)' ],
+    [ '#fde68a', 'rgba(16,22,42,.62)' ],
+    [ '#f55151', 'rgba(16,22,42,.86)' ],
+    [ '#452ef5', 'rgba(255,255,255,.74)' ],
+    [ '#2563eb', 'rgba(255,255,255,.91)' ],
+    [ '#ed1212', '#10162a' ],
+    [ '#777777', '#10162a' ],
+] )( 'the muted ink on %p is the one the server measures', ( ground, muted ) => {
+    expect( inkPair( ground )[ 1 ] ).toBe( muted );
+} );
+
+const GROUND_TOKENS = {
+    '--gratora-text-accent':    'var(--gratora-text)',
+    '--gratora-on-bg':          'var(--gratora-text)',
+    '--gratora-on-bg-muted':    'var(--gratora-text-muted)',
+    '--gratora-on-bg-accent':   'var(--gratora-accent)',
+    '--gratora-on-accent-soft': 'var(--gratora-accent)',
+};
+
+const pick = ( out ) => Object.fromEntries( Object.keys( GROUND_TOKENS ).map( ( k ) => [ k, out[ k ] ] ) );
+
+const PAGE_INK = { 'gratora-text': '#111827', 'gratora-text-muted': '#6b7280' };
+
+/** The card, the selected tint and the accent as page text, as Ink::groundDeclarations emits them. */
+describe( 'the ink for each ground the server would have emitted', () => {
+    it( 'names only tokens for the palette that ships, which it already paints', () => {
+        expect( pick( derivedInk( { ...PAGE_INK, 'gratora-accent': '#211d3f', 'gratora-accent-soft': '#efedf8', 'gratora-bg': '#ffffff' } ) ) )
+            .toEqual( { ...GROUND_TOKENS, '--gratora-text-accent': 'var(--gratora-accent)' } );
+    } );
+
+    it( 'measures a dark card under a pale accent', () => {
+        expect( mix( '#fde68a', '#15142b', 0.12 ) ).toBe( '#312d36' );
+        expect( pick( derivedInk( { ...PAGE_INK, 'gratora-accent': '#fde68a', 'gratora-bg': '#15142b', 'gratora-bg-soft': '#221f3d' } ) ) ).toEqual( {
+            '--gratora-text-accent':    'var(--gratora-text)',
+            '--gratora-on-bg':          '#ffffff',
+            '--gratora-on-bg-muted':    'rgba(255,255,255,.72)',
+            '--gratora-on-bg-accent':   'var(--gratora-accent)',
+            '--gratora-on-accent-soft': 'var(--gratora-accent)',
+        } );
+    } );
+
+    it( 'keeps page ink on a card it reads on, and measures the muted ink it does not', () => {
+        const out = derivedInk( { ...PAGE_INK, 'gratora-accent': '#211d3f', 'gratora-bg': '#f55151' } );
+
+        expect( out[ '--gratora-on-bg' ] ).toBe( 'var(--gratora-text)' );
+        expect( out[ '--gratora-on-bg-muted' ] ).toBe( 'rgba(16,22,42,.86)' );
+    } );
+
+    it( 'stands a pale accent down on its own tint', () => {
+        const out = derivedInk( { ...PAGE_INK, 'gratora-accent': '#ffee58', 'gratora-accent-soft': '#fffdeb', 'gratora-bg': '#ffffff' } );
+
+        expect( out[ '--gratora-on-accent-soft' ] ).toBe( '#10162a' );
+    } );
+
+    it( 'reverses out of a dark tint mixed from the accent and the card', () => {
+        const out = derivedInk( { ...PAGE_INK, 'gratora-accent': '#452ef5', 'gratora-bg': '#804242' } );
+
+        expect( out[ '--gratora-on-accent-soft' ] ).toBe( '#ffffff' );
     } );
 } );
 
