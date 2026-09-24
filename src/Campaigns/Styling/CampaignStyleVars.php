@@ -89,6 +89,7 @@ final class CampaignStyleVars
         $css .= Ink::softDeclarations($tokens);
         $css .= Ink::fieldDeclarations($tokens);
         $css .= Ink::groundDeclarations($tokens);
+        $css .= Ink::pageTintDeclarations($tokens);
         $css .= self::cover($campaign);
 
         // A pass-through token is unset so it inherits, which is right until this

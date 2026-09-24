@@ -468,4 +468,31 @@ final class InkTest extends TestCase
             $this->markers(['gratora-text' => 'inherit', 'gratora-bg' => '#15142b'])
         );
     }
+
+    /**
+     * Avatars and tags draw the accent darkened on the tint the campaign page
+     * mixes into white. A pale accent leaves that at 2.03:1.
+     */
+    public function test_ink_on_the_page_tint_keeps_the_darkened_accent_where_it_reads(): void
+    {
+        $this->assertSame('--gratora-on-page-tint:#1a1731;', Ink::pageTintDeclarations(self::SHIPPED));
+        $this->assertSame(
+            '--gratora-on-page-tint:#10162a;',
+            Ink::pageTintDeclarations(['gratora-accent' => '#fde68a', 'gratora-bg' => '#15142b'] + array_diff_key(self::SHIPPED, ['gratora-accent-soft' => 1]))
+        );
+    }
+
+    public function test_a_tint_the_map_states_is_the_one_the_page_tint_ink_is_measured_on(): void
+    {
+        $this->assertSame(
+            '--gratora-on-page-tint:#c5b36c;',
+            Ink::pageTintDeclarations(['gratora-accent' => '#fde68a', 'gratora-accent-soft' => '#211d3f'])
+        );
+    }
+
+    public function test_a_page_tint_it_cannot_read_leaves_the_stylesheet_its_fallback(): void
+    {
+        $this->assertSame('', Ink::pageTintDeclarations(['gratora-accent' => 'inherit']));
+        $this->assertSame('', Ink::pageTintDeclarations(['gratora-accent' => '#fde68a', 'gratora-accent-soft' => 'transparent']));
+    }
 }

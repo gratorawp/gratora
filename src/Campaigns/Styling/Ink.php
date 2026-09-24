@@ -142,6 +142,30 @@ final class Ink
     }
 
     /**
+     * Ink for the tint the campaign page mixes from the accent into white,
+     * where avatars and tags draw the accent darkened. The darkened accent is
+     * kept where it reads on the tint, and measured ink takes over where it
+     * does not.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function pageTintDeclarations(array $tokens): string
+    {
+        $accent = (string) ($tokens['gratora-accent'] ?? '');
+        $tint   = (string) ($tokens['gratora-accent-soft'] ?? '');
+        $tint   = $tint !== '' ? $tint : (self::mix($accent, '#ffffff', .12) ?? '');
+        $dark   = self::mix($accent, '#000000', .78);
+        $on     = self::on($tint);
+        if ($dark === null || $on === null) {
+            return '';
+        }
+
+        return '--gratora-on-page-tint:' . (self::carries($dark, $tint) ? $dark : $on[0]) . ';';
+    }
+
+    /**
      * A grid card paints the page's card under its own campaign's accent, so
      * the accent as text and its selected tint are measured on that card.
      *

@@ -541,6 +541,21 @@ test.describe('guest button and form on a Quiet host', () => {
     });
 });
 
+test.describe('the campaign page foundation an add-on draws with', () => {
+    test.skip(! path('LAYOUT'), unseeded('LAYOUT'));
+
+    test('an avatar and a tag read the tint they paint', async ({ page }) => {
+        await open(page, path('LAYOUT'));
+
+        // The accent mixed into white; the accent darkened on it read 2.03:1.
+        for (const selector of ['.dp-avatar', '.dp-tag', '.dp-profile__avatar']) {
+            const ink = await inkOf(page.locator(selector).first());
+            expectInk(ink, ON_ACCENT, 'rgb(255, 252, 241)', selector);
+            expect(ink.ratio, describeInk(ink)).toBeGreaterThanOrEqual(4.5);
+        }
+    });
+});
+
 test.describe('donor portal', () => {
     const portal = process.env.GRATORA_E2E_BRANDING_PORTAL_URL ?? '';
     test.skip(! portal, 'set GRATORA_E2E_BRANDING_PORTAL_URL, a single-use link each run of `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed-branding` prints');

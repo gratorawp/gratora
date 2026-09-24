@@ -86,6 +86,14 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         $this->assertStringContainsString('--gratora-on-accent:#10162a', $css);
     }
 
+    /** Avatars and tags draw the accent darkened on the page's tint, 2.03:1 for this one. */
+    public function test_a_pale_accent_gives_the_page_tint_dark_ink(): void
+    {
+        $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#fde68a'));
+
+        $this->assertStringContainsString('--gratora-on-page-tint:#10162a;', $css);
+    }
+
     public function test_a_dark_accent_gets_light_ink(): void
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#14425f'));

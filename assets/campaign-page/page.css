@@ -20,6 +20,8 @@ body,
     --dp-accent-dark: color-mix(in srgb, var(--dp-accent) 78%, #000);
     /* Derive accent-soft unless explicitly paired by the preset. */
     --dp-accent-soft: var(--gratora-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
+    /* Measured on that tint: the darkened accent where it reads, dark or white ink where it does not. */
+    --dp-on-accent-soft: var(--gratora-on-page-tint, var(--dp-accent-dark));
 
     /* Use server-resolved contrast ink from AccentInk. */
     --dp-cover-image:     var(--gratora-cover-image, none);
@@ -237,7 +239,7 @@ body,
 
 .dp-avatar {
     width: 64px; height: 64px; border-radius: 999px; flex: none;
-    background: var(--dp-accent-soft); color: var(--dp-accent-dark);
+    background: var(--dp-accent-soft); color: var(--dp-on-accent-soft);
     display: inline-flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 20px;
 }
@@ -279,7 +281,7 @@ body,
     margin-top: calc(clamp(88px, 11vw, 112px) / -2);
     border-radius: 999px;
     background: var(--dp-accent-soft);
-    color: var(--dp-accent-dark);
+    color: var(--dp-on-accent-soft);
     box-shadow: 0 0 0 5px var(--dp-card), 0 0 0 6px var(--dp-border);
     display: grid;
     place-items: center;
@@ -459,7 +461,7 @@ body,
 .dp-tag {
     display: inline-block; margin-left: 7px; padding: 1px 7px; vertical-align: 1px;
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--dp-accent-dark); background: var(--dp-accent-soft); border-radius: 999px;
+    color: var(--dp-on-accent-soft); background: var(--dp-accent-soft); border-radius: 999px;
 }
 
 .dp-row-msg { display: block; font-size: 15px; line-height: 1.5; color: var(--dp-text-2); margin: 4px 0 2px; }

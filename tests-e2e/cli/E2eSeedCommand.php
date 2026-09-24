@@ -425,6 +425,7 @@ final class E2eSeedCommand
             'WHITE_GRID' => $this->brandingPage('e2e-branding-white-grid', 'Branding White Grid', '<!-- wp:gratora/campaign-grid {"count":12} /-->', null),
             'MODAL'      => $this->brandingPage('e2e-branding-modal', 'Branding Modal', '<!-- wp:gratora/donate-button {"campaignId":' . (int) $page->id . ',"label":"Donate in a modal"} /-->', $guest),
             'QUIET_HOST' => $this->brandingPage('e2e-branding-quiet-host', 'Branding Quiet Host', self::quietHostBlocks((int) $page->id, $shortcode($plain)), $white),
+            'LAYOUT'     => $this->brandingPage('e2e-branding-layout', 'Branding Layout', self::foundationBlocks(), $page),
             'CLASSIC'    => $this->campaignPath($classic),
             'COVER'      => $this->campaignPath($cover),
             'THEME'      => $this->campaignPath($theme),
@@ -1105,6 +1106,33 @@ BLOCKS;
         return implode("\n", [
             '<!-- wp:gratora/donate-button {"campaignId":' . $guest . ',"label":"Donate in a modal"} /-->',
             $form,
+        ]);
+    }
+
+    /**
+     * The campaign page foundation as an add-on writes it into a campaign's
+     * page: a card holding a theme heading, as P2P's layout blocks do, and
+     * the avatar, tag and profile of its list and hero views.
+     */
+    private static function foundationBlocks(): string
+    {
+        return implode("\n", [
+            '<!-- wp:group {"className":"dp-card e2e-layout-card"} -->',
+            '<div class="wp-block-group dp-card e2e-layout-card">',
+            '<!-- wp:heading {"level":3,"className":"dp-h3"} -->',
+            '<h3 class="wp-block-heading dp-h3">Get involved</h3>',
+            '<!-- /wp:heading -->',
+            '<!-- wp:paragraph {"className":"dp-body"} -->',
+            '<p class="dp-body">Create your own page, or start a team.</p>',
+            '<!-- /wp:paragraph -->',
+            '</div>',
+            '<!-- /wp:group -->',
+            '<!-- wp:html -->',
+            '<div class="dp-card"><div class="dp-row"><span class="dp-avatar dp-avatar--sm" aria-hidden="true">AB</span>'
+                . '<span class="dp-row-main"><span class="dp-row-name">Ada Branding<span class="dp-tag">Featured</span></span></span></div></div>',
+            '<header class="dp-profile"><div class="dp-profile__cover"></div><div class="dp-profile__body">'
+                . '<span class="dp-profile__avatar" aria-hidden="true">AB</span><h2 class="dp-display">Ada Branding</h2></div></header>',
+            '<!-- /wp:html -->',
         ]);
     }
 
