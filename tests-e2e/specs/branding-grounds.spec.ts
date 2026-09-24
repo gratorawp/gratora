@@ -203,6 +203,19 @@ test.describe('plain form on a shortcode page', () => {
         expect(ring.ratio).toBeGreaterThanOrEqual(3);
     });
 
+    test('the keyboard ring on the selected tile reads on the page around it', async ({ page }) => {
+        await open(page, path('PLAIN'));
+        await tabToFirstTile(page);
+        await page.keyboard.press('Space');
+
+        const tile = page.locator('.gratora-form__preset.is-selected:focus-visible');
+        await expect(tile).toHaveCount(1);
+        await expect(tile).toHaveCSS('outline-offset', '2px');
+        const ring = await inkOf(tile, 'outline-color');
+        expectInk(ring, INK, WHITE, 'focus ring on the selected tile');
+        expect(ring.ratio).toBeGreaterThanOrEqual(3);
+    });
+
     test('the field text follows Base font size', async ({ page }) => {
         await open(page, path('PLAIN'));
         const form = page.locator('form.gratora-donation-form');
@@ -270,6 +283,11 @@ test.describe('framed form', () => {
         const ring = await inkOf(page.locator('.gratora-form__preset:focus-visible'), 'outline-color');
         expectInk(ring, ACCENT, CARD, 'focus ring');
         expect(ring.ratio).toBeCloseTo(14.45, 1);
+
+        await page.keyboard.press('Space');
+        const selected = page.locator('.gratora-form__preset.is-selected:focus-visible');
+        await expect(selected).toHaveCSS('outline-offset', '2px');
+        expectInk(await inkOf(selected, 'outline-color'), ACCENT, CARD, 'focus ring on the selected tile');
     });
 });
 

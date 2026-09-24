@@ -298,18 +298,18 @@
 
         &:hover { background: var(--gratora-preset-hover, rgba(0, 0, 0, .04)); }
 
-        // Drawn outside the tile, on the form's ground.
-        &:focus-visible {
-            outline-color: var(--gratora-focus-ring, var(--gratora-text-accent, var(--gratora-accent)));
-            outline-offset: 2px;
-        }
-
         &.is-selected {
             outline-color: var(--gratora-accent);
             background: var(--gratora-accent-soft);
             color: var(--gratora-on-accent-soft, var(--gratora-accent));
 
             .gratora-form__preset-impact { color: inherit; }
+        }
+
+        // Drawn outside the tile, on the form's ground, selected or not.
+        &:focus-visible {
+            outline-color: var(--gratora-focus-ring, var(--gratora-text-accent, var(--gratora-accent)));
+            outline-offset: 2px;
         }
     }
     &__preset-amount {
