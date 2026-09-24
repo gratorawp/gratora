@@ -78,6 +78,11 @@
     --gratora-accent-soft:    color-mix(in srgb, var(--gratora-accent) 12%, var(--gratora-bg, #fff));
     --gratora-text:           #111827;
     --gratora-text-muted:     #6b7280;
+    --gratora-text-accent:    var(--gratora-accent);
+    --gratora-on-bg:          var(--gratora-text);
+    --gratora-on-bg-muted:    var(--gratora-text-muted);
+    --gratora-on-bg-accent:   var(--gratora-accent);
+    --gratora-on-accent-soft: var(--gratora-accent);
     --gratora-border:         #e5e7eb;
     --gratora-bg:             #ffffff;
     // Keep field backgrounds separate from the form surface.
@@ -109,10 +114,10 @@
     --gratora-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
     &--framed {
-        background: var(--gratora-form-bg, #fff);
+        background: var(--gratora-form-bg, var(--gratora-bg));
         // Default the form radius to the campaign radius.
         border-radius: var(--gratora-form-radius, var(--gratora-radius, 14px));
-        box-shadow: var(--gratora-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
+        box-shadow: var(--gratora-form-shadow, var(--gratora-card-shadow));
         padding: var(--gratora-form-padding, 36px 40px 44px);
     }
 }
@@ -138,6 +143,22 @@
 .gratora-donation-form.gratora-donation-form--plain .gratora-form {
     background: var(--gratora-form-bg, transparent);
     color: inherit;
+}
+
+// The wrapper carries the page's ink, so what paints the card reads the card's.
+.gratora-donation-form--framed .gratora-form,
+.gratora-donation-form .gratora-modal__panel,
+:where(.gratora-donate-modal__panel, .dp-page, .dp-card) .gratora-donation-form .gratora-form {
+    --gratora-text:        var(--gratora-on-bg);
+    --gratora-text-muted:  var(--gratora-on-bg-muted);
+    --gratora-text-accent: var(--gratora-on-bg-accent);
+}
+
+// A Plain form inside a Gratora card paints the card too, so the card ink it
+// restates has its ground.
+:where(.gratora-donate-modal__panel, .dp-page, .dp-card) .gratora-donation-form.gratora-donation-form--plain .gratora-form {
+    background: var(--gratora-bg);
+    color: var(--gratora-text);
 }
 
 .gratora-donation-form .gratora-form {
@@ -1502,4 +1523,20 @@
         font-size: 12px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
+}
+
+// These paint a field or the selected tint, not the card, so they read the ink
+// measured on that ground whatever the form around them restates.
+.gratora-donation-form .gratora-form__fund-option,
+.gratora-donation-form .gratora-form__consent-purpose,
+.gratora-form__country-select-list {
+    --gratora-text:       var(--gratora-on-field, #111827);
+    --gratora-text-muted: var(--gratora-on-field-muted, #6b7280);
+}
+.gratora-donation-form .gratora-form__fund-option.is-selected,
+.gratora-form__country-select-option.is-active,
+.gratora-form__country-select-option:hover {
+    --gratora-text:       var(--gratora-on-accent-soft, #111827);
+    --gratora-text-muted: var(--gratora-on-accent-soft, #6b7280);
+    color: var(--gratora-text);
 }
