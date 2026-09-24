@@ -39,6 +39,8 @@ const MUTED = 'rgb(107, 114, 128)';
 const CARD = 'rgb(21, 20, 43)';
 const ACCENT = 'rgb(253, 230, 138)';
 const ON_ACCENT = 'rgb(16, 22, 42)';
+const SOFT = 'rgb(34, 31, 61)';
+const CARD_MUTED = 'rgba(255, 255, 255, 0.72)';
 
 /** Every text run Gratora draws, on a page or in a form. */
 const GRATORA_TEXT = '.gratora-block, .gratora-donation-form, .dp-layout, .dp-panel, .dp-cover, .dp-display';
@@ -359,6 +361,52 @@ test.describe('accent panel with an empty list', () => {
 
         await expectNothingBelowTheBar(page, 'accent panel');
     });
+
+    test('an empty card in a cover reads its own ground', async ({ page }) => {
+        await open(page, path('PANEL'));
+        const cards = page.locator('.dp-cover .gratora-empty');
+        await expect(cards).toHaveCount(2);
+        for (let i = 0; i < 2; i++) {
+            const card = cards.nth(i);
+            expectInk(await inkOf(card.locator('.gratora-empty__title')), WHITE, CARD, 'empty title in a cover');
+            expectInk(await inkOf(card.locator('.gratora-empty__sub')), CARD_MUTED, CARD, 'empty sub in a cover');
+        }
+
+        await expectNothingBelowTheBar(page, 'cover with empty lists', '.dp-cover');
+    });
+});
+
+test.describe('lists in an accent panel and a cover', () => {
+    test.skip(! path('LISTS'), unseeded('LISTS'));
+
+    for (const viewport of VIEWPORTS) {
+        test(`a soft piece inside a card reads the card's soft ground at ${viewport.width}`, async ({ page }) => {
+            await page.setViewportSize(viewport);
+            await open(page, path('LISTS'));
+
+            for (const surface of ['.dp-panel--accent', '.dp-cover']) {
+                const root = page.locator(surface);
+
+                // The panel re-inks its soft ground; a card inside paints the brand's card again.
+                const ranks = await inksOf(root.locator('.gratora-top-donors__podium-rank'));
+                expect(ranks.map((r) => r.text), `${surface}: the host's three ranks and the guest's one`).toEqual(['2', '1', '3', '1']);
+                ranks.forEach((ink) => {
+                    expectInk(ink, WHITE, SOFT, `${surface} podium rank ${ink.text}`);
+                    expect(ink.ratio).toBeCloseTo(15.77, 1);
+                });
+                const anonymous = await inkOf(root.locator('.gratora-top-donors__podium-tier .gratora-avatar--anon'));
+                expectInk(anonymous, CARD_MUTED, SOFT, `${surface} anonymous avatar`);
+                expectReadable(anonymous, `${surface} anonymous avatar`);
+
+                for (const ink of await inksOf(root.locator('.gratora-top-donors__podium-name:not(.is-anonymous), .gratora-supporter-wall__name, .gratora-campaign-card__title'))) {
+                    expectInk(ink, WHITE, CARD, `${surface} ${ink.where}`);
+                }
+                expectInk(await inkOf(root.locator('.gratora-empty__title')), WHITE, CARD, `${surface} empty title`);
+
+                await expectNothingBelowTheBar(page, `lists in ${surface}`, surface);
+            }
+        });
+    }
 });
 
 test.describe('guest blocks on a white-ground host', () => {

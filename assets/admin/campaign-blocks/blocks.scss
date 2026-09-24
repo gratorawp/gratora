@@ -33,11 +33,17 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 // card rule outranks the soft one, so the empty state, which carries both
 // classes, reads the card it paints. A grid card names --gratora-on-bg for an
 // accent that does not carry, which a page with no campaign never declares, so
-// the accent falls back to the card's own ink.
+// the accent falls back to the card's own ink. A panel or a cover re-inks the
+// soft ground for what sits on it, so a card takes back the soft ground its
+// campaign's map states for the card.
 .gratora-block :is(.gratora-empty, .gratora-top-donors__podium-tier, .gratora-supporter-wall__card, .gratora-campaign-card, .gratora-donate-modal__panel) {
     --gratora-text: var(--gratora-on-bg, #{$text-fallback});
     --gratora-text-muted: var(--gratora-on-bg-muted, #{$text-muted-fallback});
     --gratora-text-accent: var(--gratora-on-bg-accent, var(--gratora-text));
+    --gratora-bg-soft: var(--gratora-card-soft);
+    --gratora-on-soft: var(--gratora-card-on-soft);
+    --gratora-on-soft-muted: var(--gratora-card-on-soft-muted);
+    --gratora-on-soft-accent: var(--gratora-card-on-soft-accent);
 }
 .gratora-block__empty,
 .gratora-stat-empty,

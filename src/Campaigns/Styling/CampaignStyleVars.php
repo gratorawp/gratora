@@ -90,6 +90,7 @@ final class CampaignStyleVars
         $css .= Ink::fieldDeclarations($tokens);
         $css .= Ink::groundDeclarations($tokens);
         $css .= Ink::pageTintDeclarations($tokens);
+        $css .= self::cardSoft();
         $css .= self::cover($campaign);
 
         // A pass-through token is unset so it inherits, which is right until this
@@ -111,6 +112,20 @@ final class CampaignStyleVars
         }
 
         return self::$cache[$id] = $css;
+    }
+
+    /**
+     * The soft ground and its ink under a second name, resolved where the map
+     * is written. A panel or a cover re-inks the soft ground for what sits on
+     * it, and a card inside paints this map's card again, so it restates the
+     * soft ground from these.
+     */
+    private static function cardSoft(): string
+    {
+        return '--gratora-card-soft:var(--gratora-bg-soft);'
+            . '--gratora-card-on-soft:var(--gratora-on-soft);'
+            . '--gratora-card-on-soft-muted:var(--gratora-on-soft-muted);'
+            . '--gratora-card-on-soft-accent:var(--gratora-on-soft-accent);';
     }
 
     /**

@@ -404,6 +404,7 @@ final class E2eSeedCommand
             ['key' => 'e2e-branding-1', 'campaign' => $page, 'email' => 'e2e-branding-1@example.test', 'first' => 'Ada', 'last' => 'Branding', 'cents' => 12000],
             ['key' => 'e2e-branding-2', 'campaign' => $page, 'email' => 'e2e-branding-2@example.test', 'first' => 'Ben', 'last' => 'Branding', 'cents' => 4500],
             ['key' => 'e2e-branding-3', 'campaign' => $pale, 'email' => 'e2e-branding-1@example.test', 'first' => 'Ada', 'last' => 'Branding', 'cents' => 30000],
+            ['key' => 'e2e-branding-4', 'campaign' => $page, 'email' => 'e2e-branding-4@example.test', 'first' => 'Cy', 'last' => 'Branding', 'cents' => 2500, 'anonymous' => true],
         ]);
 
         $forms = $this->container()->get(FormService::class);
@@ -420,6 +421,7 @@ final class E2eSeedCommand
             'FRAME'      => $this->brandingPage('e2e-branding-frame', 'Branding Frame', $shortcode($frame), null),
             'FRAME_BOLD' => $this->brandingPage('e2e-branding-frame-bold', 'Branding Frame Bold', $shortcode($frameBold), null),
             'PANEL'      => $this->brandingPage('e2e-branding-panel', 'Branding Panel', self::panelBlocks((int) $host->id, (int) $guest->id), $host),
+            'LISTS'      => $this->brandingPage('e2e-branding-lists', 'Branding Lists', self::listBlocks((int) $page->id, (int) $pale->id, (int) $guest->id), $page),
             'WHITE_HOST' => $this->brandingPage('e2e-branding-white-host', 'Branding White Host Page', self::whiteHostBlocks((int) $page->id), $white),
             'BOLD_HOST'  => $this->brandingPage('e2e-branding-bold-host', 'Branding Bold Host', self::boldHostBlocks((int) $page->id, (int) $bold->id), $bold),
             'WHITE_GRID' => $this->brandingPage('e2e-branding-white-grid', 'Branding White Grid', '<!-- wp:gratora/campaign-grid {"count":12} /-->', null),
@@ -938,7 +940,7 @@ BLOCKS;
      * percentage. Test-mode rows are left out of both. Keyed by intent id, so a
      * later run writes nothing.
      *
-     * @param list<array{key:string,campaign:Campaign,email:string,first:string,last:string,cents:int}> $specs
+     * @param list<array{key:string,campaign:Campaign,email:string,first:string,last:string,cents:int,anonymous?:bool}> $specs
      */
     private function brandingDonations(array $specs): void
     {
@@ -967,6 +969,7 @@ BLOCKS;
                     campaign_id:    (int) $spec['campaign']->id,
                     profile:        ['first_name' => $spec['first'], 'last_name' => $spec['last']],
                     payment_method: 'bank_transfer',
+                    is_anonymous:   (bool) ($spec['anonymous'] ?? false),
                     is_test:        false,
                 ))['donation'];
                 $donations->setGatewayIntent($donation, $spec['key']);
@@ -1075,7 +1078,7 @@ BLOCKS;
         ]);
     }
 
-    /** An accent panel holding the host's own empty list and a guest campaign's. */
+    /** An accent panel and a cover with no photo, each holding the host's own empty list and a guest campaign's. */
     private static function panelBlocks(int $host, int $guest): string
     {
         return implode("\n", [
@@ -1083,6 +1086,50 @@ BLOCKS;
             '<div class="wp-block-group dp-panel dp-panel--accent">',
             '<!-- wp:gratora/top-donors {"campaignId":' . $host . ',"title":"Top donors host"} /-->',
             '<!-- wp:gratora/top-donors {"campaignId":' . $guest . ',"title":"Top donors guest"} /-->',
+            '</div>',
+            '<!-- /wp:group -->',
+            '<!-- wp:group {"className":"dp-panel dp-cover"} -->',
+            '<div class="wp-block-group dp-panel dp-cover">',
+            '<!-- wp:group {"className":"dp-cover__body"} -->',
+            '<div class="wp-block-group dp-cover__body">',
+            '<!-- wp:gratora/top-donors {"campaignId":' . $host . ',"title":"Top donors host in a cover","layout":"podium"} /-->',
+            '<!-- wp:gratora/supporter-wall {"campaignId":' . $guest . ',"title":"Supporters guest in a cover"} /-->',
+            '</div>',
+            '<!-- /wp:group -->',
+            '</div>',
+            '<!-- /wp:group -->',
+        ]);
+    }
+
+    /**
+     * The host's lists and a guest's, full and empty, in an accent panel and
+     * in a cover with no photo. The podium ranks and the anonymous avatar sit
+     * on the soft ground inside a card.
+     */
+    private static function listBlocks(int $host, int $guest, int $empty): string
+    {
+        $lists = static fn (string $where): string => implode("\n", [
+            '<!-- wp:gratora/top-donors {"campaignId":' . $host . ',"title":"Podium host ' . $where . '","layout":"podium"} /-->',
+            '<!-- wp:gratora/top-donors {"campaignId":' . $guest . ',"title":"Podium guest ' . $where . '","layout":"podium"} /-->',
+            '<!-- wp:gratora/supporter-wall {"campaignId":' . $host . ',"title":"Wall host ' . $where . '"} /-->',
+            '<!-- wp:gratora/supporter-wall {"campaignId":' . $guest . ',"title":"Wall guest ' . $where . '"} /-->',
+            '<!-- wp:gratora/supporter-wall {"campaignId":' . $empty . ',"title":"Wall empty ' . $where . '"} /-->',
+            '<!-- wp:gratora/campaign-grid {"campaignId":' . $host . ',"count":3} /-->',
+        ]);
+
+        return implode("\n", [
+            '<!-- wp:group {"className":"dp-panel dp-panel--accent"} -->',
+            '<div class="wp-block-group dp-panel dp-panel--accent">',
+            $lists('panel'),
+            '</div>',
+            '<!-- /wp:group -->',
+            '<!-- wp:group {"className":"dp-panel dp-cover"} -->',
+            '<div class="wp-block-group dp-panel dp-cover">',
+            '<!-- wp:group {"className":"dp-cover__body"} -->',
+            '<div class="wp-block-group dp-cover__body">',
+            $lists('cover'),
+            '</div>',
+            '<!-- /wp:group -->',
             '</div>',
             '<!-- /wp:group -->',
         ]);
