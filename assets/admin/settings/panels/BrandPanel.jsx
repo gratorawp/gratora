@@ -1,7 +1,7 @@
 
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Palette } from 'lucide-react';
 
 import Card from '../../_shared/components/Card';
@@ -12,8 +12,8 @@ import Icon from '../../_shared/components/Icon';
 import TokenEditor from '../../_shared/styling/TokenEditor';
 import StylePreview from '../../_shared/styling/StylePreview';
 import UnshownNotice from '../../_shared/styling/UnshownNotice';
+import ContrastNotice from '../../_shared/styling/ContrastNotice';
 import { presetsForPanel, presetLabel } from './brandPresets';
-import { bestOn } from './contrast';
 
 const PlusIcon  = () => <Icon name="plus"  size={ 16 } />;
 const CloneIcon = () => <Icon name="copy"  size={ 14 } />;
@@ -267,42 +267,6 @@ export function PresetEditor( { preset, resetDefaults, base, isDefault, onRename
                 defaults={ resetDefaults || window.gratora?.styling?.defaults || {} }
             />
         </div>
-    );
-}
-
-/**
- * A ground between light and dark carries no body text whichever ink is drawn
- * on it, and a colour picker cannot show that. The text colours follow the
- * ground on their own, so this is the one choice the org has to make itself.
- */
-const GROUNDS = [
-    [ 'gratora-bg',      () => __( 'Background', 'gratora-donation-platform' ) ],
-    [ 'gratora-bg-soft', () => __( 'Soft background', 'gratora-donation-platform' ) ],
-    [ 'gratora-field-bg', () => __( 'Field background', 'gratora-donation-platform' ) ],
-    [ 'gratora-accent',  () => __( 'Accent', 'gratora-donation-platform' ) ],
-];
-
-function ContrastNotice( { tokens } ) {
-    const failing = GROUNDS
-        .map( ( [ key, label ] ) => ( { label: label(), value: tokens[ key ], best: bestOn( tokens[ key ] ) } ) )
-        .filter( ( g ) => g.best !== null && g.best < 4.5 );
-
-    if ( ! failing.length ) return null;
-
-    return (
-        <ul className="gratora-preset-editor__contrast">
-            { failing.map( ( g ) => (
-                <li key={ g.label }>
-                    { sprintf(
-                        /* translators: 1: colour name, e.g. Background, 2: the hex the admin picked, 3: the contrast it reaches, e.g. 4.0 */
-                        __( '%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker.', 'gratora-donation-platform' ),
-                        g.label,
-                        String( g.value ).toUpperCase(),
-                        g.best.toFixed( 1 )
-                    ) }
-                </li>
-            ) ) }
-        </ul>
     );
 }
 

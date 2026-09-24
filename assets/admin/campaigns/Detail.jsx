@@ -19,6 +19,7 @@ import Btn from '../_shared/components/Btn';
 import { downloadFile } from '@gratora/ui/utils/download';
 import TokenEditor from '../_shared/styling/TokenEditor';
 import UnshownNotice from '../_shared/styling/UnshownNotice';
+import ContrastNotice from '../_shared/styling/ContrastNotice';
 import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon, AlertTriangle } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
@@ -2217,6 +2218,7 @@ export function AppearancePanel( { c } ) {
 
                 { isCustomizing && (
                     <div className="gratora-custom-style-body">
+                        <ContrastNotice tokens={ { ...presetBase, ...inline } } />
                         <UnshownNotice
                             tokens={ { ...presetBase, ...inline } }
                             catalogue={ window.gratora?.styling?.catalogue || {} }
