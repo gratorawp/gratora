@@ -2,7 +2,7 @@
 defined('ABSPATH') || exit;
 /**
  * @var string $heading
- * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','barWidth','accent']
+ * @var array  $cards   list of ['title','blurb','imageUrl','url','raised','goalLabel','percent','barWidth','vars']
  * @var string $styleVars
  * @var ?string $emptyText     set only when there are no cards
  * @var ?string $emptySubText
@@ -33,8 +33,7 @@ echo wp_kses_data(get_block_wrapper_attributes(array_filter([
         <?php foreach ($cards as $card): ?>
             <a class="gratora-campaign-card<?php echo esc_attr($card['url'] === '' ? ' is-inert' : ''); ?>"
                <?php echo $card['url'] !== '' ? 'href="' . esc_url($card['url']) . '"' : ''; ?>
-               style="--gratora-accent: <?php echo esc_attr($card['accent']);
-?>;">
+               style="<?php echo esc_attr($card['vars']); ?>">
                 <span class="gratora-campaign-card__cover<?php echo esc_attr($card['imageUrl'] ? '' : ' is-placeholder'); ?>">
                     <?php if ($card['imageUrl']): ?>
                         <img src="<?php echo esc_url($card['imageUrl']);

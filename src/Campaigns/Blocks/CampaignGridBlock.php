@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Gratora\Campaigns\Blocks;
 
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Styling\Ink;
+use Gratora\Campaigns\Styling\PageStyle;
+use Gratora\Campaigns\Styling\Tokens;
 use Gratora\Foundation\Helpers\GoalProgress;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Helpers\View;
@@ -91,6 +95,13 @@ final class CampaignGridBlock extends CampaignBlock
             ]);
         }
 
+        // The card each campaign is drawn on is the page's, so its accent is
+        // measured there. With no campaign behind the page it is the stylesheet's white.
+        $groundCampaign = $this->resolveCampaign($attrs) ?? PageStyle::campaignForPost((int) get_queried_object_id());
+        $ground = $groundCampaign
+            ? (Tokens::sanitize((new CampaignStyleResolver())->resolveForCampaign($groundCampaign))['gratora-bg'] ?? '#ffffff')
+            : '#ffffff';
+
         $cards = [];
         foreach ($campaigns as $c) {
             // Read the way CampaignProgressBlock reads it: a campaign can
@@ -104,6 +115,7 @@ final class CampaignGridBlock extends CampaignBlock
             };
             $target  = $type === 'amount' ? (int) ($c->goal_cents ?? 0) : (int) ($c->goal_count ?? 0);
             $percent = GoalProgress::percent($current, $target);
+            $accent  = $c->accentColor();
 
             $cards[] = [
                 'title'     => (string) $c->title,
@@ -121,7 +133,8 @@ final class CampaignGridBlock extends CampaignBlock
                     : '',
                 'percent'   => $percent,
                 'barWidth'  => GoalProgress::barWidth($percent),
-                'accent'    => $c->accentColor(),
+                'vars'      => '--gratora-accent:' . $accent . ';--gratora-accent-soft:initial;'
+                    . Ink::cardAccentDeclarations($accent, $ground),
             ];
         }
 
