@@ -100,6 +100,14 @@ final class CampaignStyleVars
             }
         }
 
+        // A dropped pair is stated as unset, so a wrapper nested in another
+        // campaign's page does not inherit that campaign's pair.
+        foreach (['gratora-accent-soft', 'gratora-focus-ring'] as $key) {
+            if (! isset($tokens[$key])) {
+                $css .= '--' . $key . ':initial;';
+            }
+        }
+
         return self::$cache[$id] = $css;
     }
 

@@ -6,6 +6,7 @@ namespace Gratora\Tests\Integration;
 
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Styling\CampaignStyleVars;
 use Gratora\Forms\Form;
 
 /**
@@ -89,5 +90,60 @@ final class AccentPairsTravelWithTheAccentTest extends IntegrationTestCase
         $this->assertSame('#c62828', $tokens['gratora-accent']);
         $this->assertArrayNotHasKey('gratora-accent-soft', $tokens);
         $this->assertArrayNotHasKey('gratora-focus-ring', $tokens);
+    }
+
+    /**
+     * Dropped from the map is unset on a page of its own, and inherited from
+     * the host when the wrapper sits in another campaign's page: its selected
+     * tiles took the host's tint. So the drop is stated.
+     */
+    public function test_a_dropped_pair_is_stated_as_unset_where_the_map_is_written(): void
+    {
+        $css = CampaignStyleVars::forCampaign($this->saved([
+            'preset_id' => 'bold',
+            'tokens'    => ['gratora-accent' => '#c62828'],
+        ]));
+
+        $this->assertStringContainsString('--gratora-accent-soft:initial;', $css);
+        $this->assertStringContainsString('--gratora-focus-ring:initial;', $css);
+    }
+
+    public function test_a_pair_that_stands_is_not_unset(): void
+    {
+        $css = CampaignStyleVars::forCampaign($this->saved(['preset_id' => 'bold']));
+
+        $this->assertStringContainsString('--gratora-accent-soft:#dde6ed;', $css);
+        $this->assertStringNotContainsString('--gratora-accent-soft:initial;', $css);
+    }
+
+    /** A guest wrapper's style attribute goes through kses on the way out. */
+    public function test_the_whole_map_survives_kses_byte_for_byte(): void
+    {
+        kses_init_filters();
+
+        $css = CampaignStyleVars::forCampaign($this->saved([
+            'preset_id' => 'bold',
+            'tokens'    => ['gratora-accent' => '#c62828', 'gratora-bg' => '#f55151'],
+        ]));
+
+        $this->assertStringContainsString('--gratora-accent-soft:initial;', $css);
+        $this->assertStringContainsString('--gratora-on-bg-muted:rgba(16,22,42,.86);', $css);
+        $this->assertSame(rtrim($css, ';'), safecss_filter_attr($css));
+    }
+
+    private function saved(array $style): Campaign
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $c = $this->campaign($style);
+        $c->title      = 'Pair';
+        $c->slug       = 'pair-' . uniqid();
+        $c->status     = 'published';
+        $c->created_at = $now;
+        $c->updated_at = $now;
+        $c->save();
+
+        CampaignStyleVars::flush();
+
+        return $c;
     }
 }

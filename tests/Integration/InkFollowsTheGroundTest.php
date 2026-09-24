@@ -156,13 +156,16 @@ final class InkFollowsTheGroundTest extends IntegrationTestCase
     }
 
     /**
-     * The focus ring is paired with the accent the way accent-soft is. Left at
-     * the shipped value it never tracked the brand, and on the shipped navy
-     * background it was drawn in the ground's own colour: no visible focus.
+     * The focus ring is paired with the accent the way accent-soft is. One
+     * nothing paired is stated as unset, so each ring falls back to its own
+     * colour rather than to a ring a surrounding page declared.
      */
-    public function test_an_unpaired_focus_ring_falls_through_to_the_accent(): void
+    public function test_an_unpaired_focus_ring_is_stated_as_unset(): void
     {
-        $this->assertStringNotContainsString('--gratora-focus-ring:', $this->css(['gratora-accent' => '#c62828']));
+        $css = $this->css(['gratora-accent' => '#c62828']);
+
+        $this->assertStringContainsString('--gratora-focus-ring:initial;', $css);
+        $this->assertStringNotContainsString('--gratora-focus-ring:#', $css);
     }
 
     /** A ring the org paired with something is still theirs. */
