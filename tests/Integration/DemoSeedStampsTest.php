@@ -16,6 +16,7 @@ use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Foundation\Time\FrozenClock;
 use Gratora\Funds\FundService;
+use Gratora\Recurring\RecurringPlan;
 use Gratora\Recurring\RecurringPlanRepository;
 
 /**
@@ -64,6 +65,20 @@ final class DemoSeedStampsTest extends IntegrationTestCase
         );
 
         $this->assertSame([], $ahead, 'a seeded donation is dated later than the seed run');
+    }
+
+    public function test_no_seeded_plan_is_cancelled_after_the_run_that_wrote_it(): void
+    {
+        $this->seeder()->run(static fn (string $line) => null);
+
+        $plans = RecurringPlan::query()->where('status', 'cancelled')->getAll();
+        $ahead = array_values(array_filter(array_map(
+            static fn ($plan) => (string) $plan->cancelled_at,
+            $plans
+        ), static fn (string $at) => $at > self::SEEDED_AT));
+
+        $this->assertNotSame([], $plans, 'the seed wrote no cancelled plan to check');
+        $this->assertSame([], $ahead, 'a seeded plan is cancelled later than the seed run');
     }
 
     public function test_the_clamp_leaves_the_year_of_data_spread_out(): void

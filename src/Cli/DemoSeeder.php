@@ -977,7 +977,7 @@ final class DemoSeeder
                 break;
             case 'cancelled':
                 $patch['next_payment_at']     = null;
-                $patch['cancelled_at']        = $this->shiftDays($last ?? $now, $step);
+                $patch['cancelled_at']        = $last === null ? $now : min($this->shiftDays($last, $step), $now);
                 $patch['cancellation_reason'] = (string) $spec['cancel_reason'];
                 break;
         }
