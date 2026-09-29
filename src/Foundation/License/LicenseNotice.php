@@ -31,8 +31,8 @@ final class LicenseNotice
         if (! current_user_can('manage_options') || ! CurrentPage::isGratora()) {
             return;
         }
-        // Already on the screen that says all of this.
-        if (CurrentPage::slug() === 'gratora-settings') {
+        // Already on a screen that says all of this.
+        if (CurrentPage::slug() === 'gratora-settings' || $this->onManageScreen()) {
             return;
         }
 
@@ -66,6 +66,32 @@ final class LicenseNotice
     }
 
     /**
+     * The licensing client's own screen, which lists every add-on's status.
+     *
+     * @since unreleased
+     */
+    private function onManageScreen(): bool
+    {
+        parse_str((string) wp_parse_url($this->manageUrl(), PHP_URL_QUERY), $query);
+        $page = is_string($query['page'] ?? null) ? sanitize_key($query['page']) : '';
+
+        return $page !== '' && $page === CurrentPage::slug();
+    }
+
+    /**
+     * The license UI belongs to the licensing client vendored into each Pro
+     * add-on. Core has no page of its own to send anyone to.
+     *
+     * @since unreleased
+     */
+    private function manageUrl(): string
+    {
+        $url = apply_filters('gratora.license.manage_url', '');
+
+        return is_string($url) ? $url : '';
+    }
+
+    /**
      * @param array<int,array{name:string}> $addons
      * @since 1.0.0
      */
@@ -87,10 +113,8 @@ final class LicenseNotice
             . "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;"
             . 'font-size:13px;line-height:1.45;';
 
-        // The licence UI belongs to the licensing client vendored into each Pro
-        // add-on. Core has no page of its own to send anyone to.
-        $url = apply_filters('gratora.license.manage_url', '');
-        $link = is_string($url) && $url !== ''
+        $url  = $this->manageUrl();
+        $link = $url !== ''
             ? sprintf(
                 ' <a href="%s">%s</a>',
                 esc_url($url),

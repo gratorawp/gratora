@@ -29,6 +29,7 @@ final class LicenseNoticeScreensTest extends IntegrationTestCase
     {
         unset($GLOBALS['plugin_page']);
         remove_all_filters('gratora.pro.product_status');
+        remove_all_filters('gratora.license.manage_url');
 
         parent::tearDown();
     }
@@ -53,6 +54,22 @@ final class LicenseNoticeScreensTest extends IntegrationTestCase
 
         $this->assertSame('', $this->renderedOn('wc-settings'));
         $this->assertStringContainsString('Fake Add-on', $this->renderedOn('gratora-campaigns'));
+    }
+
+    /**
+     * The licensing client registers its screen under Gratora's menu, so it
+     * reads as a Gratora screen. It lists every add-on's status itself, and a
+     * notice there would only link to the page it sits on.
+     */
+    public function test_the_license_screen_the_client_names_is_not_told_what_it_shows(): void
+    {
+        add_filter('gratora.license.manage_url', static fn (): string => admin_url('admin.php?page=gratora-pro-license'));
+
+        $this->assertSame('', $this->renderedOn('gratora-pro-license'));
+
+        $elsewhere = $this->renderedOn('gratora-donations');
+        $this->assertStringContainsString('Manage licenses', $elsewhere);
+        $this->assertStringContainsString('page=gratora-pro-license', $elsewhere);
     }
 
     private function renderedOn(?string $page): string
