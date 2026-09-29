@@ -103,6 +103,45 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
 
         $this->assertSame([], $this->erased);
         $this->assertTrue($this->stillHasSettings($this->otherSite));
+        $this->assertSame(0, $this->onSite($this->otherSite, static fn (): int => (int) get_option('gratora_erased_at', 0)));
+    }
+
+    /**
+     * An add-on switched off before the erase never hears gratora.uninstall.
+     * Its own uninstall or next activation reads this option by name, with
+     * core possibly deleted by then, so the literal is the contract.
+     */
+    public function test_every_erased_site_keeps_a_marker_a_switched_off_add_on_can_read(): void
+    {
+        $before = time();
+
+        $this->askForTheWipe();
+        Plugin::onDeactivation(true);
+
+        foreach ([get_current_blog_id(), $this->otherSite] as $siteId) {
+            $this->assertGreaterThanOrEqual(
+                $before,
+                $this->onSite($siteId, static fn (): int => (int) get_option('gratora_erased_at', 0)),
+                "site {$siteId} was erased and says nothing of it"
+            );
+        }
+    }
+
+    /** A listener records the erase it handled, so the marker has to be there already. */
+    public function test_an_add_on_listening_sees_the_marker_of_the_erase_it_is_part_of(): void
+    {
+        $seen = [];
+        add_action('gratora.uninstall', static function () use (&$seen): void {
+            $seen[get_current_blog_id()] = DataEraser::erasedAt();
+        });
+        $before = time();
+
+        $this->askForTheWipe();
+        Plugin::onDeactivation(true);
+
+        foreach ([get_current_blog_id(), $this->otherSite] as $siteId) {
+            $this->assertGreaterThanOrEqual($before, $seen[$siteId] ?? 0, "site {$siteId}");
+        }
     }
 
     /** One site the plugin was never active on cannot end the wipe for the rest. */

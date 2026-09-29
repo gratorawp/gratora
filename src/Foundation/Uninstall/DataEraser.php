@@ -24,6 +24,16 @@ final class DataEraser
     public const OPT_IN = 'gratora_delete_data';
 
     /**
+     * When data was last erased, as a Unix time. Never deleted, not even by
+     * the erase: an add-on switched off beforehand missed gratora.uninstall,
+     * and reads this from its own uninstall or activation, often with core
+     * already gone. So the option name is the contract, not this class.
+     *
+     * @since unreleased
+     */
+    public const ERASED_AT = 'gratora_erased_at';
+
+    /**
      * Options core writes. Listed rather than matched on a prefix for the same
      * reason as the tables: gratora_gift_aid_db_version and its siblings belong to
      * other plugins.
@@ -111,6 +121,16 @@ final class DataEraser
     }
 
     /**
+     * 0 when this site's data has never been erased.
+     *
+     * @since unreleased
+     */
+    public static function erasedAt(): int
+    {
+        return (int) get_option(self::ERASED_AT, 0);
+    }
+
+    /**
      * Put the answer back, dated now, because the erase it belonged to did not
      * finish.
      *
@@ -148,6 +168,9 @@ final class DataEraser
     /** @since 1.0.0 */
     public function erase(): void
     {
+        // First, so a listener can record which erase it has handled.
+        update_option(self::ERASED_AT, time(), false);
+
         // Before the tables go, so an add-on can still read what it needs to
         // clean up rows of its own that point at core.
         do_action('gratora.uninstall');

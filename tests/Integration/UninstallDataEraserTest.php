@@ -191,6 +191,21 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $this->assertContains(DataEraser::OPT_IN, (new DataEraser())->plan()['options']);
     }
 
+    /**
+     * Add-ons switched off before an erase read this by name after it, so it
+     * outlives the erase and core's reactivation both.
+     */
+    public function test_the_erase_marker_survives_the_erase_and_a_reactivation(): void
+    {
+        update_option('gratora_erased_at', 1_900_000_000, false);
+
+        $this->assertNotContains('gratora_erased_at', (new DataEraser())->plan()['options']);
+
+        Plugin::instance()->container->get(Activator::class)->activate();
+
+        $this->assertSame(1_900_000_000, DataEraser::erasedAt());
+    }
+
     public function test_only_core_capabilities_are_named(): void
     {
         $caps = [...Capabilities::ALL, Capabilities::MANAGE];
