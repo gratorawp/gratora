@@ -1,6 +1,7 @@
 <?php
 /**
  * Plugin Name: Gratora - Donation Platform
+ * Plugin URI: https://gratora.net
  * Description: Donation & Fundraising Platform for WordPress
  * Version: 1.0.0
  * Requires at least: 7.0
