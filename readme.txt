@@ -89,10 +89,12 @@ contrast check so text stays readable. Gratora is translation ready and ships a
 
 = Your donor data stays yours =
 
-Email, phone, address and tax ID are encrypted at rest. Consent is recorded per
-donation, IP anonymization is on by default, and you can erase or anonymize a
-donor on request. Gratora gives you the tools; compliance depends on how you use
-them.
+Donors' email addresses, phone numbers, postal addresses and tax IDs are
+encrypted at rest, as are private notes and answers to your own form fields.
+Names, company and country are stored as plain text, so they can be searched and
+sorted. Consent is recorded per donation, IP anonymization is on by default, and
+you can erase or anonymize a donor on request. Gratora gives you the tools;
+compliance depends on how you use them.
 
 == External services ==
 

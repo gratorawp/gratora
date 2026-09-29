@@ -169,9 +169,9 @@ final class RecurringController
             'frequency'    => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'failing'      => (bool) $request['failing'],
             'include_test' => (bool) $request['include_test'],
-            // Donor identity is encrypted, so a LIKE over the donors table
-            // cannot work. Matching ids are resolved through the hasher first
-            // and the plan query filters on them.
+            // Plans hold no donor details and emails are encrypted, so
+            // matching donor ids are resolved by DonorService first and the
+            // plan query filters on them.
             'donor_ids'    => $this->donorIdsMatching((string) ($request['search'] ?? '')),
             'search'       => trim((string) ($request['search'] ?? '')),
         ];

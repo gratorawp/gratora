@@ -1272,7 +1272,7 @@ final class CoreModule implements GratoraModule
                     . '<strong>Gratora:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore gratora_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'gratora-donation-platform'),
+                        __('Encryption key missing since %s. What was encrypted before then cannot be decrypted: donor emails, addresses, phone numbers, tax IDs, notes and form answers, and saved gateway secret keys. Restore gratora_system_settings from a backup, or accept that those details are gone and enter your gateway keys again. New data is encrypted with a freshly generated key.', 'gratora-donation-platform'),
                         $lostAt
                     ))
                     . '</div>';

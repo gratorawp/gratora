@@ -11,8 +11,9 @@ use Gratora\Vendor\Queryable\Model;
 use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
- * Donor record. PII columns are AES-256-GCM encrypted; email_hash is the
- * indexed lookup key.
+ * Donor record. Email, address, phone, tax id and notes are AES-256-GCM
+ * encrypted; names, company and country are plain so lists can search and sort
+ * them. email_hash, a peppered HMAC, is the indexed lookup key.
  *
  * @since 1.0.0
  */

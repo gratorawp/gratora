@@ -10,8 +10,8 @@
 
 Gratora gives an organization the whole fundraising stack in one plugin: a
 block-based donation form builder, one-time and recurring giving, campaigns and
-funds, encrypted donor records with a self-service portal, receipts, and
-advanced reporting.
+funds, donor records with encrypted contact details and a self-service portal,
+receipts, and advanced reporting.
 
 ## Requirements
 
