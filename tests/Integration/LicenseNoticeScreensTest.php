@@ -72,6 +72,15 @@ final class LicenseNoticeScreensTest extends IntegrationTestCase
         $this->assertStringContainsString('page=gratora-pro-license', $elsewhere);
     }
 
+    /** With no key stored nothing is ever checked, and that is not a pass. */
+    public function test_add_ons_with_no_license_key_are_announced(): void
+    {
+        remove_all_filters('gratora.pro.product_status');
+
+        $this->assertSame('', $this->renderedOn('wc-settings'));
+        $this->assertStringContainsString('not linked to a license key', $this->renderedOn('gratora-campaigns'));
+    }
+
     private function renderedOn(?string $page): string
     {
         if ($page === null) {

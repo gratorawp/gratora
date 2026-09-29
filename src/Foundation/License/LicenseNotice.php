@@ -63,6 +63,14 @@ final class LicenseNotice
             return;
         }
 
+        // Nothing was checked, which is what no key looks like: not a pass.
+        $unchecked = array_filter($addons, static fn (array $a): bool => $a['status'] === 'unknown');
+        if (count($unchecked) === count($addons)) {
+            $this->notice(
+                __('Your add-ons are not linked to a license key', 'gratora-donation-platform') . '. '
+                . __('They keep running, but they will not receive updates or security fixes.', 'gratora-donation-platform')
+            );
+        }
     }
 
     /**
