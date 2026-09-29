@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-24T16:36:38+00:00\n"
+"POT-Creation-Date: 2026-09-29T21:22:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -465,6 +465,11 @@ msgstr ""
 #. Plugin Name of the plugin
 #: gratora.php
 msgid "Gratora - Donation Platform"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: gratora.php
+msgid "https://gratora.net"
 msgstr ""
 
 #. Description of the plugin
@@ -1991,7 +1996,7 @@ msgstr ""
 #. translators: %s: timestamp the key loss was detected
 #: src/Core/CoreModule.php:1275
 #, php-format
-msgid "Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore gratora_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key."
+msgid "Encryption key missing since %s. What was encrypted before then cannot be decrypted: donor emails, addresses, phone numbers, tax IDs, notes and form answers, and saved gateway secret keys. Restore gratora_system_settings from a backup, or accept that those details are gone and enter your gateway keys again. New data is encrypted with a freshly generated key."
 msgstr ""
 
 #. translators: 1: current base currency, 2: number of donations.
@@ -4046,13 +4051,23 @@ msgstr ""
 msgid "The license for %s has lapsed. Renew to keep receiving updates and security fixes."
 msgstr ""
 
-#: src/Foundation/License/LicenseNotice.php:97
+#: src/Foundation/License/LicenseNotice.php:70
+#: src/Settings/ReadinessService.php:672
+msgid "Your add-ons are not linked to a license key"
+msgstr ""
+
+#: src/Foundation/License/LicenseNotice.php:71
+#: src/Settings/ReadinessService.php:673
+msgid "They keep running, but they will not receive updates or security fixes."
+msgstr ""
+
+#: src/Foundation/License/LicenseNotice.php:129
 #: src/Settings/ReadinessService.php:640
 #: src/Settings/ReadinessService.php:660
 msgid "Manage licenses"
 msgstr ""
 
-#: src/Foundation/License/LicenseNotice.php:104
+#: src/Foundation/License/LicenseNotice.php:136
 msgid "Gratora:"
 msgstr ""
 
@@ -5951,14 +5966,6 @@ msgstr ""
 
 #: src/Settings/ReadinessService.php:658
 msgid "Renew to keep receiving updates and security fixes."
-msgstr ""
-
-#: src/Settings/ReadinessService.php:672
-msgid "Your add-ons are not linked to a license key"
-msgstr ""
-
-#: src/Settings/ReadinessService.php:673
-msgid "They keep running, but they will not receive updates or security fixes."
 msgstr ""
 
 #: src/Settings/ReadinessService.php:675
