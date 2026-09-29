@@ -37,13 +37,6 @@ final class AsyncDispatcher
     }
 
     /**
-     * Idempotent: no-op if this hook is already scheduled, else run every
-     * $intervalSeconds starting one minute from now.
-     *
-     * @param array<array-key,mixed> $args
-     * @since 1.0.0
-     */
-    /**
      * Take the recurring sweeps out of the queue.
      *
      * Every run of a recurring action schedules its successor whether or not a
@@ -71,6 +64,46 @@ final class AsyncDispatcher
         delete_option(self::INSTALLED_OPTION);
     }
 
+    /**
+     * Take one recurring hook out of the queue, for an add-on switching off
+     * while core stays on. Its memo entry goes too, or the add-on's next
+     * activation would find it "installed" and not schedule it for up to a day.
+     *
+     * @since unreleased
+     */
+    public static function forgetRecurringHook(string $hook): void
+    {
+        $known   = get_option(self::INSTALLED_OPTION, []);
+        $known   = is_array($known) ? $known : [];
+        $argSets = [[]];
+
+        foreach ($known as $key => $entry) {
+            if (is_array($entry) && ($entry['hook'] ?? null) === $hook) {
+                $argSets[] = (array) ($entry['args'] ?? []);
+                unset($known[$key]);
+            }
+        }
+
+        if (count($argSets) > 1) {
+            update_option(self::INSTALLED_OPTION, $known, true);
+        }
+
+        if (! function_exists('as_unschedule_all_actions')) {
+            return;
+        }
+
+        foreach (array_unique($argSets, SORT_REGULAR) as $args) {
+            \as_unschedule_all_actions($hook, $args, self::GROUP);
+        }
+    }
+
+    /**
+     * Idempotent: no-op if this hook is already scheduled, else run every
+     * $intervalSeconds starting one minute from now.
+     *
+     * @param array<array-key,mixed> $args
+     * @since 1.0.0
+     */
     public function scheduleRecurring(string $hook, int $intervalSeconds, array $args = []): void
     {
         // as_has_scheduled_action is an uncached join, and every registered

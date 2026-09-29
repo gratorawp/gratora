@@ -16,10 +16,14 @@ final class RecurringScheduleCostTest extends IntegrationTestCase
 {
     private const HOOK = 'gratora.test.cost';
 
+    private const OTHER = 'gratora.test.cost_other';
+
     protected function tearDown(): void
     {
         if (function_exists('as_unschedule_all_actions')) {
             as_unschedule_all_actions(self::HOOK, [], AsyncDispatcher::GROUP);
+            as_unschedule_all_actions(self::HOOK, ['site' => 2], AsyncDispatcher::GROUP);
+            as_unschedule_all_actions(self::OTHER, [], AsyncDispatcher::GROUP);
         }
         delete_option(AsyncDispatcher::INSTALLED_OPTION);
         parent::tearDown();
@@ -64,6 +68,28 @@ final class RecurringScheduleCostTest extends IntegrationTestCase
 
         $this->assertFalse(as_has_scheduled_action(self::HOOK, [], AsyncDispatcher::GROUP));
         $this->assertFalse(get_option(AsyncDispatcher::INSTALLED_OPTION), 'and the memo goes with them');
+    }
+
+    /**
+     * An add-on switching off while core stays on takes only its own sweep
+     * out, and switching back on puts it straight back rather than a day later.
+     */
+    public function test_an_add_on_can_forget_one_hook_and_have_it_back_on_reactivation(): void
+    {
+        $async = new AsyncDispatcher();
+        $async->scheduleRecurring(self::HOOK, HOUR_IN_SECONDS);
+        $async->scheduleRecurring(self::HOOK, HOUR_IN_SECONDS, ['site' => 2]);
+        $async->scheduleRecurring(self::OTHER, HOUR_IN_SECONDS);
+
+        AsyncDispatcher::forgetRecurringHook(self::HOOK);
+
+        $this->assertFalse(as_has_scheduled_action(self::HOOK, [], AsyncDispatcher::GROUP));
+        $this->assertFalse(as_has_scheduled_action(self::HOOK, ['site' => 2], AsyncDispatcher::GROUP));
+        $this->assertTrue(as_has_scheduled_action(self::OTHER, [], AsyncDispatcher::GROUP), 'another sweep is not this one to forget');
+
+        (new AsyncDispatcher())->scheduleRecurring(self::HOOK, HOUR_IN_SECONDS);
+
+        $this->assertTrue(as_has_scheduled_action(self::HOOK, [], AsyncDispatcher::GROUP));
     }
 
     /** A hook someone cancelled by hand comes back on the daily revalidation. */
