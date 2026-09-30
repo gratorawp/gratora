@@ -29,7 +29,7 @@ final class DataEraser
      * and reads this from its own uninstall or activation, often with core
      * already gone. So the option name is the contract, not this class.
      *
-     * @since unreleased
+     * @since 1.1.0
      */
     public const ERASED_AT = 'gratora_erased_at';
 
@@ -123,7 +123,7 @@ final class DataEraser
     /**
      * 0 when this site's data has never been erased.
      *
-     * @since unreleased
+     * @since 1.1.0
      */
     public static function erasedAt(): int
     {

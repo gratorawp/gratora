@@ -6,7 +6,7 @@ namespace Gratora\Admin\Pages;
 
 use Gratora\Foundation\Hooks\HookProvider;
 
-/** @since unreleased */
+/** @since 1.1.0 */
 final class AddonsPage extends HookProvider
 {
     private const PAGE_ID   = 'gratora-addons';
@@ -14,13 +14,13 @@ final class AddonsPage extends HookProvider
     private const BUILD_DIR = 'build/admin/addons';
     private const SITE      = 'https://gratora.net/';
 
-    /** @since unreleased */
+    /** @since 1.1.0 */
     protected function filters(): array
     {
         return ['gratora.admin.pages' => 'registerPage'];
     }
 
-    /** @since unreleased */
+    /** @since 1.1.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
@@ -33,7 +33,7 @@ final class AddonsPage extends HookProvider
         return $pages;
     }
 
-    /** @since unreleased */
+    /** @since 1.1.0 */
     public function render(): void
     {
         $this->enqueueAssets();
@@ -51,7 +51,7 @@ final class AddonsPage extends HookProvider
      *
      * @return list<array{slug:string,name:string,description:string,icon:string,url:string,free:bool,status:string,activateUrl:string}>
      *
-     * @since unreleased
+     * @since 1.1.0
      */
     public function addons(): array
     {
@@ -126,7 +126,7 @@ final class AddonsPage extends HookProvider
         return $catalog;
     }
 
-    /** @since unreleased */
+    /** @since 1.1.0 */
     private function enqueueAssets(): void
     {
         $assetPath = GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';

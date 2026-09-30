@@ -4,7 +4,7 @@ Tags: donation, fundraising, nonprofit, recurring donations, donation form
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -195,6 +195,16 @@ of it reaches your reporting.
 10. Receipt settings: the template, your logo, and the merge tags it fills in.
 
 == Changelog ==
+
+= 1.1.0 =
+* New: Fundraising > Add-ons lists every add-on, shows which ones this site has, and activates one you have installed.
+* New: text, links, buttons and focus rings on donation forms, campaign pages, the donor portal and PDFs are checked against the color behind them, so they stay readable with any brand colors.
+* Changed: page text no longer follows your brand's Background color. If your theme is dark and you set a dark Background under Fundraising > Settings > Brand without setting Body text, set Body text too.
+* Fixed: a campaign past its goal shows by how much, on its page and in the dashboard widget.
+* Fixed: the donate modal fits the screen.
+* Fixed: Gratora screens say when your add-ons have no license key.
+* Fixed: the readme says which donor details are encrypted and which are not.
+* Developers: AsyncDispatcher::forgetRecurringHook() takes one recurring hook out of the queue, and erasing all data records its time in the gratora_erased_at option, so an add-on that was switched off at the time can still clean up after itself.
 
 = 1.0.0 =
 * Initial release.

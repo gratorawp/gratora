@@ -47,7 +47,7 @@ final class Ink
      * space form, where any slot may be none and an alpha may follow a slash,
      * or the comma form with percentages. Nothing else reads as hsl() here.
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public const HSL = 'hsla?\(\s*(?:'
         . '(?:' . self::ANGLE . '|none)\s+(?:' . self::NUMBER . '%|none)\s+(?:' . self::NUMBER . '%|none)'
@@ -87,7 +87,7 @@ final class Ink
      * What color-mix(in srgb, a share, b) paints, as #rrggbb, or null when
      * either colour cannot be read. The share is a's part, from 0 to 1.
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function mix(string $a, string $b, float $share): ?string
     {
@@ -108,7 +108,7 @@ final class Ink
      *
      * @param array<string,string> $tokens
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function groundDeclarations(array $tokens): string
     {
@@ -140,7 +140,7 @@ final class Ink
      *
      * @param array<string,string> $tokens
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function ringDeclarations(array $tokens): string
     {
@@ -171,7 +171,7 @@ final class Ink
      *
      * @param array<string,string> $tokens
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function hoverDeclarations(array $tokens): string
     {
@@ -200,7 +200,7 @@ final class Ink
      *
      * @param array<string,string> $tokens
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function requiredDeclarations(array $tokens): string
     {
@@ -229,7 +229,7 @@ final class Ink
      *
      * @param array<string,string> $tokens
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function dangerDeclarations(array $tokens): string
     {
@@ -265,7 +265,7 @@ final class Ink
      *
      * @param array<string,string> $tokens
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function pageTintDeclarations(array $tokens): string
     {
@@ -285,7 +285,7 @@ final class Ink
      * A grid card paints the page's card under its own campaign's accent, so
      * the accent as text and its selected tint are measured on that card.
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function cardAccentDeclarations(string $accent, string $ground): string
     {

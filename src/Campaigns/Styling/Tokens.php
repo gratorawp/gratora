@@ -363,7 +363,7 @@ final class Tokens
      * shows it: a translucent colour is printed as it lands on white, and one
      * that does not reach 4.5:1 there gives way to dark ink.
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public static function printInk(string $value, string $fallback): string
     {

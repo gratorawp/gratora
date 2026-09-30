@@ -76,7 +76,7 @@ final class LicenseNotice
     /**
      * The licensing client's own screen, which lists every add-on's status.
      *
-     * @since unreleased
+     * @since 1.1.0
      */
     private function onManageScreen(): bool
     {
@@ -90,7 +90,7 @@ final class LicenseNotice
      * The license UI belongs to the licensing client vendored into each Pro
      * add-on. Core has no page of its own to send anyone to.
      *
-     * @since unreleased
+     * @since 1.1.0
      */
     private function manageUrl(): string
     {

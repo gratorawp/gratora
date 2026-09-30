@@ -69,7 +69,7 @@ final class AsyncDispatcher
      * while core stays on. Its memo entry goes too, or the add-on's next
      * activation would find it "installed" and not schedule it for up to a day.
      *
-     * @since unreleased
+     * @since 1.1.0
      */
     public static function forgetRecurringHook(string $hook): void
     {

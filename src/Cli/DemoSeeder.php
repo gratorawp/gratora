@@ -1070,7 +1070,7 @@ final class DemoSeeder
      * the seed run itself. A relative formatter declines a future stamp and
      * prints a bare date, so one row in each feed reads unlike its neighbours.
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function withinElapsedDay(int $daysAgo, int $hour, int $minute, int $second): string
     {

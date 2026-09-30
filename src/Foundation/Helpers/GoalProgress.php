@@ -12,17 +12,17 @@ namespace Gratora\Foundation\Helpers;
  * cannot exceed it; the figure printed beside it can, and capped, a campaign
  * standing at 112 per cent reads like one that has just arrived.
  *
- * @since 1.0.0
+ * @since 1.1.0
  */
 final class GoalProgress
 {
-    /** @since 1.0.0 */
+    /** @since 1.1.0 */
     public static function percent(int $current, int $target): int
     {
         return $target > 0 ? (int) round(($current / $target) * 100) : 0;
     }
 
-    /** @since 1.0.0 */
+    /** @since 1.1.0 */
     public static function barWidth(int $percent): int
     {
         return max(0, min(100, $percent));
