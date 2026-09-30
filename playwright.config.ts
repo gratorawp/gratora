@@ -46,7 +46,8 @@ export default defineConfig({
     fullyParallel: false,
     workers: 1,
     retries: process.env.CI ? 1 : 0,
-    reporter: process.env.CI ? 'line' : 'list',
+    // The github reporter turns each failure into a check run annotation, which reads without the admin rights the job log needs.
+    reporter: process.env.CI ? [['line'], ['github']] : 'list',
     globalSetup: './tests-e2e/setup/global-setup.ts',
     // Goldens are committed; {platform} keeps per-OS renders side by side so a
     // Linux CI runner can grow its own set without clobbering the macOS ones.
