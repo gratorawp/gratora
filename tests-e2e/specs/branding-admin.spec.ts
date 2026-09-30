@@ -108,6 +108,9 @@ async function setColour(page: Page, label: string, hex: string): Promise<void> 
     await expect(page.locator('.gratora-color-picker-popover')).toHaveCount(0);
 }
 
+// The QA brand is the branding seed's, and nothing else creates the preset these tests pick.
+const needsQaBrand = (): void => test.skip(! idOf('CAMPAIGN'), unseeded('CAMPAIGN_ID'));
+
 async function pickPreset(page: Page, name: string): Promise<void> {
     await page.locator('.gratora-preset-mgr__row').filter({ hasText: name }).first().click();
     await expect(page.locator('.gratora-preset-editor__name')).toHaveValue(new RegExp(name));
@@ -127,6 +130,7 @@ test.describe('Brand preview', () => {
     });
 
     test('draws the hero as the accent cover under ink measured on it', async ({ page }) => {
+        needsQaBrand();
         for (const preset of ['QA Dark Pale', 'Site theme']) {
             await pickPreset(page, preset);
             const hero = page.locator('.gratora-style-preview__hero');
@@ -150,6 +154,7 @@ test.describe('Brand preview', () => {
     });
 
     test('draws the selected tile in the accent measured on its tint', async ({ page }) => {
+        needsQaBrand();
         const pairs: Array<[string, string, string]> = [
             ['QA Dark Pale', ACCENT, TINT],
             ['Classic', WHITE, 'rgb(121, 64, 87)'],
@@ -162,6 +167,7 @@ test.describe('Brand preview', () => {
     });
 
     test('draws the tiles as the published tiles: no border, an inset outline when selected', async ({ page }) => {
+        needsQaBrand();
         await pickPreset(page, 'QA Dark Pale');
         await openGroup(page, 'Radius');
         for (const stroke of ['1px', '2px']) {
@@ -178,6 +184,7 @@ test.describe('Brand preview', () => {
     });
 
     test('sizes the field text from Base font size', async ({ page }) => {
+        needsQaBrand();
         await pickPreset(page, 'QA Dark Pale');
         await openGroup(page, 'Typography');
         for (const [size, px] of [['14px', '11.2px'], ['15px', '12px'], ['16px', '12.8px']]) {
@@ -196,6 +203,7 @@ test.describe('Brand preview', () => {
     });
 
     test('offers clear only on a colour the preset changed', async ({ page }) => {
+        needsQaBrand();
         await pickPreset(page, 'Quiet');
         await openGroup(page, 'Buttons');
         await expect(row(page, 'Button background').locator('button.gratora-color')).toBeVisible();
