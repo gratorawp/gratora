@@ -147,8 +147,8 @@ final class E2eSeedCommand
 
         WP_CLI::confirm(
             'Overwrite the org currency with EUR and its number format, pin '
-            . 'invented FX rates, turn org-wide test mode on and publish five '
-            . 'e2e pages on this install?',
+            . 'invented FX rates, turn org-wide test mode on and publish the '
+            . 'e2e form pages on this install?',
             $assoc
         );
 
@@ -287,6 +287,18 @@ final class E2eSeedCommand
             ['offline', 'sandbox', 'stripe']
         );
 
+        $modalUrl = $this->upsertFormAndPage(
+            $forms,
+            (int) $campaign->id,
+            'gratora-e2e-modal',
+            'Gratora E2E Modal',
+            'gratora-e2e-modal',
+            'Gratora E2E Modal',
+            self::canonicalBlocks(),
+            ['offline', 'sandbox'],
+            ['layout' => 'modal']
+        );
+
         WP_CLI::success("Canonical forms ready.");
         WP_CLI::log('  export GRATORA_E2E_URL="' . untrailingslashit(home_url()) . '"');
         // The specs select gateways by name, and a form that offers none still
@@ -327,6 +339,7 @@ final class E2eSeedCommand
         WP_CLI::log('  export GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export GRATORA_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export GRATORA_E2E_PAYMENT_FORM_PATH="' . wp_parse_url($paymentUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_MODAL_FORM_PATH="' . wp_parse_url($modalUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export GRATORA_E2E_PORTAL_REOPEN_URL="' . $this->mintPortalLink() . '"');
     }
 
@@ -605,15 +618,16 @@ final class E2eSeedCommand
         string $pageSlug,
         string $pageTitle,
         string $blocks,
-        array $allowedGateways = ['offline', 'sandbox']
+        array $allowedGateways = ['offline', 'sandbox'],
+        array $extraSettings = []
     ): string {
         // Pinned rather than left to the shortcode default. The default is a
         // product decision that is allowed to change, and every visual golden
         // moves with it: the fixture asserts its own appearance.
-        $settings = [
+        $settings = array_merge([
             'gateways'  => ['allowed' => $allowedGateways],
             'container' => ['style' => 'frame', 'width' => 540],
-        ];
+        ], $extraSettings);
 
         $form = Form::query()->where('slug', $formSlug)->get();
         if (! $form) {
