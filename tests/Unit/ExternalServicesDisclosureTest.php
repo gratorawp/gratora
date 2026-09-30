@@ -37,6 +37,7 @@ final class ExternalServicesDisclosureTest extends TestCase
         'www.w3.org'    => 'the SVG namespace identifier, which is never dereferenced',
         'wordpress.org' => 'a link an admin clicks, not a request this plugin makes',
         'example.org'   => 'placeholder copy in the email-token preview',
+        'gratora.net'   => 'links an admin follows from the Add-ons screen, not a request this plugin makes',
     ];
 
     private function root(): string
