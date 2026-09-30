@@ -15,9 +15,9 @@ use RecursiveIteratorIterator;
  * while every service the plugin can reach is listed with the switch that turns
  * it on.
  *
- * No URL in the source names Gravatar's host, because avatars go through core's
- * get_avatar_url. The host check cannot see it, so the Gravatar check pins the
- * one path its entry describes.
+ * Gravatar is not listed: donor pictures go through core's get_avatar_url, so
+ * the request is WordPress's own, as it is for comment avatars. The Gravatar
+ * check pins that path.
  */
 final class ExternalServicesDisclosureTest extends TestCase
 {
@@ -81,14 +81,13 @@ final class ExternalServicesDisclosureTest extends TestCase
     }
 
     /**
-     * The Gravatar entry describes one path: DonorAvatars, behind the privacy
-     * toggle, hands a donor's address to get_avatar_url, and core builds the
-     * URL through the avatar filters a privacy plugin may use to replace it.
+     * DonorAvatars, behind the privacy toggle, hands a donor's address to
+     * get_avatar_url, and core builds the URL through the avatar filters a
+     * privacy plugin may use to replace it.
      *
-     * A gravatar.com URL assembled anywhere else is a request that entry does
-     * not describe, and the host check lets it through when its host appears
-     * in the section, as secure.gravatar.com does, or when it has no scheme.
-     * So this asserts nobody wrote one.
+     * A gravatar.com URL assembled anywhere else would be the plugin's own
+     * request, and the host check misses one written without a scheme. So this
+     * asserts nobody wrote one.
      */
     public function test_no_gravatar_url_is_assembled_outside_core(): void
     {
@@ -96,7 +95,7 @@ final class ExternalServicesDisclosureTest extends TestCase
         $this->assertStringContainsString(
             'get_avatar_url(',
             $avatars,
-            'Donor avatars do not go through get_avatar_url, the path the Gravatar entry in readme.txt describes.'
+            'Donor avatars do not go through get_avatar_url, so their Gravatar request is the plugin\'s own and readme.txt has to list it.'
         );
 
         $offenders = [];
@@ -129,7 +128,7 @@ final class ExternalServicesDisclosureTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            "These build a Gravatar URL by hand, a request the Gravatar entry in readme.txt does not describe:\n"
+            "These build a Gravatar URL by hand, a request of the plugin's own that readme.txt does not list:\n"
                 . implode("\n", $offenders)
         );
     }
