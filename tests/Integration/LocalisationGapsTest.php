@@ -163,6 +163,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
             'funds'         => [\Gratora\Admin\Pages\FundsPage::class, 'gratora-admin-funds'],
             'subscriptions' => [\Gratora\Admin\Pages\SubscriptionsPage::class, 'gratora-admin-subscriptions'],
             'tools'         => [\Gratora\Admin\Pages\ToolsPage::class, 'gratora-admin-tools'],
+            'addons'        => [\Gratora\Admin\Pages\AddonsPage::class, 'gratora-admin-addons'],
         ];
     }
 }

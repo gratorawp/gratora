@@ -13,6 +13,7 @@ module.exports = {
         'admin/funds':             path.resolve( __dirname, 'assets/admin/funds/index.jsx' ),
         'admin/subscriptions':     path.resolve( __dirname, 'assets/admin/subscriptions/index.jsx' ),
         'admin/tools':             path.resolve( __dirname, 'assets/admin/tools/index.jsx' ),
+        'admin/addons':            path.resolve( __dirname, 'assets/admin/addons/index.jsx' ),
         'admin/onboarding':        path.resolve( __dirname, 'assets/admin/onboarding/index.jsx' ),
         'admin/campaign-blocks':   path.resolve( __dirname, 'assets/admin/campaign-blocks/index.jsx' ),
         'admin/campaign-blocks-ui': path.resolve( __dirname, 'assets/admin/campaign-blocks/editor-ui.js' ),

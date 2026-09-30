@@ -9,6 +9,7 @@ use Gratora\Admin\AdminGlobals;
 use Gratora\Admin\AdminMenu;
 use Gratora\Admin\DeactivationDialog;
 use Gratora\Admin\ManagedPageStates;
+use Gratora\Admin\Pages\AddonsPage;
 use Gratora\Admin\Pages\CampaignsPage;
 use Gratora\Admin\Pages\DonationsPage;
 use Gratora\Admin\Pages\DonorsPage;
@@ -1252,6 +1253,7 @@ final class CoreModule implements GratoraModule
             (new FormsPage())->register();
             (new FundsPage())->register();
             (new ToolsPage())->register();
+            (new AddonsPage())->register();
             (new SettingsPage())->register();
             (new OnboardingPage())->register();
             (new Onboarding())->register();
