@@ -1,0 +1,50 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"meta": {
+		"title": "Gratora demo",
+		"description": "Gratora with a year of sample fundraising data, in test mode.",
+		"author": "gratora",
+		"categories": [
+			"Donations",
+			"Fundraising"
+		]
+	},
+	"landingPage": "/wp-admin/admin.php?page=gratora",
+	"preferredVersions": {
+		"php": "8.3",
+		"wp": "latest"
+	},
+	"login": true,
+	"steps": [
+		{
+			"step": "mkdir",
+			"path": "/wordpress/wp-content/mu-plugins"
+		},
+		{
+			"step": "writeFile",
+			"path": "/wordpress/wp-content/mu-plugins/gratora-playground.php",
+			"data": "<?php\n/**\n * Gratora on WordPress Playground.\n *\n * Playground runs WordPress on SQLite. Gratora is written for MySQL 8 and\n * calls a few functions SQLite does not have, so they are supplied here.\n * Nothing in this file is needed, or loaded, on a real site.\n */\n\nglobal $wpdb;\n\n$gratora_pdo = null;\nif ( isset( $wpdb->dbh ) && is_object( $wpdb->dbh ) ) {\n\tif ( method_exists( $wpdb->dbh, 'get_connection' ) ) {\n\t\t$gratora_pdo = $wpdb->dbh->get_connection()->get_pdo();\n\t} elseif ( method_exists( $wpdb->dbh, 'get_pdo' ) ) {\n\t\t$gratora_pdo = $wpdb->dbh->get_pdo();\n\t}\n}\nif ( ! $gratora_pdo instanceof PDO ) {\n\treturn;\n}\n\n$gratora_sql = static function ( string $name, callable $fn, int $args ) use ( $gratora_pdo ): void {\n\tif ( class_exists( 'Pdo\\Sqlite' ) && $gratora_pdo instanceof Pdo\\Sqlite ) {\n\t\t$gratora_pdo->createFunction( $name, $fn, $args );\n\n\t\treturn;\n\t}\n\t// Deprecated in PHP 8.5 in favor of the class above, which a plain PDO connection is not.\n\t@$gratora_pdo->sqliteCreateFunction( $name, $fn, $args ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged\n};\n\n// SQLite's json_extract already hands back bare text.\n$gratora_sql( 'JSON_UNQUOTE', static fn ( $value ) => null === $value ? null : (string) $value, 1 );\n\n// MySQL's atomic counter: LAST_INSERT_ID(expr) keeps a value, LAST_INSERT_ID() reads it back.\n$gratora_kept = null;\n$gratora_sql(\n\t'LAST_INSERT_ID',\n\tstatic function ( $value ) use ( &$gratora_kept ) {\n\t\t$gratora_kept = $value;\n\n\t\treturn $value;\n\t},\n\t1\n);\n$gratora_sql(\n\t'LAST_INSERT_ID',\n\tstatic function () use ( &$gratora_kept, $gratora_pdo ) {\n\t\treturn null !== $gratora_kept ? $gratora_kept : (int) $gratora_pdo->lastInsertId();\n\t},\n\t0\n);\n\n// Months between two periods written as YYYYMM.\n$gratora_sql(\n\t'PERIOD_DIFF',\n\tstatic function ( $a, $b ) {\n\t\tif ( null === $a || null === $b ) {\n\t\t\treturn null;\n\t\t}\n\t\t$months = static fn ( $p ): int => intdiv( (int) $p, 100 ) * 12 + ( (int) $p % 100 );\n\n\t\treturn $months( $a ) - $months( $b );\n\t},\n\t2\n);\n\n// The queue is slow to wake in a browser, so each request runs the Gratora jobs it queued (receipts, emails).\nadd_action(\n\t'shutdown',\n\tstatic function (): void {\n\t\tif ( ! function_exists( 'as_get_scheduled_actions' ) || ! did_action( 'action_scheduler_init' ) ) {\n\t\t\treturn;\n\t\t}\n\t\t$due = as_get_scheduled_actions(\n\t\t\tarray(\n\t\t\t\t'group'    => 'gratora',\n\t\t\t\t'status'   => ActionScheduler_Store::STATUS_PENDING,\n\t\t\t\t'date'     => as_get_datetime_object(),\n\t\t\t\t'per_page' => 20,\n\t\t\t)\n\t\t);\n\t\tforeach ( $due as $id => $action ) {\n\t\t\tif ( 0 === strpos( $action->get_hook(), 'gratora.async.' ) ) {\n\t\t\t\tActionScheduler::runner()->process_action( $id, 'Playground' );\n\t\t\t}\n\t\t}\n\t},\n\t100\n);\n"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "gratora-donation-platform"
+			},
+			"options": {
+				"activate": true
+			}
+		},
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"blogname": "Wildwater Trust",
+				"blogdescription": "A sample charity for the Gratora demo"
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php\n/**\n * Fill the sandbox: a year of sample fundraising, then test mode, so a visitor\n * can give on a campaign page with the test payment method and no money moves.\n */\n\nrequire '/wordpress/wp-load.php';\n\nuse Gratora\\Campaigns\\CampaignService;\nuse Gratora\\Cli\\DemoSeeder;\nuse Gratora\\Donations\\AggregateSyncer;\nuse Gratora\\Donations\\DonationService;\nuse Gratora\\Donors\\DonorService;\nuse Gratora\\Foundation\\Plugin;\nuse Gratora\\Foundation\\Time\\Clock;\nuse Gratora\\Funds\\FundService;\nuse Gratora\\Recurring\\RecurringPlanRepository;\nuse Gratora\\Settings\\SettingsService;\n\n$c = Plugin::instance()->container;\n\n( new DemoSeeder(\n\t$c->get( DonationService::class ),\n\t$c->get( DonorService::class ),\n\t$c->get( CampaignService::class ),\n\t$c->get( FundService::class ),\n\t$c->get( AggregateSyncer::class ),\n\t$c->get( RecurringPlanRepository::class ),\n\t$c->get( Clock::class )\n) )->run( static function (): void {} );\n\n// What \"Just exploring\" does on the setup screen.\n$c->get( SettingsService::class )->update( 'gateways', array( 'test_mode' => true ) );\nupdate_option( 'gratora_onboarding_status', 'completed', false );\n\n// A demo visitor is not asked to review the plugin.\nforeach ( get_users( array( 'role' => 'administrator', 'fields' => 'ID' ) ) as $admin ) {\n\tupdate_user_meta( (int) $admin, 'gratora_review_prompt', 'never' );\n}\n"
+		}
+	]
+}
