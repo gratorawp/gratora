@@ -432,6 +432,9 @@ export default function Editor( { formId } ) {
         return required.filter( ( r ) => ! present.has( r.block ) );
     }, [ blocks ] );
 
+    // A live form refuses every save while a required block is missing.
+    const saveBlocked = c.value( 'status', 'draft' ) === 'published' && missingRequired.length > 0;
+
     const onPublish = useCallback( async () => {
         if ( missingRequired.length > 0 ) return;
         setSavingAction( 'publish' );
@@ -463,7 +466,7 @@ export default function Editor( { formId } ) {
             const key = ( e.key || '' ).toLowerCase();
             if ( key === 's' ) {
                 e.preventDefault();
-                if ( dirtyForUnload && ! c.isSaving ) onSave();
+                if ( dirtyForUnload && ! c.isSaving && ! saveBlocked ) onSave();
                 return;
             }
             const t = e.target;
@@ -479,7 +482,7 @@ export default function Editor( { formId } ) {
         };
         window.addEventListener( 'keydown', onKey );
         return () => window.removeEventListener( 'keydown', onKey );
-    }, [ dirtyForUnload, c.isSaving, onSave, undo, redo, history.past.length, history.future.length ] );
+    }, [ dirtyForUnload, c.isSaving, saveBlocked, onSave, undo, redo, history.past.length, history.future.length ] );
 
     if ( c.isLoading || ( ! c.savedRecord && ! c.notFound && ! c.loadError ) ) {
         return <div className="gratora-form-editor__loading"><Spinner /></div>;
@@ -527,6 +530,7 @@ export default function Editor( { formId } ) {
             saving={ c.isSaving }
             savingAction={ savingAction }
             isDirty={ isDirty }
+            saveBlocked={ saveBlocked }
             onSave={ onSave }
             status={ c.value( 'status', 'draft' ) }
             missingRequiredLabels={ missingRequired.map( ( r ) => r.label ) }
@@ -796,7 +800,7 @@ function EditorHeader( {
     backHref, title, onTitleChange,
     view, onViewChange,
     canUndo, canRedo, onUndo, onRedo, onOpenTemplates,
-    saving, savingAction, isDirty, onSave,
+    saving, savingAction, isDirty, saveBlocked, onSave,
     status, missingRequiredLabels, onPublish, onUnpublish,
     sidebarOpen, onToggleSidebar,
     secondaryView, onToggleSecondaryView,
@@ -881,7 +885,7 @@ function EditorHeader( {
                 <Button
                     variant="secondary"
                     onClick={ onSave }
-                    disabled={ saving || ! isDirty }
+                    disabled={ saving || ! isDirty || saveBlocked }
                     isBusy={ saving && savingAction === 'save' }
                 >
                     { isDirty ? __( 'Save', 'gratora-donation-platform' ) : __( 'Saved', 'gratora-donation-platform' ) }

@@ -29,8 +29,8 @@ const canvasBlock = (page: Page, type: string): Locator => page.locator(`.grator
 const library = (page: Page): Locator => page.locator('.gratora-form-editor__secondary--inserter');
 const viewTab = (page: Page, name: string): Locator => page.getByRole('tab', { name, exact: true });
 
-/** Core's inserter looks at where focus went on the frame after an insert. */
-const afterInsert = (page: Page): Promise<void> =>
+/** Lets the page act on what was just done. Core's inserter looks at where focus went on the frame after an insert. */
+const nextFrames = (page: Page): Promise<void> =>
     page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
 
 test.describe('form editor', () => {
@@ -73,13 +73,36 @@ test.describe('form editor', () => {
         await expect(page.locator('.gratora-notice--warning', { hasText: 'Add these blocks before publishing: Email.' })).toBeVisible();
     });
 
+    test('a live form missing a required block cannot be saved', async ({ page }) => {
+        let saves = 0;
+        await page.route(formRequest, (route) => {
+            if (route.request().method() === 'GET') return route.continue();
+            saves++;
+            return route.abort();
+        });
+        await openEditor(page);
+
+        await canvasBlock(page, 'email').click({ position: { x: 4, y: 4 } });
+        await page.keyboard.press('Escape');
+        await page.keyboard.press('Delete');
+        await expect(canvasBlock(page, 'email')).toHaveCount(0);
+
+        await expect(page.locator('.gratora-notice--error', { hasText: 'cannot be saved without these blocks: Email' })).toBeVisible();
+        await expect(page.locator('.gratora-editor-header__right button', { hasText: /^Save$/ })).toBeDisabled();
+
+        await page.keyboard.press('ControlOrMeta+s');
+        await nextFrames(page);
+
+        expect(saves).toBe(0);
+    });
+
     test('adds a block without a console error', async ({ page }) => {
         const errors = await openEditor(page);
         const before = await canvasBlock(page, 'divider').count();
 
         await libraryItem(page, 'Divider').click();
         await expect(canvasBlock(page, 'divider')).toHaveCount(before + 1);
-        await afterInsert(page);
+        await nextFrames(page);
 
         expect(errors).toEqual([]);
     });
@@ -91,7 +114,7 @@ test.describe('form editor', () => {
         await libraryItem(page, 'Terms').click();
         await expect(added).toHaveCount(1);
         await expect.poll(() => added.evaluate((block) => block.contains(document.activeElement))).toBe(true);
-        await afterInsert(page);
+        await nextFrames(page);
 
         await expect(libraryItem(page, 'Terms')).toBeInViewport();
     });
@@ -104,7 +127,7 @@ test.describe('form editor', () => {
 
         await libraryItem(page, 'Divider').click();
         await expect(library(page)).toHaveCount(0);
-        await afterInsert(page);
+        await nextFrames(page);
 
         expect(errors).toEqual([]);
     });
