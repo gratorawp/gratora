@@ -809,13 +809,17 @@ function EditorHeader( {
     const listViewOpen   = secondaryView === 'listview';
     const isPublished    = status === 'published';
     const missing        = Array.isArray( missingRequiredLabels ) ? missingRequiredLabels : [];
-    const publishDisabledReason = missing.length > 0
+    const missingReason = missing.length > 0
         ? sprintf(
             /* translators: %s: comma-separated list of missing block labels. */
             __( 'Add these blocks first: %s.', 'gratora-donation-platform' ),
             missing.join( ', ' )
         )
         : '';
+    // A button waiting on missing blocks stays reachable, so hover and focus can
+    // say why. It keeps its own name; the reason is its description.
+    const waiting = ( name ) => ( { accessibleWhenDisabled: true, showTooltip: true, label: name, description: missingReason } );
+    const saveLabel = isDirty ? __( 'Save', 'gratora-donation-platform' ) : __( 'Saved', 'gratora-donation-platform' );
     // Inserter, list view, undo and redo are authoring tools, so the chrome
     // drops them outside Develop.
     const showAuthoringTools = view === 'develop';
@@ -887,8 +891,9 @@ function EditorHeader( {
                     onClick={ onSave }
                     disabled={ saving || ! isDirty || saveBlocked }
                     isBusy={ saving && savingAction === 'save' }
+                    { ...( saveBlocked && waiting( saveLabel ) ) }
                 >
-                    { isDirty ? __( 'Save', 'gratora-donation-platform' ) : __( 'Saved', 'gratora-donation-platform' ) }
+                    { saveLabel }
                 </Button>
                 { isPublished ? (
                     <Button
@@ -905,8 +910,7 @@ function EditorHeader( {
                         onClick={ onPublish }
                         disabled={ saving || missing.length > 0 }
                         isBusy={ saving && savingAction === 'publish' }
-                        label={ publishDisabledReason || undefined }
-                        showTooltip={ !! publishDisabledReason }
+                        { ...( missing.length > 0 && waiting( __( 'Publish', 'gratora-donation-platform' ) ) ) }
                     >
                         { __( 'Publish', 'gratora-donation-platform' ) }
                     </Button>

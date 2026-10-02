@@ -28,6 +28,29 @@ const libraryItem = (page: Page, name: string): Locator => page.getByRole('optio
 const canvasBlock = (page: Page, type: string): Locator => page.locator(`.gratora-form-editor__canvas [data-type="gratora/${type}"]`);
 const library = (page: Page): Locator => page.locator('.gratora-form-editor__secondary--inserter');
 const viewTab = (page: Page, name: string): Locator => page.getByRole('tab', { name, exact: true });
+const headerButton = (page: Page, text: string): Locator => page.locator('.gratora-editor-header__right button', { hasText: new RegExp(`^${text}$`) });
+
+/** Serves the canonical form as a draft without its Email block. Nothing is written. */
+async function draftWithoutEmail(page: Page): Promise<void> {
+    await page.route(formRequest, async (route) => {
+        if (route.request().method() !== 'GET') return route.abort();
+
+        const response = await route.fetch();
+        const form = await response.json();
+        await route.fulfill({
+            response,
+            json: { ...form, status: 'draft', blocks: form.blocks.replace(/<!-- wp:gratora\/email[^>]*-->\s*/, '') },
+        });
+    });
+}
+
+/** Takes the Email block off the canvas the way an author does. */
+async function removeEmail(page: Page): Promise<void> {
+    await canvasBlock(page, 'email').click({ position: { x: 4, y: 4 } });
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Delete');
+    await expect(canvasBlock(page, 'email')).toHaveCount(0);
+}
 
 /** Lets the page act on what was just done. Core's inserter looks at where focus went on the frame after an insert. */
 const nextFrames = (page: Page): Promise<void> =>
@@ -58,19 +81,24 @@ test.describe('form editor', () => {
     });
 
     test('a draft missing a required block says which', async ({ page }) => {
-        await page.route(formRequest, async (route) => {
-            if (route.request().method() !== 'GET') return route.abort();
-
-            const response = await route.fetch();
-            const form = await response.json();
-            await route.fulfill({
-                response,
-                json: { ...form, status: 'draft', blocks: form.blocks.replace(/<!-- wp:gratora\/email[^>]*-->\s*/, '') },
-            });
-        });
+        await draftWithoutEmail(page);
         await openEditor(page);
 
         await expect(page.locator('.gratora-notice--warning', { hasText: 'Add these blocks before publishing: Email.' })).toBeVisible();
+    });
+
+    test('a draft that cannot be published says why on the button', async ({ page }) => {
+        await draftWithoutEmail(page);
+        await openEditor(page);
+        const publish = headerButton(page, 'Publish');
+        const ground = (): Promise<string> => publish.evaluate((button) => getComputedStyle(button).backgroundColor);
+        const idle = await ground();
+
+        await publish.hover();
+
+        await expect(page.getByRole('tooltip')).toHaveText('Add these blocks first: Email.');
+        // It can be pointed at now, and must not answer as if it could be pressed.
+        expect(await ground()).toBe(idle);
     });
 
     test('a live form missing a required block cannot be saved', async ({ page }) => {
@@ -81,19 +109,25 @@ test.describe('form editor', () => {
             return route.abort();
         });
         await openEditor(page);
-
-        await canvasBlock(page, 'email').click({ position: { x: 4, y: 4 } });
-        await page.keyboard.press('Escape');
-        await page.keyboard.press('Delete');
-        await expect(canvasBlock(page, 'email')).toHaveCount(0);
+        await removeEmail(page);
 
         await expect(page.locator('.gratora-notice--error', { hasText: 'cannot be saved without these blocks: Email' })).toBeVisible();
-        await expect(page.locator('.gratora-editor-header__right button', { hasText: /^Save$/ })).toBeDisabled();
+        await expect(headerButton(page, 'Save')).toBeDisabled();
 
         await page.keyboard.press('ControlOrMeta+s');
         await nextFrames(page);
 
         expect(saves).toBe(0);
+    });
+
+    test('a live form that cannot be saved says why on the button', async ({ page }) => {
+        await page.route(formRequest, (route) => (route.request().method() === 'GET' ? route.continue() : route.abort()));
+        await openEditor(page);
+        await removeEmail(page);
+
+        await headerButton(page, 'Save').hover();
+
+        await expect(page.getByRole('tooltip')).toHaveText('Add these blocks first: Email.');
     });
 
     test('adds a block without a console error', async ({ page }) => {

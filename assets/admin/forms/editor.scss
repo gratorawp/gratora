@@ -550,7 +550,7 @@ $sidebar-width: 300px;
         box-shadow: none;
         transition: background .12s, border-color .12s, box-shadow .12s;
 
-        &:not(:disabled):hover {
+        &:not(:disabled, [aria-disabled="true"]):hover {
             background: $accent-dark;
             border-color: $accent-dark;
             color: #fff;
@@ -586,7 +586,7 @@ $sidebar-width: 300px;
         box-shadow: none;
         transition: background .12s, border-color .12s, color .12s;
 
-        &:not(:disabled):hover {
+        &:not(:disabled, [aria-disabled="true"]):hover {
             background: $bg-page;
             border-color: #cbd0d5;
             color: $text;
