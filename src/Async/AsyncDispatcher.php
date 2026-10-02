@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Gratora\Async;
 
+use ActionScheduler_Store;
+use Throwable;
+
 /**
  * Wrapper over Action Scheduler.
  *
@@ -17,6 +20,9 @@ final class AsyncDispatcher
     public const INSTALLED_OPTION = 'gratora_recurring_installed';
 
     private const RECHECK = 86400;
+
+    /** What one daily check reads; anything past it waits for the next. */
+    private const DUPLICATE_PROBE = 25;
 
     /**
      * @param array<array-key,mixed> $args
@@ -99,7 +105,8 @@ final class AsyncDispatcher
 
     /**
      * Idempotent: no-op if this hook is already scheduled, else run every
-     * $intervalSeconds starting one minute from now.
+     * $intervalSeconds starting one minute from now. Copies of the schedule
+     * are canceled.
      *
      * @param array<array-key,mixed> $args
      * @since 1.0.0
@@ -125,9 +132,65 @@ final class AsyncDispatcher
             \as_schedule_recurring_action($now + 60, $intervalSeconds, $hook, $args, self::GROUP);
         }
 
+        $this->cancelDuplicates($hook, $args);
+
         // hook and args, not just the expiry: this map is also what
         // deactivation reads to know what to unschedule.
         $known[$key] = ['hook' => $hook, 'args' => $args, 'until' => $now + self::RECHECK];
         update_option(self::INSTALLED_OPTION, $known, true);
+    }
+
+    /**
+     * Requests that arrive together all find nothing scheduled and all
+     * schedule, and each copy reschedules itself for good. Action Scheduler's
+     * $unique flag does not stop them: only the table store honors it, and a
+     * new site is not on that store yet.
+     *
+     * The newest is the one kept. Whatever the queue reschedules gets a higher
+     * id than every copy, so the action a request cancels is never the last.
+     *
+     * @param array<array-key,mixed> $args
+     *
+     * @since unreleased
+     */
+    private function cancelDuplicates(string $hook, array $args): void
+    {
+        $pending = \as_get_scheduled_actions([
+            'hook'     => $hook,
+            'args'     => $args,
+            'group'    => self::GROUP,
+            'status'   => ActionScheduler_Store::STATUS_PENDING,
+            'per_page' => self::DUPLICATE_PROBE,
+            'orderby'  => 'none',
+        ], 'ids');
+
+        if (count($pending) < 2) {
+            return;
+        }
+
+        try {
+            $store = ActionScheduler_Store::instance();
+            $kept  = false;
+            rsort($pending, SORT_NUMERIC);
+
+            foreach ($pending as $id) {
+                $action = $store->fetch_action($id);
+
+                // Not a copy: one the queue has started on since it was listed,
+                // or a sweep with a backlog queuing itself once more under its
+                // own hook.
+                if ($action->is_finished() || ! $action->get_schedule()->is_recurring()) {
+                    continue;
+                }
+
+                if ($kept) {
+                    $store->cancel_action($id);
+                }
+
+                $kept = true;
+            }
+        } catch (Throwable) {
+            // This runs on init. The copy waits for the next daily check.
+        }
     }
 }

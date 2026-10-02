@@ -140,6 +140,18 @@ if (! function_exists('as_enqueue_async_action')) {
         $GLOBALS['_gratora_as_calls'][] = ['func' => 'as_schedule_recurring_action', 'args' => [$ts, $interval, $hook, $args, $group]];
         return 1;
     }
+    // Nothing is ever queued here, so the dispatcher finds no copy to cancel.
+    function as_get_scheduled_actions(array $args = [], string $returnFormat = 'OBJECT'): array
+    {
+        return [];
+    }
+}
+
+if (! class_exists('ActionScheduler_Store')) {
+    abstract class ActionScheduler_Store
+    {
+        public const STATUS_PENDING = 'pending';
+    }
 }
 
 // Transient stubs for rate-limiting tests.
