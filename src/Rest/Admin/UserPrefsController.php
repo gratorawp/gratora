@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Gratora\Rest\Admin;
 use Gratora\Dashboard\AttentionDismissals;
+use Gratora\Dashboard\ReviewPrompt;
 use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Per-user admin preferences: widget layout, and the attention items this user
- * has waved off.
+ * Per-user admin preferences: widget layout, the attention items this user has
+ * waved off, and their answer to the review prompt.
  *
  * Layout is user meta as JSON keyed by scope: { [scope]: { order: string[],
  * hidden: string[] } }. Unknown scope keys are ignored client-side, so new
@@ -106,6 +107,23 @@ final class UserPrefsController
                 'key' => ['type' => 'string', 'required' => true],
             ],
         ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/me/review-prompt', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'answerReviewPrompt'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'answer' => ['type' => 'string', 'required' => true, 'enum' => ReviewPrompt::ANSWERS],
+            ],
+        ]);
+    }
+
+    /** @since unreleased */
+    public function answerReviewPrompt(WP_REST_Request $request): WP_REST_Response
+    {
+        (new ReviewPrompt())->answer((string) $request->get_param('answer'));
+
+        return new WP_REST_Response(['review_prompt' => false], 200);
     }
 
     /** @since 1.0.0 */

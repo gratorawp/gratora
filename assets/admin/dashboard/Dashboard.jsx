@@ -23,6 +23,7 @@ import RecentActivity from './widgets/RecentActivity';
 import TopCampaigns from './widgets/TopCampaigns';
 import RecurringForecast from './widgets/RecurringForecast';
 import NeedsAttention from './widgets/NeedsAttention';
+import ReviewPrompt from './ReviewPrompt';
 import { Button } from '@wordpress/components';
 
 const SCOPE = 'dashboard';
@@ -67,6 +68,7 @@ export default function Dashboard() {
     const [ loading, setLoading ]           = useState( true );
     const [ fetchError, setFetchError ]     = useState( false );
     const [ reloadKey, setReloadKey ]       = useState( 0 );
+    const [ reviewAnswered, setReviewAnswered ] = useState( false );
 
     const layout = useGratoraLayout( SCOPE, WIDGET_KEYS );
 
@@ -212,6 +214,10 @@ export default function Dashboard() {
                         { __( 'Show them', 'gratora-donation-platform' ) }
                     </Button>
                 </Notice>
+            ) }
+
+            { metrics?.review_prompt && ! reviewAnswered && (
+                <ReviewPrompt onAnswered={ () => setReviewAnswered( true ) } />
             ) }
 
             { metrics?.test?.includes_test && (

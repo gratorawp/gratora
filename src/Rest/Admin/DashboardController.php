@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Rest\Admin;
 use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Dashboard\ReviewPrompt;
 use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -79,6 +80,7 @@ final class DashboardController
                 'includes_test' => $includeTest,
                 'hidden'        => $this->metrics->hiddenTestCount(),
             ],
+            'review_prompt' => (new ReviewPrompt())->due(),
         ];
 
         if ($want('kpis'))             $payload['kpi']              = $this->metrics->kpi($range, $compare, $includeTest);
