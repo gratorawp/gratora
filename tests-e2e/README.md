@@ -62,6 +62,7 @@ kitchen-sink block set below in step with them.
    ```sh
    export GRATORA_E2E_URL='http://localhost:10075'
    export GRATORA_E2E_FORM_PATH='/gratora-e2e-form/'
+   export GRATORA_E2E_FORM_ID='2'
    export GRATORA_E2E_MULTI_STEP_FORM_PATH='/gratora-e2e-wizard/'
    export GRATORA_E2E_CONDITIONAL_FORM_PATH='/gratora-e2e-conditional/'
    export GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH='/gratora-e2e-custom-fields/'

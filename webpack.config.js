@@ -39,6 +39,12 @@ module.exports = {
                 test: /node_modules[\\/]@wordpress[\\/](dataviews|interface)[\\/]build-module[\\/].+\.js$/,
                 loader: path.resolve( __dirname, 'build-tools/bundledPackagesDomain.cjs' ),
             },
+            // WordPress's editor script registers the interface store, so the
+            // package's components are bundled and its store is left out.
+            {
+                test: /node_modules[\\/]@wordpress[\\/]interface[\\/]build-module[\\/](store[\\/])?index\.js$/,
+                sideEffects: false,
+            },
             ...( ( defaultConfig.module && defaultConfig.module.rules ) || [] ),
         ],
     },

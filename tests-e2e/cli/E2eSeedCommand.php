@@ -334,6 +334,7 @@ final class E2eSeedCommand
         WP_CLI::log('  export GRATORA_E2E_ADMIN_USER="' . $adminUser . '"');
         WP_CLI::log('  export GRATORA_E2E_ADMIN_PASS="' . $adminPass . '"');
         WP_CLI::log('  export GRATORA_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_FORM_ID="' . (int) Form::query()->where('slug', 'gratora-e2e-form')->get()->id . '"');
         WP_CLI::log('  export GRATORA_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export GRATORA_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
