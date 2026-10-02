@@ -413,6 +413,16 @@ $sidebar-width: 300px;
     }
 }
 
+// WordPress lays the side panels over the content at this width; each takes all of it.
+@media (max-width: 782px) {
+    .gratora-form-editor .interface-interface-skeleton__sidebar,
+    .gratora-form-editor .interface-interface-skeleton__secondary-sidebar,
+    .gratora-form-editor .gratora-form-editor__secondary {
+        width: 100%;
+        border-inline: 0;
+    }
+}
+
 .gratora-editor-header {
     height: $header-height;
     display: grid;

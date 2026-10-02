@@ -27,6 +27,7 @@ async function openEditor(page: Page): Promise<string[]> {
 const libraryItem = (page: Page, name: string): Locator => page.getByRole('option', { name, exact: true });
 const canvasBlock = (page: Page, type: string): Locator => page.locator(`.gratora-form-editor__canvas [data-type="gratora/${type}"]`);
 const library = (page: Page): Locator => page.locator('.gratora-form-editor__secondary--inserter');
+const settingsPanel = (page: Page): Locator => page.locator('.interface-interface-skeleton__sidebar');
 const viewTab = (page: Page, name: string): Locator => page.getByRole('tab', { name, exact: true });
 const headerButton = (page: Page, text: string): Locator => page.locator('.gratora-editor-header__right button', { hasText: new RegExp(`^${text}$`) });
 
@@ -153,17 +154,77 @@ test.describe('form editor', () => {
         await expect(libraryItem(page, 'Terms')).toBeInViewport();
     });
 
-    test('on a narrow screen the library closes after adding a block', async ({ page }) => {
+    // Below 782px WordPress lays the side panels over the content instead of beside it.
+    test.describe('on a narrow screen', () => {
+        test.use({ viewport: { width: 700, height: 900 } });
+
+        test('nothing lies over the form until a panel is asked for', async ({ page }) => {
+            await openEditor(page);
+            await expect(library(page)).toHaveCount(0);
+            await expect(settingsPanel(page)).toHaveCount(0);
+
+            await canvasBlock(page, 'name').click({ position: { x: 4, y: 4 } });
+            await expect(canvasBlock(page, 'name')).toHaveClass(/is-selected/);
+            await nextFrames(page);
+
+            await expect(settingsPanel(page)).toHaveCount(0);
+        });
+
+        test('one panel is open at a time, across the whole width', async ({ page }) => {
+            await openEditor(page);
+
+            await page.getByRole('button', { name: 'Toggle block inserter' }).click();
+            await expect(library(page)).toBeVisible();
+
+            await page.getByRole('button', { name: 'Toggle side panel' }).click();
+            await expect(library(page)).toHaveCount(0);
+            await expect.poll(async () => (await settingsPanel(page).boundingBox())?.width).toBe(700);
+
+            await page.getByRole('button', { name: 'Toggle block inserter' }).click();
+            await expect(settingsPanel(page)).toHaveCount(0);
+            await expect.poll(async () => (await library(page).boundingBox())?.width).toBe(700);
+        });
+
+        test('the panel button shows the settings of the block just picked', async ({ page }) => {
+            await openEditor(page);
+            await canvasBlock(page, 'name').click({ position: { x: 4, y: 4 } });
+
+            await page.getByRole('button', { name: 'Toggle side panel' }).click();
+
+            await expect(settingsPanel(page).locator('.block-editor-block-inspector')).toBeVisible();
+        });
+
+        test('changing the view puts the panel away', async ({ page }) => {
+            await openEditor(page);
+            await page.getByRole('button', { name: 'Toggle side panel' }).click();
+            await expect(settingsPanel(page)).toBeVisible();
+
+            await viewTab(page, 'Preview').click();
+
+            await expect(settingsPanel(page)).toHaveCount(0);
+        });
+
+        test('the library closes after adding a block', async ({ page }) => {
+            const errors = await openEditor(page);
+            await page.getByRole('button', { name: 'Toggle block inserter' }).click();
+
+            await libraryItem(page, 'Divider').click();
+            await expect(library(page)).toHaveCount(0);
+            await nextFrames(page);
+
+            expect(errors).toEqual([]);
+        });
+    });
+
+    test('a window made narrow puts its panels away', async ({ page }) => {
+        await openEditor(page);
+        await expect(library(page)).toBeVisible();
+        await expect(settingsPanel(page)).toBeVisible();
+
         await page.setViewportSize({ width: 700, height: 900 });
-        const errors = await openEditor(page);
-        // The settings panel lies over the library at this width.
-        await page.getByRole('button', { name: 'Toggle side panel' }).click();
 
-        await libraryItem(page, 'Divider').click();
         await expect(library(page)).toHaveCount(0);
-        await nextFrames(page);
-
-        expect(errors).toEqual([]);
+        await expect(settingsPanel(page)).toHaveCount(0);
     });
 
     test('the library is back after a trip through preview and settings', async ({ page }) => {

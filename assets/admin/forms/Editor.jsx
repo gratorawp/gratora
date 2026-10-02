@@ -31,6 +31,7 @@ import {
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 import { createBlock, parse, serialize } from '@wordpress/blocks';
+import { useViewportMatch } from '@wordpress/compose';
 import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -213,20 +214,42 @@ export default function Editor( { formId } ) {
     const [ previewHtml, setPreviewHtml ] = useState( '' );
     const [ previewLoading, setPreviewLoading ] = useState( false );
 
-    const [ sidebarOpen, setSidebarOpen ] = useState( true );
-    const [ secondaryView, setSecondaryView ] = useState( 'inserter' );
+    // At this width WordPress lays the side panels over the form instead of
+    // beside it, so none is open until asked for and one closes the other.
+    const isNarrow = useViewportMatch( 'medium', '<' );
+
+    const [ sidebarOpen, setSidebarOpen ] = useState( ! isNarrow );
+    const [ secondaryView, setSecondaryView ] = useState( isNarrow ? null : 'inserter' );
 
     const toggleSecondaryView = useCallback( ( v ) => {
         setSecondaryView( ( cur ) => ( cur === v ? null : v ) );
-    }, [] );
+        if ( isNarrow ) setSidebarOpen( false );
+    }, [ isNarrow ] );
+
+    const toggleSidebar = useCallback( () => {
+        setSidebarOpen( ( open ) => ! open );
+        if ( isNarrow ) setSecondaryView( null );
+    }, [ isNarrow ] );
+
+    const changeView = useCallback( ( next ) => {
+        setView( next );
+        if ( isNarrow ) setSidebarOpen( false );
+    }, [ isNarrow ] );
+
+    useEffect( () => {
+        if ( isNarrow ) {
+            setSidebarOpen( false );
+            setSecondaryView( null );
+        }
+    }, [ isNarrow ] );
 
     const [ selectedBlockId, setSelectedBlockId ] = useState( null );
 
     useEffect( () => {
-        if ( selectedBlockId ) {
+        if ( selectedBlockId && ! isNarrow ) {
             setSidebarOpen( true );
         }
-    }, [ selectedBlockId ] );
+    }, [ selectedBlockId, isNarrow ] );
 
     // Inserter and list view only make sense in Develop: the other views leave
     // them out, and their state waits as it was left.
@@ -521,7 +544,7 @@ export default function Editor( { formId } ) {
             title={ c.value( 'title' ) }
             onTitleChange={ ( v ) => c.edit( { title: v } ) }
             view={ view }
-            onViewChange={ setView }
+            onViewChange={ changeView }
             canUndo={ history.past.length > 0 }
             canRedo={ history.future.length > 0 }
             onUndo={ undo }
@@ -537,7 +560,7 @@ export default function Editor( { formId } ) {
             onPublish={ onPublish }
             onUnpublish={ onUnpublish }
             sidebarOpen={ sidebarOpen }
-            onToggleSidebar={ () => setSidebarOpen( ( v ) => ! v ) }
+            onToggleSidebar={ toggleSidebar }
             secondaryView={ secondaryView }
             onToggleSecondaryView={ toggleSecondaryView }
         />
@@ -722,7 +745,9 @@ function DeselectOnOutsideClick() {
             '.components-popover, .components-dropdown, ' +
             '.gratora-form-editor__sidebar, ' +
             '.gratora-form-editor__secondary, ' +
-            '.interface-interface-skeleton__sidebar';
+            '.interface-interface-skeleton__sidebar, ' +
+            // The way to a picked block's settings where the panel does not open by itself.
+            '.gratora-editor-header__panel-toggle';
         const onDocMouseDown = ( e ) => {
             const t = e.target;
             if ( ! t || t.nodeType !== 1 ) return;
@@ -916,6 +941,7 @@ function EditorHeader( {
                     </Button>
                 ) }
                 <Button
+                    className="gratora-editor-header__panel-toggle"
                     icon={ PanelRightIcon }
                     label={ __( 'Toggle side panel', 'gratora-donation-platform' ) }
                     onClick={ onToggleSidebar }
