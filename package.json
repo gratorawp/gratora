@@ -1,7 +1,7 @@
 {
   "name": "gratora",
   "version": "1.1.0",
-  "description": "Most advanced donation platform for WordPress",
+  "description": "Donation and fundraising platform for WordPress",
   "private": true,
   "scripts": {
     "build": "wp-scripts build && npm run copy:vendor-css",
