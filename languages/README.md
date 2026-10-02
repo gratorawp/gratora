@@ -12,8 +12,9 @@ naming follows from the domain:
 
 ```
 gratora-donation-platform.pot                   - template
-gratora-donation-platform-de_DE.po/.mo          - German
+gratora-donation-platform-de_DE.po/.mo          - German ("du")
 gratora-donation-platform-de_DE-<md5>.json      - German, one per script bundle
+gratora-donation-platform-de_DE_formal.po/.mo   - German ("Sie")
 gratora-donation-platform-es_ES.po/.mo          - Spanish
 ```
 
@@ -30,10 +31,15 @@ the plugin. Requires `wp-cli` with the `i18n` command.
 
 ## Translations shipped with the plugin
 
-German (`de_DE`) and Spanish (`es_ES`) ship in this directory, for sites
-whose locale has no language pack from WordPress.org. Once a pack exists it
-wins for PHP strings, while scripts keep reading the files here, because
-every `wp_set_script_translations()` call names this directory.
+German (`de_DE` and `de_DE_formal`) and Spanish (`es_ES`) ship in this
+directory, for sites whose locale has no language pack from WordPress.org.
+Once a pack exists it wins for PHP strings, while scripts keep reading the
+files here, because every `wp_set_script_translations()` call names this
+directory.
+
+`de_DE_formal` is `de_DE` with the form of address changed. Translate a new
+string in `de_DE` first, then give `de_DE_formal` the same sentence with
+"Sie".
 
 The `.po` file is the source and stays out of the zip; the `.mo` file and the
 `.json` files are generated from it and committed, so the zip carries them:

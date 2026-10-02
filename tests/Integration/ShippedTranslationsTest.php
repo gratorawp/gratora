@@ -28,7 +28,10 @@ final class ShippedTranslationsTest extends IntegrationTestCase
 
         // switch_to_locale() refuses a locale WordPress itself has no files
         // for. A switcher built with these available is a site set to them.
-        add_filter('get_available_languages', static fn (array $langs): array => array_merge($langs, ['de_DE', 'es_ES']));
+        add_filter('get_available_languages', static fn (array $langs): array => array_merge(
+            $langs,
+            ['de_DE', 'de_DE_formal', 'es_ES', 'es_MX', 'es_AR', 'de_AT', 'de_CH', 'de_CH_informal', 'fr_FR']
+        ));
         $this->originalSwitcher        = $GLOBALS['wp_locale_switcher'];
         $GLOBALS['wp_locale_switcher'] = new WP_Locale_Switcher();
         $GLOBALS['wp_locale_switcher']->init();
@@ -49,7 +52,7 @@ final class ShippedTranslationsTest extends IntegrationTestCase
     /** @return array<string, array{0:string}> */
     public function locales(): array
     {
-        return ['German' => ['de_DE'], 'Spanish' => ['es_ES']];
+        return ['German' => ['de_DE'], 'German, formal' => ['de_DE_formal'], 'Spanish' => ['es_ES']];
     }
 
     /** @dataProvider locales */
@@ -58,17 +61,7 @@ final class ShippedTranslationsTest extends IntegrationTestCase
         $source = $this->source($locale);
         $this->assertTrue(switch_to_locale($locale));
 
-        foreach ($source as $entry) {
-            if ($entry->is_plural) {
-                $this->assertSame($entry->translations[0], $this->plural($entry, 1), $entry->singular);
-                $this->assertSame($entry->translations[1], $this->plural($entry, 2), $entry->plural);
-            } else {
-                $served = $entry->context === null
-                    ? __($entry->singular, self::DOMAIN)
-                    : _x($entry->singular, $entry->context, self::DOMAIN);
-                $this->assertSame($entry->translations[0], $served, $entry->singular);
-            }
-        }
+        $this->assertEveryStringReads($source);
 
         restore_previous_locale();
         $this->assertSame('Donations', __('Donations', self::DOMAIN));
@@ -160,6 +153,22 @@ final class ShippedTranslationsTest extends IntegrationTestCase
         unset($messages['']);
 
         return $messages;
+    }
+
+    /** @param array<string, Translation_Entry> $source */
+    private function assertEveryStringReads(array $source): void
+    {
+        foreach ($source as $entry) {
+            if ($entry->is_plural) {
+                $this->assertSame($entry->translations[0], $this->plural($entry, 1), $entry->singular);
+                $this->assertSame($entry->translations[1], $this->plural($entry, 2), $entry->plural);
+            } else {
+                $served = $entry->context === null
+                    ? __($entry->singular, self::DOMAIN)
+                    : _x($entry->singular, $entry->context, self::DOMAIN);
+                $this->assertSame($entry->translations[0], $served, $entry->singular);
+            }
+        }
     }
 
     private function plural(Translation_Entry $entry, int $count): string
