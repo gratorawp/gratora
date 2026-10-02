@@ -34,6 +34,11 @@ module.exports = {
                 test: /node_modules[\\/]@gratora[\\/]ui[\\/]dist[\\/].+\.js$/,
                 loader: path.resolve( __dirname, 'build-tools/gratoraUiDomain.cjs' ),
             },
+            {
+                enforce: 'pre',
+                test: /node_modules[\\/]@wordpress[\\/](dataviews|interface)[\\/]build-module[\\/].+\.js$/,
+                loader: path.resolve( __dirname, 'build-tools/bundledPackagesDomain.cjs' ),
+            },
             ...( ( defaultConfig.module && defaultConfig.module.rules ) || [] ),
         ],
     },
