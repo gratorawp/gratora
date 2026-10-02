@@ -424,33 +424,45 @@ $sidebar-width: 300px;
 }
 
 .gratora-editor-header {
-    height: $header-height;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+    min-height: $header-height;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
+    column-gap: 16px;
     padding: 0 12px;
     background: #fff;
     border-bottom: 1px solid $border-soft;
 
-    &__left {
+    // The two sides grow alike, which keeps the title in the middle. A side
+    // never gets less than its controls need: the title gives way first, then
+    // the right side takes a row of its own, and on a row too short for it
+    // its controls wrap.
+    &__left,
+    &__right {
         display: flex;
+        flex: 1 1 0;
+        flex-wrap: wrap;
         align-items: center;
+        box-sizing: border-box;
+        min-width: fit-content;
+        min-height: $header-height;
+        padding: 8px 0;
+    }
+
+    &__left {
         gap: 4px;
-        min-width: 0;
     }
 
     &__right {
-        display: flex;
-        align-items: center;
         gap: 6px;
         justify-content: flex-end;
-        min-width: 0;
     }
 
     &__center {
         display: flex;
+        flex: 1 1 96px;
         justify-content: center;
+        max-width: 240px;
         min-width: 0;
     }
 
@@ -474,8 +486,8 @@ $sidebar-width: 300px;
     // Match core’s attribute-selector specificity.
     &__title[type="text"] {
         flex: 1 1 auto;
-        max-width: 100%;
-        min-width: 240px;
+        width: 100%;
+        min-width: 0;
         min-height: 32px;
         appearance: none;
         background: #fff;
@@ -545,6 +557,28 @@ $sidebar-width: 300px;
         height: 24px;
         background: $border-soft;
         margin: 0 4px;
+    }
+
+    // On a small screen the title is edited in Settings, and the views go by
+    // their icons; the names stay for a screen reader.
+    @media (max-width: 600px) {
+        &__center {
+            display: none;
+        }
+
+        &__tab {
+            padding: 6px 10px;
+        }
+
+        &__tab-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
     }
 
     .components-button.is-primary {

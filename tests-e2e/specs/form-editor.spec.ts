@@ -53,6 +53,19 @@ async function removeEmail(page: Page): Promise<void> {
     await expect(canvasBlock(page, 'email')).toHaveCount(0);
 }
 
+/** Header controls that something else is drawn over, or that run off the screen. */
+const unreachable = (page: Page): Promise<string[]> =>
+    page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>('.gratora-editor-header :is(a, button, input)')]
+            .filter((control) => control.getBoundingClientRect().width > 0)
+            .filter((control) => {
+                const box = control.getBoundingClientRect();
+                const onTop = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+                return ! onTop || ! control.contains(onTop) || box.left < 0 || box.right > window.innerWidth;
+            })
+            .map((control) => (control.innerText || control.getAttribute('aria-label') || control.getAttribute('placeholder') || control.tagName).trim())
+    );
+
 /** Lets the page act on what was just done. Core's inserter looks at where focus went on the frame after an insert. */
 const nextFrames = (page: Page): Promise<void> =>
     page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
@@ -214,6 +227,29 @@ test.describe('form editor', () => {
 
             expect(errors).toEqual([]);
         });
+    });
+
+    test('every header control can be reached, whatever the width', async ({ page }) => {
+        await openEditor(page);
+        const found: Record<number, string[]> = {};
+
+        for (const width of [1280, 1024, 782, 600, 375]) {
+            await page.setViewportSize({ width, height: 900 });
+            await nextFrames(page);
+            const controls = await unreachable(page);
+            if (controls.length > 0) found[width] = controls;
+        }
+
+        expect(found).toEqual({});
+    });
+
+    test('on a phone the views are still named for a screen reader', async ({ page }) => {
+        await page.setViewportSize({ width: 375, height: 800 });
+        await openEditor(page);
+
+        await viewTab(page, 'Settings').click();
+
+        await expect(viewTab(page, 'Settings')).toHaveAttribute('aria-selected', 'true');
     });
 
     test('a window made narrow puts its panels away', async ({ page }) => {

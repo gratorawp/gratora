@@ -907,7 +907,7 @@ function EditorHeader( {
                             onClick={ () => onViewChange( t.id ) }
                         >
                             { t.icon }
-                            { t.label }
+                            <span className="gratora-editor-header__tab-label">{ t.label }</span>
                         </button>
                     ) ) }
                 </div>
