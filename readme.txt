@@ -8,7 +8,7 @@ Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Free donation plugin for nonprofits and charities. Donation forms, recurring donations, fundraising campaigns, donor management, Stripe and PayPal.
+Free donation plugin for nonprofits and charities. Donation forms, recurring donations, fundraising campaigns, donor management and receipts.
 
 == Description ==
 
