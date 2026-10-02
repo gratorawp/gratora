@@ -31,7 +31,7 @@ final class CsvImporter
      * What a column can be mapped to, as the import screen names it.
      *
      * @return array<string,string>
-     * @since unreleased
+     * @since 1.1.1
      */
     public static function fields(): array
     {

@@ -11,13 +11,13 @@ use Gratora\Foundation\Hooks\HookProvider;
  * WordPress.org. A regional variant with no files of its own, such as Mexican
  * Spanish or Austrian German, reads the shipped language closest to it.
  *
- * @since unreleased
+ * @since 1.1.1
  */
 final class ShippedTranslations extends HookProvider
 {
     private const DOMAIN = 'gratora-donation-platform';
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     protected function filters(): array
     {
         return [
@@ -26,7 +26,7 @@ final class ShippedTranslations extends HookProvider
         ];
     }
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     public function register(): void
     {
         $GLOBALS['wp_textdomain_registry']->set_custom_path(self::DOMAIN, self::directory());
@@ -37,7 +37,7 @@ final class ShippedTranslations extends HookProvider
     /**
      * The shipped language a locale without files of its own reads, or null.
      *
-     * @since unreleased
+     * @since 1.1.1
      */
     public static function closest(string $locale): ?string
     {
@@ -52,7 +52,7 @@ final class ShippedTranslations extends HookProvider
         return null;
     }
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     public function closestFile(mixed $file, mixed $domain): mixed
     {
         if ($domain !== self::DOMAIN || ! is_string($file)) {
@@ -78,7 +78,7 @@ final class ShippedTranslations extends HookProvider
         return is_readable($candidate) ? $candidate : $file;
     }
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     public function closestScriptFile(mixed $file, mixed $handle, mixed $domain): mixed
     {
         return $this->closestFile($file, $domain);

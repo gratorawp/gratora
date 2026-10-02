@@ -15,7 +15,7 @@ use Gratora\Foundation\Auth\Capabilities;
  * the plugin, and stops at their answer: a review or a refusal for good,
  * "later" for a month. Per user, because a review is one person's to give.
  *
- * @since unreleased
+ * @since 1.1.1
  */
 final class ReviewPrompt
 {
@@ -32,7 +32,7 @@ final class ReviewPrompt
 
     private const LATER = 30 * DAY_IN_SECONDS;
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     public function due(): bool
     {
         if (! Capabilities::userCan('gratora_manage_settings')) {
@@ -50,7 +50,7 @@ final class ReviewPrompt
         return $this->enoughGiven();
     }
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     public function answer(string $answer): void
     {
         update_user_meta(

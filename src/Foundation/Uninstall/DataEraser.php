@@ -216,7 +216,7 @@ final class DataEraser
     /**
      * Exposed separately for testing without erasing data.
      *
-     * @since unreleased
+     * @since 1.1.1
      */
     public function removeUserData(): void
     {

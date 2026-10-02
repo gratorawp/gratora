@@ -71,7 +71,7 @@ final class DonationQueries
      * COALESCE because a donation given on a form carries the page it was given
      * on and usually no medium, and a missing key compares as NULL, not as true.
      *
-     * @since unreleased
+     * @since 1.1.1
      */
     public static function takenByThisSitePredicate(): string
     {
@@ -89,7 +89,7 @@ final class DonationQueries
      * @param  T $q
      * @return T
      *
-     * @since unreleased
+     * @since 1.1.1
      */
     public static function takenByThisSite($q)
     {

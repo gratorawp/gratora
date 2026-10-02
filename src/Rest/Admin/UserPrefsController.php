@@ -118,7 +118,7 @@ final class UserPrefsController
         ]);
     }
 
-    /** @since unreleased */
+    /** @since 1.1.1 */
     public function answerReviewPrompt(WP_REST_Request $request): WP_REST_Response
     {
         (new ReviewPrompt())->answer((string) $request->get_param('answer'));

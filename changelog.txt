@@ -1,5 +1,21 @@
 == Changelog ==
 
+= 1.1.1 =
+* New: German and Spanish translations ship with the plugin: German in both the informal and the formal form of address, and Spanish. A site in a regional variant, such as Austrian or Swiss German or Mexican Spanish, reads the closest one.
+* New: once five donations have been given on your site, the dashboard asks whether you would review Gratora on WordPress.org. It asks in that one place, and "Do not ask again" ends it for good.
+* Changed: the plugin is now called Gratora - Donation and Fundraising Platform. Only the name changed.
+* Fixed: text that stayed in English on a translated site now follows the site's language: list filters, paging and column menus, the CSV import's field names, the address block's country field, the default receipt wording shown in Settings, and the Manual and Embedded channel names.
+* Fixed: the list of paid donations with no receipt left out every donation given on a form.
+* Fixed: on a new site most background sweeps were scheduled twice. Each now runs once, and a site that already has the copies loses them within a day.
+* Fixed: "Delete all data" also removes what the plugin kept for each user: the dashboard layout, saved table views and dismissed notices.
+* Fixed: the form editor no longer logs errors in the browser console when it opens or when you add a block.
+* Fixed: the form editor shows its messages again: a save that is refused says why, and a form missing a required block says which one.
+* Fixed: on a live form missing a required block, Save waits instead of failing, and Save and Publish say what they are waiting for when you point at them.
+* Fixed: the form editor's block list and outline are as you left them when you come back from Preview or Settings.
+* Fixed: the form editor fits narrow windows and phones: its side panels open one at a time and its header wraps instead of overlapping, which it did in German on most laptops.
+* Fixed: the "+" at the end of a long form opens its list of blocks above the button, where every block can be reached.
+* Developers: DonationQueries::takenByThisSite() narrows a donation query to donations given on the site, leaving out hand-recorded and imported ones.
+
 = 1.1.0 =
 * New: Fundraising > Add-ons lists every add-on, shows which ones this site has, and activates one you have installed.
 * New: text, links, buttons and focus rings on donation forms, campaign pages, the donor portal and PDFs are checked against the color behind them, so they stay readable with any brand colors.

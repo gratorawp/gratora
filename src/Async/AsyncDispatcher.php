@@ -151,7 +151,7 @@ final class AsyncDispatcher
      *
      * @param array<array-key,mixed> $args
      *
-     * @since unreleased
+     * @since 1.1.1
      */
     private function cancelDuplicates(string $hook, array $args): void
     {

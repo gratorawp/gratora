@@ -265,7 +265,7 @@ final class SettingsService
      *
      * @return array{header_title:string, signoff:string, footer_note:string}
      *
-     * @since unreleased
+     * @since 1.1.1
      */
     public static function receiptWording(): array
     {
