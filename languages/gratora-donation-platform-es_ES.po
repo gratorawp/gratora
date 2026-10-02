@@ -914,8 +914,8 @@ msgstr "https://gratora.net"
 
 #. Description of the plugin
 #: gratora.php
-msgid "Donation & Fundraising Platform for WordPress"
-msgstr "Plataforma de donaciones y recaudación de fondos para WordPress"
+msgid "Donation forms, recurring donations, fundraising campaigns, donor management and receipts. Stripe and PayPal built in."
+msgstr "Formularios de donación, donaciones recurrentes, campañas de recaudación de fondos, gestión de donantes y recibos. Stripe y PayPal integrados."
 
 #. Author of the plugin
 #: gratora.php

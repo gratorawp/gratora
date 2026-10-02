@@ -913,7 +913,7 @@ msgstr ""
 
 #. Description of the plugin
 #: gratora.php
-msgid "Donation & Fundraising Platform for WordPress"
+msgid "Donation forms, recurring donations, fundraising campaigns, donor management and receipts. Stripe and PayPal built in."
 msgstr ""
 
 #. Author of the plugin
