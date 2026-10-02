@@ -47,6 +47,7 @@ composer.lock
 /README.md
 /ROADMAP.md
 /languages/README.md
+*.po
 /.wordpress-org
 /CLAUDE.md
 /docs

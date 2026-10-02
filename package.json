@@ -17,6 +17,7 @@
     "i18n:ui": "wp i18n make-pot node_modules/@gratora/ui/dist .cache/ui.pot --slug=gratora-donation-platform --domain=gratora-donation-platform --ignore-domain",
     "i18n:bundled": "wp i18n make-pot node_modules/@wordpress/dataviews/build-module .cache/dataviews.pot --slug=gratora-donation-platform --ignore-domain --skip-audit && wp i18n make-pot node_modules/@wordpress/interface/build-module .cache/interface.pot --slug=gratora-donation-platform --ignore-domain --skip-audit",
     "i18n": "mkdir -p .cache && npm run i18n:ui && npm run i18n:bundled && wp i18n make-pot . languages/gratora-donation-platform.pot --slug=gratora-donation-platform --domain=gratora-donation-platform --exclude=node_modules,vendor,tests,tests-e2e,build,dist,docs,qa,.github --merge=.cache/ui.pot,.cache/dataviews.pot,.cache/interface.pot",
+    "i18n:locales": "mkdir -p .cache && wp i18n make-pot build .cache/scripts.pot --slug=gratora-donation-platform --domain=gratora-donation-platform --skip-php --skip-blade --skip-block-json --skip-theme-json --skip-audit && node bin/make-translations.mjs",
     "package": "node bin/release.mjs",
     "package:only": "node bin/package.mjs",
     "changelog": "node bin/changelog.mjs"

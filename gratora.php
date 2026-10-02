@@ -55,6 +55,9 @@ define('GRATORA_FILE', __FILE__);
 define('GRATORA_DIR', plugin_dir_path(__FILE__));
 define('GRATORA_URL', plugin_dir_url(__FILE__));
 
+// A locale with no language pack from WordPress.org reads the translations in languages/.
+$GLOBALS['wp_textdomain_registry']->set_custom_path('gratora-donation-platform', GRATORA_DIR . 'languages');
+
 register_activation_hook(__FILE__, [ Plugin::class, 'onPluginActivated']);
 register_deactivation_hook(__FILE__, [ Plugin::class, 'onDeactivation']);
 
