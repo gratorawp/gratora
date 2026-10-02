@@ -27,26 +27,34 @@ use Throwable;
  */
 final class CsvImporter
 {
-    /** What a column can be mapped to. */
-    public const FIELDS = [
-        'email'         => 'Email',
-        'first_name'    => 'First name',
-        'last_name'     => 'Last name',
-        'full_name'     => 'Full name',
-        'company'       => 'Organization',
-        'phone'         => 'Phone',
-        'address_line1' => 'Address',
-        'address_line2' => 'Address line 2',
-        'city'          => 'City',
-        'region'        => 'State or region',
-        'postal'        => 'Postcode',
-        'country'       => 'Country (two-letter code)',
-        'amount'        => 'Amount',
-        'currency'      => 'Currency',
-        'date'          => 'Date',
-        'status'        => 'Status',
-        'reference'     => 'Transaction id',
-    ];
+    /**
+     * What a column can be mapped to, as the import screen names it.
+     *
+     * @return array<string,string>
+     * @since unreleased
+     */
+    public static function fields(): array
+    {
+        return [
+            'email'         => __('Email', 'gratora-donation-platform'),
+            'first_name'    => __('First name', 'gratora-donation-platform'),
+            'last_name'     => __('Last name', 'gratora-donation-platform'),
+            'full_name'     => __('Full name', 'gratora-donation-platform'),
+            'company'       => __('Organization', 'gratora-donation-platform'),
+            'phone'         => __('Phone', 'gratora-donation-platform'),
+            'address_line1' => __('Address', 'gratora-donation-platform'),
+            'address_line2' => __('Address line 2', 'gratora-donation-platform'),
+            'city'          => __('City', 'gratora-donation-platform'),
+            'region'        => __('State or region', 'gratora-donation-platform'),
+            'postal'        => __('Postcode', 'gratora-donation-platform'),
+            'country'       => __('Country (two-letter code)', 'gratora-donation-platform'),
+            'amount'        => __('Amount', 'gratora-donation-platform'),
+            'currency'      => __('Currency', 'gratora-donation-platform'),
+            'date'          => __('Date', 'gratora-donation-platform'),
+            'status'        => __('Status', 'gratora-donation-platform'),
+            'reference'     => __('Transaction id', 'gratora-donation-platform'),
+        ];
+    }
 
     /**
      * An address is the only thing every file has. Everything else, including
@@ -150,7 +158,7 @@ final class CsvImporter
             'sample'  => array_slice($rows, 0, $sampleSize),
             'rows'    => count($rows),
             'mapping' => $this->guessMapping($headers),
-            'fields'  => self::FIELDS,
+            'fields'  => self::fields(),
         ];
     }
 
@@ -174,7 +182,7 @@ final class CsvImporter
                 'errors' => [sprintf(
                     /* translators: %s: comma-separated field names. */
                     __('Map a column to %s before importing.', 'gratora-donation-platform'),
-                    implode(', ', array_map(static fn (string $f): string => self::FIELDS[$f] ?? $f, $missing))
+                    implode(', ', array_map(static fn (string $f): string => self::fields()[$f] ?? $f, $missing))
                 )],
             ];
         }

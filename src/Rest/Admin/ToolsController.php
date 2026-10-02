@@ -967,7 +967,7 @@ final class ToolsController
             return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora-donation-platform'), ['status' => 422]);
         }
 
-        return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
+        return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::fields()], 200);
     }
 
     /** @since 1.0.0 */
