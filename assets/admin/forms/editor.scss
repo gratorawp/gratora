@@ -325,6 +325,13 @@ $sidebar-width: 300px;
     }
 }
 
+// WordPress positions this popover before its blocks load, so an empty list
+// decides whether it fits under the button. Holding the height of the two
+// rows it will show makes that decision with the real size.
+.block-editor-inserter__quick-inserter-results {
+    min-height: 219px;
+}
+
 .gratora-form-editor .interface-interface-skeleton__sidebar {
     width: $sidebar-width;
     border-left: 1px solid $border-soft;

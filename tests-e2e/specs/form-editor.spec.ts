@@ -53,17 +53,21 @@ async function removeEmail(page: Page): Promise<void> {
     await expect(canvasBlock(page, 'email')).toHaveCount(0);
 }
 
-/** Header controls that something else is drawn over, or that run off the screen. */
-const unreachable = (page: Page): Promise<string[]> =>
-    page.evaluate(() =>
-        [...document.querySelectorAll<HTMLElement>('.gratora-editor-header :is(a, button, input)')]
+const headerControls = '.gratora-editor-header :is(a, button, input)';
+const quickInserterBlocks = '.block-editor-inserter__quick-inserter [role="option"]';
+
+/** Those of the controls that something else is drawn over, or that run off the screen. */
+const unreachable = (page: Page, controls: string): Promise<string[]> =>
+    page.evaluate((selector) =>
+        [...document.querySelectorAll<HTMLElement>(selector)]
             .filter((control) => control.getBoundingClientRect().width > 0)
             .filter((control) => {
                 const box = control.getBoundingClientRect();
                 const onTop = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
                 return ! onTop || ! control.contains(onTop) || box.left < 0 || box.right > window.innerWidth;
             })
-            .map((control) => (control.innerText || control.getAttribute('aria-label') || control.getAttribute('placeholder') || control.tagName).trim())
+            .map((control) => (control.innerText || control.getAttribute('aria-label') || control.getAttribute('placeholder') || control.tagName).trim()),
+        controls
     );
 
 /** Lets the page act on what was just done. Core's inserter looks at where focus went on the frame after an insert. */
@@ -167,6 +171,16 @@ test.describe('form editor', () => {
         await expect(libraryItem(page, 'Terms')).toBeInViewport();
     });
 
+    test('the add button at the end of a long form offers its blocks within reach', async ({ page }) => {
+        await openEditor(page);
+        await page.locator('.gratora-form-editor__canvas').evaluate((canvas) => canvas.scrollTo(0, canvas.scrollHeight));
+
+        await page.locator('.gratora-form-editor__canvas .block-list-appender button').click();
+
+        await expect(page.locator(quickInserterBlocks).first()).toBeVisible();
+        await expect.poll(() => unreachable(page, quickInserterBlocks)).toEqual([]);
+    });
+
     // Below 782px WordPress lays the side panels over the content instead of beside it.
     test.describe('on a narrow screen', () => {
         test.use({ viewport: { width: 700, height: 900 } });
@@ -236,7 +250,7 @@ test.describe('form editor', () => {
         for (const width of [1280, 1024, 782, 600, 375]) {
             await page.setViewportSize({ width, height: 900 });
             await nextFrames(page);
-            const controls = await unreachable(page);
+            const controls = await unreachable(page, headerControls);
             if (controls.length > 0) found[width] = controls;
         }
 
