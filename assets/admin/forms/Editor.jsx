@@ -32,7 +32,7 @@ import { InterfaceSkeleton } from '@wordpress/interface';
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 import { createBlock, parse, serialize } from '@wordpress/blocks';
 import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 import { useGratoraRecord } from '../_shared/useGratoraRecord';
@@ -790,7 +790,7 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'gratora-donation-platform' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'develop',  label: _x( 'Build', 'form editor view', 'gratora-donation-platform' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
     { id: 'preview',  label: __( 'Preview', 'gratora-donation-platform' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
     // Settings is a third view of the same form, so it sits with the other two
     // rather than behind a cog, which reads as a tool acting on the current

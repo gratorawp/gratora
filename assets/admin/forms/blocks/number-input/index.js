@@ -1,6 +1,6 @@
 import { useBlockProps, InspectorControls, RichText } from '@wordpress/block-editor';
 import { PanelBody, TextControl, ToggleControl, __experimentalNumberControl as NumberControl } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
@@ -72,7 +72,7 @@ function Edit( { attributes, setAttributes } ) {
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Step', 'gratora-donation-platform' ) }
+                        label={ _x( 'Step', 'the increment of a number field', 'gratora-donation-platform' ) }
                         value={ step }
                         min={ 0 }
                         onChange={ ( v ) => setAttributes( { step: Number( v ) || 1 } ) }

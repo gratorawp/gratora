@@ -45,7 +45,7 @@ final class StylePresets
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'gratora-donation-platform'),
+                'name'        => _x('Bold', 'style preset name', 'gratora-donation-platform'),
                 'description' => __('Deep navy with strong typography and a dramatic shadow.', 'gratora-donation-platform'),
                 'tokens'      => [
                     'gratora-accent'         => '#0F3D5C',

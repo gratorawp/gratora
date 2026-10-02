@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 import { CURRENCIES } from '../_shared/currency';
@@ -510,7 +510,7 @@ const PRESET_CARDS = [
     {
         id:     'bold',
         thumb:  'bold',
-        name:   __( 'Bold', 'gratora-donation-platform' ),
+        name:   _x( 'Bold', 'style preset name', 'gratora-donation-platform' ),
         desc:   __( 'Deep navy, strong type, dramatic shadow.', 'gratora-donation-platform' ),
     },
     {

@@ -1,4 +1,4 @@
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Coins, History } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
@@ -38,7 +38,7 @@ export function eventTitle( event, campaignTitle ) {
         : null;
 
     const toCampaign = campaignTitle
-        ? <> { __( 'to', 'gratora-donation-platform' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
+        ? <> { _x( 'to', 'a donation to a campaign', 'gratora-donation-platform' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
         : null;
 
     let title = <>{ meta.label }</>;
@@ -81,7 +81,7 @@ export function eventTitle( event, campaignTitle ) {
                 ? (
                     <>
                         { __( 'Recurring amount changed from', 'gratora-donation-platform' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
-                        { ' ' }{ __( 'to', 'gratora-donation-platform' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
+                        { ' ' }{ _x( 'to', 'from one amount to another', 'gratora-donation-platform' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
                     </>
                 )
                 : title;

@@ -95,7 +95,7 @@ final class AddonsPage extends HookProvider
             ['ai-assistant', 'gratora-ai-assistant.php', __('AI Assistant', 'gratora-donation-platform'), __('Ask about your fundraising and make changes in plain language.', 'gratora-donation-platform'), 'sparkles'],
             ['payment-gateways', 'gratora-payment-gateways.php', __('Payment Gateways', 'gratora-donation-platform'), __('Take donations through Authorize.Net, Square, GoCardless, Moneris or Razorpay.', 'gratora-donation-platform'), 'credit-card'],
             ['conversion-tracking', 'gratora-conversion-tracking.php', __('Conversion Tracking', 'gratora-donation-platform'), __('Report completed donations to GA4, Google Ads and Meta, with amount and currency.', 'gratora-donation-platform'), 'chart-line'],
-            ['connect', 'gratora-connect.php', __('Connect', 'gratora-donation-platform'), __('Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp.', 'gratora-donation-platform'), 'webhook'],
+            ['connect', 'gratora-connect.php', _x('Connect', 'add-on name', 'gratora-donation-platform'), __('Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp.', 'gratora-donation-platform'), 'webhook'],
             ['tributes', 'gratora-tributes.php', __('Tributes', 'gratora-donation-platform'), __('Donors dedicate a donation in honor or in memory of someone.', 'gratora-donation-platform'), 'rose'],
             ['gift-aid', 'gratora-gift-aid.php', __('Gift Aid', 'gratora-donation-platform'), __('Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC.', 'gratora-donation-platform'), 'landmark'],
         ];

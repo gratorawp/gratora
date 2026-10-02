@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 import { formatAmount, formatDateTime, timeAgo } from '../helpers';
 
@@ -98,7 +98,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `refund-${ ri }`,
             time:  r.occurred_at,
             dot:   r.status === 'succeeded' ? 'is-warn' : 'is-error',
-            title: <>{ __( 'Refund', 'gratora-donation-platform' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
+            title: <>{ _x( 'Refund', 'timeline entry', 'gratora-donation-platform' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
             sub:   r.reason ? <em>&quot;{ r.reason }&quot;</em> : null,
         } );
     } );
