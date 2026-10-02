@@ -88,6 +88,14 @@ final class DataEraser
         'gratora_reference_counter_',
     ];
 
+    /** What core keeps against a person. Listed, as the options are: add-ons share the prefix. */
+    private const USER_META = [
+        'gratora_attention_dismissed',
+        'gratora_review_prompt',
+        'gratora_table_views',
+        'gratora_widget_layout',
+    ];
+
     /**
      * How long a request to delete everything stays good for.
      *
@@ -154,19 +162,26 @@ final class DataEraser
      * test that ran the deletion would take the shared test database with it,
      * which means the only alternative is an untested wipe.
      *
-     * @return array{tables: string[], options: string[]}
+     * @return array{tables: string[], options: string[], user_meta: string[]}
      * @since 1.0.0
      */
     public function plan(): array
     {
         return [
-            'tables'  => $this->coreTables(),
-            'options' => $this->optionsToDelete(),
+            'tables'    => $this->coreTables(),
+            'options'   => $this->optionsToDelete(),
+            'user_meta' => self::USER_META,
         ];
     }
 
-    /** @since 1.0.0 */
-    public function erase(): void
+    /**
+     * @param bool $withUserData False for one site of a network that keeps the
+     *                           plugin elsewhere: a person's rows are shared by
+     *                           every site they use it on.
+     *
+     * @since 1.0.0
+     */
+    public function erase(bool $withUserData = true): void
     {
         // First, so a listener can record which erase it has handled.
         update_option(self::ERASED_AT, time(), false);
@@ -193,6 +208,21 @@ final class DataEraser
             delete_option($option);
         }
         $this->removeCapabilities();
+        if ($withUserData) {
+            $this->removeUserData();
+        }
+    }
+
+    /**
+     * Exposed separately for testing without erasing data.
+     *
+     * @since unreleased
+     */
+    public function removeUserData(): void
+    {
+        foreach (self::USER_META as $key) {
+            delete_metadata('user', 0, $key, '', true);
+        }
     }
 
     /**

@@ -419,7 +419,7 @@ final class Plugin
     private static function eraseEverywhere(bool $networkWide): bool
     {
         if (! $networkWide || ! is_multisite()) {
-            (new DataEraser())->erase();
+            (new DataEraser())->erase(withUserData: ! is_multisite());
 
             return true;
         }

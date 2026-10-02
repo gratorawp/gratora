@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Tests\Multisite;
 
+use Gratora\Dashboard\ReviewPrompt;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Uninstall\DataEraser;
 use Gratora\Tests\Integration\IntegrationTestCase;
@@ -95,6 +96,27 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
             $this->stillHasSettings($this->otherSite),
             'another site’s data is not this deactivation’s to delete'
         );
+    }
+
+    /** What a person set is one row for the whole network, and the other sites still read it. */
+    public function test_a_single_site_deactivation_keeps_what_people_set(): void
+    {
+        (new ReviewPrompt())->answer('never');
+
+        $this->askForTheWipe();
+        Plugin::onDeactivation(false);
+
+        $this->assertSame('never', get_user_meta(get_current_user_id(), 'gratora_review_prompt', true));
+    }
+
+    public function test_a_network_deactivation_removes_what_people_set(): void
+    {
+        (new ReviewPrompt())->answer('never');
+
+        $this->askForTheWipe();
+        Plugin::onDeactivation(true);
+
+        $this->assertSame('', get_user_meta(get_current_user_id(), 'gratora_review_prompt', true));
     }
 
     public function test_a_network_deactivation_without_the_opt_in_erases_nothing(): void
