@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import { AdminPage } from '../helpers/AdminPage';
 
 // Only a real WordPress page loads core's editor scripts beside the bundle, and
@@ -23,6 +23,13 @@ async function openEditor(page: Page): Promise<string[]> {
 
     return errors;
 }
+
+const libraryItem = (page: Page, name: string): Locator => page.getByRole('option', { name, exact: true });
+const canvasBlock = (page: Page, type: string): Locator => page.locator(`.gratora-form-editor__canvas [data-type="gratora/${type}"]`);
+
+/** Core's inserter looks at where focus went on the frame after an insert. */
+const afterInsert = (page: Page): Promise<void> =>
+    page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
 
 test.describe('form editor', () => {
     test.skip(! formId, 'set GRATORA_E2E_FORM_ID via `wp --require=tests-e2e/cli/E2eSeedCommand.php gratora e2e-seed`');
@@ -62,5 +69,41 @@ test.describe('form editor', () => {
         await openEditor(page);
 
         await expect(page.locator('.gratora-notice--warning', { hasText: 'Add these blocks before publishing: Email.' })).toBeVisible();
+    });
+
+    test('adds a block without a console error', async ({ page }) => {
+        const errors = await openEditor(page);
+        const before = await canvasBlock(page, 'divider').count();
+
+        await libraryItem(page, 'Divider').click();
+        await expect(canvasBlock(page, 'divider')).toHaveCount(before + 1);
+        await afterInsert(page);
+
+        expect(errors).toEqual([]);
+    });
+
+    test('a block that can be added once takes focus and leaves the library in place', async ({ page }) => {
+        await openEditor(page);
+        const added = canvasBlock(page, 'terms');
+
+        await libraryItem(page, 'Terms').click();
+        await expect(added).toHaveCount(1);
+        await expect.poll(() => added.evaluate((block) => block.contains(document.activeElement))).toBe(true);
+        await afterInsert(page);
+
+        await expect(libraryItem(page, 'Terms')).toBeInViewport();
+    });
+
+    test('on a narrow screen the library closes after adding a block', async ({ page }) => {
+        await page.setViewportSize({ width: 700, height: 900 });
+        const errors = await openEditor(page);
+        // The settings panel lies over the library at this width.
+        await page.getByRole('button', { name: 'Toggle side panel' }).click();
+
+        await libraryItem(page, 'Divider').click();
+        await expect(page.locator('.gratora-form-editor__secondary--inserter')).toHaveCount(0);
+        await afterInsert(page);
+
+        expect(errors).toEqual([]);
     });
 });

@@ -654,6 +654,10 @@ export default function Editor( { formId } ) {
                                             showInserterHelpPanel={ false }
                                             rootClientId=""
                                             __experimentalInitialTab="blocks"
+                                            // Core's inserter needs both after an insert: without the first it reads
+                                            // a ref nobody passes, and on a narrow screen it calls the second.
+                                            shouldFocusBlock
+                                            onClose={ () => setSecondaryView( null ) }
                                         />
                                     </div>
                                 ) : secondaryView === 'listview' ? (
