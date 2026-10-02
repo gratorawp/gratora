@@ -109,6 +109,51 @@ final class ShippedTranslationsTest extends IntegrationTestCase
         }
     }
 
+    /** @return array<string, array{0:string, 1:string}> */
+    public function regionalVariants(): array
+    {
+        return [
+            'Mexican Spanish'        => ['es_MX', 'es_ES'],
+            'Argentinian Spanish'    => ['es_AR', 'es_ES'],
+            'Austrian German'        => ['de_AT', 'de_DE'],
+            'Swiss German'           => ['de_CH', 'de_DE_formal'],
+            'Swiss German, informal' => ['de_CH_informal', 'de_DE'],
+        ];
+    }
+
+    /**
+     * WordPress looks for files named after the site's own locale and finds
+     * none for a regional variant, which left a Mexican or an Austrian site in
+     * English beside a translation it could read.
+     *
+     * @dataProvider regionalVariants
+     */
+    public function test_a_regional_variant_reads_the_shipped_language_closest_to_it(string $locale, string $shipped): void
+    {
+        global $wp_scripts;
+
+        set_current_screen('gratora_page_gratora-donations');
+        ob_start();
+        (new DonationsPage())->render();
+        ob_end_clean();
+        $bundle = substr($wp_scripts->registered['gratora-admin-donations']->src, strlen(GRATORA_URL));
+
+        $source = $this->source($shipped);
+        $this->assertTrue(switch_to_locale($locale));
+
+        $this->assertEveryStringReads($source);
+        foreach ($this->served($bundle) as $key => $translations) {
+            $this->assertSame($source[$key]->translations, $translations, $key);
+        }
+    }
+
+    public function test_a_language_with_no_relative_among_the_shipped_ones_stays_in_english(): void
+    {
+        $this->assertTrue(switch_to_locale('fr_FR'));
+
+        $this->assertSame('Donations', __('Donations', self::DOMAIN));
+    }
+
     /**
      * The Receipts panel shows the wording a receipt goes out with. Held as
      * literals it read English on every site, beside receipts in the site's

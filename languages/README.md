@@ -37,6 +37,11 @@ Once a pack exists it wins for PHP strings, while scripts keep reading the
 files here, because every `wp_set_script_translations()` call names this
 directory.
 
+A regional variant with no files of its own reads the closest shipped
+language (`ShippedTranslations::closest()`): every `es_*` reads `es_ES`,
+`de_AT` and `de_CH_informal` read `de_DE`, and `de_CH` reads `de_DE_formal`,
+as WordPress's own Swiss German addresses the reader as "Sie".
+
 `de_DE_formal` is `de_DE` with the form of address changed. Translate a new
 string in `de_DE` first, then give `de_DE_formal` the same sentence with
 "Sie".
