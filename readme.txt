@@ -1,6 +1,6 @@
 === Gratora - Donation and Fundraising Platform ===
 Contributors: donodp
-Tags: donation, fundraising, nonprofit, recurring donations, donation form
+Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.1
@@ -8,16 +8,23 @@ Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Donation forms, recurring donations, campaigns, funds, PDF receipts and donor records. Donors can cover the processing fee. Everything included.
+Free donation plugin for nonprofits and charities. Donation forms, recurring donations, fundraising campaigns, donor management, Stripe and PayPal.
 
 == Description ==
 
 Gratora is a donation and fundraising platform for WordPress. Not a form plugin
 you then extend, and not a starting point you pay to finish. The donation form,
 the campaign page around it, the recurring plans, the donor record, the receipt
-and the report are all here, in one plugin, on day one.
+and the report are all here, in one free plugin, on day one.
 
-Guides, support and add-ons are at [gratora.net](https://gratora.net).
+It is made for nonprofits of every size: a charity, a church, a school, a club,
+or anyone else who takes donations on a WordPress site. Supporters donate once
+or set up a recurring donation, and pay by card, Apple Pay, Google Pay, SEPA
+debit or PayPal.
+
+See it before you install it: [the live demo](https://gratora.net/demo) runs in
+your browser on a year of sample data. Guides, support and add-ons are at
+[gratora.net](https://gratora.net).
 
 = Donation forms built in the WordPress editor =
 
@@ -32,19 +39,25 @@ builder and no separate form plugin.
 * Show a field only when it applies, based on the amount, the frequency or
   another answer on the form
 * Anonymous giving, consent checkboxes and a privacy notice
+* Put a form on any page with the Donation form block or its shortcode, or add
+  a Donate button that opens the form in a pop-up
 
 = Recurring donations =
 
 * Weekly, every two weeks, monthly, quarterly or yearly, and you pick which of
   those each form offers
-* Donors change or cancel their own plan
+* Donors change, pause or cancel their own plan in the donor portal
+* A receipt for every renewal, and an email to the donor the first time a
+  payment is declined
+* Part of the free plugin, with no add-on to buy
 
-= Campaigns and funds =
+= Fundraising campaigns and funds =
 
 * Gratora builds the campaign page for you, donation form included
 * Goals by amount raised, by number of donations or by number of donors, with an
   optional end date
-* Progress bars, recent donations, top donors and a supporter wall
+* Progress bars, recent donations, top donors and a supporter wall: the parts
+  of a crowdfunding page, on your own site
 * Funds let donors choose what their donation pays for.
 
 = Donor management and a donor portal =
@@ -54,7 +67,7 @@ builder and no separate form plugin.
 * Lifecycle stages, segments, lifetime value and retention, worked out for you
 * Export donors to CSV
 
-= Receipts and reports =
+= Donation receipts and reports =
 
 * Receipts emailed automatically, plus branded PDF receipts and year-end
   statements donors can download themselves
@@ -62,12 +75,13 @@ builder and no separate form plugin.
 * Revenue, donation and donor figures over any period, per campaign or overall
 * A campaign report as a one-page PDF, and revenue as CSV
 
-= Payments =
+= Payments with Stripe and PayPal =
 
 Take payments with your own Stripe or PayPal account, so the money goes straight
-to you. Additional fees may apply from your payment provider. Cash, check and
-bank transfer are recorded next to online donations, full and partial refunds are
-supported, and test mode is kept out of your reporting.
+to you. Additional fees may apply from your payment provider. Stripe takes cards,
+Apple Pay, Google Pay and SEPA debit. Cash, check and bank transfer are recorded
+next to online donations, full and partial refunds are supported, and test mode
+is kept out of your reporting.
 
 Public donation endpoints are rate limited, so a run of automated card attempts
 does not turn into a run of donation records.
@@ -86,8 +100,8 @@ amount, and you decide whether it starts ticked.
 = Made to look like your site =
 
 Style presets you set once and reuse across every campaign and form, with a
-contrast check so text stays readable. Gratora is translation ready and ships a
-.pot file.
+contrast check so text stays readable. Gratora comes in English, German and
+Spanish, and is ready to be translated into other languages.
 
 = Your donor data stays yours =
 
@@ -151,10 +165,38 @@ https://github.com/gratorawp/gratora
 
 == Frequently Asked Questions ==
 
+= Is Gratora free? =
+
+Yes. Donation forms, recurring donations, campaigns, donor management, receipts
+and reports are all in the free plugin. The add-ons are optional.
+
 = Does Gratora take a cut of donations? =
 
 No. You connect your own Stripe or PayPal account and donations settle straight
 into it. Additional fees may apply from your payment provider.
+
+= Can I take recurring donations without buying an add-on? =
+
+Yes. Recurring donations are part of the free plugin: weekly, every two weeks,
+monthly, quarterly or yearly. Donors change, pause or cancel their own plan in
+the donor portal.
+
+= Which payment methods can donors use? =
+
+Cards, Apple Pay, Google Pay and SEPA debit through Stripe, and PayPal. Cash,
+check and bank transfer are recorded as offline donations. The Payment Gateways
+add-on adds Authorize.Net, Square, GoCardless, Moneris and Razorpay.
+
+= How do I add a donation form to my site? =
+
+Create a campaign and Gratora builds its page, donation form included. To put a
+form anywhere else, use the Donation form block, the Donate button block, or the
+shortcode shown on the form's own screen.
+
+= Is there a demo? =
+
+Yes, at [gratora.net/demo](https://gratora.net/demo). It runs in your browser on
+sample data, so there is nothing to install.
 
 = Can donors pay the processing fee for me? =
 
@@ -171,28 +213,39 @@ restyle or remove anything on it.
 No. Campaign pages and donation forms are built from blocks in the WordPress
 editor.
 
-= Can I bring donations in from somewhere else? =
+= Can I move from GiveWP or another donation plugin? =
 
-Yes. Import a CSV of donors, or donors and donations together, mapping your
-columns to Gratora fields.
+Yes. The free GiveWP Importer add-on moves donors, donations, campaigns and
+recurring donations over. From anything else, import a CSV of donors, or donors
+and donations together, mapping your columns to Gratora fields.
 
 = Can I try it without taking real money? =
 
 Yes. Turn on test mode, run donations through your provider's sandbox, and none
 of it reaches your reporting.
 
+= Does Gratora help with GDPR? =
+
+It gives you the tools: consent is recorded per donation, IP anonymization is on
+by default, contact details are encrypted at rest, and you can erase or
+anonymize a donor on request. Compliance depends on how you use them.
+
+= Which languages does Gratora come in? =
+
+English, German and Spanish, and it is ready to be translated into others.
+
 == Screenshots ==
 
-1. The dashboard: what came in, where it came from, and what needs attention.
+1. The fundraising dashboard: what came in, where it came from, and what needs attention.
 2. Every donation, filterable by status, campaign, gateway and frequency.
 3. A donor record: lifetime giving, their whole history, receipts, consent and notes.
 4. Donor insights: lifecycle stages, segments, lifetime value and retention.
-5. Campaigns, each with its goal and progress.
+5. Fundraising campaigns, each with its goal and progress.
 6. A campaign in detail, with its own figures and a report to download.
-7. The block-based form builder. Fields and layout are blocks, so the editor is the one you already know.
-8. Recurring plans, with monthly recurring revenue and the renewals that need attention.
+7. The donation form builder. Fields and layout are blocks, so the editor is the one you already know.
+8. Recurring donations, with monthly recurring revenue and the renewals that need attention.
 9. Funds, so a donor can choose what their donation pays for.
-10. Receipt settings: the template, your logo, and the merge tags it fills in.
+10. Donation receipt settings: the template, your logo, and the merge tags it fills in.
 
 == Changelog ==
 
