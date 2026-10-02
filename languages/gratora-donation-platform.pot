@@ -903,7 +903,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: gratora.php
-msgid "Gratora - Donation Platform"
+msgid "Gratora - Donation and Fundraising Platform"
 msgstr ""
 
 #. Plugin URI of the plugin

@@ -1,4 +1,4 @@
-=== Gratora - Donation Platform ===
+=== Gratora - Donation and Fundraising Platform ===
 Contributors: donodp
 Tags: donation, fundraising, nonprofit, recurring donations, donation form
 Requires at least: 7.0

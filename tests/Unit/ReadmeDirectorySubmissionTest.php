@@ -204,6 +204,20 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         $this->assertSame($composer['license'] ?? null, $headers['License']);
     }
 
+    /** Plugin Check reports a readme whose title is not the plugin's name. */
+    public function test_the_readme_is_titled_with_the_plugins_name(): void
+    {
+        $plugin = (string) file_get_contents($this->root() . '/gratora.php');
+
+        preg_match('/^=== (.+) ===$/m', $this->readme(), $title);
+        $this->assertNotEmpty($title, 'readme.txt has no title line.');
+
+        preg_match('/^\s*\*\s*Plugin Name:\s*(.+)$/m', $plugin, $name);
+        $this->assertNotEmpty($name, 'gratora.php has no Plugin Name header.');
+
+        $this->assertSame(trim($name[1]), trim($title[1]));
+    }
+
     public function test_the_tags_and_short_description_fit_what_the_directory_shows(): void
     {
         $tags = array_filter(array_map('trim', explode(',', $this->headers()['Tags'] ?? '')));

@@ -904,8 +904,8 @@ msgstr "Pie de página"
 
 #. Plugin Name of the plugin
 #: gratora.php
-msgid "Gratora - Donation Platform"
-msgstr "Gratora - Plataforma de donaciones"
+msgid "Gratora - Donation and Fundraising Platform"
+msgstr "Gratora - Plataforma de donaciones y recaudación de fondos"
 
 #. Plugin URI of the plugin
 #: gratora.php
