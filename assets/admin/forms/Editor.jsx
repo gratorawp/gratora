@@ -613,9 +613,9 @@ export default function Editor( { formId } ) {
                         <AssistantBridge />
                         <InterfaceSkeleton
                             header={ header }
-                            notices={ notices }
-                            content={
-                                view === 'preview' ? (
+                            content={ <>
+                                { notices }
+                                { view === 'preview' ? (
                                     <PreviewPane
                                         loading={ previewLoading }
                                         html={ previewHtml }
@@ -644,8 +644,8 @@ export default function Editor( { formId } ) {
                                             ) }
                                         </div>
                                     </div>
-                                )
-                            }
+                                ) }
+                            </> }
                             sidebar={ sidebar }
                             secondarySidebar={
                                 secondaryView === 'inserter' ? (
