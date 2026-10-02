@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-30T15:37:08+00:00\n"
+"POT-Creation-Date: 2026-10-02T06:47:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -74,6 +74,7 @@ msgid "Replace"
 msgstr ""
 
 #: components/CoverImagePicker.js:71
+#: components/dataviews-filters/filter-summary.js:178
 #: assets/admin/campaign-blocks/index.jsx:180
 #: assets/admin/campaigns/CoverImageCard.jsx:33
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:327
@@ -115,6 +116,7 @@ msgstr ""
 
 #: components/Dialog.js:53
 #: components/Drawer.js:56
+#: dataforms-layouts/panel/index.js:31
 #: src/Campaigns/Blocks/views/donate-button.php:49
 #: src/Forms/Shortcode/DonationFormShortcode.php:837
 #: assets/admin/campaigns/Detail.jsx:1547
@@ -232,6 +234,7 @@ msgid "Other amount"
 msgstr ""
 
 #: styling/StylePreview.js:127
+#: src/Foundation/Transfer/CsvImporter.php:42
 msgid "Full name"
 msgstr ""
 
@@ -271,6 +274,8 @@ msgid "ends"
 msgstr ""
 
 #: styling/TokenEditor.js:122
+#: components/dataviews-filters/filter-summary.js:178
+#: components/dataviews-filters/reset-filters.js:32
 #: assets/admin/settings/panels/CurrencyPanel.jsx:196
 msgid "Reset"
 msgstr ""
@@ -291,6 +296,7 @@ msgstr ""
 #: src/Forms/Blocks/views/email.php:8
 #: src/Forms/FormService.php:61
 #: src/Forms/Shortcode/DonationFormShortcode.php:763
+#: src/Foundation/Transfer/CsvImporter.php:39
 #: assets/admin/donations/detail/helpers.js:32
 #: assets/admin/donors/DonorProfile.jsx:145
 #: assets/admin/donors/index.jsx:338
@@ -463,6 +469,421 @@ msgstr ""
 msgid "Hide widget"
 msgstr ""
 
+#: components/dataviews-bulk-actions/index.js:85
+msgid "Deselect all"
+msgstr ""
+
+#: components/dataviews-bulk-actions/index.js:85
+msgid "Select all"
+msgstr ""
+
+#. translators: %d: number of items.
+#: components/dataviews-bulk-actions/index.js:142
+#, js-format
+msgid "%d Item selected"
+msgid_plural "%d Items selected"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of items.
+#: components/dataviews-bulk-actions/index.js:143
+#, js-format
+msgid "%d Item"
+msgid_plural "%d Items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: components/dataviews-bulk-actions/index.js:173
+#: src/Admin/views/deactivation-dialog.php:43
+#: src/Forms/Shortcode/DonationFormShortcode.php:819
+#: assets/admin/campaigns/CreateCampaignDrawer.jsx:177
+#: assets/admin/campaigns/Detail.jsx:411
+#: assets/admin/campaigns/Detail.jsx:1838
+#: assets/admin/donations/Detail.jsx:372
+#: assets/admin/donations/detail/RefundDialog.jsx:128
+#: assets/admin/donations/RecordDonationDrawer.jsx:184
+#: assets/admin/donors/DonorProfile.jsx:130
+#: assets/admin/donors/profile/tabs/ConsentTab.jsx:65
+#: assets/admin/forms/Editor.jsx:692
+#: assets/admin/funds/List.jsx:689
+#: assets/admin/funds/List.jsx:861
+#: assets/admin/settings/panels/EmailPanel.jsx:246
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:170
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:223
+#: assets/admin/settings/panels/StripeKeysCard.jsx:134
+#: assets/admin/settings/panels/StripeKeysCard.jsx:252
+#: assets/admin/tools/tabs/CsvImportCard.jsx:168
+#: assets/admin/_shared/components/ConfirmDialog.jsx:103
+#: assets/donor-portal/index.jsx:1739
+msgid "Cancel"
+msgstr ""
+
+#: components/dataviews-filters/add-filter.js:76
+#: components/dataviews-filters/index.js:74
+#: dataviews-layouts/table/column-header-menu.js:124
+msgid "Add filter"
+msgstr ""
+
+#. translators: 1: Filter name. 3: Filter value. e.g.: "Author is any: Admin, Editor".
+#: components/dataviews-filters/filter-summary.js:39
+#, js-format
+msgid "<Name>%1$s is any: </Name><Value>%2$s</Value>"
+msgstr ""
+
+#. translators: 1: Filter name. 3: Filter value. e.g.: "Author is none: Admin, Editor".
+#: components/dataviews-filters/filter-summary.js:43
+#, js-format
+msgid "<Name>%1$s is none: </Name><Value>%2$s</Value>"
+msgstr ""
+
+#. translators: 1: Filter name. 3: Filter value. e.g.: "Author is all: Admin, Editor".
+#: components/dataviews-filters/filter-summary.js:47
+#, js-format
+msgid "<Name>%1$s is all: </Name><Value>%2$s</Value>"
+msgstr ""
+
+#. translators: 1: Filter name. 3: Filter value. e.g.: "Author is not all: Admin, Editor".
+#: components/dataviews-filters/filter-summary.js:51
+#, js-format
+msgid "<Name>%1$s is not all: </Name><Value>%2$s</Value>"
+msgstr ""
+
+#. translators: 1: Filter name. 3: Filter value. e.g.: "Author is: Admin".
+#: components/dataviews-filters/filter-summary.js:55
+#, js-format
+msgid "<Name>%1$s is: </Name><Value>%2$s</Value>"
+msgstr ""
+
+#. translators: 1: Filter name. 3: Filter value. e.g.: "Author is not: Admin".
+#: components/dataviews-filters/filter-summary.js:59
+#, js-format
+msgid "<Name>%1$s is not: </Name><Value>%2$s</Value>"
+msgstr ""
+
+#. translators: 1: Filter name e.g.: "Unknown status for Author".
+#: components/dataviews-filters/filter-summary.js:62
+#, js-format
+msgid "Unknown status for %1$s"
+msgstr ""
+
+#: components/dataviews-filters/filter-summary.js:83
+msgid "Conditions"
+msgstr ""
+
+#. translators: 1: Filter name.
+#: components/dataviews-filters/filter-summary.js:152
+#, js-format
+msgid "Filter by: %1$s"
+msgstr ""
+
+#: components/dataviews-filters/index.js:79
+msgctxt "verb"
+msgid "Filter"
+msgstr ""
+
+#. translators: List of items for a filter. 1: Filter name. e.g.: "List of: Author".
+#: components/dataviews-filters/search-widget.js:83
+#, js-format
+msgid "List of: %1$s"
+msgstr ""
+
+#: components/dataviews-filters/search-widget.js:178
+#: components/dataviews-filters/search-widget.js:180
+msgid "Search items"
+msgstr ""
+
+#: components/dataviews-filters/search-widget.js:183
+#: components/dataviews-search/index.js:41
+msgid "Search"
+msgstr ""
+
+#: components/dataviews-filters/search-widget.js:220
+msgid "No results found"
+msgstr ""
+
+#: components/dataviews-item-actions/index.js:164
+#: dataviews-layouts/list/index.js:161
+#: dataviews-layouts/table/index.js:283
+#: assets/admin/donations/detail/rail/ActionsCard.jsx:35
+msgid "Actions"
+msgstr ""
+
+#. translators: Current page number in total number of pages
+#: components/dataviews-pagination/index.js:35
+#: components/dataviews-pagination/index.js:40
+#, js-format
+msgid "Page %1$s of %2$s"
+msgstr ""
+
+#. translators: 1: Current page number, 2: Total number of pages.
+#: components/dataviews-pagination/index.js:50
+#: components/dataviews-pagination/index.js:67
+#, js-format
+msgctxt "paging"
+msgid "<div>Page</div>%1$s<div>of %2$s</div>"
+msgstr ""
+
+#: components/dataviews-pagination/index.js:55
+#: components/dataviews-pagination/index.js:78
+msgid "Current page"
+msgstr ""
+
+#: components/dataviews-pagination/index.js:79
+#: components/dataviews-pagination/index.js:105
+msgid "Previous page"
+msgstr ""
+
+#: components/dataviews-pagination/index.js:91
+#: components/dataviews-pagination/index.js:117
+msgid "Next page"
+msgstr ""
+
+#: components/dataviews-selection-checkbox/index.js:25
+msgid "(no title)"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:54
+#: assets/admin/campaign-blocks/index.jsx:589
+#: assets/admin/forms/blocks/radio/index.js:63
+#: assets/admin/forms/Editor.jsx:1368
+msgid "Layout"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:113
+#: assets/admin/campaign-blocks/index.jsx:806
+msgid "Sort by"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:147
+msgid "Order"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:184
+msgid "Items per page"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:227
+#: components/dataviews-view-config/index.js:411
+#: assets/admin/forms/Editor.jsx:794
+#: assets/admin/settings/panels/CurrencyPanel.jsx:358
+#: assets/admin/settings/panels/EmailPanel.jsx:277
+#: assets/admin/tools/tabs/CsvImportCard.jsx:220
+msgid "Preview"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:314
+msgid "This field can't be moved up"
+msgstr ""
+
+#. translators: %s: field label
+#: components/dataviews-view-config/index.js:315
+#, js-format
+msgid "Move %s up"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:322
+msgid "This field can't be moved down"
+msgstr ""
+
+#. translators: %s: field label
+#: components/dataviews-view-config/index.js:323
+#, js-format
+msgid "Move %s down"
+msgstr ""
+
+#. translators: %s: field label
+#: components/dataviews-view-config/index.js:336
+#, js-format
+msgctxt "field"
+msgid "Hide %s"
+msgstr ""
+
+#. translators: %s: field label
+#: components/dataviews-view-config/index.js:337
+#, js-format
+msgctxt "field"
+msgid "Show %s"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:502
+#: assets/admin/forms/blocks/hidden/index.js:71
+msgid "Hidden"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:582
+msgctxt "View is used as a noun"
+msgid "View options"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:595
+#: assets/admin/campaigns/Detail.jsx:1574
+#: assets/admin/campaigns/Detail.jsx:1600
+msgid "Appearance"
+msgstr ""
+
+#: components/dataviews-view-config/index.js:602
+msgid "Properties"
+msgstr ""
+
+#: constants.js:22
+msgid "Is"
+msgstr ""
+
+#: constants.js:26
+msgid "Is not"
+msgstr ""
+
+#: constants.js:30
+msgid "Is any"
+msgstr ""
+
+#: constants.js:34
+msgid "Is none"
+msgstr ""
+
+#: constants.js:38
+msgid "Is all"
+msgstr ""
+
+#: constants.js:42
+msgid "Is not all"
+msgstr ""
+
+#: constants.js:55
+msgid "Sort ascending"
+msgstr ""
+
+#: constants.js:56
+msgid "Sort descending"
+msgstr ""
+
+#: dataform-controls/select.js:38
+msgid "Select item"
+msgstr ""
+
+#. translators: %s: Field name.
+#: dataforms-layouts/panel/index.js:99
+#, js-format
+msgctxt "field"
+msgid "Edit %s"
+msgstr ""
+
+#: dataviews-layouts/grid/index.js:81
+msgid "Navigate to item"
+msgstr ""
+
+#: dataviews-layouts/grid/index.js:247
+#: dataviews-layouts/list/index.js:334
+#: dataviews-layouts/table/index.js:313
+msgid "No results"
+msgstr ""
+
+#: dataviews-layouts/grid/preview-size-picker.js:100
+msgid "Preview size"
+msgstr ""
+
+#: dataviews-layouts/index.js:18
+#: dataviews-layouts/index.js:25
+msgid "Table"
+msgstr ""
+
+#: dataviews-layouts/index.js:24
+#: dataviews-layouts/index.js:32
+msgid "Grid"
+msgstr ""
+
+#: dataviews-layouts/index.js:30
+#: dataviews-layouts/index.js:39
+#: assets/admin/campaign-blocks/index.jsx:592
+#: assets/admin/donors/index.jsx:711
+msgid "List"
+msgstr ""
+
+#: dataviews-layouts/table/column-header-menu.js:141
+msgid "Move left"
+msgstr ""
+
+#: dataviews-layouts/table/column-header-menu.js:156
+msgid "Move right"
+msgstr ""
+
+#: dataviews-layouts/table/column-header-menu.js:170
+msgid "Hide column"
+msgstr ""
+
+#: dataviews-layouts/table/density-picker.js:19
+msgid "Density"
+msgstr ""
+
+#: dataviews-layouts/table/density-picker.js:33
+msgctxt "Density option for DataView layout"
+msgid "Comfortable"
+msgstr ""
+
+#: dataviews-layouts/table/density-picker.js:36
+msgctxt "Density option for DataView layout"
+msgid "Balanced"
+msgstr ""
+
+#: dataviews-layouts/table/density-picker.js:39
+msgctxt "Density option for DataView layout"
+msgid "Compact"
+msgstr ""
+
+#: components/complementary-area/index.js:137
+#: components/complementary-area/index.js:173
+msgid "Close plugin"
+msgstr ""
+
+#: components/complementary-area/index.js:253
+#: components/complementary-area/index.js:328
+msgid "Unpin from toolbar"
+msgstr ""
+
+#: components/complementary-area/index.js:253
+#: components/complementary-area/index.js:329
+msgid "Pin to toolbar"
+msgstr ""
+
+#. translators: accessibility text for the top bar landmark region.
+#: components/interface-skeleton/index.js:92
+#: components/interface-skeleton/index.js:102
+msgctxt "header landmark area"
+msgid "Header"
+msgstr ""
+
+#. translators: accessibility text for the content landmark region.
+#: components/interface-skeleton/index.js:94
+#: components/interface-skeleton/index.js:104
+msgid "Content"
+msgstr ""
+
+#. translators: accessibility text for the secondary sidebar landmark region.
+#: components/interface-skeleton/index.js:96
+#: components/interface-skeleton/index.js:106
+msgid "Block Library"
+msgstr ""
+
+#. translators: accessibility text for the settings landmark region.
+#: components/interface-skeleton/index.js:98
+#: components/interface-skeleton/index.js:108
+msgctxt "settings landmark area"
+msgid "Settings"
+msgstr ""
+
+#. translators: accessibility text for the publish landmark region.
+#: components/interface-skeleton/index.js:100
+#: components/interface-skeleton/index.js:110
+#: assets/admin/forms/Editor.jsx:913
+msgid "Publish"
+msgstr ""
+
+#. translators: accessibility text for the footer landmark region.
+#: components/interface-skeleton/index.js:102
+#: components/interface-skeleton/index.js:112
+msgid "Footer"
+msgstr ""
+
 #. Plugin Name of the plugin
 #: gratora.php
 msgid "Gratora - Donation Platform"
@@ -583,7 +1004,7 @@ msgid "Report completed donations to GA4, Google Ads and Meta, with amount and c
 msgstr ""
 
 #: src/Admin/Pages/AddonsPage.php:98
-#: assets/admin/onboarding/Onboarding.jsx:692
+msgctxt "add-on name"
 msgid "Connect"
 msgstr ""
 
@@ -1039,30 +1460,6 @@ msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:36
 msgid "Reactivating will not bring any of it back. Export anything you need first."
-msgstr ""
-
-#: src/Admin/views/deactivation-dialog.php:43
-#: src/Forms/Shortcode/DonationFormShortcode.php:819
-#: assets/admin/campaigns/CreateCampaignDrawer.jsx:177
-#: assets/admin/campaigns/Detail.jsx:411
-#: assets/admin/campaigns/Detail.jsx:1838
-#: assets/admin/donations/Detail.jsx:372
-#: assets/admin/donations/detail/RefundDialog.jsx:128
-#: assets/admin/donations/RecordDonationDrawer.jsx:184
-#: assets/admin/donors/DonorProfile.jsx:130
-#: assets/admin/donors/profile/tabs/ConsentTab.jsx:65
-#: assets/admin/forms/Editor.jsx:692
-#: assets/admin/funds/List.jsx:689
-#: assets/admin/funds/List.jsx:861
-#: assets/admin/settings/panels/EmailPanel.jsx:246
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:170
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:223
-#: assets/admin/settings/panels/StripeKeysCard.jsx:134
-#: assets/admin/settings/panels/StripeKeysCard.jsx:252
-#: assets/admin/tools/tabs/CsvImportCard.jsx:168
-#: assets/admin/_shared/components/ConfirmDialog.jsx:103
-#: assets/donor-portal/index.jsx:1739
-msgid "Cancel"
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:46
@@ -1776,9 +2173,8 @@ msgid "Balanced, friendly, accent green. The Gratora default."
 msgstr ""
 
 #: src/Campaigns/Styling/StylePresets.php:48
-#: src/Campaigns/Styling/Tokens.php:131
-#: src/Campaigns/Styling/Tokens.php:219
 #: assets/admin/onboarding/Onboarding.jsx:513
+msgctxt "style preset name"
 msgid "Bold"
 msgstr ""
 
@@ -1883,6 +2279,11 @@ msgstr ""
 #: src/Campaigns/Styling/Tokens.php:130
 #: src/Campaigns/Styling/Tokens.php:218
 msgid "Semibold"
+msgstr ""
+
+#: src/Campaigns/Styling/Tokens.php:131
+#: src/Campaigns/Styling/Tokens.php:219
+msgid "Bold"
 msgstr ""
 
 #: src/Campaigns/Styling/Tokens.php:136
@@ -2366,6 +2767,7 @@ msgid "Individual"
 msgstr ""
 
 #: src/Donors/DonorType.php:48
+#: src/Foundation/Transfer/CsvImporter.php:43
 #: assets/admin/donors/DonorProfile.jsx:197
 #: assets/admin/donors/profile/IdentityCard.jsx:67
 #: assets/admin/onboarding/Onboarding.jsx:429
@@ -2418,6 +2820,7 @@ msgstr ""
 
 #: src/Donors/Portal/views/annual-statement.php:31
 #: src/Forms/Blocks/views/date.php:11
+#: src/Foundation/Transfer/CsvImporter.php:53
 #: src/Receipts/resources/views/donor-tax-statement.php:75
 #: src/Receipts/resources/views/generic.php:200
 #: assets/admin/donations/detail/cards/RelatedDonationsCard.jsx:16
@@ -2442,6 +2845,7 @@ msgstr ""
 #: src/Donors/Portal/views/annual-statement.php:33
 #: src/Forms/Blocks/views/currency-switcher.php:14
 #: src/Forms/Shortcode/DonationFormShortcode.php:833
+#: src/Foundation/Transfer/CsvImporter.php:52
 #: src/Rest/Admin/DonationsController.php:2051
 #: assets/admin/forms/blocks/currency-switcher/index.js:167
 #: assets/admin/onboarding/Onboarding.jsx:487
@@ -2457,6 +2861,7 @@ msgstr ""
 #: src/Forms/Blocks/views/donation-summary.php:13
 #: src/Forms/FormService.php:59
 #: src/Forms/Shortcode/DonationFormShortcode.php:766
+#: src/Foundation/Transfer/CsvImporter.php:51
 #: src/Receipts/resources/views/donor-tax-statement.php:77
 #: src/Receipts/resources/views/generic.php:231
 #: src/Rest/Admin/DonationsController.php:2050
@@ -2535,6 +2940,7 @@ msgstr ""
 #: src/Forms/Blocks/views/name.php:11
 #: src/Forms/FormSubmissionValidator.php:246
 #: src/Forms/Shortcode/DonationFormShortcode.php:761
+#: src/Foundation/Transfer/CsvImporter.php:40
 #: assets/admin/donations/RecordDonationDrawer.jsx:224
 #: assets/admin/donors/DonorProfile.jsx:161
 #: assets/admin/forms/blocks/name/index.js:26
@@ -2550,6 +2956,7 @@ msgstr ""
 #: src/Forms/Blocks/views/name.php:12
 #: src/Forms/FormSubmissionValidator.php:249
 #: src/Forms/Shortcode/DonationFormShortcode.php:762
+#: src/Foundation/Transfer/CsvImporter.php:41
 #: assets/admin/donations/RecordDonationDrawer.jsx:227
 #: assets/admin/donors/DonorProfile.jsx:165
 #: assets/admin/forms/blocks/name/index.js:46
@@ -2572,6 +2979,7 @@ msgstr ""
 #: src/Forms/Blocks/views/phone.php:8
 #: src/Forms/FormSubmissionValidator.php:266
 #: src/Forms/Shortcode/DonationFormShortcode.php:823
+#: src/Foundation/Transfer/CsvImporter.php:44
 #: assets/admin/donors/DonorProfile.jsx:206
 #: assets/admin/forms/blocks/phone/index.js:20
 #: assets/admin/forms/blocks/phone/index.js:25
@@ -2585,6 +2993,7 @@ msgstr ""
 #: src/Donors/Privacy/WordPressPrivacy.php:214
 #: src/Exports/DonorExporter.php:167
 #: src/Forms/FormSubmissionValidator.php:379
+#: src/Foundation/Transfer/CsvImporter.php:45
 #: assets/admin/forms/blocks/address/index.js:57
 #: assets/admin/forms/blocks/address/index.js:241
 #: assets/admin/settings/panels/OrganizationPanel.jsx:67
@@ -2645,6 +3054,7 @@ msgstr ""
 
 #: src/Donors/Privacy/WordPressPrivacy.php:229
 #: src/Donors/Privacy/WordPressPrivacy.php:243
+#: src/Foundation/Transfer/CsvImporter.php:54
 #: src/Rest/Admin/DonationsController.php:2049
 #: assets/admin/campaigns/Detail.jsx:1325
 #: assets/admin/campaigns/Detail.jsx:1991
@@ -2910,6 +3320,7 @@ msgstr ""
 #: src/Forms/Blocks/views/address.php:26
 #: src/Forms/FormSubmissionValidator.php:380
 #: src/Forms/Shortcode/DonationFormShortcode.php:826
+#: src/Foundation/Transfer/CsvImporter.php:47
 #: assets/admin/donors/DonorProfile.jsx:242
 #: assets/admin/forms/blocks/address/index.js:119
 #: assets/admin/forms/blocks/address/index.js:222
@@ -4222,14 +4633,36 @@ msgstr ""
 msgid "This numbering would produce references of up to %1$d characters and the limit is %2$d. Shorten a prefix, the separator or the padding."
 msgstr ""
 
+#: src/Foundation/Transfer/CsvImporter.php:46
+#: assets/admin/donors/DonorProfile.jsx:232
+msgid "Address line 2"
+msgstr ""
+
+#: src/Foundation/Transfer/CsvImporter.php:48
+msgid "State or region"
+msgstr ""
+
+#: src/Foundation/Transfer/CsvImporter.php:49
+#: assets/admin/settings/panels/OrganizationPanel.jsx:82
+msgid "Postcode"
+msgstr ""
+
+#: src/Foundation/Transfer/CsvImporter.php:50
+msgid "Country (two-letter code)"
+msgstr ""
+
+#: src/Foundation/Transfer/CsvImporter.php:55
+msgid "Transaction id"
+msgstr ""
+
 #. translators: %s: comma-separated field names.
-#: src/Foundation/Transfer/CsvImporter.php:176
+#: src/Foundation/Transfer/CsvImporter.php:184
 #, php-format
 msgid "Map a column to %s before importing."
 msgstr ""
 
 #. translators: 1: row number, 2: error message.
-#: src/Foundation/Transfer/CsvImporter.php:202
+#: src/Foundation/Transfer/CsvImporter.php:210
 #, php-format
 msgid "Row %1$d: %2$s"
 msgstr ""
@@ -6712,17 +7145,6 @@ msgstr ""
 msgid "Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing."
 msgstr ""
 
-#: assets/admin/campaign-blocks/index.jsx:589
-#: assets/admin/forms/blocks/radio/index.js:63
-#: assets/admin/forms/Editor.jsx:1368
-msgid "Layout"
-msgstr ""
-
-#: assets/admin/campaign-blocks/index.jsx:592
-#: assets/admin/donors/index.jsx:711
-msgid "List"
-msgstr ""
-
 #: assets/admin/campaign-blocks/index.jsx:593
 msgid "Podium"
 msgstr ""
@@ -6790,10 +7212,6 @@ msgstr ""
 #: assets/admin/campaign-blocks/index.jsx:794
 #: assets/admin/campaign-blocks/index.jsx:881
 msgid "Thank you to our supporters"
-msgstr ""
-
-#: assets/admin/campaign-blocks/index.jsx:806
-msgid "Sort by"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:809
@@ -7637,11 +8055,6 @@ msgid "This form cannot be deleted"
 msgid_plural "These forms cannot be deleted"
 msgstr[0] ""
 msgstr[1] ""
-
-#: assets/admin/campaigns/Detail.jsx:1574
-#: assets/admin/campaigns/Detail.jsx:1600
-msgid "Appearance"
-msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1575
 msgid "Defaults"
@@ -9019,7 +9432,7 @@ msgid "Receipt voided"
 msgstr ""
 
 #: assets/admin/donations/detail/cards/TimelineCard.jsx:101
-#: assets/admin/donations/detail/Header.jsx:97
+msgctxt "timeline entry"
 msgid "Refund"
 msgstr ""
 
@@ -9058,6 +9471,10 @@ msgstr ""
 
 #: assets/admin/donations/detail/Header.jsx:96
 msgid "Refund remaining"
+msgstr ""
+
+#: assets/admin/donations/detail/Header.jsx:97
+msgid "Refund"
 msgstr ""
 
 #: assets/admin/donations/detail/helpers.js:11
@@ -9112,10 +9529,6 @@ msgstr ""
 
 #: assets/admin/donations/detail/helpers.js:41
 msgid "Manual"
-msgstr ""
-
-#: assets/admin/donations/detail/rail/ActionsCard.jsx:35
-msgid "Actions"
 msgstr ""
 
 #: assets/admin/donations/detail/rail/ActionsCard.jsx:67
@@ -9763,10 +10176,6 @@ msgstr ""
 
 #: assets/admin/donors/DonorProfile.jsx:227
 msgid "Street and number"
-msgstr ""
-
-#: assets/admin/donors/DonorProfile.jsx:232
-msgid "Address line 2"
 msgstr ""
 
 #: assets/admin/donors/DonorProfile.jsx:237
@@ -10456,7 +10865,7 @@ msgid "by an admin"
 msgstr ""
 
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:41
-#: assets/admin/donors/profile/tabs/ActivityTab.jsx:84
+msgctxt "a donation to a campaign"
 msgid "to"
 msgstr ""
 
@@ -10494,6 +10903,11 @@ msgstr ""
 
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:83
 msgid "Recurring amount changed from"
+msgstr ""
+
+#: assets/admin/donors/profile/tabs/ActivityTab.jsx:84
+msgctxt "from one amount to another"
+msgid "to"
 msgstr ""
 
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:158
@@ -11540,10 +11954,6 @@ msgstr ""
 msgid "Used when the source above resolves to empty (e.g. donor arrived directly)."
 msgstr ""
 
-#: assets/admin/forms/blocks/hidden/index.js:71
-msgid "Hidden"
-msgstr ""
-
 #: assets/admin/forms/blocks/hidden/index.js:73
 msgid "(no field key set)"
 msgstr ""
@@ -11673,8 +12083,7 @@ msgid "Maximum"
 msgstr ""
 
 #: assets/admin/forms/blocks/number-input/index.js:75
-#: assets/admin/forms/blocks/step/index.js:32
-#: assets/admin/forms/blocks/step/index.js:84
+msgctxt "the increment of a number field"
 msgid "Step"
 msgstr ""
 
@@ -11916,6 +12325,11 @@ msgstr ""
 
 #: assets/admin/forms/blocks/section/index.js:230
 msgid "A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs."
+msgstr ""
+
+#: assets/admin/forms/blocks/step/index.js:32
+#: assets/admin/forms/blocks/step/index.js:84
+msgid "Step"
 msgstr ""
 
 #: assets/admin/forms/blocks/step/index.js:37
@@ -12255,15 +12669,8 @@ msgid "Add your first block"
 msgstr ""
 
 #: assets/admin/forms/Editor.jsx:793
-#: assets/admin/onboarding/Onboarding.jsx:699
+msgctxt "form editor view"
 msgid "Build"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:794
-#: assets/admin/settings/panels/CurrencyPanel.jsx:358
-#: assets/admin/settings/panels/EmailPanel.jsx:277
-#: assets/admin/tools/tabs/CsvImportCard.jsx:220
-msgid "Preview"
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels.
@@ -12300,10 +12707,6 @@ msgstr ""
 
 #: assets/admin/forms/Editor.jsx:902
 msgid "Unpublish"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:913
-msgid "Publish"
 msgstr ""
 
 #: assets/admin/forms/Editor.jsx:918
@@ -13080,12 +13483,20 @@ msgstr ""
 msgid "Stripe, PayPal, or a manual bank-transfer flow. You can change this any time."
 msgstr ""
 
+#: assets/admin/onboarding/Onboarding.jsx:692
+msgid "Connect"
+msgstr ""
+
 #: assets/admin/onboarding/Onboarding.jsx:696
 msgid "Build your first form"
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:697
 msgid "Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live."
+msgstr ""
+
+#: assets/admin/onboarding/Onboarding.jsx:699
+msgid "Build"
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:704
@@ -13652,7 +14063,7 @@ msgstr ""
 #. translators: 1: reference type, 2: the formatted next reference
 #: assets/admin/settings/panels/NumberingPanel.jsx:179
 #, js-format
-msgid "The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?"
+msgid "%1$s: the next reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?"
 msgstr ""
 
 #: assets/admin/settings/panels/NumberingPanel.jsx:183
@@ -13763,10 +14174,6 @@ msgstr ""
 
 #: assets/admin/settings/panels/OrganizationPanel.jsx:74
 msgid "Street"
-msgstr ""
-
-#: assets/admin/settings/panels/OrganizationPanel.jsx:82
-msgid "Postcode"
 msgstr ""
 
 #: assets/admin/settings/panels/OrganizationPanel.jsx:100
