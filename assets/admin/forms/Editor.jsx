@@ -228,19 +228,9 @@ export default function Editor( { formId } ) {
         }
     }, [ selectedBlockId ] );
 
-    // Inserter and list view only make sense in Develop, so they close on the
-    // way out and come back in whatever state they were left.
-    const lastSecondaryView = useRef( secondaryView );
-    useEffect( () => {
-        if ( view !== 'develop' ) {
-            setSecondaryView( ( cur ) => {
-                lastSecondaryView.current = cur;
-                return null;
-            } );
-        } else {
-            setSecondaryView( lastSecondaryView.current );
-        }
-    }, [ view ] );
+    // Inserter and list view only make sense in Develop: the other views leave
+    // them out, and their state waits as it was left.
+    const shownSecondaryView = view === 'develop' ? secondaryView : null;
 
     ensureBlocksRegistered();
 
@@ -648,7 +638,7 @@ export default function Editor( { formId } ) {
                             </> }
                             sidebar={ sidebar }
                             secondarySidebar={
-                                secondaryView === 'inserter' ? (
+                                shownSecondaryView === 'inserter' ? (
                                     <div className="gratora-form-editor__secondary gratora-form-editor__secondary--inserter">
                                         <BlockLibrary
                                             showInserterHelpPanel={ false }
@@ -660,7 +650,7 @@ export default function Editor( { formId } ) {
                                             onClose={ () => setSecondaryView( null ) }
                                         />
                                     </div>
-                                ) : secondaryView === 'listview' ? (
+                                ) : shownSecondaryView === 'listview' ? (
                                     <div className="gratora-form-editor__secondary gratora-form-editor__secondary--listview">
                                         <div className="gratora-form-editor__secondary-title">
                                             { __( 'Form structure', 'gratora-donation-platform' ) }

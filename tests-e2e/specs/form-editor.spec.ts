@@ -26,6 +26,8 @@ async function openEditor(page: Page): Promise<string[]> {
 
 const libraryItem = (page: Page, name: string): Locator => page.getByRole('option', { name, exact: true });
 const canvasBlock = (page: Page, type: string): Locator => page.locator(`.gratora-form-editor__canvas [data-type="gratora/${type}"]`);
+const library = (page: Page): Locator => page.locator('.gratora-form-editor__secondary--inserter');
+const viewTab = (page: Page, name: string): Locator => page.getByRole('tab', { name, exact: true });
 
 /** Core's inserter looks at where focus went on the frame after an insert. */
 const afterInsert = (page: Page): Promise<void> =>
@@ -101,9 +103,32 @@ test.describe('form editor', () => {
         await page.getByRole('button', { name: 'Toggle side panel' }).click();
 
         await libraryItem(page, 'Divider').click();
-        await expect(page.locator('.gratora-form-editor__secondary--inserter')).toHaveCount(0);
+        await expect(library(page)).toHaveCount(0);
         await afterInsert(page);
 
         expect(errors).toEqual([]);
+    });
+
+    test('the library is back after a trip through preview and settings', async ({ page }) => {
+        await openEditor(page);
+
+        await viewTab(page, 'Preview').click();
+        await viewTab(page, 'Settings').click();
+        await viewTab(page, 'Build').click();
+
+        // The header button first: a library on its way out is still in the page for a moment.
+        await expect(page.getByRole('button', { name: 'Close block inserter' })).toBeVisible();
+        await expect(library(page)).toBeVisible();
+    });
+
+    test('a library closed on purpose stays closed after a trip to preview', async ({ page }) => {
+        await openEditor(page);
+        await page.getByRole('button', { name: 'Close block inserter' }).click();
+
+        await viewTab(page, 'Preview').click();
+        await viewTab(page, 'Build').click();
+
+        await expect(page.getByRole('button', { name: 'Toggle block inserter' })).toBeVisible();
+        await expect(library(page)).toHaveCount(0);
     });
 });
