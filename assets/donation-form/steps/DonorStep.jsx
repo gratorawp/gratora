@@ -398,6 +398,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         id={ `gratora-address-country-${ key }` }
                                         value={ a.country || '' }
                                         onChange={ setField( 'profile.address.country' ) }
+                                        placeholder={ config.i18n.searchCountry || 'Search country…' }
                                         required={ !! f.requireCountry }
                                         ariaInvalid={ !! err[ 'profile.address.country' ] }
                                     />
