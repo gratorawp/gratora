@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Gratora - Donation Platform 1.1.0\n"
+"Project-Id-Version: Gratora - Donation and Fundraising Platform 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/gratora-donation-platform\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T09:05:56+00:00\n"
+"POT-Creation-Date: 2026-10-02T18:40:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -146,7 +146,7 @@ msgstr ""
 #: components/KeyField.js:57
 #: assets/admin/donors/profile/IdentityCard.jsx:36
 #: assets/admin/donors/profile/IdentityCard.jsx:194
-#: assets/admin/forms/Editor.jsx:1701
+#: assets/admin/forms/Editor.jsx:1729
 msgid "Copy"
 msgstr ""
 
@@ -521,7 +521,7 @@ msgstr[1] ""
 #: assets/admin/donations/RecordDonationDrawer.jsx:184
 #: assets/admin/donors/DonorProfile.jsx:130
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:65
-#: assets/admin/forms/Editor.jsx:692
+#: assets/admin/forms/Editor.jsx:713
 #: assets/admin/funds/List.jsx:689
 #: assets/admin/funds/List.jsx:861
 #: assets/admin/settings/panels/EmailPanel.jsx:246
@@ -662,7 +662,7 @@ msgstr ""
 #: components/dataviews-view-config/index.js:54
 #: assets/admin/campaign-blocks/index.jsx:589
 #: assets/admin/forms/blocks/radio/index.js:63
-#: assets/admin/forms/Editor.jsx:1368
+#: assets/admin/forms/Editor.jsx:1396
 msgid "Layout"
 msgstr ""
 
@@ -681,7 +681,7 @@ msgstr ""
 
 #: components/dataviews-view-config/index.js:227
 #: components/dataviews-view-config/index.js:411
-#: assets/admin/forms/Editor.jsx:794
+#: assets/admin/forms/Editor.jsx:817
 #: assets/admin/settings/panels/CurrencyPanel.jsx:358
 #: assets/admin/settings/panels/EmailPanel.jsx:277
 #: assets/admin/tools/tabs/CsvImportCard.jsx:220
@@ -891,7 +891,8 @@ msgstr ""
 #. translators: accessibility text for the publish landmark region.
 #: components/interface-skeleton/index.js:100
 #: components/interface-skeleton/index.js:110
-#: assets/admin/forms/Editor.jsx:913
+#: assets/admin/forms/Editor.jsx:938
+#: assets/admin/forms/Editor.jsx:940
 msgid "Publish"
 msgstr ""
 
@@ -1088,7 +1089,7 @@ msgstr ""
 #: assets/admin/donors/index.jsx:376
 #: assets/admin/donors/Insights.jsx:207
 #: assets/admin/donors/profile/Tabs.jsx:8
-#: assets/admin/forms/Editor.jsx:1405
+#: assets/admin/forms/Editor.jsx:1433
 #: assets/admin/tools/tabs/ExportTab.jsx:168
 #: assets/donor-portal/index.jsx:526
 #: assets/donor-portal/index.jsx:682
@@ -1111,7 +1112,7 @@ msgstr ""
 #: assets/admin/donors/Insights.jsx:117
 #: assets/admin/donors/Insights.jsx:482
 #: assets/admin/donors/profile/Header.jsx:48
-#: assets/admin/forms/Editor.jsx:1406
+#: assets/admin/forms/Editor.jsx:1434
 #: assets/admin/tools/tabs/ExportTab.jsx:270
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:12
 msgid "Donors"
@@ -1122,7 +1123,7 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:486
 #: assets/admin/campaigns/Detail.jsx:1491
 #: assets/admin/campaigns/List.jsx:239
-#: assets/admin/forms/Editor.jsx:830
+#: assets/admin/forms/Editor.jsx:857
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:15
 msgid "Forms"
 msgstr ""
@@ -1138,7 +1139,7 @@ msgstr ""
 #: src/Admin/Pages/SettingsPage.php:28
 #: assets/admin/campaigns/Detail.jsx:487
 #: assets/admin/dashboard/widgets/QuickActions.jsx:69
-#: assets/admin/forms/Editor.jsx:798
+#: assets/admin/forms/Editor.jsx:821
 #: assets/admin/settings/Settings.jsx:303
 #: assets/admin/settings/Settings.jsx:310
 #: assets/admin/tools/tabs/ExportTab.jsx:357
@@ -1246,7 +1247,7 @@ msgid "not configured"
 msgstr ""
 
 #: src/Admin/SystemReport.php:195
-#: assets/admin/forms/Editor.jsx:1199
+#: assets/admin/forms/Editor.jsx:1227
 msgid "Gateways"
 msgstr ""
 
@@ -1588,7 +1589,7 @@ msgstr[1] ""
 #: assets/admin/campaign-blocks/index.jsx:791
 #: assets/admin/campaigns/Detail.jsx:1305
 #: assets/admin/campaigns/List.jsx:169
-#: assets/admin/forms/Editor.jsx:1277
+#: assets/admin/forms/Editor.jsx:1305
 msgid "Title"
 msgstr ""
 
@@ -1632,7 +1633,7 @@ msgstr ""
 #: assets/admin/campaigns/List.jsx:210
 #: assets/admin/forms/blocks/goal/index.js:110
 #: assets/admin/forms/blocks/goal/index.js:212
-#: assets/admin/forms/Editor.jsx:1198
+#: assets/admin/forms/Editor.jsx:1226
 msgid "Goal"
 msgstr ""
 
@@ -2452,7 +2453,7 @@ msgstr ""
 
 #: src/Core/Activator.php:62
 #: assets/admin/campaigns/Detail.jsx:1572
-#: assets/admin/forms/Editor.jsx:1197
+#: assets/admin/forms/Editor.jsx:1225
 #: assets/admin/_shared/components/CampaignTemplatePicker.jsx:12
 msgid "General"
 msgstr ""
@@ -2892,7 +2893,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:109
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:115
 #: assets/admin/forms/blocks/donation-summary/index.js:19
-#: assets/admin/forms/Editor.jsx:1404
+#: assets/admin/forms/Editor.jsx:1432
 msgid "Amount"
 msgstr ""
 
@@ -3002,7 +3003,7 @@ msgstr ""
 #: assets/admin/forms/blocks/phone/index.js:25
 #: assets/admin/forms/blocks/phone/index.js:49
 #: assets/admin/forms/blocks/phone/index.js:63
-#: assets/admin/forms/Editor.jsx:931
+#: assets/admin/forms/Editor.jsx:959
 #: assets/donor-portal/index.jsx:1583
 msgid "Phone"
 msgstr ""
@@ -3083,7 +3084,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:125
 #: assets/admin/donors/profile/tabs/ReceiptsTab.jsx:159
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:96
-#: assets/admin/forms/Editor.jsx:1292
+#: assets/admin/forms/Editor.jsx:1320
 #: assets/admin/funds/List.jsx:375
 #: assets/admin/subscriptions/List.jsx:648
 msgid "Status"
@@ -3690,7 +3691,7 @@ msgstr ""
 
 #: src/Forms/FormService.php:97
 #: assets/admin/campaigns/Detail.jsx:1282
-#: assets/admin/forms/Editor.jsx:867
+#: assets/admin/forms/Editor.jsx:894
 msgid "Untitled donation form"
 msgstr ""
 
@@ -5769,7 +5770,7 @@ msgstr ""
 #: src/Rest/Admin/FormsController.php:342
 #: src/Rest/Admin/FormsController.php:374
 #: src/Rest/Admin/FormsController.php:393
-#: assets/admin/forms/Editor.jsx:505
+#: assets/admin/forms/Editor.jsx:521
 msgid "Form not found."
 msgstr ""
 
@@ -6890,7 +6891,7 @@ msgstr ""
 #: assets/admin/donations/RecordDonationDrawer.jsx:256
 #: assets/admin/donors/profile/tabs/ActivityLogTab.jsx:103
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:143
-#: assets/admin/forms/Editor.jsx:1318
+#: assets/admin/forms/Editor.jsx:1346
 #: assets/admin/subscriptions/List.jsx:716
 #: assets/admin/tools/tabs/ExportTab.jsx:293
 #: assets/admin/_shared/components/FormTemplatePicker.jsx:24
@@ -7442,14 +7443,14 @@ msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:23
 #: assets/admin/campaigns/Detail.jsx:1565
-#: assets/admin/forms/Editor.jsx:1403
+#: assets/admin/forms/Editor.jsx:1431
 #: assets/admin/funds/List.jsx:753
 #: assets/admin/_shared/components/GoalBar.jsx:33
 msgid "No goal"
 msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:27
-#: assets/admin/forms/Editor.jsx:1411
+#: assets/admin/forms/Editor.jsx:1439
 msgid "Track progress toward a fundraising total."
 msgstr ""
 
@@ -7538,7 +7539,7 @@ msgstr ""
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:250
 #: assets/admin/campaigns/Detail.jsx:2050
-#: assets/admin/forms/Editor.jsx:1425
+#: assets/admin/forms/Editor.jsx:1453
 msgid "Goal type"
 msgstr ""
 
@@ -7710,7 +7711,7 @@ msgstr ""
 #: assets/admin/donations/Detail.jsx:82
 #: assets/admin/donors/DonorProfile.jsx:316
 #: assets/admin/forms/blocks/currency-switcher/index.js:71
-#: assets/admin/forms/Editor.jsx:511
+#: assets/admin/forms/Editor.jsx:527
 #: assets/admin/funds/List.jsx:927
 #: assets/admin/settings/panels/SetupPanel.jsx:45
 #: assets/admin/subscriptions/List.jsx:1045
@@ -7841,7 +7842,7 @@ msgstr ""
 #. translators: 1: first three section names, 2: count of remaining
 #. translators: 1: first three style setting names, 2: count of the remaining ones.
 #: assets/admin/campaigns/Detail.jsx:630
-#: assets/admin/forms/Editor.jsx:1611
+#: assets/admin/forms/Editor.jsx:1639
 #, js-format
 msgid "%1$s, and %2$d more"
 msgstr ""
@@ -7981,7 +7982,7 @@ msgstr ""
 #: assets/admin/donations/detail/cards/PaymentDetailsCard.jsx:17
 #: assets/admin/donors/profile/IdentityCard.jsx:21
 #: assets/admin/donors/profile/IdentityCard.jsx:194
-#: assets/admin/forms/Editor.jsx:1701
+#: assets/admin/forms/Editor.jsx:1729
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:64
 msgid "Copied"
 msgstr ""
@@ -8084,7 +8085,7 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:1589
 #: assets/admin/campaigns/Detail.jsx:1590
 #: assets/admin/campaigns/Detail.jsx:1930
-#: assets/admin/forms/Editor.jsx:1273
+#: assets/admin/forms/Editor.jsx:1301
 #: assets/admin/funds/List.jsx:702
 #: assets/admin/settings/panels/OrganizationPanel.jsx:40
 msgid "Identity"
@@ -8116,14 +8117,14 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:1604
 #: assets/admin/campaigns/Detail.jsx:2314
 #: assets/admin/donations/RecordDonationDrawer.jsx:294
-#: assets/admin/forms/Editor.jsx:1351
+#: assets/admin/forms/Editor.jsx:1379
 #: assets/admin/funds/List.jsx:120
 #: assets/admin/funds/List.jsx:779
 msgid "Default fund"
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1626
-#: assets/admin/forms/Editor.jsx:258
+#: assets/admin/forms/Editor.jsx:271
 msgid "Could not load funds."
 msgstr ""
 
@@ -8136,7 +8137,7 @@ msgid "Campaign saved."
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1666
-#: assets/admin/forms/Editor.jsx:356
+#: assets/admin/forms/Editor.jsx:369
 #: assets/admin/settings/Settings.jsx:278
 msgid "Save failed."
 msgstr ""
@@ -8199,7 +8200,7 @@ msgid "The URL donors land on. Changing this may break inbound links."
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1887
-#: assets/admin/forms/Editor.jsx:1283
+#: assets/admin/forms/Editor.jsx:1311
 msgid "Slug"
 msgstr ""
 
@@ -8265,7 +8266,7 @@ msgid "Drives the progress widget on the campaign page and the goal donut on the
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:2063
-#: assets/admin/forms/Editor.jsx:1435
+#: assets/admin/forms/Editor.jsx:1463
 msgid "Target amount"
 msgstr ""
 
@@ -8318,7 +8319,7 @@ msgid "Pick which brand preset this campaign uses. Optionally tweak individual t
 msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:2195
-#: assets/admin/forms/Editor.jsx:1654
+#: assets/admin/forms/Editor.jsx:1682
 msgid "Style preset"
 msgstr ""
 
@@ -8825,7 +8826,7 @@ msgid "Dismissed. It comes back if the situation changes."
 msgstr ""
 
 #: assets/admin/dashboard/widgets/NeedsAttention.jsx:27
-#: assets/admin/forms/Editor.jsx:849
+#: assets/admin/forms/Editor.jsx:876
 msgid "Undo"
 msgstr ""
 
@@ -10190,7 +10191,7 @@ msgid "Edit donor details"
 msgstr ""
 
 #: assets/admin/donors/DonorProfile.jsx:138
-#: assets/admin/forms/Editor.jsx:893
+#: assets/admin/forms/Editor.jsx:847
 #: assets/donor-portal/index.jsx:1588
 msgid "Save"
 msgstr ""
@@ -11870,7 +11871,7 @@ msgid "Show"
 msgstr ""
 
 #: assets/admin/forms/blocks/goal/index.js:117
-#: assets/admin/forms/Editor.jsx:1421
+#: assets/admin/forms/Editor.jsx:1449
 msgid "Form goal"
 msgstr ""
 
@@ -12609,187 +12610,187 @@ msgstr ""
 msgid "Add option"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:78
+#: assets/admin/forms/Editor.jsx:79
 msgid "Inline (in-page)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:79
+#: assets/admin/forms/Editor.jsx:80
 msgid "Modal (button opens form)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:252
+#: assets/admin/forms/Editor.jsx:265
 msgid "Could not load campaigns."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:255
+#: assets/admin/forms/Editor.jsx:268
 msgid "Could not load payment gateways."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:331
+#: assets/admin/forms/Editor.jsx:344
 msgid "Preview failed."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:368
+#: assets/admin/forms/Editor.jsx:381
 msgid "Form saved."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:369
+#: assets/admin/forms/Editor.jsx:382
 msgid "Draft saved."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:450
+#: assets/admin/forms/Editor.jsx:466
 msgid "Form published."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:457
+#: assets/admin/forms/Editor.jsx:473
 msgid "Form moved to draft."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:504
+#: assets/admin/forms/Editor.jsx:520
 msgid "This form could not be loaded."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:516
+#: assets/admin/forms/Editor.jsx:532
 msgid "Back to forms"
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels (Name, Email).
-#: assets/admin/forms/Editor.jsx:565
+#: assets/admin/forms/Editor.jsx:582
 #, js-format
 msgid "This form is live and cannot be saved without these blocks: %s. Add them back, or move it to draft to keep editing."
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels (Name, Email).
-#: assets/admin/forms/Editor.jsx:570
+#: assets/admin/forms/Editor.jsx:587
 #, js-format
 msgid "Add these blocks before publishing: %s."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:662
+#: assets/admin/forms/Editor.jsx:683
 msgid "Form structure"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:676
+#: assets/admin/forms/Editor.jsx:697
 msgid "We didn't pre-build this form so you can pick a shape that fits. You can change it later."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:684
+#: assets/admin/forms/Editor.jsx:705
 msgid "Apply template"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:689
+#: assets/admin/forms/Editor.jsx:710
 msgid "Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:694
+#: assets/admin/forms/Editor.jsx:715
 msgid "Replace form"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:777
+#: assets/admin/forms/Editor.jsx:800
 msgid "Start building your donation form"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:778
+#: assets/admin/forms/Editor.jsx:801
 msgid "Add a heading, an amount block, and a submit button to take your first donation."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:784
+#: assets/admin/forms/Editor.jsx:807
 msgid "Add your first block"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:793
+#: assets/admin/forms/Editor.jsx:816
 msgctxt "form editor view"
 msgid "Build"
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels.
-#: assets/admin/forms/Editor.jsx:817
+#: assets/admin/forms/Editor.jsx:840
 #, js-format
 msgid "Add these blocks first: %s."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:837
-msgid "Close block inserter"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:837
-msgid "Toggle block inserter"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:844
-msgid "Toggle block outline"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:850
-msgid "Redo"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:853
-msgid "Start from a template"
-msgstr ""
-
-#: assets/admin/forms/Editor.jsx:893
+#: assets/admin/forms/Editor.jsx:847
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:133
 #: assets/admin/settings/panels/StripeKeysCard.jsx:96
 msgid "Saved"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:902
-msgid "Unpublish"
+#: assets/admin/forms/Editor.jsx:864
+msgid "Close block inserter"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:918
-msgid "Toggle side panel"
+#: assets/admin/forms/Editor.jsx:864
+msgid "Toggle block inserter"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:929
-msgid "Desktop"
+#: assets/admin/forms/Editor.jsx:871
+msgid "Toggle block outline"
+msgstr ""
+
+#: assets/admin/forms/Editor.jsx:877
+msgid "Redo"
+msgstr ""
+
+#: assets/admin/forms/Editor.jsx:880
+msgid "Start from a template"
 msgstr ""
 
 #: assets/admin/forms/Editor.jsx:930
+msgid "Unpublish"
+msgstr ""
+
+#: assets/admin/forms/Editor.jsx:946
+msgid "Toggle side panel"
+msgstr ""
+
+#: assets/admin/forms/Editor.jsx:957
+msgid "Desktop"
+msgstr ""
+
+#: assets/admin/forms/Editor.jsx:958
 msgid "Tablet"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:964
+#: assets/admin/forms/Editor.jsx:992
 msgid "Form preview"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1002
+#: assets/admin/forms/Editor.jsx:1030
 msgid "Block"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1010
+#: assets/admin/forms/Editor.jsx:1038
 msgid "Block settings"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1011
+#: assets/admin/forms/Editor.jsx:1039
 msgid "Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1046
+#: assets/admin/forms/Editor.jsx:1074
 msgid "Could not load readiness checks."
 msgstr ""
 
 #. translators: %s: comma-separated list of missing block labels.
-#: assets/admin/forms/Editor.jsx:1058
+#: assets/admin/forms/Editor.jsx:1086
 #, js-format
 msgid "Missing required fields: %s"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1061
+#: assets/admin/forms/Editor.jsx:1089
 msgid "Donors need these to complete a donation."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1067
+#: assets/admin/forms/Editor.jsx:1095
 msgid "Required fields present"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1102
+#: assets/admin/forms/Editor.jsx:1130
 msgid "Running checks…"
 msgstr ""
 
 #. translators: %d: number of failing required-field checks that block publishing.
-#: assets/admin/forms/Editor.jsx:1105
+#: assets/admin/forms/Editor.jsx:1133
 #, js-format
 msgid "%d issue blocks publishing"
 msgid_plural "%d issues block publishing"
@@ -12797,7 +12798,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of readiness issues to fix before the form can take donations.
-#: assets/admin/forms/Editor.jsx:1110
+#: assets/admin/forms/Editor.jsx:1138
 #, js-format
 msgid "%d issue to fix before donors can give"
 msgid_plural "%d issues to fix before donors can give"
@@ -12805,194 +12806,194 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of warning readiness checks.
-#: assets/admin/forms/Editor.jsx:1115
+#: assets/admin/forms/Editor.jsx:1143
 #, js-format
 msgid "%d thing to review"
 msgid_plural "%d things to review"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/forms/Editor.jsx:1118
+#: assets/admin/forms/Editor.jsx:1146
 msgid "Form is ready to publish"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1126
+#: assets/admin/forms/Editor.jsx:1154
 msgid "Pre-launch checks"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1144
+#: assets/admin/forms/Editor.jsx:1172
 msgid "Everything looks good. This form is safe to publish."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1200
+#: assets/admin/forms/Editor.jsx:1228
 msgid "After donation"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1201
-#: assets/admin/forms/Editor.jsx:1583
+#: assets/admin/forms/Editor.jsx:1229
+#: assets/admin/forms/Editor.jsx:1611
 msgid "Embed"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1217
+#: assets/admin/forms/Editor.jsx:1245
 #: assets/admin/settings/Settings.jsx:323
 msgid "Settings sections"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1255
+#: assets/admin/forms/Editor.jsx:1283
 msgid "(Use campaign or org default)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1274
+#: assets/admin/forms/Editor.jsx:1302
 msgid "The form name and the slug used in the URL and shortcode."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1286
+#: assets/admin/forms/Editor.jsx:1314
 msgid "Used in the shortcode and the form URL."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1293
+#: assets/admin/forms/Editor.jsx:1321
 msgid "Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1319
+#: assets/admin/forms/Editor.jsx:1347
 msgid "Every form lives under a campaign. Move this form to a different one here."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1337
+#: assets/admin/forms/Editor.jsx:1365
 msgid "Current campaign"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1352
+#: assets/admin/forms/Editor.jsx:1380
 msgid "Where donations land when this form has no fund picker, or the donor does not choose one."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1358
+#: assets/admin/forms/Editor.jsx:1386
 msgid "Leave on the default to fall back to the campaign fund, then the organization default."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1364
+#: assets/admin/forms/Editor.jsx:1392
 msgid "Layout & style"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1365
+#: assets/admin/forms/Editor.jsx:1393
 msgid "How the form is presented: its layout, style preset, width, and whether it sits in a card."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1380
+#: assets/admin/forms/Editor.jsx:1408
 msgid "Maximum width"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1388
+#: assets/admin/forms/Editor.jsx:1416
 msgid "Container"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1392
+#: assets/admin/forms/Editor.jsx:1420
 msgid "Frame"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1393
+#: assets/admin/forms/Editor.jsx:1421
 msgid "Plain"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1395
+#: assets/admin/forms/Editor.jsx:1423
 msgid "\"Frame\" wraps the form in a card with a shadow; \"Plain\" renders it flush with the page."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1410
+#: assets/admin/forms/Editor.jsx:1438
 msgid "No progress bar or target on this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1412
+#: assets/admin/forms/Editor.jsx:1440
 msgid "Track the number of completed donations to this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1413
+#: assets/admin/forms/Editor.jsx:1441
 msgid "Track the number of unique donors who give through this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1422
+#: assets/admin/forms/Editor.jsx:1450
 msgid "An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1436
+#: assets/admin/forms/Editor.jsx:1464
 msgid "In the currency this form uses."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1456
+#: assets/admin/forms/Editor.jsx:1484
 msgid "Target count"
 msgstr ""
 
 #. translators: %s: payment gateway name.
-#: assets/admin/forms/Editor.jsx:1478
+#: assets/admin/forms/Editor.jsx:1506
 #, js-format
 msgid "%s (off in Settings)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1510
+#: assets/admin/forms/Editor.jsx:1538
 msgid "Allowed gateways"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1511
+#: assets/admin/forms/Editor.jsx:1539
 msgid "Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings. A form needs at least one."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1532
+#: assets/admin/forms/Editor.jsx:1560
 msgid "Test mode (no real payment, excluded from reporting)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1542
+#: assets/admin/forms/Editor.jsx:1570
 msgid "Thank-you message"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1543
+#: assets/admin/forms/Editor.jsx:1571
 msgid "Shown to the donor after a successful donation, unless a redirect URL is set."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1553
+#: assets/admin/forms/Editor.jsx:1581
 msgid "Redirect URL"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1554
+#: assets/admin/forms/Editor.jsx:1582
 msgid "If set, donors are sent here instead of seeing the thank-you message."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1563
+#: assets/admin/forms/Editor.jsx:1591
 msgid "Use a full URL starting with http:// or https://"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1584
+#: assets/admin/forms/Editor.jsx:1612
 msgid "Paste this shortcode into any post or page to render the form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1589
+#: assets/admin/forms/Editor.jsx:1617
 msgid "Save the form to update this shortcode: the slug you typed is not the one the server will store."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1619
+#: assets/admin/forms/Editor.jsx:1647
 msgid "The campaign"
 msgstr ""
 
 #. translators: 1: campaign title, 2: comma-separated list of style setting names.
-#: assets/admin/forms/Editor.jsx:1623
+#: assets/admin/forms/Editor.jsx:1651
 #, js-format
 msgid "%1$s overrides %2$s. This form is on a preset of its own, so those overrides do not reach it."
 msgstr ""
 
 #. translators: 1: campaign title, 2: comma-separated list of style setting names.
-#: assets/admin/forms/Editor.jsx:1630
+#: assets/admin/forms/Editor.jsx:1658
 #, js-format
 msgid "%1$s overrides %2$s. Picking a preset here stops those overrides reaching this form."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1651
+#: assets/admin/forms/Editor.jsx:1679
 msgid "Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign's preset and the overrides it carries."
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1659
+#: assets/admin/forms/Editor.jsx:1687
 msgid "Inherit (campaign or org default)"
 msgstr ""
 
-#: assets/admin/forms/Editor.jsx:1688
+#: assets/admin/forms/Editor.jsx:1716
 msgid "Could not copy. Select the shortcode above and copy it by hand."
 msgstr ""
 
