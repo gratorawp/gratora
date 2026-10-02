@@ -914,8 +914,8 @@ msgstr "https://gratora.net"
 
 #. Description of the plugin
 #: gratora.php
-msgid "Donation forms, recurring donations, fundraising campaigns, donor management and receipts. Stripe and PayPal built in."
-msgstr "Spendenformulare, wiederkehrende Spenden, Fundraising-Kampagnen, Spenderverwaltung und Quittungen. Stripe und PayPal sind integriert."
+msgid "Donation forms, recurring donations, fundraising campaigns, donor management and receipts."
+msgstr "Spendenformulare, wiederkehrende Spenden, Fundraising-Kampagnen, Spenderverwaltung und Quittungen."
 
 #. Author of the plugin
 #: gratora.php

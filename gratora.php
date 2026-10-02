@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gratora - Donation and Fundraising Platform
  * Plugin URI: https://gratora.net
- * Description: Donation forms, recurring donations, fundraising campaigns, donor management and receipts. Stripe and PayPal built in.
+ * Description: Donation forms, recurring donations, fundraising campaigns, donor management and receipts.
  * Version: 1.1.0
  * Requires at least: 7.0
  * Requires PHP: 8.1
