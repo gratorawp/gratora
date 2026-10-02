@@ -5,20 +5,25 @@ declare(strict_types=1);
 namespace Gratora\Dashboard;
 
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
 use Gratora\Foundation\Auth\Capabilities;
 
 /**
  * Whether the dashboard asks the current user for a review on WordPress.org.
  *
- * It asks once real money has come in, asks only someone who manages the
- * plugin, and stops at their answer: a review or a refusal for good, "later"
- * for a month. Per user, because a review is one person's to give.
+ * It asks once donors have given on the site, asks only someone who manages
+ * the plugin, and stops at their answer: a review or a refusal for good,
+ * "later" for a month. Per user, because a review is one person's to give.
  *
  * @since unreleased
  */
 final class ReviewPrompt
 {
-    /** Paid donations, test ones aside, before the question is fair to ask. */
+    /**
+     * Paid donations given on the site before the question is fair to ask.
+     * Recorded and imported ones aside: the sentence says they came in through
+     * the plugin, and a site is not asked on the day it moves its history over.
+     */
     public const AFTER_DONATIONS = 5;
 
     public const ANSWERS = ['reviewed', 'later', 'never'];
@@ -42,7 +47,7 @@ final class ReviewPrompt
             return false;
         }
 
-        return $this->paidDonations() >= self::AFTER_DONATIONS;
+        return $this->enoughGiven();
     }
 
     /** @since unreleased */
@@ -55,12 +60,19 @@ final class ReviewPrompt
         );
     }
 
-    private function paidDonations(): int
+    /**
+     * Newest first and no further than the threshold: this runs on every
+     * dashboard load until the person answers, and a count would read every
+     * donation the site holds.
+     */
+    private function enoughGiven(): bool
     {
-        return (int) Donation::query()
-            ->where('is_test', 0)
-            ->where('kind', 'donation')
+        $newest = DonationQueries::takenByThisSite(DonationQueries::donationsOnly(Donation::query()))
             ->whereIn('status', ['paid', 'partial_refund'])
-            ->count();
+            ->orderBy('id', 'DESC')
+            ->limit(self::AFTER_DONATIONS)
+            ->pluck('id');
+
+        return count($newest) >= self::AFTER_DONATIONS;
     }
 }

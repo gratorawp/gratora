@@ -8,10 +8,11 @@ use Gratora\Dashboard\ReviewPrompt;
 use Gratora\Donations\Donation;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\CsvImporter;
 use WP_REST_Request;
 
 /**
- * The dashboard asks for a review once real donations have come in, asks only
+ * The dashboard asks for a review once donors have given on the site, asks only
  * the people who manage the plugin, and takes their answer as final.
  */
 final class ReviewPromptTest extends IntegrationTestCase
@@ -32,6 +33,57 @@ final class ReviewPromptTest extends IntegrationTestCase
         $this->donations(ReviewPrompt::AFTER_DONATIONS - 1);
         $this->donations(3, ['is_test' => true]);
         $this->donations(3, ['status' => 'pending']);
+
+        $this->assertFalse($this->dashboard()['review_prompt']);
+    }
+
+    /**
+     * The sentence says the donations came in through the plugin. Money an
+     * admin typed in did not.
+     */
+    public function test_money_an_admin_recorded_does_not_count(): void
+    {
+        for ($i = 0; $i < ReviewPrompt::AFTER_DONATIONS; $i++) {
+            $request = new WP_REST_Request('POST', '/gratora/v1/admin/donations');
+            $request->set_header('content-type', 'application/json');
+            $request->set_body((string) wp_json_encode([
+                'email'          => "cheque-{$i}@example.test",
+                'first_name'     => 'Nadia',
+                'amount_cents'   => 25000,
+                'currency'       => 'USD',
+                'payment_method' => 'cheque',
+                'received_at'    => '2026-06-14',
+            ]));
+            $this->assertSame(201, rest_do_request($request)->get_status());
+        }
+
+        $this->assertFalse($this->dashboard()['review_prompt']);
+    }
+
+    /** Nor did the history a site brings with it on the day it moves over. */
+    public function test_history_an_import_brought_over_does_not_count(): void
+    {
+        $rows = '';
+        for ($i = 0; $i < ReviewPrompt::AFTER_DONATIONS; $i++) {
+            $rows .= "past-{$i}@example.test,25.00,2025-03-0" . ($i + 1) . "\n";
+        }
+        $result = Plugin::instance()->container->get(CsvImporter::class)->import(
+            "Email,Amount,Date\n" . $rows,
+            ['email' => 'Email', 'amount' => 'Amount', 'date' => 'Date'],
+            false
+        );
+        $this->assertSame(ReviewPrompt::AFTER_DONATIONS, $result['donations_imported'], (string) wp_json_encode($result));
+
+        $this->assertFalse($this->dashboard()['review_prompt']);
+    }
+
+    /** What the Give importer writes on each row it brings over. */
+    public function test_donations_moved_over_from_give_do_not_count(): void
+    {
+        $this->donations(ReviewPrompt::AFTER_DONATIONS, [
+            'gateway'            => 'stripe',
+            'source_attribution' => ['utm_source' => 'give-import', 'utm_medium' => 'manual'],
+        ]);
 
         $this->assertFalse($this->dashboard()['review_prompt']);
     }
@@ -120,9 +172,11 @@ final class ReviewPromptTest extends IntegrationTestCase
             $d->base_amount_cents = 2500;
             $d->base_currency     = 'USD';
             $d->fx_rate           = '1.00000000';
-            $d->gateway           = 'offline';
+            $d->gateway           = (string) ($with['gateway'] ?? 'offline');
             $d->status            = (string) ($with['status'] ?? 'paid');
             $d->is_test           = (bool) ($with['is_test'] ?? false);
+            // What the form sends with every donation given on it.
+            $d->source_attribution = $with['source_attribution'] ?? ['landing' => 'https://example.org/donate/'];
             $d->paid_at           = $now;
             $d->created_at        = $now;
             $d->updated_at        = $now;
