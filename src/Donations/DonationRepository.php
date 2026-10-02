@@ -188,22 +188,14 @@ final class DonationRepository
             . "WHERE rc.donation_id = {$prefix}gratora_donations.id "
             . "AND rc.voided = 0 AND rc.sent_to_email_at IS NOT NULL)";
 
-        // A hand-recorded donation with no receipt is not one that went
-        // missing: the admin was asked and declined, because the donor never
-        // gave this site an address. Matches ChannelClassifier::MANUAL, which
-        // core reserves and the public route strips; there is no channel column
-        // to read instead.
-        // IF(JSON_VALID(...)) because the column is LONGTEXT, so nothing stops a
-        // non-JSON string reaching it. MySQL raises an error on one, MariaDB
-        // returns NULL; guarding makes both return NULL.
-        $notByHand = "(source_attribution IS NULL OR JSON_UNQUOTE(JSON_EXTRACT("
-            . "IF(JSON_VALID(source_attribution), source_attribution, NULL), "
-            . "'$.utm_medium')) <> 'manual')";
+        // A recorded or imported donation with no receipt is not one that went
+        // missing: nobody asked this site for one.
+        $taken = DonationQueries::takenByThisSitePredicate();
 
-        $build = function () use ($noReceipt, $notByHand, $campaignId) {
+        $build = function () use ($noReceipt, $taken, $campaignId) {
             $q = DonationQueries::live(
                 Donation::query()
-                    ->whereRaw($noReceipt . ' AND ' . $notByHand)
+                    ->whereRaw($noReceipt . ' AND ' . $taken)
                     ->whereIn('status', ['paid', 'partial_refund'])
             );
             if ($campaignId !== null) {

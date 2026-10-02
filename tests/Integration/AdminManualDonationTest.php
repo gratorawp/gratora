@@ -398,22 +398,55 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(0, (int) $missing['total'], 'a hand-recorded check is not a receipt that went missing');
     }
 
+    /**
+     * Given through the public route, because what it stores is what decides
+     * this: the form sends the page it sits on with every donation, and a
+     * medium only when the donor's link had one.
+     */
     public function test_an_online_donation_with_no_receipt_is_still_reported(): void
     {
-        $service = \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donations\DonationService::class);
-        $pending = $service->createPending(new \Gratora\Donations\DonationIntent(
-            email: 'online@example.com',
-            amount_cents: 1000,
-            currency: 'USD',
-            gateway: 'offline',
-        ))['donation'];
-        $service->confirm($pending, []);
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode([
+            'gateway'            => 'offline',
+            'amount_cents'       => 1000,
+            'currency'           => 'USD',
+            'email'              => 'online@example.com',
+            'profile'            => ['first_name' => 'Ona', 'last_name' => 'Line'],
+            'source_attribution' => ['landing' => 'https://example.org/donate/', 'referrer' => 'https://example.org/'],
+        ]));
+        $res = rest_do_request($req);
+        $this->assertSame(201, $res->get_status(), (string) wp_json_encode($res->get_data()));
+
+        $pending = $this->donation((string) $res->get_data()['reference']);
+        \Gratora\Foundation\Plugin::instance()->container
+            ->get(\Gratora\Donations\DonationService::class)
+            ->confirm($pending, []);
 
         $missing = \Gratora\Foundation\Plugin::instance()->container
             ->get(\Gratora\Donations\DonationRepository::class)
             ->paidWithoutReceipt();
 
-        $this->assertGreaterThan(0, (int) $missing['total']);
+        $this->assertSame(1, (int) $missing['total']);
+    }
+
+    /** History from a spreadsheet was receipted, or not, by whatever took it. */
+    public function test_an_imported_donation_is_not_reported_as_a_missing_receipt(): void
+    {
+        $result = \Gratora\Foundation\Plugin::instance()->container
+            ->get(\Gratora\Foundation\Transfer\CsvImporter::class)
+            ->import(
+                "Email,Amount,Date\nada@example.test,25.00,2025-03-01\n",
+                ['email' => 'Email', 'amount' => 'Amount', 'date' => 'Date'],
+                false
+            );
+        $this->assertSame(1, $result['donations_imported'], (string) wp_json_encode($result));
+
+        $missing = \Gratora\Foundation\Plugin::instance()->container
+            ->get(\Gratora\Donations\DonationRepository::class)
+            ->paidWithoutReceipt();
+
+        $this->assertSame(0, (int) $missing['total']);
     }
 
     /**

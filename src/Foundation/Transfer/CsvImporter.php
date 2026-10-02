@@ -384,7 +384,7 @@ final class CsvImporter
         $donation->net_cents    = (int) $amountCents;
         $donation->currency     = $currency;
         $donation->status       = $status;
-        $donation->gateway      = 'imported';
+        $donation->gateway      = DonationQueries::IMPORTED;
         $donation->frequency    = 'one_time';
         // Every status whose money moved, not just paid: the aggregates filter
         // on status, so a NULL date would count the row and date it nowhere.

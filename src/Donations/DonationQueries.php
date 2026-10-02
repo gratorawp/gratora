@@ -60,6 +60,44 @@ final class DonationQueries
         return $q->whereIn('status', self::MONEY_MOVED);
     }
 
+    /** The gateway a CSV import writes on its rows. */
+    public const IMPORTED = 'imported';
+
+    /**
+     * Rows a donor gave on this site, as against money an admin recorded and
+     * history an import brought over. No column says so: a recorded row carries
+     * ChannelClassifier::MANUAL as its medium, a CSV import its own gateway.
+     *
+     * COALESCE because a donation given on a form carries the page it was given
+     * on and usually no medium, and a missing key compares as NULL, not as true.
+     *
+     * @since unreleased
+     */
+    public static function takenByThisSitePredicate(): string
+    {
+        $donations = DB::getPrefix() . 'gratora_donations';
+
+        return "({$donations}.gateway <> '" . self::IMPORTED . "' AND COALESCE(LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT("
+            . "IF(JSON_VALID({$donations}.source_attribution), {$donations}.source_attribution, NULL), "
+            . "'\$.utm_medium')))), '') <> '" . ChannelClassifier::MANUAL . "')";
+    }
+
+    /**
+     * Grouped, so it is safe at any point in a chain: see notSuperseded().
+     *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since unreleased
+     */
+    public static function takenByThisSite($q)
+    {
+        return $q->where(static function ($g): void {
+            $g->whereRaw(self::takenByThisSitePredicate());
+        });
+    }
+
     /**
      * Rows that are donation history: real money, given rather than exchanged.
      *
