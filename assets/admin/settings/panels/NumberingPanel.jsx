@@ -176,8 +176,8 @@ export default function NumberingPanel( { s , active } ) {
             title:        __( 'Set next number', 'gratora-donation-platform' ),
             message:      sprintf(
                 /* translators: 1: reference type, 2: the formatted next reference */
-                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'gratora-donation-platform' ),
-                label.toLowerCase(),
+                __( '%1$s: the next reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'gratora-donation-platform' ),
+                label,
                 buildRef( savedFmt, savedPrefix[ key ], next, year ),
             ),
             confirmLabel: __( 'Set number', 'gratora-donation-platform' ),
