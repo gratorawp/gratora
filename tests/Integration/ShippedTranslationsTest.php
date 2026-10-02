@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Admin\Pages\DonationsPage;
+use Gratora\Settings\SettingsService;
 use PO;
 use Translation_Entry;
 use WP_Locale_Switcher;
@@ -113,6 +114,32 @@ final class ShippedTranslationsTest extends IntegrationTestCase
                 $this->assertSame($source[$key]->translations, $translations, "{$bundle}: {$key}");
             }
         }
+    }
+
+    /**
+     * The Receipts panel shows the wording a receipt goes out with. Held as
+     * literals it read English on every site, beside receipts in the site's
+     * own language.
+     *
+     * @dataProvider locales
+     */
+    public function test_the_receipt_wording_a_site_is_offered_is_in_its_language(string $locale): void
+    {
+        $source   = $this->source($locale);
+        $english  = SettingsService::receiptWording();
+        $settings = new SettingsService();
+        switch_to_locale($locale);
+
+        $offered = $settings->get('receipts');
+
+        foreach ($english as $field => $sentence) {
+            $this->assertSame($source[$sentence]->translations[0], $offered[$field], $field);
+        }
+        $this->assertSame(
+            [],
+            array_intersect_key($settings->withoutResolvedDefaults('receipts', $offered), $english),
+            'a panel saved untouched stores none of it, so receipts stay in each donor\'s language'
+        );
     }
 
     /**

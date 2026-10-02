@@ -160,10 +160,13 @@ final class SettingsService
         'receipts' => [
             'option'   => 'gratora_receipt_settings',
             'defaults' => [
-                'header_title'       => 'Donation receipt',
+                // The title, sign-off and footer note are filled at runtime by
+                // receiptWording(), as the email templates are: a const cannot
+                // call __().
+                'header_title'       => '',
                 'intro'              => '',
-                'signoff'            => 'Thank you for your support, {donor_name}.',
-                'footer_note'        => "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
+                'signoff'            => '',
+                'footer_note'        => '',
                 'show_tax_id'        => true,
                 'show_donor_address' => false,
                 'logo_attachment_id' => 0,
@@ -253,6 +256,27 @@ final class SettingsService
         $stored = get_option($cfg['option'], []);
         $defaults = $this->resolveDynamicDefaults($group, $cfg['defaults']);
         return $this->merge($defaults, is_array($stored) ? $stored : []);
+    }
+
+    /**
+     * What a receipt says until an admin writes their own wording, in the
+     * language of whoever is reading: the admin on the Receipts panel, the
+     * donor on the receipt.
+     *
+     * @return array{header_title:string, signoff:string, footer_note:string}
+     *
+     * @since unreleased
+     */
+    public static function receiptWording(): array
+    {
+        return [
+            'header_title' => __('Donation receipt', 'gratora-donation-platform'),
+            'signoff'      => __('Thank you for your support, {donor_name}.', 'gratora-donation-platform'),
+            'footer_note'  => __(
+                "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
+                'gratora-donation-platform'
+            ),
+        ];
     }
 
     /**
@@ -430,6 +454,16 @@ final class SettingsService
      */
     private function resolveDynamicDefaults(string $group, array $static): array
     {
+        if ($group === 'receipts') {
+            foreach (self::receiptWording() as $field => $sentence) {
+                if (($static[$field] ?? '') === '') {
+                    $static[$field] = $sentence;
+                }
+            }
+
+            return $static;
+        }
+
         if ($group !== 'email') return $static;
 
         // Translatable template defaults (see the const note). Merge core

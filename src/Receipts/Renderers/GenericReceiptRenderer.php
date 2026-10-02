@@ -14,6 +14,7 @@ use Gratora\Foundation\Helpers\View;
 use Gratora\Receipts\PdfBuilder;
 use Gratora\Receipts\ReceiptContext;
 use Gratora\Receipts\ReceiptRenderer;
+use Gratora\Settings\SettingsService;
 use Gratora\Foundation\Helpers\TemplateTokens;
 
 /**
@@ -133,19 +134,10 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         $stored = get_option('gratora_receipt_settings', []);
         if (! is_array($stored)) $stored = [];
 
-        $defaults = [
-            'header_title'       => __('Donation receipt', 'gratora-donation-platform'),
-            'intro'              => '',
-            // The wording the Receipts panel shows and the admin believes is in
-            // effect. Two default sets for one field disagreed about it.
-            'signoff'            => __('Thank you for your support, {donor_name}.', 'gratora-donation-platform'),
-            'footer_note'        => __(
-                "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'gratora-donation-platform'
-            ),
+        // The wording the Receipts panel shows, so the admin sees what is in effect.
+        $defaults = SettingsService::receiptWording() + [
             'show_tax_id'        => true,
             'show_donor_address' => false,
-            'logo_url'           => '',
         ];
 
         $logoId  = (int) ($stored['logo_attachment_id'] ?? 0);
