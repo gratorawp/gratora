@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Generate changelog entries from conventional commits. Use --write to save, --since <tag> for
- * a range, or --all for maintenance commits. Update changelog.txt, recent readme entries, and
- * Upgrade Notice.
+ * a range, or --all for maintenance commits. Update changelog.txt, the readme's entry for this
+ * release, and Upgrade Notice.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -23,7 +23,7 @@ const git = ( ...args ) => execFileSync( 'git', args, { cwd: root, encoding: 'ut
 
 const README    = path.join( root, 'readme.txt' );
 const CHANGELOG = path.join( root, 'changelog.txt' );
-const README_KEEPS = 3;
+const EARLIER   = 'Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).';
 
 /** Version from the plugin header, so the changelog cannot name one that was never shipped. */
 function pluginVersion() {
@@ -168,12 +168,12 @@ if ( existing.some( ( e ) => e.startsWith( `= ${ version } =` ) ) ) {
 const all = [ entry, ...existing ];
 writeFileSync( CHANGELOG, `== Changelog ==\n\n${ all.join( '\n\n' ) }\n` );
 
-// readme.txt: the recent few, then a pointer at the rest.
-const readme = readFileSync( README, 'utf8' );
-const recent = all.slice( 0, README_KEEPS ).join( '\n\n' );
-const pointer = all.length > README_KEEPS ? '\nThe full history lives in changelog.txt.\n' : '';
+// readme.txt: this release, then where the earlier ones are. WordPress.org shows
+// this section and does not read changelog.txt.
+const readme  = readFileSync( README, 'utf8' );
+const pointer = existing.length ? `\n\n${ EARLIER }` : '';
 
-let next = replaceSection( readme, 'Changelog', `${ recent }\n${ pointer }` );
+let next = replaceSection( readme, 'Changelog', `${ entry }${ pointer }` );
 
 // One line, because WordPress shows it inline on the Plugins screen and a
 // paragraph there is a wall of text beside a button.
@@ -184,4 +184,4 @@ writeFileSync( README, next );
 
 console.log( `Wrote ${ version } (${ counts })` );
 console.log( '  changelog.txt  full history' );
-console.log( `  readme.txt     newest ${ Math.min( all.length, README_KEEPS ) } entries + upgrade notice` );
+console.log( '  readme.txt     this release + upgrade notice' );

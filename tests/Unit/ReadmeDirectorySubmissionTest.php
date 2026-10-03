@@ -45,6 +45,26 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         return $headers;
     }
 
+    /** @return array<string, list<string>> each release's lines, newest first */
+    private function releases(string $text): array
+    {
+        $parts     = preg_split('/^== Changelog ==$/m', $text) ?: [];
+        $changelog = (preg_split('/^== .+ ==$/m', $parts[1] ?? '') ?: [''])[0];
+
+        $releases = [];
+        $version  = null;
+        foreach (preg_split('/\R/', $changelog) ?: [] as $line) {
+            if (preg_match('/^= (.+) =$/', $line, $m) === 1) {
+                $version            = $m[1];
+                $releases[$version] = [];
+            } elseif ($version !== null && str_starts_with($line, '* ')) {
+                $releases[$version][] = $line;
+            }
+        }
+
+        return $releases;
+    }
+
     /**
      * The one build dependency that is not on npm, as `owner/repo#ref`.
      *
@@ -227,5 +247,32 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         $matched = preg_match('/^\s*$\n(.+)$/m', explode('== Description ==', $this->readme())[0], $m);
         $this->assertSame(1, $matched, 'readme.txt has no short description.');
         $this->assertLessThanOrEqual(150, strlen(trim($m[1])));
+    }
+
+    /** WordPress.org asks for the current release in the readme and the earlier ones in a file of their own. */
+    public function test_the_readme_changelog_holds_the_current_release_only(): void
+    {
+        $this->assertSame(
+            [$this->headers()['Stable tag'] ?? null],
+            array_keys($this->releases($this->readme())),
+            'readme.txt shows the current release; earlier ones go in changelog.txt.'
+        );
+    }
+
+    public function test_changelog_txt_opens_with_the_release_the_readme_shows(): void
+    {
+        $shown = $this->releases($this->readme());
+        $this->assertNotEmpty($shown, 'readme.txt has no changelog entry.');
+
+        $history = $this->releases((string) file_get_contents($this->root() . '/changelog.txt'));
+
+        $this->assertSame($shown, array_slice($history, 0, 1, true));
+    }
+
+    public function test_the_readme_says_where_the_earlier_releases_are(): void
+    {
+        $changelog = (preg_split('/^== Changelog ==$/m', $this->readme()) ?: [])[1] ?? '';
+
+        $this->assertStringContainsString('changelog.txt', $changelog);
     }
 }
