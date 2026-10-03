@@ -23,8 +23,8 @@ final class AddonsPage extends HookProvider
      * as the current page the link looks like every other.
      */
     private const MENU_LINK_CSS = <<<'CSS'
-        :is(.admin-color-modern, .admin-color-fresh, .admin-color-blue, .admin-color-midnight, .admin-color-sunrise, .admin-color-ectoplasm, .admin-color-ocean, .admin-color-coffee) #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #ff8f73; }
-        .admin-color-light #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #c7412a; }
+        :is(.admin-color-modern, .admin-color-fresh, .admin-color-blue, .admin-color-midnight, .admin-color-sunrise, .admin-color-ectoplasm, .admin-color-ocean, .admin-color-coffee) #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #e89940; }
+        .admin-color-light #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #b45309; }
         CSS;
 
     /** @since 1.1.0 */

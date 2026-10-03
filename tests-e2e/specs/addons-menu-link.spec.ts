@@ -70,6 +70,18 @@ test.describe('the add-ons link in the menu', () => {
         }
     });
 
+    test('is the colour of the test mode badge on a dark menu', async ({ page }) => {
+        await useScheme(page, 'modern');
+        await page.goto(DASHBOARD);
+        await page.mouse.move(700, 500);
+
+        const badge = await page
+            .locator('#wp-admin-bar-gratora-test-mode .gratora-test-mode-badge')
+            .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+        expect((await drawn(link(page, 'gratora-addons'))).color).toBe(badge);
+    });
+
     test('takes the colour of every other link under the pointer', async ({ page }) => {
         await page.goto(DASHBOARD);
 
