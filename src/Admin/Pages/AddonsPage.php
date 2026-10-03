@@ -9,15 +9,34 @@ use Gratora\Foundation\Hooks\HookProvider;
 /** @since 1.1.0 */
 final class AddonsPage extends HookProvider
 {
-    private const PAGE_ID   = 'gratora-addons';
-    private const HANDLE    = 'gratora-admin-addons';
-    private const BUILD_DIR = 'build/admin/addons';
-    private const SITE      = 'https://gratora.net/';
+    private const PAGE_ID    = 'gratora-addons';
+    private const CAPABILITY = 'gratora_access_settings';
+    private const HANDLE     = 'gratora-admin-addons';
+    private const BUILD_DIR  = 'build/admin/addons';
+    private const SITE       = 'https://gratora.net/';
+    private const MENU_STYLE = 'gratora-addons-menu-link';
+
+    /**
+     * Each admin colour scheme paints the menu its own ground, so the schemes
+     * are named: the light one takes the darker ink, and a scheme not listed
+     * keeps the link as WordPress draws it. Under the pointer, with focus and
+     * as the current page the link looks like every other.
+     */
+    private const MENU_LINK_CSS = <<<'CSS'
+        :is(.admin-color-modern, .admin-color-fresh, .admin-color-blue, .admin-color-midnight, .admin-color-sunrise, .admin-color-ectoplasm, .admin-color-ocean, .admin-color-coffee) #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #ff8f73; }
+        .admin-color-light #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #c7412a; }
+        CSS;
 
     /** @since 1.1.0 */
     protected function filters(): array
     {
         return ['gratora.admin.pages' => 'registerPage'];
+    }
+
+    /** @since unreleased */
+    protected function actions(): array
+    {
+        return ['admin_enqueue_scripts' => 'menuLinkStyle'];
     }
 
     /** @since 1.1.0 */
@@ -26,11 +45,28 @@ final class AddonsPage extends HookProvider
         $pages[] = [
             'id'         => self::PAGE_ID,
             'title'      => __('Add-ons', 'gratora-donation-platform'),
-            'capability' => 'gratora_access_settings',
+            'capability' => self::CAPABILITY,
             'position'   => 100,
             'render'     => [$this, 'render'],
         ];
         return $pages;
+    }
+
+    /**
+     * The menu is on every admin screen, so the colour of its link loads on each.
+     *
+     * @since unreleased
+     */
+    public function menuLinkStyle(): void
+    {
+        if (! current_user_can(self::CAPABILITY)) {
+            return;
+        }
+
+        // Use a registered handle for inline CSS.
+        wp_register_style(self::MENU_STYLE, false, [], GRATORA_VERSION);
+        wp_enqueue_style(self::MENU_STYLE);
+        wp_add_inline_style(self::MENU_STYLE, self::MENU_LINK_CSS);
     }
 
     /** @since 1.1.0 */
