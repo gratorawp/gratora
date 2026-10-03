@@ -752,16 +752,18 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                             <label htmlFor="gratora-fund-goal">{ __( 'Goal amount', 'gratora-donation-platform' ) } <span className="gratora-fld__opt">{ __( 'optional', 'gratora-donation-platform' ) }</span></label>
                             <input id="gratora-fund-goal" className="gratora-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'gratora-donation-platform' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
                         </div>
-                        <ScheduleFields
-                            enabled={ scheduleOn }
-                            onToggle={ setScheduleOn }
-                            startsAt={ form.starts_at ? form.starts_at.slice( 0, 10 ) : '' }
-                            onStartsAt={ ( v ) => set( 'starts_at', v || '' ) }
-                            endsAt={ form.ends_at ? form.ends_at.slice( 0, 10 ) : '' }
-                            onEndsAt={ ( v ) => set( 'ends_at', v || '' ) }
-                            disabled={ form.is_default }
-                            disabledNote={ __( 'The default fund takes every donation with no fund chosen, so it stays open. Make another fund the default to schedule this one.', 'gratora-donation-platform' ) }
-                        />
+                        <div className="gratora-fund-schedule">
+                            <ScheduleFields
+                                enabled={ scheduleOn }
+                                onToggle={ setScheduleOn }
+                                startsAt={ form.starts_at ? form.starts_at.slice( 0, 10 ) : '' }
+                                onStartsAt={ ( v ) => set( 'starts_at', v || '' ) }
+                                endsAt={ form.ends_at ? form.ends_at.slice( 0, 10 ) : '' }
+                                onEndsAt={ ( v ) => set( 'ends_at', v || '' ) }
+                                disabled={ form.is_default }
+                                disabledNote={ __( 'The default fund takes every donation with no fund chosen, so it stays open. Make another fund the default to schedule this one.', 'gratora-donation-platform' ) }
+                            />
+                        </div>
                     </fieldset>
 
                     <fieldset className="gratora-fset">
