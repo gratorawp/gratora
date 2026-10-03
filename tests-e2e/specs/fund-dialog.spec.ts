@@ -49,3 +49,28 @@ test('a locked switch is dimmed and refuses the pointer', async ({ page }) => {
         { track: '1', cursor: 'pointer' },
     ]);
 });
+
+test('every field of the fund dialog is labelled in one style', async ({ page }) => {
+    const dialog = await editDefaultFund(page);
+
+    const styles = await dialog.locator('.gratora-fld > label, .gratora-fld > .gratora-fld__label').evaluateAll((labels) => labels.map((label) => {
+        const { display, fontWeight, fontSize, marginBottom } = getComputedStyle(label);
+
+        return `${display} ${fontWeight} ${fontSize} ${marginBottom}`;
+    }));
+
+    expect(styles).toHaveLength(7);
+    expect(styles).toEqual(styles.map(() => styles[0]));
+});
+
+test('the sections of the fund dialog are spaced evenly', async ({ page }) => {
+    const dialog = await editDefaultFund(page);
+
+    const gaps = await dialog.locator('fieldset.gratora-fset').evaluateAll((sections) => sections.slice(1).map((section, i) => {
+        const above = (sections[i].lastElementChild as HTMLElement).getBoundingClientRect().bottom;
+
+        return Math.round((section.querySelector('legend') as HTMLElement).getBoundingClientRect().top - above);
+    }));
+
+    expect(gaps).toEqual(gaps.map(() => gaps[0]));
+});
