@@ -203,17 +203,21 @@ final class PlanRow
         $prefix = DB::getPrefix();
         $in     = implode(',', array_map('intval', array_unique($ids)));
 
-        // ROW_NUMBER rather than a LIMIT over the whole page: one plan with a
-        // long decline history would otherwise eat the budget and leave the
-        // rest of the page reading as if it had never failed.
+        // No window function, which MySQL 5.7 lacks, and no single LIMIT over
+        // the page, which one plan with a long decline history would use up.
         $rows = DB::raw(
-            "SELECT id FROM (
-                SELECT id, ROW_NUMBER() OVER (
-                    PARTITION BY recurring_plan_id ORDER BY created_at DESC, id DESC
-                ) AS rn
+            "SELECT MAX(d.id) AS id
+             FROM {$prefix}gratora_donations d
+             INNER JOIN (
+                SELECT recurring_plan_id, MAX(created_at) AS created_at
                 FROM {$prefix}gratora_donations
                 WHERE recurring_plan_id IN ({$in}) AND status = 'failed'
-             ) ranked WHERE rn = 1"
+                GROUP BY recurring_plan_id
+             ) newest
+                ON newest.recurring_plan_id = d.recurring_plan_id
+               AND newest.created_at = d.created_at
+             WHERE d.recurring_plan_id IN ({$in}) AND d.status = 'failed'
+             GROUP BY d.recurring_plan_id"
         )['rows'] ?? [];
 
         $donationIds = array_map(static fn ($r): int => (int) ($r->id ?? 0), $rows);
@@ -243,21 +247,23 @@ final class PlanRow
         ))));
         if ($ids === []) return [];
 
-        $prefix = DB::getPrefix();
-        $in     = implode(',', array_map('intval', $ids));
+        // Cut per plan here, MySQL 5.7 having no window function to do it.
+        // ErrorLog::KEEP bounds what there is to read.
+        $rows = DB::table('gratora_events')
+            ->select('id', 'recurring_plan_id')
+            ->whereIn('recurring_plan_id', $ids)
+            ->whereLike('type', ErrorLog::PREFIX . '%')
+            ->orderBy('occurred_at', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->getAll();
 
-        $rows = DB::raw(
-            "SELECT id FROM (
-                SELECT id, ROW_NUMBER() OVER (
-                    PARTITION BY recurring_plan_id ORDER BY occurred_at DESC, id DESC
-                ) AS rn
-                FROM {$prefix}gratora_events
-                WHERE recurring_plan_id IN ({$in}) AND type LIKE %s
-             ) ranked WHERE rn <= %d",
-            [ErrorLog::PREFIX . '%', self::MAX_ERRORS]
-        )['rows'] ?? [];
-
-        $eventIds = array_map(static fn ($r): int => (int) ($r->id ?? 0), $rows);
+        $kept     = [];
+        $eventIds = [];
+        foreach ($rows as $row) {
+            $planId        = (int) $row['recurring_plan_id'];
+            $kept[$planId] = ($kept[$planId] ?? 0) + 1;
+            if ($kept[$planId] <= self::MAX_ERRORS) $eventIds[] = (int) $row['id'];
+        }
         if ($eventIds === []) return [];
 
         $out = [];

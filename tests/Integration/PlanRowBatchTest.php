@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
 use Gratora\Donations\Donation;
 use Gratora\Foundation\Plugin;
 use Gratora\Gateways\GatewayManager;
@@ -84,6 +85,22 @@ final class PlanRowBatchTest extends IntegrationTestCase
         );
     }
 
+    private function seedPlanErrorAt(int $planId, string $message, string $at): void
+    {
+        $e = Event::make();
+        $e->type              = ErrorLog::PREFIX . 'gateway.offline';
+        $e->recurring_plan_id = $planId;
+        $e->payload           = ['message' => $message];
+        $e->occurred_at       = $at;
+        $e->save();
+    }
+
+    /** @return list<string> */
+    private function errorMessages(array $shaped, RecurringPlan $plan): array
+    {
+        return array_column($shaped[(int) $plan->id]['errors'], 'message');
+    }
+
     private function queriesToShape(array $plans): int
     {
         global $wpdb;
@@ -130,6 +147,58 @@ final class PlanRowBatchTest extends IntegrationTestCase
             $this->assertCount(1, $errors, 'errors landed on the wrong plan');
             $this->assertSame("cancel failed on errs-{$i}", $errors[0]['message']);
         }
+    }
+
+    /** The date decides first, and between two declines in one second the later row. */
+    public function test_declines_in_the_same_second_resolve_to_the_later_row(): void
+    {
+        $plan = $this->seedPlans(1, 'tie')[0];
+        $id   = (int) $plan->id;
+
+        $this->seedFailedRenewal($id, 'GRATORA-tie-FIRST', '2026-03-01 00:00:00', 'First');
+        $this->seedFailedRenewal($id, 'GRATORA-tie-SECOND', '2026-03-01 00:00:00', 'Second');
+        $this->seedFailedRenewal($id, 'GRATORA-tie-BACKDATED', '2026-01-15 00:00:00', 'Written last, dated earlier');
+
+        $shaped = PlanRow::commonMany([$plan], $this->gateways());
+
+        $this->assertSame('GRATORA-tie-SECOND', $shaped[$id]['last_failure']['reference']);
+    }
+
+    /** A long history is cut to its newest ten, and the plan beside it keeps its own. */
+    public function test_a_long_error_history_is_cut_to_the_newest(): void
+    {
+        [$busy, $quiet] = $this->seedPlans(2, 'cap');
+
+        for ($i = 1; $i <= 11; $i++) {
+            $this->seedPlanErrorAt((int) $busy->id, "older {$i}", sprintf('2026-01-01 00:00:%02d', $i));
+        }
+
+        $shaped = PlanRow::commonMany([$busy, $quiet], $this->gateways());
+
+        $this->assertSame(
+            [
+                'cancel failed on cap-0',
+                'older 11', 'older 10', 'older 9', 'older 8', 'older 7',
+                'older 6', 'older 5', 'older 4', 'older 3',
+            ],
+            $this->errorMessages($shaped, $busy)
+        );
+        $this->assertSame(['cancel failed on cap-1'], $this->errorMessages($shaped, $quiet));
+    }
+
+    public function test_errors_in_the_same_second_are_cut_from_the_earliest_written(): void
+    {
+        $plan = $this->seedPlans(1, 'same')[0];
+
+        for ($i = 1; $i <= 11; $i++) {
+            $this->seedPlanErrorAt((int) $plan->id, "same {$i}", '2026-01-01 00:00:00');
+        }
+
+        $messages = $this->errorMessages(PlanRow::commonMany([$plan], $this->gateways()), $plan);
+
+        $this->assertCount(10, $messages);
+        $this->assertNotContains('same 1', $messages);
+        $this->assertNotContains('same 2', $messages);
     }
 
     /** A plan that never failed asks for nothing and is told nothing. */
