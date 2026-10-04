@@ -238,6 +238,20 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         $this->assertSame(trim($name[1]), trim($title[1]));
     }
 
+    /** The directory's submission form refuses a plugin whose two links are the same string. */
+    public function test_the_plugin_and_author_links_are_not_the_same(): void
+    {
+        $plugin = (string) file_get_contents($this->root() . '/gratora.php');
+
+        preg_match('/^\s*\*\s*Plugin URI:\s*(\S+)$/m', $plugin, $pluginUri);
+        $this->assertNotEmpty($pluginUri, 'gratora.php has no Plugin URI header.');
+
+        preg_match('/^\s*\*\s*Author URI:\s*(\S+)$/m', $plugin, $authorUri);
+        $this->assertNotEmpty($authorUri, 'gratora.php has no Author URI header.');
+
+        $this->assertNotSame($pluginUri[1], $authorUri[1]);
+    }
+
     public function test_the_tags_and_short_description_fit_what_the_directory_shows(): void
     {
         $tags = array_filter(array_map('trim', explode(',', $this->headers()['Tags'] ?? '')));

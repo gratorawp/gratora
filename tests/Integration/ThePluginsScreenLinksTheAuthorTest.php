@@ -17,6 +17,6 @@ final class ThePluginsScreenLinksTheAuthorTest extends IntegrationTestCase
 
         $plugin = get_plugin_data(GRATORA_FILE, true, false);
 
-        $this->assertSame('<a href="https://gratora.net">Gratora</a>', $plugin['Author']);
+        $this->assertSame('<a href="https://gratora.net/">Gratora</a>', $plugin['Author']);
     }
 }
