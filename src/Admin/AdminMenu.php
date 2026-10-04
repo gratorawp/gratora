@@ -52,15 +52,24 @@ final class AdminMenu extends HookProvider
         );
 
         foreach ($this->pages() as $page) {
-            $parent = ! empty($page['hidden']) ? null : self::SLUG;
-            add_submenu_page(
-                $parent,
-                $page['title'] ?? '',
-                $page['title'] ?? '',
+            $hidden = ! empty($page['hidden']);
+            $title  = (string) ($page['title'] ?? '');
+            $hook   = add_submenu_page(
+                $hidden ? null : self::SLUG,
+                $title,
+                $title,
                 $page['capability'] ?? self::CAPABILITY,
                 $page['id'] ?? '',
                 $page['render'] ?? '__return_null'
             );
+
+            // WordPress looks a title up through the parent menu, so a page without one gets none.
+            if ($hidden && $hook) {
+                add_action("load-{$hook}", static function () use ($title): void {
+                    // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- admin-header.php prints this global, and nothing else sets it for a page outside the menu.
+                    $GLOBALS['title'] = $title;
+                });
+            }
         }
 
         // Remove the default submenu after registration so WordPress cannot recreate it under
