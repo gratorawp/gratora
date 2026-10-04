@@ -19,7 +19,7 @@ receipts, and advanced reporting.
 |---|---|
 | WordPress | 7.0 or later |
 | PHP | 8.1 or later |
-| MySQL | 8.0 or later |
+| Database | MySQL 5.7 or later, or MariaDB 10.3 or later |
 | Node | 18.12 or later |
 
 ## Getting started

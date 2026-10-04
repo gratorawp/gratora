@@ -234,6 +234,11 @@ anonymize a donor on request. Compliance depends on how you use them.
 
 English, German and Spanish, and it is ready to be translated into others.
 
+= Which database does Gratora need? =
+
+MySQL 5.7 or newer, or MariaDB 10.3 or newer. To see what your site runs, open
+Tools > Site Health > Info and look under Database.
+
 == Screenshots ==
 
 1. The fundraising dashboard: what came in, where it came from, and what needs attention.
