@@ -927,6 +927,11 @@ msgstr "Spendenformulare, wiederkehrende Spenden, Fundraising-Kampagnen, Spender
 msgid "Gratora"
 msgstr "Gratora"
 
+#. Author URI of the plugin
+#: gratora.php
+msgid "https://gratora.net/"
+msgstr "https://gratora.net/"
+
 #: src/Admin/AdminFooter.php:33
 msgid "Leave a five star review on WordPress.org"
 msgstr "Hinterlassen Sie eine Fünf-Sterne-Bewertung auf WordPress.org"

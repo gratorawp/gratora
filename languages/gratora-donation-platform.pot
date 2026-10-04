@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T18:41:56+00:00\n"
+"POT-Creation-Date: 2026-10-04T03:24:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -195,7 +195,7 @@ msgstr ""
 #: assets/admin/donors/Insights.jsx:61
 #: assets/admin/funds/List.jsx:36
 #: assets/admin/funds/List.jsx:99
-#: assets/admin/funds/List.jsx:791
+#: assets/admin/funds/List.jsx:793
 #: assets/admin/_shared/format.js:33
 #: assets/admin/_shared/statuses.js:17
 #: assets/admin/_shared/statuses.js:38
@@ -523,7 +523,7 @@ msgstr[1] ""
 #: assets/admin/donors/profile/tabs/ConsentTab.jsx:65
 #: assets/admin/forms/Editor.jsx:713
 #: assets/admin/funds/List.jsx:689
-#: assets/admin/funds/List.jsx:861
+#: assets/admin/funds/List.jsx:863
 #: assets/admin/settings/panels/EmailPanel.jsx:246
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:170
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:223
@@ -927,6 +927,11 @@ msgstr ""
 msgid "Gratora"
 msgstr ""
 
+#. Author URI of the plugin
+#: gratora.php
+msgid "https://gratora.net/"
+msgstr ""
+
 #: src/Admin/AdminFooter.php:33
 msgid "Leave a five star review on WordPress.org"
 msgstr ""
@@ -973,7 +978,7 @@ msgstr ""
 msgid "Gratora Donor Portal"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:28
+#: src/Admin/Pages/AddonsPage.php:47
 #: src/Admin/SystemReport.php:44
 #: src/Admin/SystemReport.php:102
 #: assets/admin/addons/Addons.jsx:92
@@ -981,76 +986,76 @@ msgstr ""
 msgid "Add-ons"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:93
+#: src/Admin/Pages/AddonsPage.php:129
 msgid "Peer-to-Peer"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:93
+#: src/Admin/Pages/AddonsPage.php:129
 msgid "Supporters raise money for you on their own pages, alone or in teams."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:94
+#: src/Admin/Pages/AddonsPage.php:130
 msgid "Event Tickets"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:94
+#: src/Admin/Pages/AddonsPage.php:130
 msgid "Sell tickets to fundraising events, then check guests in by phone."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:95
+#: src/Admin/Pages/AddonsPage.php:131
 msgid "AI Assistant"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:95
+#: src/Admin/Pages/AddonsPage.php:131
 msgid "Ask about your fundraising and make changes in plain language."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:96
+#: src/Admin/Pages/AddonsPage.php:132
 msgid "Payment Gateways"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:96
+#: src/Admin/Pages/AddonsPage.php:132
 msgid "Take donations through Authorize.Net, Square, GoCardless, Moneris or Razorpay."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:97
+#: src/Admin/Pages/AddonsPage.php:133
 msgid "Conversion Tracking"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:97
+#: src/Admin/Pages/AddonsPage.php:133
 msgid "Report completed donations to GA4, Google Ads and Meta, with amount and currency."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:98
+#: src/Admin/Pages/AddonsPage.php:134
 msgctxt "add-on name"
 msgid "Connect"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:98
+#: src/Admin/Pages/AddonsPage.php:134
 msgid "Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:99
+#: src/Admin/Pages/AddonsPage.php:135
 msgid "Tributes"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:99
+#: src/Admin/Pages/AddonsPage.php:135
 msgid "Donors dedicate a donation in honor or in memory of someone."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:100
+#: src/Admin/Pages/AddonsPage.php:136
 msgid "Gift Aid"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:100
+#: src/Admin/Pages/AddonsPage.php:136
 msgid "Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC."
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:119
+#: src/Admin/Pages/AddonsPage.php:155
 msgid "GiveWP Importer"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:120
+#: src/Admin/Pages/AddonsPage.php:156
 msgid "Copy donors, donations, campaigns and recurring subscriptions from GiveWP into Gratora."
 msgstr ""
 
@@ -1483,7 +1488,7 @@ msgstr ""
 #: src/Admin/views/deactivation-dialog.php:46
 #: src/Admin/views/deactivation-dialog.php:48
 #: assets/admin/funds/List.jsx:450
-#: assets/admin/funds/List.jsx:896
+#: assets/admin/funds/List.jsx:898
 msgid "Deactivate"
 msgstr ""
 
@@ -7712,7 +7717,7 @@ msgstr ""
 #: assets/admin/donors/DonorProfile.jsx:316
 #: assets/admin/forms/blocks/currency-switcher/index.js:71
 #: assets/admin/forms/Editor.jsx:527
-#: assets/admin/funds/List.jsx:927
+#: assets/admin/funds/List.jsx:929
 #: assets/admin/settings/panels/SetupPanel.jsx:45
 #: assets/admin/subscriptions/List.jsx:1045
 #: assets/admin/_shared/components/CampaignTemplatePicker.jsx:270
@@ -8119,7 +8124,7 @@ msgstr ""
 #: assets/admin/donations/RecordDonationDrawer.jsx:294
 #: assets/admin/forms/Editor.jsx:1379
 #: assets/admin/funds/List.jsx:120
-#: assets/admin/funds/List.jsx:779
+#: assets/admin/funds/List.jsx:781
 msgid "Default fund"
 msgstr ""
 
@@ -9641,7 +9646,7 @@ msgstr ""
 
 #: assets/admin/donations/detail/RefundDialog.jsx:90
 #: assets/admin/funds/List.jsx:752
-#: assets/admin/funds/List.jsx:770
+#: assets/admin/funds/List.jsx:772
 msgid "optional"
 msgstr ""
 
@@ -13205,123 +13210,123 @@ msgstr ""
 msgid "Goal amount"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:763
+#: assets/admin/funds/List.jsx:764
 msgid "The default fund takes every donation with no fund chosen, so it stays open. Make another fund the default to schedule this one."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:768
+#: assets/admin/funds/List.jsx:770
 msgid "Accounting"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:770
+#: assets/admin/funds/List.jsx:772
 msgid "Accounting code"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:771
+#: assets/admin/funds/List.jsx:773
 msgid "Enter accounting code"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:772
+#: assets/admin/funds/List.jsx:774
 msgid "Maps this fund to a GL account in your bookkeeping. Included in exports."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:777
+#: assets/admin/funds/List.jsx:779
 msgid "Behaviour"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:784
+#: assets/admin/funds/List.jsx:786
 msgid "Donations with no chosen fund (and campaigns with no default) are allocated here. Promote another fund to move it."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:785
+#: assets/admin/funds/List.jsx:787
 msgid "Donations with no chosen fund (and campaigns with no default) are allocated here. The default has no schedule."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:792
+#: assets/admin/funds/List.jsx:794
 msgid "Inactive funds stay in reports but cannot receive new donations."
-msgstr ""
-
-#. translators: %s: fund name
-#: assets/admin/funds/List.jsx:828
-#, js-format
-msgid "Fund “%s” was deleted."
 msgstr ""
 
 #. translators: %s: fund name
 #: assets/admin/funds/List.jsx:830
 #, js-format
+msgid "Fund “%s” was deleted."
+msgstr ""
+
+#. translators: %s: fund name
+#: assets/admin/funds/List.jsx:832
+#, js-format
 msgid "Reassigning donations from “%s”. It will be removed once complete."
 msgstr ""
 
 #. translators: %s: fund name
-#: assets/admin/funds/List.jsx:834
+#: assets/admin/funds/List.jsx:836
 #, js-format
 msgid "Fund “%s” was deactivated and kept for reporting."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:840
+#: assets/admin/funds/List.jsx:842
 msgid "Could not delete the fund."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:852
+#: assets/admin/funds/List.jsx:854
 msgid "Delete fund"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:853
+#: assets/admin/funds/List.jsx:855
 msgid "Reassign and delete"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:853
+#: assets/admin/funds/List.jsx:855
 msgid "Deactivate fund"
 msgstr ""
 
 #. translators: %s: fund name
-#: assets/admin/funds/List.jsx:857
+#: assets/admin/funds/List.jsx:859
 #, js-format
 msgid "Delete fund: %s"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:879
+#: assets/admin/funds/List.jsx:881
 msgid "Nothing points to this fund, so deleting it removes it entirely."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:884
+#: assets/admin/funds/List.jsx:886
 msgid "This fund is still referenced, so it is never hard-deleted. Choose what to do:"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:897
+#: assets/admin/funds/List.jsx:899
 msgid "Keep all donation records. Recommended."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:912
+#: assets/admin/funds/List.jsx:914
 msgid "Reassign to another fund, then delete"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:913
+#: assets/admin/funds/List.jsx:915
 msgid "Moves every donation, campaign and form that points here onto the chosen fund, then removes this one."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:919
+#: assets/admin/funds/List.jsx:921
 msgid "This fund has sub-funds under it, so it cannot be removed. Deactivating keeps them; they move up to the top level. To remove it outright, move or delete the sub-funds first."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:921
+#: assets/admin/funds/List.jsx:923
 msgid "Still loading the other funds, so reassigning is not offered yet."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:923
+#: assets/admin/funds/List.jsx:925
 msgid "The list of other funds could not be loaded, so reassigning is not offered. Deactivating is safe either way."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:924
+#: assets/admin/funds/List.jsx:926
 msgid "There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations."
 msgstr ""
 
-#: assets/admin/funds/List.jsx:935
+#: assets/admin/funds/List.jsx:937
 msgid "Reassign donations to"
 msgstr ""
 
-#: assets/admin/funds/List.jsx:939
+#: assets/admin/funds/List.jsx:941
 msgid "Select a fund"
 msgstr ""
 
