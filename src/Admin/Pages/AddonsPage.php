@@ -33,7 +33,7 @@ final class AddonsPage extends HookProvider
         return ['gratora.admin.pages' => 'registerPage'];
     }
 
-    /** @since unreleased */
+    /** @since 1.1.2 */
     protected function actions(): array
     {
         return ['admin_enqueue_scripts' => 'menuLinkStyle'];
@@ -55,7 +55,7 @@ final class AddonsPage extends HookProvider
     /**
      * The menu is on every admin screen, so the colour of its link loads on each.
      *
-     * @since unreleased
+     * @since 1.1.2
      */
     public function menuLinkStyle(): void
     {
