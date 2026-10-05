@@ -134,6 +134,7 @@ final class AddonsPage extends HookProvider
             ['connect', 'gratora-connect.php', _x('Connect', 'add-on name', 'gratora-donation-platform'), __('Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp.', 'gratora-donation-platform'), 'webhook'],
             ['tributes', 'gratora-tributes.php', __('Tributes', 'gratora-donation-platform'), __('Donors dedicate a donation in honor or in memory of someone.', 'gratora-donation-platform'), 'rose'],
             ['gift-aid', 'gratora-gift-aid.php', __('Gift Aid', 'gratora-donation-platform'), __('Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC.', 'gratora-donation-platform'), 'landmark'],
+            ['donation-recovery', 'gratora-donation-recovery.php', __('Donation Recovery', 'gratora-donation-platform'), __('One reminder email to someone who started a donation and did not finish it.', 'gratora-donation-platform'), 'mail'],
         ];
 
         $catalog = [];

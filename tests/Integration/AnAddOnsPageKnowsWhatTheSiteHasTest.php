@@ -92,6 +92,18 @@ final class AnAddOnsPageKnowsWhatTheSiteHasTest extends IntegrationTestCase
         $this->assertSame('active', $this->addons()['connect']['status']);
     }
 
+    public function test_donation_recovery_is_found_by_its_main_file_and_links_to_its_page(): void
+    {
+        $this->installed(['gratora-donation-recovery/gratora-donation-recovery.php']);
+
+        $recovery = $this->addons()['donation-recovery'] ?? null;
+
+        $this->assertNotNull($recovery, 'Donation Recovery is not on the screen.');
+        $this->assertSame('installed', $recovery['status']);
+        $this->assertSame('https://gratora.net/add-ons/donation-recovery/', $recovery['url']);
+        $this->assertFalse($recovery['free']);
+    }
+
     public function test_someone_who_cannot_activate_plugins_is_not_offered_activation(): void
     {
         $this->installed(['gratora-gift-aid/gratora-gift-aid.php']);

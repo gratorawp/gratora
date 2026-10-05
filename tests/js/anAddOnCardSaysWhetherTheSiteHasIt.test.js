@@ -72,6 +72,13 @@ test( 'an add-on the site does not have links to its page in a new tab', () => {
     expect( more.getAttribute( 'aria-label' ) ).toBe( 'Learn more about Event Tickets (opens in a new tab)' );
 } );
 
+test( 'a card draws the icon the server names for it', () => {
+    const tile = ( icon ) => card( { icon } ).querySelector( '.gratora-addon__tile svg' );
+
+    expect( tile( 'ticket' ) ).not.toBeNull();
+    expect( tile( 'mail' ) ).not.toBeNull();
+} );
+
 test( 'the free importer says it is free until the site has it', () => {
     expect( pill( card( { slug: 'give-importer', free: true } ) ) ).toBe( 'Free' );
     expect( pill( card( { slug: 'give-importer', free: true, status: 'active' } ) ) ).toBe( 'Active' );

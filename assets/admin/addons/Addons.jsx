@@ -5,6 +5,7 @@ import {
     ExternalLink,
     Import,
     Landmark,
+    Mail,
     Rose,
     Sparkles,
     Ticket,
@@ -26,6 +27,7 @@ const ICONS = {
     webhook:       Webhook,
     rose:          Rose,
     landmark:      Landmark,
+    mail:          Mail,
     import:        Import,
 };
 
