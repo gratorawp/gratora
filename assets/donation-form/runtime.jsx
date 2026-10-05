@@ -489,11 +489,14 @@ function FormBody( { state, dispatch, config } ) {
             const retry  = ( prior?.reference && priorT )
                 ? { reference: prior.reference, status_token: priorT }
                 : null;
+            const payload = buildPayload( state );
             // X-WP-Nonce only when present (logged-in users), so a page-cached
             // form never sends a stale nonce the REST layer would 403.
             const body = JSON.stringify( {
-                ...buildPayload( state ),
-                ...( config.extra ? { extra: config.extra } : {} ),
+                ...payload,
+                // Added to what the fields put there, and winning where both
+                // name a key: a form's own extra is issued by the server.
+                ...( config.extra ? { extra: { ...( payload.extra || {} ), ...config.extra } } : {} ),
                 ...( retry ? { _retry: retry } : {} ),
                 _ft: embed ? embedToken : formToken,
                 _hp: honeypot,
