@@ -142,8 +142,7 @@ final class CliCommands
         if (empty($gateways['test_mode'])) {
             WP_CLI::error(
                 'Refusing to seed: org-wide test mode is off. Turn it on in '
-                . 'Settings, Payment gateways (it is also set automatically by '
-                . 'the "just exploring" onboarding path).'
+                . 'Settings, Payment gateways (a new install starts with it on).'
             );
         }
 

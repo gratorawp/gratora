@@ -292,8 +292,7 @@ test.describe('documentation screenshots', () => {
         // The later steps are reached by buttons that write the organisation's
         // profile, currency and brand, so walking the whole wizard is opt-in:
         // set GRATORA_E2E_ONBOARDING=1 and put those settings back afterwards.
-        // Finishing is safe on a site that has onboarded already, because the
-        // one destructive branch in finalize() is guarded on a first run.
+        // Finishing itself only marks the wizard complete.
         await page.setViewportSize(WIZARD_VIEWPORT);
         await page.goto(admin('gratora-onboarding'));
         await page.waitForLoadState('networkidle');
@@ -331,7 +330,7 @@ test.describe('documentation screenshots', () => {
         await shoot(page, 'onboarding-step4');
 
         await advanceWizard(page);
-        await expect(page.getByText('Skip for now', { exact: true })).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByText('Go to the dashboard', { exact: true })).toBeVisible({ timeout: 15_000 });
         await page.waitForTimeout(800);
         await shoot(page, 'onboarding-step5');
     });

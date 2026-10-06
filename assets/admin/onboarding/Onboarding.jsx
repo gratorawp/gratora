@@ -92,7 +92,7 @@ const USER_TYPES = [
         id:   'exploring',
         icon: 'target',
         name: __( 'Just exploring', 'gratora-donation-platform' ),
-        desc: __( 'Trying Gratora out. Starts in test mode, so nothing takes real money until you switch it off.', 'gratora-donation-platform' ),
+        desc: __( 'Trying Gratora out before deciding.', 'gratora-donation-platform' ),
     },
 ];
 
