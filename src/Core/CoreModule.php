@@ -385,6 +385,7 @@ final class CoreModule implements GratoraModule
         ));
 
         (new DonorAggregateSyncer())->register();
+        add_action('gratora.donation.completed', [FirstRun::class, 'noteCompleted']);
         // Prunes our own expired rate-limit transients independently of WP core's wp_scheduled_delete.
         (new TransientGc($c->get(AsyncDispatcher::class)))->register();
         (new AbandonedPendingReaper($c->get(AsyncDispatcher::class), $c->get(Clock::class)))->register();

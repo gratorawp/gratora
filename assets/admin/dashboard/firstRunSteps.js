@@ -71,6 +71,17 @@ function testStep( facts ) {
         };
     }
 
+    // Deleted, binned or refunded since. The step it finished stays finished.
+    if ( facts.test_donation_made ) {
+        return {
+            ...step,
+            title:  made,
+            done:   true,
+            text:   __( 'A test donation came in.', 'gratora-donation-platform' ),
+            action: null,
+        };
+    }
+
     if ( facts.page !== 'live' ) {
         return { ...step, done: false, text: __( 'Needs a donation page first.', 'gratora-donation-platform' ), action: null };
     }

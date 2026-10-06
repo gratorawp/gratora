@@ -52,6 +52,7 @@ final class DataEraser
         'gratora_donor_rehash_after_id',
         'gratora_donor_rehash_pending',
         'gratora_email_settings',
+        'gratora_first_test_donation_at',
         'gratora_fund_reassignments',
         'gratora_fx_rates',
         'gratora_gateway_config',

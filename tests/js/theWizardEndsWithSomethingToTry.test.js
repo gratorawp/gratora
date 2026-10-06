@@ -27,6 +27,7 @@ const facts = ( over = {} ) => ( {
     page_url:        null,
     test_mode:       true,
     test_donation:   null,
+    test_donation_made: false,
     payments:        false,
     payment_methods: [],
     ...over,

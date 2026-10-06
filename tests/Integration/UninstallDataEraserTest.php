@@ -6,6 +6,7 @@ namespace Gratora\Tests\Integration;
 
 use Gratora\Core\Activator;
 use Gratora\Core\CoreModule;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Uninstall\DataEraser;
@@ -146,6 +147,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
             'gratora_paypal_product',
             'gratora_paypal_plans',
             Plugin::OPT_REWRITE_RULES_PENDING,
+            FirstRun::TEST_DONATION_AT,
         ] as $option) {
             $this->assertContains(
                 $option,

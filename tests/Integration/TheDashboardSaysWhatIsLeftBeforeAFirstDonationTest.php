@@ -9,6 +9,8 @@ use Gratora\Campaigns\CampaignService;
 use Gratora\Cli\DemoSeeder;
 use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationDeleter;
+use Gratora\Donations\DonationIntent;
 use Gratora\Donations\DonationService;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
@@ -35,13 +37,14 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
     public function test_a_new_site_has_no_page_no_test_donation_and_no_way_to_take_money(): void
     {
         $this->assertSame([
-            'page'            => 'none',
-            'page_title'      => null,
-            'page_url'        => null,
-            'test_mode'       => true,
-            'test_donation'   => null,
-            'payments'        => false,
-            'payment_methods' => [],
+            'page'               => 'none',
+            'page_title'         => null,
+            'page_url'           => null,
+            'test_mode'          => true,
+            'test_donation'      => null,
+            'test_donation_made' => false,
+            'payments'           => false,
+            'payment_methods'    => [],
         ], $this->card());
     }
 
@@ -155,6 +158,88 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         $finished = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/onboarding/finalize'))->get_data();
 
         $this->assertNull($finished['first_run']['test_donation']);
+        $this->assertFalse($finished['first_run']['test_donation_made']);
+    }
+
+    /**
+     * The step a test donation finishes stays finished. Tidying the donation
+     * away is the next thing a newcomer does with it, and a card that then asks
+     * for another has forgotten what it saw.
+     */
+    public function test_a_test_donation_that_came_in_still_counts_once_it_is_deleted(): void
+    {
+        $donation = $this->given(new DonationIntent(
+            email:        'ada@example.test',
+            amount_cents: 2500,
+            currency:     'USD',
+            gateway:      'offline',
+        ));
+
+        Plugin::instance()->container->get(DonationDeleter::class)->delete($donation, null, false);
+
+        $card = $this->card();
+
+        $this->assertNull($card['test_donation']);
+        $this->assertTrue($card['test_donation_made']);
+    }
+
+    // Written straight in, as one given before anything was remembered.
+    public function test_one_the_card_has_shown_still_counts_once_it_is_gone(): void
+    {
+        $this->donation(['is_test' => true]);
+        $this->assertTrue($this->card()['test_donation_made']);
+
+        Donation::query()->where('is_test', 1)->delete();
+
+        $card = $this->card();
+
+        $this->assertNull($card['test_donation']);
+        $this->assertTrue($card['test_donation_made']);
+    }
+
+    public function test_a_real_donation_coming_in_is_not_remembered_as_a_test(): void
+    {
+        $this->given(new DonationIntent(
+            email:        'ada@example.test',
+            amount_cents: 2500,
+            currency:     'USD',
+            gateway:      'offline',
+            is_test:      false,
+        ));
+
+        $this->assertFalse($this->wizardFacts()['test_donation_made']);
+    }
+
+    public function test_a_ticket_bought_in_test_mode_is_not_remembered_as_a_test_donation(): void
+    {
+        $this->given(new DonationIntent(
+            email:        'ada@example.test',
+            amount_cents: 2500,
+            currency:     'USD',
+            gateway:      'offline',
+            kind:         'order',
+        ));
+
+        $this->assertFalse($this->wizardFacts()['test_donation_made']);
+    }
+
+    /** A donation taken the way the form takes one: asked for, then paid. */
+    private function given(DonationIntent $intent): Donation
+    {
+        $service = Plugin::instance()->container->get(DonationService::class);
+
+        return $service->confirm($service->createPending($intent)['donation'], ['gateway_txn_id' => 'txn-' . ++$this->seq]);
+    }
+
+    /**
+     * The facts as the wizard is given them, which answers whether or not the
+     * card is still due.
+     *
+     * @return array<string, mixed>
+     */
+    private function wizardFacts(): array
+    {
+        return rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/onboarding/finalize'))->get_data()['first_run'];
     }
 
     public function test_payments_are_ready_once_bank_details_are_written(): void

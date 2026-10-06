@@ -20,6 +20,7 @@ const facts = ( over = {} ) => ( {
     page_url:        null,
     test_mode:       true,
     test_donation:   null,
+    test_donation_made: false,
     payments:        false,
     payment_methods: [],
     ...over,
@@ -46,7 +47,7 @@ test( 'there are four, in the order a site goes through them', () => {
 } );
 
 test( 'a step that is finished is worded as finished', () => {
-    const given = withPage( { test_donation: TEST_DONATION, payments: true, payment_methods: [ 'Stripe' ] } );
+    const given = withPage( { test_donation: TEST_DONATION, test_donation_made: true, payments: true, payment_methods: [ 'Stripe' ] } );
 
     expect( firstRunSteps( given, HREFS ).map( ( s ) => [ s.done, s.title ] ) ).toEqual( [
         [ true, 'Donation page created' ],
@@ -142,6 +143,18 @@ describe( 'the test donation', () => {
     test( 'once it has come in it stays done, whatever happens to the page', () => {
         expect( step( facts( { page: 'closed', test_donation: TEST_DONATION } ), 'test' ).done ).toBe( true );
     } );
+
+    // Deleted, binned or refunded since: there is nothing to open, and the
+    // step it finished is not undone by tidying up.
+    test( 'one that is no longer there still counts, with nothing to open', () => {
+        expect( step( withPage( { test_donation_made: true } ), 'test' ) ).toMatchObject( {
+            done:   true,
+            title:  'Test donation made',
+            text:   'A test donation came in.',
+            action: null,
+        } );
+        expect( step( facts( { test_donation_made: true } ), 'test' ).done ).toBe( true );
+    } );
 } );
 
 describe( 'payments', () => {
@@ -209,6 +222,7 @@ describe( 'which step carries the button', () => {
 
     test( 'once that has come in: payments', () => {
         expect( primary( withPage( { test_donation: TEST_DONATION } ) ) ).toBe( 'payments' );
+        expect( primary( withPage( { test_donation_made: true } ) ) ).toBe( 'payments' );
     } );
 
     test( 'once payments are connected: going live', () => {
