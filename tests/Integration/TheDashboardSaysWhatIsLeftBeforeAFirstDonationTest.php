@@ -1,0 +1,308 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Gratora\Tests\Integration;
+
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use WP_REST_Request;
+
+/**
+ * Until a site takes its first real donation the dashboard carries a card that
+ * says what is left. Every test starts from a site as a new install leaves it:
+ * test mode on, nothing connected, no campaign.
+ */
+final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends IntegrationTestCase
+{
+    private int $seq = 0;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+    }
+
+    public function test_a_new_site_has_no_page_no_test_donation_and_no_way_to_take_money(): void
+    {
+        $this->assertSame([
+            'page'            => 'none',
+            'page_title'      => null,
+            'page_url'        => null,
+            'test_mode'       => true,
+            'test_donation'   => null,
+            'payments'        => false,
+            'payment_methods' => [],
+        ], $this->card());
+    }
+
+    public function test_a_campaign_no_donor_can_reach_is_told_apart_from_none(): void
+    {
+        $this->campaign(['title' => 'Still a draft', 'status' => 'draft']);
+
+        $card = $this->card();
+
+        $this->assertSame('unpublished', $card['page']);
+        $this->assertNull($card['page_url']);
+    }
+
+    public function test_a_live_page_is_named_and_linked(): void
+    {
+        $campaign = $this->campaign(['title' => 'Winter food drive', 'status' => 'published']);
+
+        $card = $this->card();
+
+        $this->assertSame('live', $card['page']);
+        $this->assertSame('Winter food drive', $card['page_title']);
+        $this->assertSame(get_permalink((int) $campaign->page_id), $card['page_url']);
+    }
+
+    public function test_of_two_live_pages_the_older_one_is_shown(): void
+    {
+        $this->campaign(['title' => 'The first one', 'status' => 'published']);
+        $this->campaign(['title' => 'A later one', 'status' => 'published']);
+
+        $this->assertSame('The first one', $this->card()['page_title']);
+    }
+
+    public function test_the_newest_paid_test_donation_is_shown(): void
+    {
+        $this->donation(['is_test' => true, 'amount_cents' => 1000, 'donor' => ['Ada', 'Lovelace']]);
+        $this->donation(['is_test' => true, 'amount_cents' => 2603, 'donor' => ['Maya', 'Chen']]);
+
+        $this->assertSame([
+            'amount_cents' => 2603,
+            'currency'     => 'USD',
+            'donor'        => 'Maya Chen',
+            'url'          => admin_url('admin.php?page=gratora-donations&include_test=1'),
+        ], $this->card()['test_donation']);
+    }
+
+    public function test_a_test_donation_that_was_never_paid_is_not_shown(): void
+    {
+        $this->donation(['is_test' => true, 'status' => 'pending']);
+        $this->donation(['is_test' => true, 'status' => 'failed']);
+
+        $this->assertNull($this->card()['test_donation']);
+    }
+
+    public function test_a_test_donation_given_without_a_name_shows_none(): void
+    {
+        $this->donation(['is_test' => true, 'is_anonymous' => true]);
+
+        $this->assertNull($this->card()['test_donation']['donor']);
+    }
+
+    /** @return array<string, array{0: array<string,mixed>}> */
+    public function paidRowsThatAreNotATestDonation(): array
+    {
+        return [
+            'a real donation'              => [[]],
+            'a ticket bought in test mode' => [['is_test' => true, 'kind' => 'order']],
+            'a test donation since binned' => [['is_test' => true, 'trashed_at' => '2026-10-01 09:00:00']],
+        ];
+    }
+
+    /**
+     * Read from what the wizard is given, which answers whether or not the
+     * card is still due.
+     *
+     * @dataProvider paidRowsThatAreNotATestDonation
+     *
+     * @param array<string,mixed> $with
+     */
+    public function test_only_a_test_donation_is_shown_as_one(array $with): void
+    {
+        $this->donation($with);
+
+        $finished = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/onboarding/finalize'))->get_data();
+
+        $this->assertNull($finished['first_run']['test_donation']);
+    }
+
+    public function test_payments_are_ready_once_bank_details_are_written(): void
+    {
+        update_option('gratora_gateway_config', [
+            'test_mode' => true,
+            'offline'   => ['bank_details' => 'IBAN HR12 1001 0051 8630 0016 0'],
+        ]);
+
+        $card = $this->card();
+
+        $this->assertTrue($card['payments']);
+        $this->assertSame(['Offline donations'], $card['payment_methods']);
+    }
+
+    public function test_it_says_when_test_mode_is_off(): void
+    {
+        update_option('gratora_gateway_config', ['test_mode' => false]);
+
+        $this->assertFalse($this->card()['test_mode']);
+    }
+
+    public function test_a_real_donation_given_on_the_site_ends_it(): void
+    {
+        $this->donation();
+
+        $this->assertNull($this->dashboard()['first_run']);
+    }
+
+    /** @return array<string, array{0: array<string,mixed>}> */
+    public function donationsThatAreNotARealOneGivenHere(): array
+    {
+        return [
+            'a test donation'          => [['is_test' => true]],
+            'one that was never paid'  => [['status' => 'pending']],
+            'one an import brought'    => [['gateway' => 'imported']],
+            'one an admin recorded'    => [['source_attribution' => ['utm_medium' => 'manual']]],
+        ];
+    }
+
+    /**
+     * @dataProvider donationsThatAreNotARealOneGivenHere
+     *
+     * @param array<string,mixed> $with
+     */
+    public function test_anything_short_of_a_real_donation_given_here_does_not_end_it(array $with): void
+    {
+        $this->donation($with);
+
+        $this->assertIsArray($this->dashboard()['first_run']);
+    }
+
+    public function test_a_site_that_is_live_no_longer_sees_it(): void
+    {
+        $this->campaign(['title' => 'Winter food drive', 'status' => 'published']);
+        update_option('gratora_gateway_config', [
+            'test_mode' => false,
+            'offline'   => ['bank_details' => 'IBAN HR12 1001 0051 8630 0016 0'],
+        ]);
+
+        $this->assertNull($this->dashboard()['first_run']);
+    }
+
+    /** @return array<string, array{0: bool, 1: array<string,mixed>}> */
+    public function sitesOneStepShortOfLive(): array
+    {
+        $ready = ['offline' => ['bank_details' => 'IBAN HR12 1001 0051 8630 0016 0']];
+
+        return [
+            'no page'               => [false, ['test_mode' => false] + $ready],
+            'nothing to take money' => [true, ['test_mode' => false]],
+            'test mode still on'    => [true, ['test_mode' => true] + $ready],
+        ];
+    }
+
+    /**
+     * @dataProvider sitesOneStepShortOfLive
+     *
+     * @param array<string,mixed> $payments
+     */
+    public function test_a_site_one_step_short_of_live_still_sees_it(bool $page, array $payments): void
+    {
+        if ($page) {
+            $this->campaign(['title' => 'Winter food drive', 'status' => 'published']);
+        }
+        update_option('gratora_gateway_config', $payments);
+
+        $this->assertIsArray($this->dashboard()['first_run']);
+    }
+
+    public function test_hiding_it_is_for_that_person_only(): void
+    {
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/me/first-run');
+        $this->assertSame(200, rest_do_request($request)->get_status());
+
+        $this->assertNull($this->dashboard()['first_run']);
+
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        $this->assertIsArray($this->dashboard()['first_run'], 'A colleague has not hidden it.');
+    }
+
+    public function test_someone_who_only_reads_the_reports_does_not_see_it(): void
+    {
+        $reader = self::factory()->user->create(['role' => 'editor']);
+        get_userdata($reader)->add_cap('gratora_view_reports');
+        wp_set_current_user($reader);
+
+        $this->assertNull($this->dashboard()['first_run']);
+    }
+
+    public function test_the_wizard_s_last_screen_is_given_the_same_facts(): void
+    {
+        $this->campaign(['title' => 'Winter food drive', 'status' => 'published']);
+        $card = $this->card();
+
+        $finished = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/onboarding/finalize'))->get_data();
+
+        $this->assertSame($card, $finished['first_run']);
+    }
+
+    public function test_the_wizard_is_given_the_facts_even_by_someone_who_hid_the_card(): void
+    {
+        rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/me/first-run'));
+
+        $finished = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/onboarding/finalize'))->get_data();
+
+        $this->assertSame('none', $finished['first_run']['page']);
+    }
+
+    /** @return array<string, mixed> */
+    private function dashboard(): array
+    {
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/dashboard');
+        $request->set_param('include', '');
+
+        return rest_do_request($request)->get_data();
+    }
+
+    /** @return array<string, mixed> */
+    private function card(): array
+    {
+        $card = $this->dashboard()['first_run'];
+        $this->assertIsArray($card, 'the card is due');
+
+        return $card;
+    }
+
+    /** @param array<string,mixed> $input */
+    private function campaign(array $input): Campaign
+    {
+        return Plugin::instance()->container->get(CampaignService::class)->create($input);
+    }
+
+    /** @param array<string, mixed> $with */
+    private function donation(array $with = []): void
+    {
+        [$first, $last] = $with['donor'] ?? ['Ada', 'Lovelace'];
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate(strtolower($first) . '@example.test', ['first_name' => $first, 'last_name' => $last]);
+
+        $cents = (int) ($with['amount_cents'] ?? 2500);
+        $now   = gmdate('Y-m-d H:i:s');
+
+        $d = Donation::make();
+        $d->reference         = 'DN-FIRST-RUN-' . ++$this->seq;
+        $d->donor_id          = (int) $donor->id;
+        $d->amount_cents      = $cents;
+        $d->net_cents         = $cents;
+        $d->currency          = 'USD';
+        $d->base_amount_cents = $cents;
+        $d->base_currency     = 'USD';
+        $d->fx_rate           = '1.00000000';
+        $d->gateway           = (string) ($with['gateway'] ?? 'offline');
+        $d->status            = (string) ($with['status'] ?? 'paid');
+        $d->is_test           = (bool) ($with['is_test'] ?? false);
+        $d->is_anonymous      = (bool) ($with['is_anonymous'] ?? false);
+        $d->kind              = (string) ($with['kind'] ?? 'donation');
+        $d->trashed_at        = $with['trashed_at'] ?? null;
+        $d->source_attribution = $with['source_attribution'] ?? ['landing' => 'https://example.org/donate/'];
+        $d->paid_at           = $now;
+        $d->created_at        = $now;
+        $d->updated_at        = $now;
+        $d->save();
+    }
+}

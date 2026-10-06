@@ -23,7 +23,7 @@ final class UninstallUserDataTest extends IntegrationTestCase
         ];
         foreach ($people as $person) {
             $this->useThePluginAs($person);
-            $this->assertCount(4, $this->kept($person), 'fixture: ' . implode(', ', $this->kept($person)));
+            $this->assertCount(5, $this->kept($person), 'fixture: ' . implode(', ', $this->kept($person)));
         }
 
         (new DataEraser())->removeUserData();
@@ -65,6 +65,7 @@ final class UninstallUserDataTest extends IntegrationTestCase
         $this->send('PUT', '/gratora/v1/admin/me/table-view', ['fields' => ['reference', 'status'], 'perPage' => 50], ['scope' => 'donations']);
         $this->send('POST', '/gratora/v1/admin/me/attention/dismiss', ['key' => 'webhook_secret', 'signature' => 'a']);
         $this->send('POST', '/gratora/v1/admin/me/review-prompt', ['answer' => 'never']);
+        $this->send('POST', '/gratora/v1/admin/me/first-run', []);
     }
 
     /**

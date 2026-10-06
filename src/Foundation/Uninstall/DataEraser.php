@@ -92,6 +92,7 @@ final class DataEraser
     /** What core keeps against a person. Listed, as the options are: add-ons share the prefix. */
     private const USER_META = [
         'gratora_attention_dismissed',
+        'gratora_first_run_hidden',
         'gratora_review_prompt',
         'gratora_table_views',
         'gratora_widget_layout',

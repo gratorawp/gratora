@@ -46,6 +46,7 @@ use Gratora\Campaigns\CampaignPageTemplate;
 use Gratora\Campaigns\CampaignPermalinks;
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Campaigns\CampaignService;
+use Gratora\Campaigns\LiveCampaigns;
 use Gratora\Campaigns\StarterCampaign;
 use Gratora\Campaigns\CampaignStatMetrics;
 use Gratora\Campaigns\CampaignTypeRegistry;
@@ -59,6 +60,7 @@ use Gratora\Currency\FxBackfill;
 use Gratora\Currency\FxRates;
 use Gratora\Currency\FxRatesUpdater;
 use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\AntiSpamGuard;
 use Gratora\Donations\Donation;
@@ -439,6 +441,11 @@ final class CoreModule implements GratoraModule
             $c->get(CampaignRepository::class),
             $c->get(FormService::class),
             $c->get(Clock::class)
+        ));
+
+        $c->bind(FirstRun::class, fn (Container $c) => new FirstRun(
+            new LiveCampaigns(),
+            $c->get(GatewayManager::class)
         ));
 
         $c->bind(FundService::class, fn (Container $c) => new FundService(
@@ -997,7 +1004,8 @@ final class CoreModule implements GratoraModule
                     $c->get( Clock::class),
                     $c->get(DonationRepository::class),
                     $c->get(RecurringPlanRepository::class),
-                )
+                ),
+                $c->get(FirstRun::class),
             ),
             new SettingsController(new SettingsService(), $c->get(DonorRetention::class)),
             $c->get(PortalController::class),
@@ -1027,7 +1035,10 @@ final class CoreModule implements GratoraModule
                 $c->get(RevenueReportBuilder::class),
                 $c->get(DonationRepository::class),
             ),
-            new OnboardingController(new StarterCampaign($c->get(CampaignService::class))),
+            new OnboardingController(
+                new StarterCampaign($c->get(CampaignService::class)),
+                $c->get(FirstRun::class),
+            ),
             new StripeKeysController(
                 $c->get(StripeApi::class),
                 $c->get(StripeAccount::class),

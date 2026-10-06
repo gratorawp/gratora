@@ -1,0 +1,131 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Gratora\Dashboard;
+
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\LiveCampaigns;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\TestMode;
+
+/**
+ * What stands between a new site and its first real donation.
+ *
+ * Derived on each request and never stored: every fact here is one another
+ * screen already decides, and a stored copy would drift from it.
+ *
+ * @unreleased
+ */
+final class FirstRun
+{
+    private const HIDDEN_META = 'gratora_first_run_hidden';
+
+    /** @unreleased */
+    public function __construct(
+        private LiveCampaigns $live,
+        private GatewayManager $gateways,
+    ) {
+    }
+
+    /**
+     * @return array{
+     *   page: 'none'|'unpublished'|'live',
+     *   page_title: ?string,
+     *   page_url: ?string,
+     *   test_mode: bool,
+     *   test_donation: ?array{amount_cents:int, currency:string, donor:?string, url:string},
+     *   payments: bool,
+     *   payment_methods: list<string>,
+     * }
+     *
+     * @unreleased
+     */
+    public function facts(): array
+    {
+        $page    = $this->live->first();
+        $methods = $this->gateways->realMethods();
+
+        return [
+            'page'            => $page ? 'live' : (Campaign::query()->count() > 0 ? 'unpublished' : 'none'),
+            'page_title'      => $page ? (string) $page->title : null,
+            'page_url'        => $page && $page->page_id ? (string) get_permalink((int) $page->page_id) : null,
+            'test_mode'       => TestMode::siteWide(),
+            'test_donation'   => $this->testDonation(),
+            'payments'        => $methods !== [],
+            'payment_methods' => $methods,
+        ];
+    }
+
+    /**
+     * The facts while the dashboard should show them to this person, null once
+     * it should not: they hid the card, a donor has given, or the site is live.
+     *
+     * @return ?array<string,mixed>
+     *
+     * @unreleased
+     */
+    public function card(): ?array
+    {
+        if (! Capabilities::userCan('gratora_manage_settings')) {
+            return null;
+        }
+        if (get_user_meta(get_current_user_id(), self::HIDDEN_META, true)) {
+            return null;
+        }
+        if ($this->aDonorHasGiven()) {
+            return null;
+        }
+
+        $facts = $this->facts();
+        $live  = $facts['page'] === 'live' && $facts['payments'] && ! $facts['test_mode'];
+
+        return $live ? null : $facts;
+    }
+
+    /** @unreleased */
+    public static function hide(int $userId): void
+    {
+        update_user_meta($userId, self::HIDDEN_META, '1');
+    }
+
+    /** Money an admin recorded and history an import brought over are not the page working. */
+    private function aDonorHasGiven(): bool
+    {
+        return DonationQueries::takenByThisSite(DonationQueries::donationsOnly(Donation::query()))
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->limit(1)
+            ->pluck('id') !== [];
+    }
+
+    /** @return ?array{amount_cents:int, currency:string, donor:?string, url:string} */
+    private function testDonation(): ?array
+    {
+        $donation = DonationQueries::notTrashed(Donation::query())
+            ->where('is_test', 1)
+            ->where('kind', 'donation')
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->orderBy('id', 'DESC')
+            ->limit(1)
+            ->get();
+        if (! $donation) {
+            return null;
+        }
+
+        $donor = $donation->donor_id && ! $donation->is_anonymous
+            ? Donor::query()->find('id', (int) $donation->donor_id)
+            : null;
+        $name = $donor ? trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')) : '';
+
+        return [
+            'amount_cents' => (int) $donation->amount_cents,
+            'currency'     => (string) $donation->currency,
+            'donor'        => $name !== '' ? $name : null,
+            'url'          => admin_url('admin.php?page=gratora-donations&include_test=1'),
+        ];
+    }
+}

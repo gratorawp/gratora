@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Rest\Admin;
 use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Dashboard\ReviewPrompt;
 use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
@@ -18,8 +19,10 @@ final class DashboardController
     private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
-    public function __construct(private DashboardMetricsService $metrics)
-    {
+    public function __construct(
+        private DashboardMetricsService $metrics,
+        private FirstRun $firstRun,
+    ) {
     }
 
     /** @since 1.0.0 */
@@ -81,6 +84,7 @@ final class DashboardController
                 'hidden'        => $this->metrics->hiddenTestCount(),
             ],
             'review_prompt' => (new ReviewPrompt())->due(),
+            'first_run'     => $this->firstRun->card(),
         ];
 
         if ($want('kpis'))             $payload['kpi']              = $this->metrics->kpi($range, $compare, $includeTest);

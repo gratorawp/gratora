@@ -6,6 +6,7 @@ namespace Gratora\Rest\Admin;
 
 use Gratora\Campaigns\StarterCampaign;
 use Gratora\Campaigns\StarterCampaignRefused;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Onboarding\Onboarding;
 use RuntimeException;
@@ -23,8 +24,10 @@ final class OnboardingController
     private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
-    public function __construct(private StarterCampaign $starter)
-    {
+    public function __construct(
+        private StarterCampaign $starter,
+        private FirstRun $firstRun,
+    ) {
     }
 
     /** @since 1.0.0 */
@@ -67,7 +70,7 @@ final class OnboardingController
     {
         update_option(Onboarding::OPTION, 'completed', false);
 
-        return new WP_REST_Response(['ok' => true], 200);
+        return new WP_REST_Response(['ok' => true, 'first_run' => $this->firstRun->facts()], 200);
     }
 
 

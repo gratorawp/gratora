@@ -7,6 +7,7 @@ namespace Gratora\Campaigns;
 use Gratora\Receipts\OrgProfile;
 use Gratora\Vendor\Queryable\DB;
 use Gratora\Vendor\Queryable\QueryBuilder;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -40,7 +41,8 @@ final class StarterCampaign
     /**
      * The campaign this made, making it first if it has not yet.
      *
-     * @throws StarterCampaignRefused
+     * @throws StarterCampaignRefused when the site has a campaign of its own, or another request is making this one
+     * @throws RuntimeException when the campaign could not be written
      *
      * @unreleased
      */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Rest\Admin;
 use Gratora\Dashboard\AttentionDismissals;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Dashboard\ReviewPrompt;
 use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
@@ -108,6 +109,12 @@ final class UserPrefsController
             ],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/me/first-run', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'hideFirstRun'],
+            'permission_callback' => [$this, 'canAccess'],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/me/review-prompt', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'answerReviewPrompt'],
@@ -116,6 +123,14 @@ final class UserPrefsController
                 'answer' => ['type' => 'string', 'required' => true, 'enum' => ReviewPrompt::ANSWERS],
             ],
         ]);
+    }
+
+    /** @unreleased */
+    public function hideFirstRun(): WP_REST_Response
+    {
+        FirstRun::hide(get_current_user_id());
+
+        return new WP_REST_Response(['ok' => true], 200);
     }
 
     /** @since 1.1.1 */
