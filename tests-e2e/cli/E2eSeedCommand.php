@@ -7,6 +7,7 @@ namespace Gratora\Tests\E2e;
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignService;
 use Gratora\Currency\FxRates;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\Donation;
 use Gratora\Donations\DonationIntent;
@@ -497,6 +498,10 @@ final class E2eSeedCommand
                 return [$login, $pass];
             }
 
+            // The fixture site is in test mode with no donor having given,
+            // which is a site still being set up. The screens the suites
+            // picture are of one that is running.
+            FirstRun::hide((int) $id);
             WP_CLI::log('  admin created: ' . $login);
 
             return [$login, $pass];
@@ -504,6 +509,7 @@ final class E2eSeedCommand
 
         wp_set_password($pass, (int) $user->ID);
         $user->set_role('administrator');
+        FirstRun::hide((int) $user->ID);
         WP_CLI::log('  admin reused: ' . $login);
 
         return [$login, $pass];

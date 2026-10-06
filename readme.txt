@@ -227,8 +227,9 @@ and donations together, mapping your columns to Gratora fields.
 
 = Can I try it without taking real money? =
 
-Yes. Turn on test mode, run donations through your provider's sandbox, and none
-of it reaches your reporting.
+Yes. A new site starts in test mode. Give with the Test donation method, or run
+donations through your provider's sandbox, and none of it reaches your
+reporting.
 
 = Does Gratora help with GDPR? =
 
