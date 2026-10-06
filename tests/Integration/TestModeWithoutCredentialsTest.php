@@ -16,6 +16,7 @@ use Gratora\Forms\FormReadinessService;
 use Gratora\Forms\FormRepository;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Sandbox\SandboxGateway;
 use Gratora\Gateways\Stripe\ApplePayDomain;
 use Gratora\Gateways\Stripe\StripeAccount;
 use Gratora\Gateways\Stripe\StripeApi;
@@ -97,7 +98,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
     }
 
 
-    private function checks(): array
+    private function checks(?GatewayManager $gateways = null): array
     {
         $settings = new SettingsService();
         $crypto   = new Crypto();
@@ -111,7 +112,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
             $api,
             new ApplePayDomain($api, $stripe),
             new PayPalAccount($crypto),
-            new GatewayManager(),
+            $gateways ?? new GatewayManager(),
             new PortalPage(),
             new LicenseService(),
         );
@@ -134,6 +135,42 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::FAIL, $check['status'], 'the screen said only that test mode was on');
         $this->assertTrue($check['blocker']);
         $this->assertStringContainsString('Stripe', (string) $check['label']);
+    }
+
+    /**
+     * A new install starts in test mode with the Test donation method on. Live
+     * keys pasted there are the next step towards going live, and donations do
+     * not fail: they go through the method that can take them.
+     */
+    public function test_it_is_a_warning_while_another_method_can_take_a_test_donation(): void
+    {
+        $this->liveOnlyStripe();
+        $this->testModeOn();
+
+        $gateways = new GatewayManager();
+        $gateways->register(new SandboxGateway(
+            Plugin::instance()->container->get(Clock::class),
+            new RecurringPlanRepository()
+        ));
+
+        $check = $this->checks($gateways)['mode'];
+
+        $this->assertSame(ReadinessService::WARN, $check['status']);
+        $this->assertArrayNotHasKey('blocker', array_filter($check));
+        $this->assertStringContainsString('Stripe', (string) $check['label']);
+        $this->assertStringNotContainsString('fail', (string) $check['detail']);
+    }
+
+    /** The gateway that lacks the keys is not something else that can take one. */
+    public function test_it_stays_a_blocker_when_the_only_gateway_is_the_one_without_test_keys(): void
+    {
+        $gateways = $this->stripeIn($this->liveOnlyStripe());
+        $this->testModeOn();
+
+        $check = $this->checks($gateways)['mode'];
+
+        $this->assertSame(ReadinessService::FAIL, $check['status']);
+        $this->assertTrue($check['blocker']);
     }
 
     public function test_test_mode_with_test_keys_stays_the_ordinary_warning(): void

@@ -218,19 +218,35 @@ final class ReadinessService
     private function modeCheck(): array
     {
         if ($this->testMode()) {
-            // Test keys are optional, so the usual live site has none. Flipping
-            // the switch then fails every donation at createIntent, which the
-            // donor sees as "we could not start your payment".
+            // Test keys are optional, so the usual live site has none, and a
+            // gateway without them is not offered while test mode is on.
             $noSandbox = $this->modeGaps(true);
             if ($noSandbox !== []) {
+                $label = sprintf(
+                    /* translators: %s: comma-separated list of gateway names holding no test keys. */
+                    __('Test mode is on, but %s has no test keys', 'gratora-donation-platform'),
+                    implode(', ', $noSandbox)
+                );
+
+                // A site that pasted its live keys while still in test mode is
+                // one switch from live, and its forms still take a donation
+                // through whatever else is on. Only a site with nothing else
+                // has a form that cannot be given on.
+                if ($this->somethingTakesATestDonation()) {
+                    return $this->warn(
+                        'mode',
+                        'money',
+                        $label,
+                        __('It is not offered while test mode is on, so donations go through another method and no real payment is taken. Turn test mode off to go live, or add the test key pair to rehearse with it.', 'gratora-donation-platform'),
+                        'gateways',
+                        __('Open payments', 'gratora-donation-platform')
+                    );
+                }
+
                 return $this->fail(
                     'mode',
                     'money',
-                    sprintf(
-                        /* translators: %s: comma-separated list of gateway names holding no test keys. */
-                        __('Test mode is on, but %s has no test keys', 'gratora-donation-platform'),
-                        implode(', ', $noSandbox)
-                    ),
+                    $label,
                     __('Every donation will fail while this is on. Add the test key pair, or turn test mode off.', 'gratora-donation-platform'),
                     'gateways',
                     __('Add test keys', 'gratora-donation-platform'),
@@ -283,6 +299,18 @@ final class ReadinessService
         }
 
         return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'gratora-donation-platform'));
+    }
+
+    /** @unreleased */
+    private function somethingTakesATestDonation(): bool
+    {
+        foreach (array_keys($this->gateways->all()) as $id) {
+            if ($this->gateways->isOn((string) $id, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
