@@ -2,6 +2,7 @@
 
 import { formatAmount, frequencyLabel } from '../util/format';
 import { coveredFeeCents } from '../state/store';
+import { visibleGateways } from '../util/gateways';
 import { countryName } from '../../_shared/countries';
 
 export default function ConfirmStep( { state, config, showDonor = true, showGateway = true } ) {
@@ -17,6 +18,9 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
     // equals what buildPayload charges.
     const fee   = coveredFeeCents( state );
     const total = formatAmount( cents + fee, state.currency );
+
+    // The method the donation would go through, when the form has one to offer.
+    const method = visibleGateways( config, state ).find( ( o ) => o.id === state.gateway );
 
     return (
         <div class="gratora-form__confirm">
@@ -55,10 +59,10 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
                         <dd>{ countryName( v.profile.country ) }</dd>
                     </div>
                 ) }
-                { showGateway && (
+                { showGateway && method && (
                     <div class="gratora-form__summary-row">
                         <dt>{ config.i18n.paymentMethod }</dt>
-                        <dd>{ gatewayLabel( state.gateway, config ) }</dd>
+                        <dd>{ method.label || method.id }</dd>
                     </div>
                 ) }
                 <div class="gratora-form__summary-row gratora-form__summary-row--total">
@@ -68,13 +72,4 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
             </dl>
         </div>
     );
-}
-
-function gatewayLabel( id, config ) {
-    const opts = config?.gateways?.options;
-    if ( Array.isArray( opts ) ) {
-        const found = opts.find( ( o ) => o.id === id );
-        if ( found && found.label ) return found.label;
-    }
-    return id;
 }

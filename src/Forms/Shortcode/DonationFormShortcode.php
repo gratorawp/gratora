@@ -29,6 +29,7 @@ use Gratora\Forms\Form;
 use Gratora\Forms\FormRepository;
 use Gratora\Forms\Rendering\FormDocument;
 use Gratora\Forms\Rendering\FormMarkup;
+use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
 use Gratora\Foundation\Plugin;
@@ -701,6 +702,7 @@ JS;
             'stripe'      => $this->stripePublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn),
             'paypal'      => $this->payPalPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
             ...$this->browserAwareConfig($testModeOn, (string) $currency),
+            ...$this->ownerNotice($testModeOn),
             'testMode'    => $testModeOn,
             'currency'    => $currency,
             'currencies'  => $currencies,
@@ -1820,6 +1822,31 @@ JS;
         return $clientId !== ''
             ? ['clientId' => $clientId, 'currency' => strtoupper($currency), 'intent' => 'capture']
             : null;
+    }
+
+    /**
+     * Why a form with no payment method cannot take a donation, for the people
+     * who can do something about it. A donor is told only that it cannot, so
+     * this is sent to nobody else. The runtime shows it when the form has no
+     * method at all, never when a currency or a frequency rules the methods out.
+     *
+     * @return array{ownerNotice?: array{text:string, linkLabel:string, linkUrl:string}}
+     *
+     * @unreleased
+     */
+    private function ownerNotice(bool $testMode): array
+    {
+        if (! Capabilities::userCan('gratora_manage_settings')) {
+            return [];
+        }
+
+        return ['ownerNotice' => [
+            'text' => $testMode
+                ? __('Only you can see this. This form cannot take a donation, because none of the payment methods it allows is switched on.', 'gratora-donation-platform')
+                : __('Only you can see this. This form cannot take a donation, because no payment method is switched on. Connect payments, or turn on test mode.', 'gratora-donation-platform'),
+            'linkLabel' => __('Open payment settings', 'gratora-donation-platform'),
+            'linkUrl'   => esc_url_raw(admin_url('admin.php?page=gratora-settings#gateways')),
+        ]];
     }
 
     /**

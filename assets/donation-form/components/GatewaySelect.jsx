@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 
-import { visibleGateways, emptyMessage } from '../util/gateways';
+import { visibleGateways } from '../util/gateways';
+import NoGateway from './NoGateway';
 
 /**
  * Test-mode notice + payment-gateway selector. The selector hides when one
@@ -17,7 +18,7 @@ export default function GatewaySelect( { state, dispatch, config } ) {
     if ( ! opts.length ) {
         return (
             <div class="gratora-form__payment">
-                <div class="gratora-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+                <NoGateway config={ config } state={ state } />
             </div>
         );
     }

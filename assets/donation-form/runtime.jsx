@@ -5,7 +5,7 @@ import { render } from 'preact';
 import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
 import { reducer, initialState, validateStep, buildPayload, fieldSteps, embedOf } from './state/store';
-import { visibleGateways, emptyMessage, keepGatewayValid } from './util/gateways';
+import { visibleGateways, keepGatewayValid } from './util/gateways';
 import { backGlyph } from './util/direction';
 import AmountStep   from './steps/AmountStep';
 import DonorStep    from './steps/DonorStep';
@@ -13,6 +13,7 @@ import ConfirmStep  from './steps/ConfirmStep';
 import ProgressBar  from './components/ProgressBar';
 import ErrorBoundary from './components/ErrorBoundary';
 import GatewaySelect from './components/GatewaySelect';
+import NoGateway from './components/NoGateway';
 import CurrencySwitcher from './components/CurrencySwitcher';
 import StripePayment from './components/StripePayment';
 import PayPalPayment from './components/PayPalPayment';
@@ -854,7 +855,7 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
                 <div class="gratora-form__error" role="alert">{ state.message }</div>
             ) }
             { unexplained && (
-                <div class="gratora-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+                <NoGateway config={ config } state={ state } />
             ) }
             <div class={ `gratora-form__nav gratora-form__nav--align-${ submitStep?.align || 'left' }` }>
                 <button
@@ -969,7 +970,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     // author removed. This is only the reason the button below cannot work, on
     // the pages where the section that would have said it is not on screen.
     const emptyNotice = unexplained && (
-        <div class="gratora-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+        <NoGateway config={ config } state={ state } />
     );
 
     if ( progressStyle === 'bar' ) {
