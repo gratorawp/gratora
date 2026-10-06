@@ -36,7 +36,7 @@ let root;
 let heard;
 
 function card( given ) {
-    heard = { onChanged: jest.fn(), onWentLive: jest.fn(), onHidden: jest.fn() };
+    heard = { onChanged: jest.fn(), onModeSwitched: jest.fn(), onHidden: jest.fn() };
     root = document.createElement( 'div' );
     document.body.appendChild( root );
     render( <FirstRunCard facts={ given } { ...heard } />, root );
@@ -88,6 +88,7 @@ test( 'creating the page asks the server for it and then for fresh facts', async
 
     expect( lastRequest() ).toEqual( { path: '/gratora/v1/admin/onboarding/starter-campaign', method: 'POST' } );
     expect( heard.onChanged ).toHaveBeenCalledTimes( 1 );
+    expect( heard.onModeSwitched ).not.toHaveBeenCalled();
 } );
 
 test( 'a second press while the first is being answered sends nothing more', async () => {
@@ -122,19 +123,28 @@ test( 'turning test mode on saves it through the payment settings', async () => 
     await settle();
 
     expect( lastRequest() ).toEqual( { path: '/gratora/v1/admin/settings/gateways', method: 'PUT', data: { test_mode: true } } );
-    expect( heard.onChanged ).toHaveBeenCalledTimes( 1 );
-    expect( heard.onWentLive ).not.toHaveBeenCalled();
+    expect( heard.onModeSwitched ).toHaveBeenCalledWith( true );
 } );
 
-test( 'turning test mode off saves it and says the site went live', async () => {
+test( 'turning test mode off saves it and says which way the switch went', async () => {
     card( withPage( { payments: true, payment_methods: [ 'Stripe' ] } ) );
 
     pressable( 'Turn off test mode' ).click();
     await settle();
 
     expect( lastRequest() ).toEqual( { path: '/gratora/v1/admin/settings/gateways', method: 'PUT', data: { test_mode: false } } );
-    expect( heard.onWentLive ).toHaveBeenCalledTimes( 1 );
-    expect( heard.onChanged ).toHaveBeenCalledTimes( 1 );
+    expect( heard.onModeSwitched ).toHaveBeenCalledWith( false );
+} );
+
+test( 'a switch that was refused is not announced', async () => {
+    apiFetch.mockRejectedValue( { message: 'Sorry, you are not allowed to do that.' } );
+    card( withPage( { payments: true, payment_methods: [ 'Stripe' ] } ) );
+
+    pressable( 'Turn off test mode' ).click();
+    await settle();
+
+    expect( heard.onModeSwitched ).not.toHaveBeenCalled();
+    expect( root.querySelector( '[role="alert"]' ).textContent ).toBe( 'Sorry, you are not allowed to do that.' );
 } );
 
 test( 'with no payments, going live cannot be pressed and the button carries its reason', () => {

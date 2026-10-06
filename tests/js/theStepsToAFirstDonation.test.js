@@ -49,7 +49,7 @@ describe( 'the donation page', () => {
     test( 'a site with no campaign is offered one', () => {
         expect( step( facts(), 'page' ) ).toMatchObject( {
             done:   false,
-            text:   'One page with a donation form, named after your organization. You can rename or delete it.',
+            text:   'One page with a donation form, named after your organization. You can rename it, and delete it if you never use it.',
             action: { kind: 'create', label: 'Create the page' },
         } );
     } );

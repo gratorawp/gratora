@@ -72,10 +72,18 @@ const card = () => root.querySelector( '.gratora-firstrun' );
 const pressable = ( label ) => [ ...root.querySelectorAll( 'button' ) ].find( ( b ) => b.textContent.trim() === label );
 const loads = () => apiFetch.mock.calls.filter( ( [ { path, method } ] ) => ! method && path.startsWith( '/gratora/v1/admin/dashboard' ) ).length;
 
+const realLocation = window.location;
+
 beforeEach( () => {
     document.body.innerHTML = '';
     apiFetch.mockReset();
-    window.history.replaceState( null, '', '/wp-admin/admin.php?page=gratora' );
+    window.sessionStorage.clear();
+    delete window.location;
+    window.location = { pathname: '/wp-admin/admin.php', search: '?page=gratora', hash: '', reload: jest.fn() };
+} );
+
+afterAll( () => {
+    window.location = realLocation;
 } );
 
 test( 'a site with steps left sees the card, above everything else on the screen', async () => {
@@ -108,15 +116,59 @@ test( 'a press that changed the facts is followed by the new ones', async () => 
     expect( card().textContent ).toContain( '1 of 4 done' );
 } );
 
-test( 'the press that makes the site live is answered with one line, in place of the card', async () => {
-    dashboardAnswering( payload( READY ), payload( null ) );
+// The admin bar's test mode badge is drawn by the server, so a switch of mode
+// is followed by a fresh page rather than left beside a badge that is wrong.
+test( 'switching test mode off loads the screen again', async () => {
+    dashboardAnswering( payload( READY ) );
     await settle();
 
     pressable( 'Turn off test mode' ).click();
     await settle();
 
+    expect( window.location.reload ).toHaveBeenCalledTimes( 1 );
+} );
+
+test( 'so does switching it on', async () => {
+    dashboardAnswering( payload( { ...WITH_PAGE, test_mode: false } ) );
+    await settle();
+
+    pressable( 'Turn on test mode' ).click();
+    await settle();
+
+    expect( window.location.reload ).toHaveBeenCalledTimes( 1 );
+} );
+
+test( 'the screen that follows going live says so once, in place of the card', async () => {
+    dashboardAnswering( payload( READY ) );
+    await settle();
+    pressable( 'Turn off test mode' ).click();
+    await settle();
+
+    document.body.innerHTML = '';
+    dashboardAnswering( payload( null ) );
+    await settle();
+
     expect( card() ).toBeNull();
     expect( root.textContent ).toContain( 'Test mode is off. Donations are real from now on.' );
+
+    document.body.innerHTML = '';
+    dashboardAnswering( payload( null ) );
+    await settle();
+
+    expect( root.textContent ).not.toContain( 'Test mode is off.' );
+} );
+
+test( 'switching test mode on is followed by no such line', async () => {
+    dashboardAnswering( payload( { ...WITH_PAGE, test_mode: false } ) );
+    await settle();
+    pressable( 'Turn on test mode' ).click();
+    await settle();
+
+    document.body.innerHTML = '';
+    dashboardAnswering( payload( WITH_PAGE ) );
+    await settle();
+
+    expect( root.textContent ).not.toContain( 'Test mode is off.' );
 } );
 
 test( 'a site that was live all along is told nothing of the kind', async () => {

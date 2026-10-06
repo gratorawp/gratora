@@ -39,7 +39,7 @@ function pageStep( facts, hrefs ) {
     return {
         ...step,
         done:   false,
-        text:   __( 'One page with a donation form, named after your organization. You can rename or delete it.', 'gratora-donation-platform' ),
+        text:   __( 'One page with a donation form, named after your organization. You can rename it, and delete it if you never use it.', 'gratora-donation-platform' ),
         action: { kind: 'create', label: __( 'Create the page', 'gratora-donation-platform' ) },
     };
 }

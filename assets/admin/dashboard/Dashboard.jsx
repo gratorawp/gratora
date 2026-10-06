@@ -29,6 +29,42 @@ import { Button } from '@wordpress/components';
 
 const SCOPE = 'dashboard';
 
+const WENT_LIVE = 'gratora-went-live';
+
+/**
+ * The admin bar's test mode badge is drawn by the server, so a switch of mode
+ * is followed by a fresh page. What the next page has to say about it rides
+ * across in the tab's own storage and is read once.
+ */
+function afterModeSwitch( testMode ) {
+    try {
+        if ( testMode ) {
+            window.sessionStorage.removeItem( WENT_LIVE );
+        } else {
+            window.sessionStorage.setItem( WENT_LIVE, '1' );
+        }
+    } catch ( e ) {
+        // Storage can be switched off. The page still loads again, without the line.
+    }
+    window.location.reload();
+}
+
+function wentLiveJustNow() {
+    try {
+        return window.sessionStorage.getItem( WENT_LIVE ) === '1';
+    } catch ( e ) {
+        return false;
+    }
+}
+
+function forgetWentLive() {
+    try {
+        window.sessionStorage.removeItem( WENT_LIVE );
+    } catch ( e ) {
+        // Nothing was kept, so there is nothing to forget.
+    }
+}
+
 const WIDGET_KEYS = [
     'kpis',
     'revenue',
@@ -71,7 +107,11 @@ export default function Dashboard() {
     const [ reloadKey, setReloadKey ]       = useState( 0 );
     const [ reviewAnswered, setReviewAnswered ] = useState( false );
     const [ firstRunHidden, setFirstRunHidden ] = useState( false );
-    const [ wentLive, setWentLive ]             = useState( false );
+    const [ wentLive, setWentLive ]             = useState( wentLiveJustNow );
+
+    // Read while rendering and forgotten after, so a render that runs twice
+    // still reads it.
+    useEffect( forgetWentLive, [] );
 
     const layout = useGratoraLayout( SCOPE, WIDGET_KEYS );
 
@@ -201,7 +241,7 @@ export default function Dashboard() {
                 <FirstRunCard
                     facts={ metrics.first_run }
                     onChanged={ () => setReloadKey( ( k ) => k + 1 ) }
-                    onWentLive={ () => setWentLive( true ) }
+                    onModeSwitched={ afterModeSwitch }
                     onHidden={ () => setFirstRunHidden( true ) }
                 />
             ) }

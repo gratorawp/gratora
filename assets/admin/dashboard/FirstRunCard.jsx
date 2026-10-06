@@ -20,7 +20,7 @@ const NewTab = () => (
  * decides when it shows; this draws the facts it was given and presses the
  * server's own buttons.
  */
-export default function FirstRunCard( { facts, onChanged, onWentLive, onHidden } ) {
+export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidden } ) {
     const [ busy, setBusy ]   = useState( null );
     const [ error, setError ] = useState( null );
 
@@ -33,11 +33,14 @@ export default function FirstRunCard( { facts, onChanged, onWentLive, onHidden }
         setBusy( kind );
         setError( null );
         try {
-            await apiFetch( kind === 'create'
-                ? { path: '/gratora/v1/admin/onboarding/starter-campaign', method: 'POST' }
-                : { path: '/gratora/v1/admin/settings/gateways', method: 'PUT', data: { test_mode: kind === 'test-on' } } );
-            if ( kind === 'test-off' ) onWentLive();
-            onChanged();
+            if ( kind === 'create' ) {
+                await apiFetch( { path: '/gratora/v1/admin/onboarding/starter-campaign', method: 'POST' } );
+                onChanged();
+            } else {
+                const testMode = kind === 'test-on';
+                await apiFetch( { path: '/gratora/v1/admin/settings/gateways', method: 'PUT', data: { test_mode: testMode } } );
+                onModeSwitched( testMode );
+            }
         } catch ( err ) {
             setError( err?.message || __( 'That did not work. Please try again.', 'gratora-donation-platform' ) );
         } finally {
