@@ -6,9 +6,15 @@ namespace Gratora\Tests\Integration;
 
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignService;
+use Gratora\Cli\DemoSeeder;
+use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\Donation;
+use Gratora\Donations\DonationService;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Funds\FundService;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -239,6 +245,24 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         $this->donation($with);
 
         $this->assertIsArray($this->dashboard()['first_run']);
+    }
+
+    // The public demo is this site: a year of sample giving, with test mode on.
+    public function test_a_site_filled_with_sample_data_is_not_shown_it(): void
+    {
+        $c = Plugin::instance()->container;
+
+        (new DemoSeeder(
+            $c->get(DonationService::class),
+            $c->get(DonorService::class),
+            $c->get(CampaignService::class),
+            $c->get(FundService::class),
+            $c->get(AggregateSyncer::class),
+            $c->get(RecurringPlanRepository::class),
+            $c->get(Clock::class),
+        ))->run(static fn (string $line) => null);
+
+        $this->assertNull($this->dashboard()['first_run']);
     }
 
     public function test_a_site_that_is_live_no_longer_sees_it(): void
