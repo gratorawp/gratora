@@ -128,7 +128,7 @@ export default function Onboarding() {
         user_type: '',
     } );
 
-    // Holds finalize response (campaign + form URLs) for checklist links.
+    // The finalize response: what the site has, for the last screen.
     const [ finalized, setFinalized ] = useState( null );
 
     // Pre-populate from saved settings so a resumed onboarding starts from prior inputs.
@@ -298,8 +298,7 @@ export default function Onboarding() {
                 { step === 2 && <BrandStep value={ brand } onChange={ setBrand } presets={ presets } currency={ currency.default_currency } /> }
                 { step === 3 && (
                     <ChecklistStep
-                        finalized={ finalized }
-                        settingsUrl={ wp.settings_url }
+                        facts={ finalized?.first_run }
                         dashboardUrl={ wp.dashboard_url }
                         campaignsUrl={ wp.campaigns_url }
                     />
@@ -661,58 +660,113 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
     );
 }
 
-function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } ) {
-    const campaignId = finalized?.campaign_id || 0;
-    const gatewayUrl = settingsUrl ? `${ settingsUrl }#gateways` : ( dashboardUrl || '#' );
-    // Hands off to the campaigns screen with the create drawer already open,
-    // so a campaign is built with the same form as every other one rather than
-    // conjured from the wizard's answers.
-    const newCampaignUrl = campaignsUrl
-        ? `${ campaignsUrl }${ campaignsUrl.includes( '?' ) ? '&' : '?' }action=new`
-        : ( dashboardUrl || '#' );
+const DEMO_URL = 'https://gratora.net/demo/?utm_source=plugin&utm_medium=setup';
+
+/**
+ * What the first item offers, by what the site already has. A page is made
+ * only when someone asks for one here: a campaign published at the end of
+ * setup left every install with one whether or not it was wanted.
+ */
+function firstItem( facts, campaignsUrl ) {
+    if ( facts.page === 'live' ) {
+        return facts.test_mode
+            ? {
+                title: __( 'Make a test donation', 'gratora-donation-platform' ),
+                description: __( 'Open your page and give with the Test donation method. No card is charged.', 'gratora-donation-platform' ),
+                cta: __( 'Open the page', 'gratora-donation-platform' ),
+                href: facts.page_url,
+            }
+            : {
+                title: __( 'Your donation page', 'gratora-donation-platform' ),
+                description: __( 'Your page is published.', 'gratora-donation-platform' ),
+                cta: __( 'Open the page', 'gratora-donation-platform' ),
+                href: facts.page_url,
+            };
+    }
+
+    if ( facts.page === 'unpublished' ) {
+        return {
+            title: __( 'Publish your campaign', 'gratora-donation-platform' ),
+            description: __( 'You have a campaign, but none is published, so no page is taking donations yet.', 'gratora-donation-platform' ),
+            cta: __( 'Open campaigns', 'gratora-donation-platform' ),
+            href: campaignsUrl,
+        };
+    }
+
+    return facts.test_mode
+        ? {
+            title: __( 'Make a test donation', 'gratora-donation-platform' ),
+            description: __( 'We will add one donation page to your site, named after your organization, and open it. Test mode is on, so no card is charged.', 'gratora-donation-platform' ),
+            cta: __( 'Create the page and try it', 'gratora-donation-platform' ),
+        }
+        : {
+            title: __( 'Create your donation page', 'gratora-donation-platform' ),
+            description: __( 'We will add one donation page to your site, named after your organization, and open it.', 'gratora-donation-platform' ),
+            cta: __( 'Create the page', 'gratora-donation-platform' ),
+        };
+}
+
+export function ChecklistStep( { facts = {}, dashboardUrl, campaignsUrl } ) {
+    const [ busy, setBusy ]   = useState( false );
+    const [ error, setError ] = useState( null );
+
+    const first = firstItem( facts, campaignsUrl || dashboardUrl || '#' );
+
+    const createAndOpen = async () => {
+        if ( busy ) return;
+        setBusy( true );
+        setError( null );
+        try {
+            const made = await apiFetch( { path: '/gratora/v1/admin/onboarding/starter-campaign', method: 'POST' } );
+            // This tab, not a new one: a window opened after a request has
+            // answered is what pop-up blockers stop.
+            window.location.href = made.page_url;
+        } catch ( err ) {
+            setError( err?.message || __( 'Could not create the page. Please try again.', 'gratora-donation-platform' ) );
+            setBusy( false );
+        }
+    };
 
     return (
         <div>
             <h1 className="gratora-onboarding__headline">{ __( "You're set up", 'gratora-donation-platform' ) }</h1>
             <p className="gratora-onboarding__subtitle">
-                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'gratora-donation-platform' ) }
+                { __( 'Your organization details are saved. Next, see a donation go through.', 'gratora-donation-platform' ) }
             </p>
 
             <ul className="gratora-onboarding__checklist">
                 <ChecklistItem
-                    title={ __( 'Connect a payment gateway', 'gratora-donation-platform' ) }
-                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'gratora-donation-platform' ) }
-                    href={ gatewayUrl }
-                    cta={ __( 'Connect', 'gratora-donation-platform' ) }
+                    title={ first.title }
+                    description={ first.description }
+                    cta={ first.cta }
+                    href={ first.href }
+                    onClick={ first.href ? undefined : createAndOpen }
+                    busy={ busy }
                 />
-                { campaignId ? (
-                    <ChecklistItem
-                        title={ __( 'Build your first form', 'gratora-donation-platform' ) }
-                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'gratora-donation-platform' ) }
-                        href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
-                        cta={ __( 'Build', 'gratora-donation-platform' ) }
-                    />
-                ) : (
-                    <ChecklistItem
-                        title={ __( 'Create your first campaign', 'gratora-donation-platform' ) }
-                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'gratora-donation-platform' ) }
-                        href={ newCampaignUrl }
-                        cta={ __( 'Create', 'gratora-donation-platform' ) }
-                    />
-                ) }
+                <ChecklistItem
+                    title={ __( 'See it with a year of sample data', 'gratora-donation-platform' ) }
+                    description={ __( 'A demo site opens in a new tab. Nothing is added to your site.', 'gratora-donation-platform' ) }
+                    cta={ __( 'Open the demo', 'gratora-donation-platform' ) }
+                    href={ DEMO_URL }
+                    newTab
+                    secondary
+                />
             </ul>
 
+            { error && <div className="gratora-onboarding__error" role="alert">{ error }</div> }
 
             <p className="gratora-onboarding__checklist-foot">
                 <a className="gratora-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
-                    { __( 'Skip for now', 'gratora-donation-platform' ) }
+                    { __( 'Go to the dashboard', 'gratora-donation-platform' ) }
                 </a>
             </p>
         </div>
     );
 }
 
-function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
+function ChecklistItem( { title, description, href, cta, onClick, busy, newTab, secondary } ) {
+    const classes = `gratora-btn gratora-btn--${ secondary ? 'secondary' : 'primary' }`;
+
     return (
         <li className="gratora-onboarding__checklist-item">
             <span className="gratora-onboarding__checklist-bullet" aria-hidden="true" />
@@ -724,14 +778,19 @@ function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
                 ? (
                     <button
                         type="button"
-                        className="gratora-btn gratora-btn--primary"
+                        className={ classes }
                         onClick={ onClick }
                         disabled={ busy }
                     >
                         { cta }
                     </button>
                 )
-                : <a className="gratora-btn gratora-btn--primary" href={ href }>{ cta }</a> }
+                : (
+                    <a className={ classes } href={ href } { ...( newTab ? { target: '_blank', rel: 'noreferrer' } : {} ) }>
+                        { cta }
+                        { newTab && <span className="screen-reader-text">{ __( '(opens in a new tab)', 'gratora-donation-platform' ) }</span> }
+                    </a>
+                ) }
         </li>
     );
 }
