@@ -192,7 +192,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
             foot={ foot }
         >
             <p className="gratora-dialog__help">
-                { __( 'A few quick details, then you are live. You can change everything later.', 'gratora-donation-platform' ) }
+                { __( 'A few quick details to start. You can change everything later.', 'gratora-donation-platform' ) }
             </p>
             <div className="gratora-cc">
             { error && (
