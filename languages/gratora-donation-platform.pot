@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-04T03:25:41+00:00\n"
+"POT-Creation-Date: 2026-10-06T08:47:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -190,7 +190,7 @@ msgstr ""
 #: components/StatusBadge.js:5
 #: src/Admin/SystemReport.php:352
 #: src/Recurring/PlanStatus.php:132
-#: assets/admin/addons/Addons.jsx:34
+#: assets/admin/addons/Addons.jsx:42
 #: assets/admin/campaigns/List.jsx:496
 #: assets/admin/donors/Insights.jsx:61
 #: assets/admin/funds/List.jsx:36
@@ -950,7 +950,7 @@ msgid "Standard"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:31
-#: assets/admin/addons/Addons.jsx:90
+#: assets/admin/addons/Addons.jsx:164
 #: assets/admin/campaigns/List.jsx:374
 #: assets/admin/donations/detail/Header.jsx:21
 #: assets/admin/donations/List.jsx:615
@@ -978,85 +978,13 @@ msgstr ""
 msgid "Gratora Donor Portal"
 msgstr ""
 
-#: src/Admin/Pages/AddonsPage.php:47
+#: src/Admin/Pages/AddonsPage.php:53
 #: src/Admin/SystemReport.php:44
 #: src/Admin/SystemReport.php:102
-#: assets/admin/addons/Addons.jsx:92
-#: assets/admin/addons/Addons.jsx:97
+#: assets/admin/addons/Addons.jsx:166
+#: assets/admin/addons/Addons.jsx:171
+#: assets/admin/addons/Addons.jsx:205
 msgid "Add-ons"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:129
-msgid "Peer-to-Peer"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:129
-msgid "Supporters raise money for you on their own pages, alone or in teams."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:130
-msgid "Event Tickets"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:130
-msgid "Sell tickets to fundraising events, then check guests in by phone."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:131
-msgid "AI Assistant"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:131
-msgid "Ask about your fundraising and make changes in plain language."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:132
-msgid "Payment Gateways"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:132
-msgid "Take donations through Authorize.Net, Square, GoCardless, Moneris or Razorpay."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:133
-msgid "Conversion Tracking"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:133
-msgid "Report completed donations to GA4, Google Ads and Meta, with amount and currency."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:134
-msgctxt "add-on name"
-msgid "Connect"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:134
-msgid "Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:135
-msgid "Tributes"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:135
-msgid "Donors dedicate a donation in honor or in memory of someone."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:136
-msgid "Gift Aid"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:136
-msgid "Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC."
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:155
-msgid "GiveWP Importer"
-msgstr ""
-
-#: src/Admin/Pages/AddonsPage.php:156
-msgid "Copy donors, donations, campaigns and recurring subscriptions from GiveWP into Gratora."
 msgstr ""
 
 #: src/Admin/Pages/CampaignsPage.php:28
@@ -2491,12 +2419,12 @@ msgstr ""
 msgid "Link is time-limited to your login session (about %s); regenerate it if it stops working."
 msgstr ""
 
-#: src/Core/CoreModule.php:257
+#: src/Core/CoreModule.php:258
 msgid "Gratora Core"
 msgstr ""
 
 #. translators: %s: timestamp the key loss was detected
-#: src/Core/CoreModule.php:1277
+#: src/Core/CoreModule.php:1278
 #, php-format
 msgid "Encryption key missing since %s. What was encrypted before then cannot be decrypted: donor emails, addresses, phone numbers, tax IDs, notes and form answers, and saved gateway secret keys. Restore gratora_system_settings from a backup, or accept that those details are gone and enter your gateway keys again. New data is encrypted with a freshly generated key."
 msgstr ""
@@ -2823,7 +2751,7 @@ msgid "Annual donation statement"
 msgstr ""
 
 #: src/Donors/Portal/PortalPage.php:45
-#: src/Recurring/PlanRow.php:291
+#: src/Recurring/PlanRow.php:297
 #: assets/admin/settings/panels/SetupPanel.jsx:17
 #: assets/donor-portal/index.jsx:623
 msgid "Donor portal"
@@ -5352,24 +5280,24 @@ msgstr ""
 msgid "every year"
 msgstr ""
 
-#: src/Recurring/PlanRow.php:287
+#: src/Recurring/PlanRow.php:293
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:129
 msgid "Payment provider"
 msgstr ""
 
-#: src/Recurring/PlanRow.php:292
+#: src/Recurring/PlanRow.php:298
 msgid "Admin"
 msgstr ""
 
-#: src/Recurring/PlanRow.php:293
+#: src/Recurring/PlanRow.php:299
 msgid "Scheduled run"
 msgstr ""
 
-#: src/Recurring/PlanRow.php:294
+#: src/Recurring/PlanRow.php:300
 msgid "WP-CLI"
 msgstr ""
 
-#: src/Recurring/PlanRow.php:295
+#: src/Recurring/PlanRow.php:301
 msgid "Site"
 msgstr ""
 
@@ -6840,45 +6768,79 @@ msgstr ""
 msgid "Every accepted currency is a three-letter code, like USD or EUR."
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:37
+#: assets/admin/addons/Addons.jsx:45
 msgid "Installed"
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:40
+#: assets/admin/addons/Addons.jsx:48
 msgid "Free"
 msgstr ""
 
 #. translators: %s: add-on name.
-#: assets/admin/addons/Addons.jsx:65
+#: assets/admin/addons/Addons.jsx:77
 #, js-format
 msgid "Learn more about %s (opens in a new tab)"
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:67
+#: assets/admin/addons/Addons.jsx:79
+#: assets/admin/addons/Addons.jsx:116
 msgid "Learn more"
 msgstr ""
 
 #. translators: %s: add-on name.
-#: assets/admin/addons/Addons.jsx:76
+#: assets/admin/addons/Addons.jsx:88
 #, js-format
 msgid "Activate %s"
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:78
+#: assets/admin/addons/Addons.jsx:90
 #: assets/admin/funds/List.jsx:470
 msgid "Activate"
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:99
+#: assets/admin/addons/Addons.jsx:103
+#: assets/admin/addons/Addons.jsx:118
+#: assets/admin/addons/Addons.jsx:149
+#: assets/admin/addons/Addons.jsx:190
+msgid "(opens in a new tab)"
+msgstr ""
+
+#. translators: %d: number of add-ons a plan includes.
+#: assets/admin/addons/Addons.jsx:133
+#, js-format
+msgid "%d add-on"
+msgid_plural "%d add-ons"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of sites a plan covers.
+#: assets/admin/addons/Addons.jsx:140
+#, js-format
+msgid "%d site"
+msgid_plural "%d sites"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/addons/Addons.jsx:147
+msgctxt "link to one paid plan"
+msgid "See plan"
+msgstr ""
+
+#: assets/admin/addons/Addons.jsx:173
 msgid "Add-ons are separate plugins that work alongside Gratora."
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:104
+#: assets/admin/addons/Addons.jsx:180
+msgid "The lists on this page are loaded from <a>gratora.net</a>"
+msgstr ""
+
+#: assets/admin/addons/Addons.jsx:188
 msgid "Compare plans"
 msgstr ""
 
-#: assets/admin/addons/Addons.jsx:106
-msgid "(opens in a new tab)"
+#: assets/admin/addons/Addons.jsx:201
+msgctxt "paid plans that hold the add-ons"
+msgid "Plans"
 msgstr ""
 
 #: assets/admin/campaign-blocks/bindings.js:24

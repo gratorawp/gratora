@@ -986,79 +986,6 @@ msgstr "Portal del donante de Gratora"
 msgid "Add-ons"
 msgstr "Extensiones"
 
-#: src/Admin/Pages/AddonsPage.php:93
-msgid "Peer-to-Peer"
-msgstr "Peer-to-Peer"
-
-#: src/Admin/Pages/AddonsPage.php:93
-msgid "Supporters raise money for you on their own pages, alone or in teams."
-msgstr "Tus simpatizantes recaudan fondos para ti en sus propias páginas, en solitario o en equipo."
-
-#: src/Admin/Pages/AddonsPage.php:94
-msgid "Event Tickets"
-msgstr "Entradas para eventos"
-
-#: src/Admin/Pages/AddonsPage.php:94
-msgid "Sell tickets to fundraising events, then check guests in by phone."
-msgstr "Vende entradas para eventos de recaudación de fondos y registra la llegada de los asistentes con el móvil."
-
-#: src/Admin/Pages/AddonsPage.php:95
-msgid "AI Assistant"
-msgstr "Asistente de IA"
-
-#: src/Admin/Pages/AddonsPage.php:95
-msgid "Ask about your fundraising and make changes in plain language."
-msgstr "Pregunta sobre tu recaudación de fondos y haz cambios en lenguaje natural."
-
-#: src/Admin/Pages/AddonsPage.php:96
-msgid "Payment Gateways"
-msgstr "Pasarelas de pago"
-
-#: src/Admin/Pages/AddonsPage.php:96
-msgid "Take donations through Authorize.Net, Square, GoCardless, Moneris or Razorpay."
-msgstr "Recibe donaciones a través de Authorize.Net, Square, GoCardless, Moneris o Razorpay."
-
-#: src/Admin/Pages/AddonsPage.php:97
-msgid "Conversion Tracking"
-msgstr "Seguimiento de conversiones"
-
-#: src/Admin/Pages/AddonsPage.php:97
-msgid "Report completed donations to GA4, Google Ads and Meta, with amount and currency."
-msgstr "Envía las donaciones completadas a GA4, Google Ads y Meta, con su importe y moneda."
-
-#: src/Admin/Pages/AddonsPage.php:98
-msgctxt "add-on name"
-msgid "Connect"
-msgstr "Connect"
-
-#: src/Admin/Pages/AddonsPage.php:98
-msgid "Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp."
-msgstr "Envía los eventos de donaciones, donantes y donaciones recurrentes a webhooks firmados, Slack y Mailchimp."
-
-#: src/Admin/Pages/AddonsPage.php:99
-msgid "Tributes"
-msgstr "Homenajes"
-
-#: src/Admin/Pages/AddonsPage.php:99
-msgid "Donors dedicate a donation in honor or in memory of someone."
-msgstr "Los donantes dedican una donación en honor o en memoria de alguien."
-
-#: src/Admin/Pages/AddonsPage.php:100
-msgid "Gift Aid"
-msgstr "Gift Aid"
-
-#: src/Admin/Pages/AddonsPage.php:100
-msgid "Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC."
-msgstr "Recoge las declaraciones de Gift Aid del Reino Unido en tus formularios y prepara tu solicitud para HMRC."
-
-#: src/Admin/Pages/AddonsPage.php:119
-msgid "GiveWP Importer"
-msgstr "Importador de GiveWP"
-
-#: src/Admin/Pages/AddonsPage.php:120
-msgid "Copy donors, donations, campaigns and recurring subscriptions from GiveWP into Gratora."
-msgstr "Copia donantes, donaciones, campañas y suscripciones recurrentes de GiveWP a Gratora."
-
 #: src/Admin/Pages/CampaignsPage.php:28
 #: src/Rest/Admin/ToolsController.php:1313
 #: assets/admin/campaigns/Detail.jsx:436
@@ -17173,3 +17100,33 @@ msgstr[1] "meses"
 #, js-format
 msgid "Every %1$d %2$s"
 msgstr "Cada %1$d %2$s"
+
+#: assets/admin/addons/Addons.jsx:180
+msgid "The lists on this page are loaded from <a>gratora.net</a>"
+msgstr "Las listas de esta página se cargan desde <a>gratora.net</a>"
+
+#: assets/admin/addons/Addons.jsx:201
+msgctxt "paid plans that hold the add-ons"
+msgid "Plans"
+msgstr "Planes"
+
+#: assets/admin/addons/Addons.jsx:147
+msgctxt "link to one paid plan"
+msgid "See plan"
+msgstr "Ver plan"
+
+#. translators: %d: number of add-ons a plan includes.
+#: assets/admin/addons/Addons.jsx:133
+#, js-format
+msgid "%d add-on"
+msgid_plural "%d add-ons"
+msgstr[0] "%d extensión"
+msgstr[1] "%d extensiones"
+
+#. translators: %d: number of sites a plan covers.
+#: assets/admin/addons/Addons.jsx:140
+#, js-format
+msgid "%d site"
+msgid_plural "%d sites"
+msgstr[0] "%d sitio"
+msgstr[1] "%d sitios"
