@@ -143,7 +143,9 @@ final class DonationTrasher
      * the record is a different question, and the one thing that must not
      * happen is a gap in a receipt sequence a tax authority reads as complete.
      * A refund voids the receipt, which leaves a row explaining the number, so
-     * the rule is not "never" but "not while a receipt still stands".
+     * the rule is not "never" but "not while a receipt still stands". A test
+     * donation's receipt holds nothing: it numbers from a counter of its own,
+     * which the test-data purge empties anyway.
      *
      * @param list<Donation> $donations
      * @return array<int, ?string> keyed by donation id
@@ -164,7 +166,7 @@ final class DonationTrasher
             $id     = (int) $donation->id;
             $reason = $this->structuralReason($donation);
 
-            if ($reason === null && isset($standing[$id])) {
+            if ($reason === null && empty($donation->is_test) && isset($standing[$id])) {
                 $reason = __('A receipt was issued for this donation. Refund it first, which voids the receipt, or the numbering has a gap nobody can explain.', 'gratora-donation-platform');
             }
 

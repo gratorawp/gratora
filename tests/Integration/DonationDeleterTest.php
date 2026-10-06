@@ -168,7 +168,7 @@ final class DonationDeleterTest extends IntegrationTestCase
      */
     public function test_a_standing_receipt_refuses_the_delete(): void
     {
-        $donation = $this->attempt('offline', ['status' => 'paid', 'paid_at' => gmdate('Y-m-d H:i:s')]);
+        $donation = $this->attempt('offline', ['status' => 'paid', 'paid_at' => gmdate('Y-m-d H:i:s'), 'is_test' => false]);
 
         $receipt = \Gratora\Receipts\Receipt::make();
         $receipt->donation_id    = (int) $donation->id;

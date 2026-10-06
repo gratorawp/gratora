@@ -14,6 +14,7 @@ use Gratora\Foundation\Transfer\DataExporter;
 use Gratora\Foundation\Transfer\DataImporter;
 use Gratora\Receipts\Receipt;
 use Gratora\Vendor\Queryable\DB;
+use WP_REST_Request;
 
 /**
  * The receipt sequence an org hands a tax authority has to be gap-free, and the
@@ -86,6 +87,92 @@ final class ReceiptRehearsalNumberingTest extends IntegrationTestCase
             $second,
             'the restore raised the rehearsal counter past what the file carried'
         );
+    }
+
+    /**
+     * One rehearsal goes the way the purge takes them all. Its receipt is on
+     * the rehearsal counter, so removing it leaves the live sequence with no
+     * number to explain, and refusing it left a new site unable to tidy away
+     * the one test donation its first run asks for.
+     */
+    public function test_a_rehearsal_can_be_deleted_from_the_donations_screen_with_its_receipt(): void
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
+        $this->issue($this->paidDonation('live@example.test', false));
+        $test = $this->paidDonation('rehearsal@example.test', true);
+        $this->issue($test);
+
+        $row = $this->rowFor($test);
+        $this->assertNull($row['delete_blocked']);
+        $this->assertTrue($row['deletable']);
+
+        $this->assertSame([], $this->deleteFromTheScreen($test));
+
+        $this->assertNull(Donation::query()->where('id', (int) $test->id)->get(), 'the rehearsal is gone');
+        $this->assertSame(
+            0,
+            (int) Receipt::query()->where('donation_id', (int) $test->id)->count(),
+            'and its receipt with it'
+        );
+        $this->assertSame(
+            2,
+            Plugin::instance()->container->get(ReferenceGenerator::class)->peekNext('receipt'),
+            'the live sequence did not move'
+        );
+    }
+
+    public function test_a_live_donation_keeps_its_receipt_and_says_what_to_do(): void
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
+        $live = $this->paidDonation('live@example.test', false);
+        $this->issue($live);
+
+        $row = $this->rowFor($live);
+        $this->assertFalse($row['deletable']);
+        $this->assertStringContainsString('Refund it first', (string) $row['delete_blocked']);
+
+        $this->assertCount(1, $this->deleteFromTheScreen($live));
+        $this->assertNotNull(Donation::query()->where('id', (int) $live->id)->get());
+    }
+
+    /**
+     * The row as the Donations screen is given it.
+     *
+     * @return array<string,mixed>
+     */
+    private function rowFor(Donation $donation): array
+    {
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/donations');
+        $request->set_param('include_test', true);
+        $request->set_param('per_page', 100);
+
+        foreach ((array) rest_do_request($request)->get_data() as $row) {
+            if ((int) $row['id'] === (int) $donation->id) {
+                return $row;
+            }
+        }
+
+        $this->fail('the donation is not on the list');
+    }
+
+    /**
+     * Delete permanently, as the screen asks for it.
+     *
+     * @return list<array<string,mixed>> the rows the server refused
+     */
+    private function deleteFromTheScreen(Donation $donation): array
+    {
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/donations/delete');
+        $request->set_param('references', [(string) $donation->reference]);
+        $request->set_param('confirmation', 'DELETE');
+        $request->set_param('delete_donors', false);
+
+        $response = rest_do_request($request);
+        $this->assertSame(200, $response->get_status(), (string) wp_json_encode($response->get_data()));
+
+        return $response->get_data()['refused'];
     }
 
     /** @return array<string,mixed> */
