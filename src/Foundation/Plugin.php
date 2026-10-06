@@ -267,6 +267,10 @@ final class Plugin
         }
 
         self::onActivation($fresh);
+
+        // Reached only by a site whose activation never completed: a subsite
+        // of a network, or one whose activation hook was cut short.
+        self::startInTestMode();
     }
 
     /**
@@ -277,7 +281,29 @@ final class Plugin
      */
     public static function onPluginActivated(bool $networkWide = false): void
     {
+        $neverActivated = get_option(Activator::OPT_ACTIVATED_AT, false) === false;
+
         self::onActivation(null);
+
+        if ($neverActivated) {
+            self::startInTestMode();
+        }
+    }
+
+    /**
+     * A new site can take a test donation before anyone has pasted a key, and
+     * cannot take a real one by accident. Added rather than updated: payment
+     * settings a restore brought with it stay as they are.
+     *
+     * Done where WordPress switches the plugin on and not in activate(), which
+     * is also how a test rig lays a site out before measuring the donations on
+     * it as real ones.
+     *
+     * @unreleased
+     */
+    private static function startInTestMode(): void
+    {
+        add_option('gratora_gateway_config', ['test_mode' => true], '', false);
     }
 
     /** @since 1.0.0 */
@@ -339,7 +365,7 @@ final class Plugin
         (new Activator(
             new FundRepository(),
             new SystemClock()
-        ))->activate($fresh);
+        ))->activate();
 
         // The donor portal page hosts [gratora_donor_portal] and is what every
         // magic-link email points at - create or adopt it before any donor
