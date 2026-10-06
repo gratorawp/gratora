@@ -1048,7 +1048,7 @@ final class CoreModule implements GratoraModule
                 $c->get(DonationRepository::class),
             ),
             new OnboardingController(
-                new StarterCampaign($c->get(CampaignService::class)),
+                new StarterCampaign($c->get(CampaignService::class), new LiveCampaigns()),
                 $c->get(FirstRun::class),
             ),
             new StripeKeysController(

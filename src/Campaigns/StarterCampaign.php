@@ -11,8 +11,8 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Makes a site's first campaign, published with its form and page, so someone
- * new has a page that takes a donation without filling in a form first.
+ * A page somebody new can be sent to and give on: the site's own if it has
+ * one, otherwise a first campaign made here, published with its form and page.
  *
  * Asked for, never automatic: a campaign published at the end of setup left
  * every install with one whether or not it was wanted.
@@ -22,9 +22,9 @@ use Throwable;
 final class StarterCampaign
 {
     /**
-     * The id of the campaign this made, or a claim while it is being made.
-     * Read and written as a row, never through the options cache, which would
-     * answer from what an earlier request left in it.
+     * A claim held while the campaign is being made, so that two requests at
+     * once make one. Read and written as a row, never through the options
+     * cache, which would answer from what an earlier request left in it.
      */
     public const OPTION = 'gratora_starter_campaign';
 
@@ -34,60 +34,68 @@ final class StarterCampaign
     private const CLAIM_SECONDS = 60;
 
     /** @unreleased */
-    public function __construct(private CampaignService $campaigns)
-    {
+    public function __construct(
+        private CampaignService $campaigns,
+        private LiveCampaigns $live,
+    ) {
     }
 
     /**
-     * The campaign this made, making it first if it has not yet.
-     *
-     * @throws StarterCampaignRefused when the site has a campaign of its own, or another request is making this one
+     * @throws StarterCampaignRefused when the site has campaigns and none takes donations, or another request is making this one
      * @throws RuntimeException when the campaign could not be written
      *
      * @unreleased
      */
     public function ensure(): Campaign
     {
-        $stored = $this->stored();
-
-        $made = ctype_digit($stored) ? Campaign::query()->find('id', (int) $stored) : null;
-        if ($made) {
-            return $made;
+        // Asked first, and of the site rather than of a record kept here: a
+        // request that died after writing the campaign, or a listener that
+        // threw once it was written, leaves a page that is there to be used.
+        $open = $this->live->firstOpen();
+        if ($open) {
+            return $open;
         }
 
         if (Campaign::query()->count() > 0) {
-            throw new StarterCampaignRefused(esc_html__('This site already has a campaign.', 'gratora-donation-platform'));
+            throw new StarterCampaignRefused(esc_html__('You have a campaign, but none of them is taking donations right now.', 'gratora-donation-platform'));
         }
 
-        $claim = $this->claim($stored);
+        $claim = $this->claim();
         if ($claim === null) {
-            throw new StarterCampaignRefused(esc_html__('The page is being created. Reload in a moment.', 'gratora-donation-platform'));
+            throw new StarterCampaignRefused(esc_html__('The page is being created. Try again in a moment.', 'gratora-donation-platform'));
         }
 
         try {
-            $campaign = $this->campaigns->create([
+            return $this->campaigns->create([
                 'title'  => $this->title(),
                 'status' => 'published',
             ]);
-        } catch (Throwable $e) {
+        } finally {
             $this->row()->where('option_value', $claim)->delete();
-            throw $e;
         }
-
-        $this->row()->where('option_value', $claim)->update(['option_value' => (string) $campaign->id]);
-
-        return $campaign;
     }
 
+    /**
+     * The page is public, so it is named in the site's language. The request
+     * that makes it speaks the language of whoever pressed the button.
+     */
     private function title(): string
     {
-        $name = trim(wp_specialchars_decode((string) OrgProfile::load()['name'], ENT_QUOTES));
-        if ($name === '') {
-            return __('Donate', 'gratora-donation-platform');
-        }
+        $switched = switch_to_locale(get_locale());
 
-        /* translators: %s: the organization's name. The title of its first donation page. */
-        return sprintf(__('Support %s', 'gratora-donation-platform'), $name);
+        try {
+            $name = trim(wp_specialchars_decode((string) OrgProfile::load()['name'], ENT_QUOTES));
+            if ($name === '') {
+                return __('Donate', 'gratora-donation-platform');
+            }
+
+            /* translators: %s: the organization's name. The title of its first donation page. */
+            return sprintf(__('Support %s', 'gratora-donation-platform'), $name);
+        } finally {
+            if ($switched) {
+                restore_previous_locale();
+            }
+        }
     }
 
     /**
@@ -96,16 +104,16 @@ final class StarterCampaign
      *
      * @return ?string the claim this request holds
      */
-    private function claim(string $stored): ?string
+    private function claim(): ?string
     {
-        if ($stored !== '') {
-            if ($this->isStandingClaim($stored)) {
+        $standing = (string) ($this->row()->pluck('option_value')[0] ?? '');
+        if ($standing !== '') {
+            if ((int) substr($standing, strlen(self::CLAIM)) + self::CLAIM_SECONDS > time()) {
                 return null;
             }
 
-            // A claim nobody finished, or the id of a campaign since deleted.
             // Removed only as read, so a claim taken in between stands.
-            $this->row()->where('option_value', $stored)->delete();
+            $this->row()->where('option_value', $standing)->delete();
         }
 
         $claim  = self::CLAIM . time();
@@ -115,17 +123,6 @@ final class StarterCampaign
         );
 
         return $result->affectedRows === 1 ? $claim : null;
-    }
-
-    private function isStandingClaim(string $stored): bool
-    {
-        return str_starts_with($stored, self::CLAIM)
-            && (int) substr($stored, strlen(self::CLAIM)) + self::CLAIM_SECONDS > time();
-    }
-
-    private function stored(): string
-    {
-        return (string) ($this->row()->pluck('option_value')[0] ?? '');
     }
 
     private function row(): QueryBuilder

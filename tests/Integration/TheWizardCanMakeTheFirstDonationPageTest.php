@@ -10,6 +10,7 @@ use Gratora\Campaigns\LiveCampaigns;
 use Gratora\Campaigns\StarterCampaign;
 use Gratora\Forms\Form;
 use Gratora\Foundation\Plugin;
+use RuntimeException;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -80,7 +81,7 @@ final class TheWizardCanMakeTheFirstDonationPageTest extends IntegrationTestCase
         $this->assertCount(1, Campaign::query()->getAll());
     }
 
-    public function test_a_site_that_already_has_a_campaign_is_refused(): void
+    public function test_a_site_whose_own_campaign_takes_no_donations_is_refused_and_told_why(): void
     {
         $this->campaigns()->create(['title' => 'Made by hand', 'status' => 'draft']);
 
@@ -88,7 +89,79 @@ final class TheWizardCanMakeTheFirstDonationPageTest extends IntegrationTestCase
 
         $this->assertSame(409, $res->get_status());
         $this->assertSame('gratora_starter_campaign_refused', $res->get_data()['code']);
+        $this->assertSame('You have a campaign, but none of them is taking donations right now.', $res->get_data()['message']);
         $this->assertCount(1, Campaign::query()->getAll());
+    }
+
+    /** A wizard left open in another tab, pressed after a campaign was made by hand. */
+    public function test_a_site_with_a_page_that_takes_donations_is_given_that_page(): void
+    {
+        $own = $this->campaigns()->create(['title' => 'Made by hand', 'status' => 'published']);
+
+        $res = $this->press();
+
+        $this->assertSame(200, $res->get_status());
+        $this->assertSame((int) $own->id, $res->get_data()['campaign_id']);
+        $this->assertSame(get_permalink((int) $own->page_id), $res->get_data()['page_url']);
+        $this->assertCount(1, Campaign::query()->getAll());
+    }
+
+    /**
+     * The campaign is written before anything listening for it runs. An add-on
+     * that throws there must not leave a page nobody can be sent to.
+     */
+    public function test_a_listener_that_fails_once_the_campaign_is_written_does_not_strand_the_button(): void
+    {
+        $fail = static function (): void {
+            throw new RuntimeException('An add-on could not finish.');
+        };
+        add_action('gratora.campaign.created', $fail);
+        $failed = $this->press();
+        remove_action('gratora.campaign.created', $fail);
+
+        $this->assertSame(500, $failed->get_status());
+
+        $again = $this->press();
+
+        $this->assertSame(200, $again->get_status());
+        $this->assertCount(1, Campaign::query()->getAll());
+    }
+
+    public function test_nothing_is_left_behind_once_the_page_is_made(): void
+    {
+        $this->press();
+
+        $this->assertSame(0, (int) self::$wpdb->get_var(self::$wpdb->prepare(
+            'SELECT COUNT(*) FROM ' . self::$wpdb->options . ' WHERE option_name = %s',
+            StarterCampaign::OPTION
+        )));
+    }
+
+    /**
+     * The page is public, so it is named in the site's language. The request
+     * that makes it runs in the language of whoever pressed the button: here a
+     * German speaker administering an English site.
+     */
+    public function test_the_page_is_named_in_the_site_s_language_and_not_the_presser_s(): void
+    {
+        update_option('gratora_org_profile', ['name' => 'Riverside Food Bank']);
+        update_user_meta(get_current_user_id(), 'locale', 'de_DE');
+        $_GET['_locale']        = 'user';
+        $_SERVER['HTTP_ACCEPT'] = 'application/json';
+        $spoken = static fn (string $translation, string $text): string => $text === 'Support %s'
+            ? '[' . determine_locale() . '] %s'
+            : $translation;
+        add_filter('gettext', $spoken, 10, 2);
+
+        try {
+            $this->assertSame('de_DE', determine_locale(), 'the request speaks the presser\'s language');
+            $title = $this->titleOfWhatItMakes();
+        } finally {
+            remove_filter('gettext', $spoken, 10);
+            unset($_GET['_locale'], $_SERVER['HTTP_ACCEPT']);
+        }
+
+        $this->assertSame('[en_US] Riverside Food Bank', $title);
     }
 
     public function test_after_its_campaign_is_deleted_it_makes_a_new_one(): void
