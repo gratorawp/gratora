@@ -23,6 +23,7 @@ import RecentActivity from './widgets/RecentActivity';
 import TopCampaigns from './widgets/TopCampaigns';
 import RecurringForecast from './widgets/RecurringForecast';
 import NeedsAttention from './widgets/NeedsAttention';
+import FirstRunCard from './FirstRunCard';
 import ReviewPrompt from './ReviewPrompt';
 import { Button } from '@wordpress/components';
 
@@ -69,6 +70,8 @@ export default function Dashboard() {
     const [ fetchError, setFetchError ]     = useState( false );
     const [ reloadKey, setReloadKey ]       = useState( 0 );
     const [ reviewAnswered, setReviewAnswered ] = useState( false );
+    const [ firstRunHidden, setFirstRunHidden ] = useState( false );
+    const [ wentLive, setWentLive ]             = useState( false );
 
     const layout = useGratoraLayout( SCOPE, WIDGET_KEYS );
 
@@ -193,6 +196,23 @@ export default function Dashboard() {
                     />
                 </div>
             </div>
+
+            { metrics?.first_run && ! firstRunHidden && (
+                <FirstRunCard
+                    facts={ metrics.first_run }
+                    onChanged={ () => setReloadKey( ( k ) => k + 1 ) }
+                    onWentLive={ () => setWentLive( true ) }
+                    onHidden={ () => setFirstRunHidden( true ) }
+                />
+            ) }
+
+            { /* Only once the card has gone: test mode can be turned off on a
+                 site that still has no page, and that site is not live. */ }
+            { wentLive && metrics && ! metrics.first_run && (
+                <Notice status="success" onRemove={ () => setWentLive( false ) }>
+                    { __( 'Test mode is off. Donations are real from now on.', 'gratora-donation-platform' ) }
+                </Notice>
+            ) }
 
             { /* A dashboard of zeroes on a site that has been rehearsing looks
                  broken. Say what is being held back, and offer the way to see
