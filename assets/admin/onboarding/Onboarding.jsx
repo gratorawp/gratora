@@ -660,8 +660,6 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
     );
 }
 
-const DEMO_URL = 'https://gratora.net/demo/?utm_source=plugin&utm_medium=setup';
-
 /**
  * What the first item offers, by what the site already has. A page is made
  * only when someone asks for one here: a campaign published at the end of
@@ -744,14 +742,6 @@ export function ChecklistStep( { facts = {}, dashboardUrl, campaignsUrl } ) {
                     onClick={ first.href ? undefined : createAndOpen }
                     busy={ busy }
                 />
-                <ChecklistItem
-                    title={ __( 'See it with a year of sample data', 'gratora-donation-platform' ) }
-                    description={ __( 'A demo site opens in a new tab. Nothing is added to your site.', 'gratora-donation-platform' ) }
-                    cta={ __( 'Open the demo', 'gratora-donation-platform' ) }
-                    href={ DEMO_URL }
-                    newTab
-                    secondary
-                />
             </ul>
 
             { error && <div className="gratora-onboarding__error" role="alert">{ error }</div> }
@@ -769,9 +759,7 @@ export function ChecklistStep( { facts = {}, dashboardUrl, campaignsUrl } ) {
     );
 }
 
-function ChecklistItem( { title, description, href, cta, onClick, busy, newTab, secondary } ) {
-    const classes = `gratora-btn gratora-btn--${ secondary ? 'secondary' : 'primary' }`;
-
+function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
     return (
         <li className="gratora-onboarding__checklist-item">
             <span className="gratora-onboarding__checklist-bullet" aria-hidden="true" />
@@ -783,7 +771,7 @@ function ChecklistItem( { title, description, href, cta, onClick, busy, newTab, 
                 ? (
                     <button
                         type="button"
-                        className={ classes }
+                        className="gratora-btn gratora-btn--primary"
                         onClick={ onClick }
                         disabled={ busy }
                     >
@@ -791,9 +779,8 @@ function ChecklistItem( { title, description, href, cta, onClick, busy, newTab, 
                     </button>
                 )
                 : (
-                    <a className={ classes } href={ href } { ...( newTab ? { target: '_blank', rel: 'noreferrer' } : {} ) }>
+                    <a className="gratora-btn gratora-btn--primary" href={ href }>
                         { cta }
-                        { newTab && <span className="screen-reader-text">{ __( '(opens in a new tab)', 'gratora-donation-platform' ) }</span> }
                     </a>
                 ) }
         </li>

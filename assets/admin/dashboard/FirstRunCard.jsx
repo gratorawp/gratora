@@ -7,8 +7,6 @@ import Btn from '../_shared/components/Btn';
 import { listHref } from '../_shared/format';
 import { firstRunSteps, primaryStep } from './firstRunSteps';
 
-const DEMO_URL = 'https://gratora.net/demo/?utm_source=plugin&utm_medium=dashboard';
-
 const settingsHref = ( tab ) => `${ window.location.pathname }?page=gratora-settings#${ tab }`;
 
 const NewTab = () => (
@@ -129,15 +127,6 @@ export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidd
             </ol>
 
             <div className="gratora-firstrun__foot">
-                <span>
-                    { __( 'Want to see it full first?', 'gratora-donation-platform' ) }
-                    { ' ' }
-                    <a href={ DEMO_URL } target="_blank" rel="noreferrer">
-                        { __( 'Open the demo, with a year of sample data', 'gratora-donation-platform' ) }
-                        <ExternalLink size={ 13 } strokeWidth={ 2 } aria-hidden="true" />
-                        <NewTab />
-                    </a>
-                </span>
                 <a href={ settingsHref( 'setup' ) }>
                     { __( 'See the full setup check', 'gratora-donation-platform' ) }
                 </a>

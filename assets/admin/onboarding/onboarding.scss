@@ -744,14 +744,6 @@ body .gratora-onboarding .gratora-btn:active { border-radius: 999px; }
         &:hover:not(:disabled) { background: $accent-dark; }
     }
 
-    &--secondary {
-        background: #fff;
-        border-color: $border-mid;
-        color: $text;
-
-        &:hover:not(:disabled) { border-color: $accent; }
-    }
-
     &--ghost {
         background: transparent;
         color: $text-muted;

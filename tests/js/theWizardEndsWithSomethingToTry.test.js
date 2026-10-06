@@ -1,7 +1,7 @@
 /**
  * The setup wizard used to end on a list of what was still missing, payment
  * keys first. It ends on something to try: one button that makes a donation
- * page and opens it, and the demo for anyone who would rather look first.
+ * page and opens it.
  */
 
 import { render } from 'preact';
@@ -171,30 +171,25 @@ test( 'a page that could not be made says why, and the button works again', asyn
     expect( cta( items()[ 0 ] ).disabled ).toBe( false );
 } );
 
-test( 'the second thing it offers is the demo, in a new tab, marked as coming from setup', () => {
+test( 'nothing on it leads off the site or opens another tab', () => {
     lastScreen( facts() );
 
-    expect( read( items()[ 1 ] ) ).toEqual( {
-        title: 'See it with a year of sample data',
-        text:  'A demo site opens in a new tab. Nothing is added to your site.',
-        cta:   'Open the demo',
-    } );
-    expect( cta( items()[ 1 ] ).getAttribute( 'href' ) ).toBe( 'https://gratora.net/demo/?utm_source=plugin&utm_medium=setup' );
-    expect( cta( items()[ 1 ] ).getAttribute( 'target' ) ).toBe( '_blank' );
-    expect( cta( items()[ 1 ] ).textContent ).toContain( '(opens in a new tab)' );
+    const hrefs = [ ...root.querySelectorAll( 'a' ) ].map( ( a ) => a.getAttribute( 'href' ) );
+
+    expect( hrefs ).toEqual( [ DASHBOARD ] );
+    expect( root.querySelector( '[target="_blank"]' ) ).toBeNull();
 } );
 
-test( 'only the first button is filled', () => {
+test( 'its button is the filled one', () => {
     lastScreen( facts() );
 
     expect( cta( items()[ 0 ] ).className ).toContain( 'gratora-btn--primary' );
-    expect( cta( items()[ 1 ] ).className ).not.toContain( 'gratora-btn--primary' );
 } );
 
-test( 'there are two things on it and neither asks for payment keys', () => {
+test( 'there is one thing on it and it does not ask for payment keys', () => {
     lastScreen( facts() );
 
-    expect( items() ).toHaveLength( 2 );
+    expect( items() ).toHaveLength( 1 );
     expect( root.textContent ).not.toMatch( /gateway/i );
 } );
 

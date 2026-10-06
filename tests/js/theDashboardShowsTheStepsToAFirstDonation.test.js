@@ -243,14 +243,18 @@ test( 'a hide the server refused leaves the card where it is, and says so', asyn
     expect( root.querySelector( '[role="alert"]' ).textContent ).toBe( 'Sorry, you are not allowed to do that.' );
 } );
 
-test( 'the demo opens in a new tab and is marked as coming from the dashboard', () => {
+test( 'no link on it leads off the site', () => {
     card( facts() );
 
-    const demo = link( 'Open the demo' );
+    const hrefs = [ ...root.querySelectorAll( 'a' ) ].map( ( a ) => a.getAttribute( 'href' ) );
 
-    expect( demo.getAttribute( 'href' ) ).toBe( 'https://gratora.net/demo/?utm_source=plugin&utm_medium=dashboard' );
-    expect( demo.getAttribute( 'target' ) ).toBe( '_blank' );
-    expect( demo.textContent ).toContain( '(opens in a new tab)' );
+    expect( hrefs.filter( ( href ) => ! href.startsWith( '/wp-admin/' ) ) ).toEqual( [] );
+} );
+
+test( 'its foot offers the full check and nothing else', () => {
+    card( facts() );
+
+    expect( root.querySelector( '.gratora-firstrun__foot' ).textContent.trim() ).toBe( 'See the full setup check' );
 } );
 
 test( 'the full check is one link away, on the Setup tab', () => {

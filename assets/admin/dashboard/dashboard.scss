@@ -601,7 +601,7 @@
         flex-wrap: wrap;
         font-size: 13px;
         gap: $space-2 $space-4;
-        justify-content: space-between;
+        justify-content: flex-end;
         padding: $space-3 $space-5;
 
         a {
