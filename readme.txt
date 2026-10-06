@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -260,10 +260,10 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.1.2 =
-* New: the Add-ons link in the Fundraising menu has a color of its own.
-* New: on the Plugins screen, "By Gratora" links to gratora.net.
-* Fixed: a disabled switch no longer shows a checkbox on top of it.
-* Fixed: uneven labels and spacing in the fund dialog.
+= 1.1.3 =
+* New: the Add-ons screen loads its add-ons and plans from gratora.net.
+* Fixed: recurring donation screens on MySQL 5.7.
+* Fixed: fields added by add-ons are saved when a form is shown on a fundraiser's page.
+* Fixed: a deprecation notice in the log when the form editor opens.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).

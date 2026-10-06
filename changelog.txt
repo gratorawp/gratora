@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 1.1.3 =
+* New: the Add-ons screen loads its add-ons and plans from gratora.net.
+* Fixed: recurring donation screens on MySQL 5.7.
+* Fixed: fields added by add-ons are saved when a form is shown on a fundraiser's page.
+* Fixed: a deprecation notice in the log when the form editor opens.
+
 = 1.1.2 =
 * New: the Add-ons link in the Fundraising menu has a color of its own.
 * New: on the Plugins screen, "By Gratora" links to gratora.net.

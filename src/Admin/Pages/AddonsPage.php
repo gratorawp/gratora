@@ -28,7 +28,7 @@ final class AddonsPage extends HookProvider
         .admin-color-light #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #b45309; }
         CSS;
 
-    /** @unreleased */
+    /** @since 1.1.3 */
     public function __construct(private AddonsCatalog $catalog, private LicenseService $license)
     {
     }
@@ -97,7 +97,7 @@ final class AddonsPage extends HookProvider
      *   offer:array{text:string,url:string}|null,
      * }
      *
-     * @unreleased
+     * @since 1.1.3
      */
     public function screen(): array
     {

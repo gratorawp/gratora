@@ -12,7 +12,7 @@ use Gratora\Foundation\Time\Clock;
  * The add-ons, plans and offer the Add-ons screen shows: from gratora.net when
  * it answers, from the list below when it does not.
  *
- * @unreleased
+ * @since 1.1.3
  */
 final class AddonsCatalog
 {
@@ -32,7 +32,7 @@ final class AddonsCatalog
     /** The same on every site, so it names the plugin as the source of a visit and not the site. */
     private const MARK = '?utm_source=plugin&utm_medium=add-ons';
 
-    /** @unreleased */
+    /** @since 1.1.3 */
     public function __construct(private Clock $clock)
     {
     }
@@ -45,7 +45,7 @@ final class AddonsCatalog
      *   offer:array{text:string,url:string}|null,
      * }
      *
-     * @unreleased
+     * @since 1.1.3
      */
     public function get(): array
     {
@@ -69,7 +69,7 @@ final class AddonsCatalog
         /**
          * Whether the Add-ons screen may ask gratora.net for its lists.
          *
-         * @unreleased
+         * @since 1.1.3
          *
          * @param bool $allowed
          */
