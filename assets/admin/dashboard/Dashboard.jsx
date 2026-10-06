@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -113,6 +113,20 @@ export default function Dashboard() {
     // still reads it.
     useEffect( forgetWentLive, [] );
 
+    const heading     = useRef( null );
+    const cardShowing = !! metrics?.first_run && ! firstRunHidden;
+
+    // The step the card pushes hardest opens the donation page in another
+    // tab. Coming back from it has to show the donation that was just made.
+    useEffect( () => {
+        if ( ! cardShowing ) return undefined;
+        const onReturn = () => {
+            if ( document.visibilityState === 'visible' ) setReloadKey( ( k ) => k + 1 );
+        };
+        document.addEventListener( 'visibilitychange', onReturn );
+        return () => document.removeEventListener( 'visibilitychange', onReturn );
+    }, [ cardShowing ] );
+
     const layout = useGratoraLayout( SCOPE, WIDGET_KEYS );
 
     // Only fetch sections for visible widgets; include= changes on hide/unhide.
@@ -218,7 +232,7 @@ export default function Dashboard() {
         <div className="gratora-dashboard" data-loading={ loading ? 'true' : undefined }>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'gratora-donation-platform' ) }</h1>
+                    <h1 ref={ heading } tabIndex={ -1 }>{ __( 'Dashboard', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     <SectionBar
@@ -237,12 +251,15 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            { metrics?.first_run && ! firstRunHidden && (
+            { cardShowing && (
                 <FirstRunCard
                     facts={ metrics.first_run }
                     onChanged={ () => setReloadKey( ( k ) => k + 1 ) }
                     onModeSwitched={ afterModeSwitch }
-                    onHidden={ () => setFirstRunHidden( true ) }
+                    onHidden={ () => {
+                        setFirstRunHidden( true );
+                        heading.current?.focus();
+                    } }
                 />
             ) }
 

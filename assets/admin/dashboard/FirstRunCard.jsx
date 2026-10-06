@@ -1,4 +1,4 @@
-import { useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { ArrowRight, Circle, CircleCheck, ExternalLink } from 'lucide-react';
@@ -23,6 +23,16 @@ const NewTab = () => (
 export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidden } ) {
     const [ busy, setBusy ]   = useState( null );
     const [ error, setError ] = useState( null );
+    const card       = useRef( null );
+    const afterPress = useRef( false );
+
+    // A press that changed the facts leaves the keyboard on what comes next,
+    // not on a button that is no longer there.
+    useEffect( () => {
+        if ( ! afterPress.current ) return;
+        afterPress.current = false;
+        card.current?.querySelector( '.is-next .gratora-firstrun__act a, .is-next .gratora-firstrun__act button' )?.focus();
+    }, [ facts ] );
 
     const steps   = firstRunSteps( facts, { campaigns: listHref(), payments: settingsHref( 'gateways' ) } );
     const primary = primaryStep( steps );
@@ -35,6 +45,7 @@ export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidd
         try {
             if ( kind === 'create' ) {
                 await apiFetch( { path: '/gratora/v1/admin/onboarding/starter-campaign', method: 'POST' } );
+                afterPress.current = true;
                 onChanged();
             } else {
                 const testMode = kind === 'test-on';
@@ -48,13 +59,26 @@ export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidd
         }
     };
 
-    const hide = () => {
-        apiFetch( { path: '/gratora/v1/admin/me/first-run', method: 'POST' } ).catch( () => {} );
+    // Waited for: a card that goes at once and is back on the next visit,
+    // because the server said no, has told its reader nothing.
+    const hide = async () => {
+        if ( busy ) return;
+        setBusy( 'hide' );
+        setError( null );
+        try {
+            await apiFetch( { path: '/gratora/v1/admin/me/first-run', method: 'POST' } );
+        } catch ( err ) {
+            setError( err?.message || __( 'That did not work. Please try again.', 'gratora-donation-platform' ) );
+            setBusy( null );
+            return;
+        }
         onHidden();
     };
 
+    const hideNote = __( 'Hides these steps for you for good. The full check stays on Settings, Setup.', 'gratora-donation-platform' );
+
     return (
-        <section className="gratora-firstrun" aria-labelledby="gratora-firstrun-title">
+        <section ref={ card } className="gratora-firstrun" aria-labelledby="gratora-firstrun-title">
             <div className="gratora-firstrun__head">
                 <div>
                     <h2 id="gratora-firstrun-title" className="gratora-firstrun__title">
@@ -65,7 +89,7 @@ export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidd
                     </p>
                 </div>
                 <div className="gratora-firstrun__progress">
-                    <span>
+                    <span role="status">
                         { sprintf(
                             /* translators: 1: steps done. 2: steps in all. */
                             __( '%1$d of %2$d done', 'gratora-donation-platform' ),
@@ -76,9 +100,16 @@ export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidd
                     <span className="gratora-firstrun__bar" aria-hidden="true">
                         <i style={ { width: `${ ( done / steps.length ) * 100 }%` } } />
                     </span>
-                    <button type="button" className="gratora-firstrun__hide" onClick={ hide }>
+                    <button
+                        type="button"
+                        className="gratora-firstrun__hide"
+                        onClick={ hide }
+                        title={ hideNote }
+                        aria-describedby="gratora-firstrun-hide-note"
+                    >
                         { __( 'Hide', 'gratora-donation-platform' ) }
                     </button>
+                    <span id="gratora-firstrun-hide-note" className="screen-reader-text">{ hideNote }</span>
                 </div>
             </div>
 
@@ -146,13 +177,18 @@ function Step( { step, number, isPrimary, busy, onPress } ) {
 
 function Action( { action, isPrimary, busy, onPress, describedBy } ) {
     if ( action.kind !== 'link' ) {
+        // Withheld rather than disabled: a disabled button is skipped by the
+        // keyboard, and the reason it cannot be pressed is then never read.
+        const withheld = !! action.disabled;
+
         return (
             <Btn
                 variant={ isPrimary ? 'primary' : undefined }
                 size="sm"
-                disabled={ action.disabled || !! busy }
+                disabled={ !! busy && ! withheld }
                 isBusy={ busy === action.kind }
-                onClick={ () => onPress( action.kind ) }
+                onClick={ () => { if ( ! withheld ) onPress( action.kind ); } }
+                aria-disabled={ withheld ? 'true' : undefined }
                 aria-describedby={ describedBy }
             >
                 { action.label }
@@ -160,13 +196,19 @@ function Action( { action, isPrimary, busy, onPress, describedBy } ) {
         );
     }
 
-    const opens = action.newTab ? { target: '_blank', rel: 'noreferrer' } : {};
+    const opens  = action.newTab ? { target: '_blank', rel: 'noreferrer' } : {};
+    const newTab = action.newTab && (
+        <>
+            <ExternalLink size={ 13 } strokeWidth={ 2 } aria-hidden="true" />
+            <NewTab />
+        </>
+    );
 
     if ( isPrimary ) {
         return (
             <Btn variant="primary" size="sm" href={ action.href } { ...opens }>
                 { action.label }
-                { action.newTab && <NewTab /> }
+                { newTab }
             </Btn>
         );
     }
@@ -174,8 +216,7 @@ function Action( { action, isPrimary, busy, onPress, describedBy } ) {
     return (
         <a className="gratora-firstrun__link" href={ action.href } { ...opens }>
             { action.label }
-            <ArrowRight size={ 14 } strokeWidth={ 2 } aria-hidden="true" />
-            { action.newTab && <NewTab /> }
+            { newTab || <ArrowRight size={ 14 } strokeWidth={ 2 } aria-hidden="true" /> }
         </a>
     );
 }

@@ -63,6 +63,10 @@ function dashboardAnswering( ...payloads ) {
             : Promise.resolve( {} )
     ) );
 
+    // The page before this one is gone, with whatever it was listening for.
+    if ( root ) render( null, root );
+    document.body.innerHTML = '';
+
     root = document.createElement( 'div' );
     document.body.appendChild( root );
     render( <Dashboard />, root );
@@ -75,6 +79,8 @@ const loads = () => apiFetch.mock.calls.filter( ( [ { path, method } ] ) => ! me
 const realLocation = window.location;
 
 beforeEach( () => {
+    if ( root ) render( null, root );
+    root = null;
     document.body.innerHTML = '';
     apiFetch.mockReset();
     window.sessionStorage.clear();
@@ -144,14 +150,12 @@ test( 'the screen that follows going live says so once, in place of the card', a
     pressable( 'Turn off test mode' ).click();
     await settle();
 
-    document.body.innerHTML = '';
     dashboardAnswering( payload( null ) );
     await settle();
 
     expect( card() ).toBeNull();
     expect( root.textContent ).toContain( 'Test mode is off. Donations are real from now on.' );
 
-    document.body.innerHTML = '';
     dashboardAnswering( payload( null ) );
     await settle();
 
@@ -164,11 +168,61 @@ test( 'switching test mode on is followed by no such line', async () => {
     pressable( 'Turn on test mode' ).click();
     await settle();
 
-    document.body.innerHTML = '';
-    dashboardAnswering( payload( WITH_PAGE ) );
+    // Answered with no card, which the switch on its own could not produce:
+    // the direction of the switch is what has to keep the line away.
+    dashboardAnswering( payload( null ) );
     await settle();
 
     expect( root.textContent ).not.toContain( 'Test mode is off.' );
+} );
+
+// Test mode can be turned off on a site that still has no page. That site is
+// not live, keeps its card, and is not told that donations are real.
+test( 'a site that turned test mode off and still has steps left is not told it is live', async () => {
+    dashboardAnswering( payload( { ...NEW_SITE, payments: true, payment_methods: [ 'Stripe' ] } ) );
+    await settle();
+    pressable( 'Turn off test mode' ).click();
+    await settle();
+
+    dashboardAnswering( payload( { ...NEW_SITE, test_mode: false, payments: true, payment_methods: [ 'Stripe' ] } ) );
+    await settle();
+
+    expect( card() ).not.toBeNull();
+    expect( root.textContent ).not.toContain( 'Test mode is off. Donations are real' );
+} );
+
+// The step it pushes hardest opens the donation page in another tab. Coming
+// back from it has to show the donation that was just made.
+test( 'coming back to the tab asks again while the card is showing', async () => {
+    dashboardAnswering( payload( WITH_PAGE ), payload( { ...WITH_PAGE, test_donation: { amount_cents: 2603, currency: 'USD', donor: 'Maya Chen', url: '#' } } ) );
+    await settle();
+    expect( card().textContent ).toContain( '1 of 4 done' );
+
+    document.dispatchEvent( new Event( 'visibilitychange' ) );
+    await settle();
+
+    expect( loads() ).toBe( 2 );
+    expect( card().textContent ).toContain( '2 of 4 done' );
+} );
+
+test( 'coming back to a dashboard with no card asks for nothing', async () => {
+    dashboardAnswering( payload( null ) );
+    await settle();
+
+    document.dispatchEvent( new Event( 'visibilitychange' ) );
+    await settle();
+
+    expect( loads() ).toBe( 1 );
+} );
+
+test( 'once the card is hidden, the keyboard is left on the heading of the screen', async () => {
+    dashboardAnswering( payload( NEW_SITE ) );
+    await settle();
+
+    pressable( 'Hide' ).click();
+    await settle();
+
+    expect( document.activeElement.tagName ).toBe( 'H1' );
 } );
 
 test( 'a site that was live all along is told nothing of the kind', async () => {

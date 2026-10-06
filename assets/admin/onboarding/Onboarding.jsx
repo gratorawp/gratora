@@ -756,6 +756,10 @@ export function ChecklistStep( { facts = {}, dashboardUrl, campaignsUrl } ) {
 
             { error && <div className="gratora-onboarding__error" role="alert">{ error }</div> }
 
+            <span className="screen-reader-text" role="status">
+                { busy ? __( 'Creating the page.', 'gratora-donation-platform' ) : '' }
+            </span>
+
             <p className="gratora-onboarding__checklist-foot">
                 <a className="gratora-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
                     { __( 'Go to the dashboard', 'gratora-donation-platform' ) }

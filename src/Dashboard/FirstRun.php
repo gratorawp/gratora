@@ -38,7 +38,7 @@ final class FirstRun
      *   page_title: ?string,
      *   page_url: ?string,
      *   test_mode: bool,
-     *   test_donation: ?array{amount_cents:int, currency:string, donor:?string, url:string},
+     *   test_donation: ?array{amount_cents:int, currency:string, donor:?string, url:?string},
      *   payments: bool,
      *   payment_methods: list<string>,
      * }
@@ -71,7 +71,9 @@ final class FirstRun
      */
     public function card(): ?array
     {
-        if (! Capabilities::userCan('gratora_manage_settings')) {
+        // The steps make a campaign and change payment settings, so the card
+        // is for someone who may do both.
+        if (! Capabilities::userCan('gratora_manage_settings') || ! Capabilities::userCan('gratora_manage_campaigns')) {
             return null;
         }
         if (get_user_meta(get_current_user_id(), self::HIDDEN_META, true)) {
@@ -102,7 +104,7 @@ final class FirstRun
             ->pluck('id') !== [];
     }
 
-    /** @return ?array{amount_cents:int, currency:string, donor:?string, url:string} */
+    /** @return ?array{amount_cents:int, currency:string, donor:?string, url:?string} */
     private function testDonation(): ?array
     {
         $donation = DonationQueries::notTrashed(Donation::query())
@@ -125,7 +127,9 @@ final class FirstRun
             'amount_cents' => (int) $donation->amount_cents,
             'currency'     => (string) $donation->currency,
             'donor'        => $name !== '' ? $name : null,
-            'url'          => admin_url('admin.php?page=gratora-donations&include_test=1'),
+            'url'          => Capabilities::userCan('gratora_view_donations')
+                ? admin_url('admin.php?page=gratora-donations&include_test=1')
+                : null,
         ];
     }
 }

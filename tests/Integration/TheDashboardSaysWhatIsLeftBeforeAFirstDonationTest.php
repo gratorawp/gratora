@@ -299,6 +299,39 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         $this->assertNull($this->dashboard()['first_run']);
     }
 
+    /**
+     * The first step makes a campaign. Someone who may not is not shown a
+     * button that would refuse them.
+     */
+    public function test_someone_who_may_not_create_campaigns_does_not_see_it(): void
+    {
+        wp_set_current_user($this->someoneWho(['gratora_view_reports', 'gratora_manage_settings']));
+
+        $this->assertNull($this->dashboard()['first_run']);
+    }
+
+    public function test_someone_who_may_not_open_donations_is_given_no_link_to_one(): void
+    {
+        $this->donation(['is_test' => true]);
+        wp_set_current_user($this->someoneWho(['gratora_view_reports', 'gratora_manage_settings', 'gratora_manage_campaigns']));
+
+        $given = $this->card()['test_donation'];
+
+        $this->assertSame(2500, $given['amount_cents']);
+        $this->assertNull($given['url']);
+    }
+
+    /** @param list<string> $capabilities */
+    private function someoneWho(array $capabilities): int
+    {
+        $person = self::factory()->user->create(['role' => 'editor']);
+        foreach ($capabilities as $capability) {
+            get_userdata($person)->add_cap($capability);
+        }
+
+        return $person;
+    }
+
     public function test_the_wizard_s_last_screen_is_given_the_same_facts(): void
     {
         $this->campaign(['title' => 'Winter food drive', 'status' => 'published']);

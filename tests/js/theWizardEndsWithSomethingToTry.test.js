@@ -148,6 +148,17 @@ test( 'a second press while the page is being made sends nothing more', async ()
     expect( apiFetch ).toHaveBeenCalledTimes( 1 );
 } );
 
+test( 'while the page is being made, that is said and not only shown', async () => {
+    apiFetch.mockReturnValue( new Promise( () => {} ) );
+    lastScreen( facts() );
+    expect( root.querySelector( '[role="status"]' ).textContent ).toBe( '' );
+
+    cta( items()[ 0 ] ).click();
+    await settle();
+
+    expect( root.querySelector( '[role="status"]' ).textContent ).toBe( 'Creating the page.' );
+} );
+
 test( 'a page that could not be made says why, and the button works again', async () => {
     apiFetch.mockRejectedValue( { message: 'This site already has a campaign.' } );
     lastScreen( facts() );

@@ -566,6 +566,17 @@
         padding-top: 14px;
     }
 
+    .gratora-btn {
+        align-items: center;
+        display: inline-flex;
+        gap: 5px;
+
+        &[aria-disabled="true"] {
+            cursor: default;
+            opacity: .55;
+        }
+    }
+
     &__link {
         align-items: center;
         color: $text;
