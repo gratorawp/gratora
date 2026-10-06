@@ -21,6 +21,7 @@ function pageStep( facts, hrefs ) {
     if ( facts.page === 'live' ) {
         return {
             ...step,
+            title:  __( 'Donation page created', 'gratora-donation-platform' ),
             done:   true,
             text:   facts.page_title,
             action: { kind: 'link', label: __( 'View the page', 'gratora-donation-platform' ), href: facts.page_url, newTab: true },
@@ -46,6 +47,7 @@ function pageStep( facts, hrefs ) {
 
 function testStep( facts ) {
     const step = { key: 'test', title: __( 'Make a test donation', 'gratora-donation-platform' ) };
+    const made = __( 'Test donation made', 'gratora-donation-platform' );
     const given = facts.test_donation;
 
     if ( given ) {
@@ -62,6 +64,7 @@ function testStep( facts ) {
 
         return {
             ...step,
+            title:  made,
             done:   true,
             text,
             action: given.url ? { kind: 'link', label: __( 'View it', 'gratora-donation-platform' ), href: given.url } : null,
@@ -102,6 +105,7 @@ function paymentsStep( facts, hrefs ) {
     if ( facts.payments ) {
         return {
             ...step,
+            title:  __( 'Payments connected', 'gratora-donation-platform' ),
             done:   true,
             /* translators: %s: a list of payment methods, e.g. "Stripe, Offline donations". */
             text:   sprintf( __( 'Ready: %s', 'gratora-donation-platform' ), facts.payment_methods.join( ', ' ) ),

@@ -45,6 +45,17 @@ test( 'there are four, in the order a site goes through them', () => {
     ] );
 } );
 
+test( 'a step that is finished is worded as finished', () => {
+    const given = withPage( { test_donation: TEST_DONATION, payments: true, payment_methods: [ 'Stripe' ] } );
+
+    expect( firstRunSteps( given, HREFS ).map( ( s ) => [ s.done, s.title ] ) ).toEqual( [
+        [ true, 'Donation page created' ],
+        [ true, 'Test donation made' ],
+        [ true, 'Payments connected' ],
+        [ false, 'Go live' ],
+    ] );
+} );
+
 describe( 'the donation page', () => {
     test( 'a site with no campaign is offered one', () => {
         expect( step( facts(), 'page' ) ).toMatchObject( {

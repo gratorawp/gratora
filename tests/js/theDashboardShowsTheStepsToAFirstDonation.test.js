@@ -66,13 +66,13 @@ test( 'it draws the four steps and how many are done', () => {
     card( withPage() );
 
     expect( steps().map( ( li ) => li.querySelector( 'h3' ).textContent ) ).toEqual( [
-        'Create your donation page',
+        'Donation page created',
         'Make a test donation',
         'Connect payments',
         'Go live',
     ] );
     expect( root.querySelector( '.gratora-firstrun__progress' ).textContent ).toContain( '1 of 4 done' );
-    expect( stepNamed( 'Create your donation page' ).textContent ).toContain( 'Done' );
+    expect( stepNamed( 'Donation page created' ).textContent ).toContain( 'Done' );
     expect( stepNamed( 'Make a test donation' ).textContent ).toContain( 'Step 2' );
 } );
 
