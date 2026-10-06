@@ -136,6 +136,46 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         $this->assertSame(['Offline donations'], $card['payment_methods']);
     }
 
+    /** @return array<string, array{0: array<string,mixed>, 1: ?string}> */
+    public function sitesTheSetupTabAlsoJudges(): array
+    {
+        $bank = ['offline' => ['bank_details' => 'IBAN HR12 1001 0051 8630 0016 0']];
+
+        return [
+            'a new site'                         => [['test_mode' => true], null],
+            'bank details, still in test mode'   => [['test_mode' => true] + $bank, null],
+            'bank details and a draft campaign'  => [['test_mode' => true] + $bank, 'draft'],
+            'a page and nothing to take money'   => [['test_mode' => true], 'published'],
+            'a page and bank details, test mode' => [['test_mode' => true] + $bank, 'published'],
+            'no page, test mode off'             => [['test_mode' => false] + $bank, null],
+        ];
+    }
+
+    /**
+     * The card links to the Setup tab as the full check, so the two have to
+     * give one answer about the page and one about payments.
+     *
+     * @dataProvider sitesTheSetupTabAlsoJudges
+     *
+     * @param array<string,mixed> $payments
+     */
+    public function test_the_card_and_the_setup_tab_give_one_answer(array $payments, ?string $campaign): void
+    {
+        update_option('gratora_gateway_config', $payments);
+        if ($campaign !== null) {
+            $this->campaign(['title' => 'Winter food drive', 'status' => $campaign]);
+        }
+
+        $card  = $this->card();
+        $setup = [];
+        foreach (rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/readiness'))->get_data()['checks'] as $row) {
+            $setup[$row['id']] = $row['status'];
+        }
+
+        $this->assertSame($card['payments'], $setup['gateway'] === 'pass', 'payments');
+        $this->assertSame($card['page'] === 'live', $setup['donation-page'] === 'pass', 'the page');
+    }
+
     public function test_it_says_when_test_mode_is_off(): void
     {
         update_option('gratora_gateway_config', ['test_mode' => false]);

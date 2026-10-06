@@ -443,9 +443,21 @@ final class CoreModule implements GratoraModule
             $c->get(Clock::class)
         ));
 
+        $c->bind(ReadinessService::class, fn (Container $c) => new ReadinessService(
+            $c->get(SettingsService::class),
+            $c->get(FormReadinessService::class),
+            $c->get(StripeAccount::class),
+            $c->get(StripeApi::class),
+            $c->get(ApplePayDomain::class),
+            $c->get(PayPalAccount::class),
+            $c->get(GatewayManager::class),
+            new PortalPage(),
+            $c->get(LicenseService::class),
+        ));
+
         $c->bind(FirstRun::class, fn (Container $c) => new FirstRun(
             new LiveCampaigns(),
-            $c->get(GatewayManager::class)
+            $c->get(ReadinessService::class)
         ));
 
         $c->bind(FundService::class, fn (Container $c) => new FundService(
@@ -1071,17 +1083,7 @@ final class CoreModule implements GratoraModule
                 $c->get(DonorRepository::class),
                 $c->get(TaxStatementBuilder::class),
             ),
-            new ReadinessController(new ReadinessService(
-                $c->get(SettingsService::class),
-                $c->get(FormReadinessService::class),
-                $c->get(StripeAccount::class),
-                $c->get(StripeApi::class),
-                $c->get(ApplePayDomain::class),
-                $c->get(PayPalAccount::class),
-                $c->get(GatewayManager::class),
-                new PortalPage(),
-                $c->get(LicenseService::class),
-            ))
+            new ReadinessController($c->get(ReadinessService::class))
         ))->register();
 
         $c->get(PortalController::class)->registerHooks();

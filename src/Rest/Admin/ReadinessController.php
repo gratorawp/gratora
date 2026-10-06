@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Rest\Admin;
 
 use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Gateways\TestMode;
 use Gratora\Settings\ReadinessService;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -47,6 +48,9 @@ final class ReadinessController
         return new WP_REST_Response([
             'checks'   => $checks,
             'live'     => $this->readiness->isLive($checks),
+            // The headline has to tell a site whose donations work from one
+            // whose test donations do.
+            'test_mode' => TestMode::siteWide(),
             'blockers' => count(array_filter(
                 $checks,
                 static fn (array $c): bool => ! empty($c['blocker']) && $c['status'] === ReadinessService::FAIL

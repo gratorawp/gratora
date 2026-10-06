@@ -100,6 +100,16 @@ function Summary( { report } ) {
             blockers,
             'gratora-donation-platform'
         );
+    } else if ( report.test_mode ) {
+        // A site in test mode takes test donations and no real ones, so
+        // "donations work" would be true of the wrong kind.
+        tone  = 'amber';
+        title = __( 'Ready to accept test donations', 'gratora-donation-platform' );
+        sub   = sprintf(
+            /* translators: %d: number of things to look at before going live. */
+            _n( '%d thing is worth a look before you turn test mode off.', '%d things are worth a look before you turn test mode off.', warnings, 'gratora-donation-platform' ),
+            warnings
+        );
     } else if ( warnings > 0 ) {
         tone = 'amber';
         sub  = sprintf(

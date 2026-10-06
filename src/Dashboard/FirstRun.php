@@ -10,8 +10,8 @@ use Gratora\Donations\Donation;
 use Gratora\Donations\DonationQueries;
 use Gratora\Donors\Donor;
 use Gratora\Foundation\Auth\Capabilities;
-use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\TestMode;
+use Gratora\Settings\ReadinessService;
 
 /**
  * What stands between a new site and its first real donation.
@@ -28,7 +28,7 @@ final class FirstRun
     /** @unreleased */
     public function __construct(
         private LiveCampaigns $live,
-        private GatewayManager $gateways,
+        private ReadinessService $readiness,
     ) {
     }
 
@@ -48,7 +48,7 @@ final class FirstRun
     public function facts(): array
     {
         $page    = $this->live->first();
-        $methods = $this->gateways->realMethods();
+        $methods = $this->readiness->realMethods();
 
         return [
             'page'            => $page ? 'live' : (Campaign::query()->count() > 0 ? 'unpublished' : 'none'),

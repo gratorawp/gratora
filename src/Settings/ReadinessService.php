@@ -129,17 +129,23 @@ final class ReadinessService
      */
     private function gatewayCheck(): array
     {
-        // Check enabled registered gateways, including add-ons.
-        $ready = [];
-        foreach ($this->gateways->all() as $gateway) {
-            if ($this->gateways->isOn($gateway->id())) {
-                $ready[] = $gateway->label();
-            }
-        }
-
-        $ready = array_values(array_unique($ready));
+        $ready = $this->realMethods();
 
         if ($ready === []) {
+            // The form of a site in test mode still takes a test donation, so
+            // nothing is stopping a donor. What is missing is a way to take a
+            // real one, and a new install is in exactly this state.
+            if ($this->testMode() && $this->somethingTakesATestDonation()) {
+                return $this->warn(
+                    'gateway',
+                    'money',
+                    __('Only test donations can be taken so far', 'gratora-donation-platform'),
+                    __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow, before you turn test mode off.', 'gratora-donation-platform'),
+                    'gateways',
+                    __('Set up payments', 'gratora-donation-platform')
+                );
+            }
+
             return $this->fail(
                 'gateway',
                 'money',
@@ -173,6 +179,36 @@ final class ReadinessService
                 implode(', ', $ready)
             )
         );
+    }
+
+    /**
+     * Labels of the methods that can take a real donation: switched on, able
+     * to charge with live credentials, and not reported as missing them. The
+     * rehearsal method is left out, since it charges nobody in either mode.
+     *
+     * A gateway from an add-on that answers for both modes at once says which
+     * mode it lacks through the gap filters, by its label, so the label is
+     * what it is taken out by.
+     *
+     * @return list<string>
+     *
+     * @unreleased
+     */
+    public function realMethods(): array
+    {
+        $withoutLiveKeys = $this->modeGaps(false);
+
+        $labels = [];
+        foreach ($this->gateways->all() as $id => $gateway) {
+            if ($id === 'sandbox' || ! $this->gateways->isOn((string) $id, false)) {
+                continue;
+            }
+            if (! in_array($gateway->label(), $withoutLiveKeys, true)) {
+                $labels[] = $gateway->label();
+            }
+        }
+
+        return array_values(array_unique($labels));
     }
 
     /**
@@ -237,7 +273,7 @@ final class ReadinessService
                         'mode',
                         'money',
                         $label,
-                        __('It is not offered while test mode is on, so donations go through another method and no real payment is taken. Turn test mode off to go live, or add the test key pair to rehearse with it.', 'gratora-donation-platform'),
+                        __('A gateway without test keys is not offered while test mode is on, so donations go through another method and no real payment is taken. Turn test mode off to go live, or add the test key pair to rehearse with it.', 'gratora-donation-platform'),
                         'gateways',
                         __('Open payments', 'gratora-donation-platform')
                     );

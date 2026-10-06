@@ -14,11 +14,13 @@ use Gratora\Foundation\Time\SystemClock;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\Offline\OfflineGateway;
 use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Sandbox\SandboxGateway;
 use Gratora\Gateways\Stripe\ApplePayDomain;
 use Gratora\Gateways\Stripe\StripeAccount;
 use Gratora\Gateways\Stripe\StripeApi;
 use Gratora\Gateways\TestMode;
 use Gratora\Forms\FormRepository;
+use Gratora\Recurring\RecurringPlanRepository;
 use Gratora\Settings\ReadinessService;
 use Gratora\Settings\SettingsService;
 use WP_REST_Request;
@@ -44,7 +46,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
         return $gateways;
     }
 
-    private function service(): ReadinessService
+    private function service(?GatewayManager $gateways = null): ReadinessService
     {
         $settings = new SettingsService();
         $crypto   = new Crypto();
@@ -62,17 +64,17 @@ final class ReadinessServiceTest extends IntegrationTestCase
             // and the shared one may hold whatever a sibling registered. Offline
             // is put back because CoreModule always registers it, and the check
             // reads the registry to decide whether money can arrive.
-            $this->registry(),
+            $gateways ?? $this->registry(),
             new PortalPage(),
             new LicenseService(),
         );
     }
 
     /** @return array<string,array<string,mixed>> keyed by check id */
-    private function checks(): array
+    private function checks(?GatewayManager $gateways = null): array
     {
         $out = [];
-        foreach ($this->service()->check() as $check) {
+        foreach ($this->service($gateways)->check() as $check) {
             $out[$check['id']] = $check;
         }
 
@@ -106,6 +108,70 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->enableOffline('');
 
         $this->assertSame(ReadinessService::FAIL, $this->checks()['gateway']['status']);
+    }
+
+    /**
+     * A new install is in test mode with the Test donation method on and
+     * nothing else. Its form takes a test donation, so nothing is stopping a
+     * donor, and it cannot take a real one, so it is not ready either.
+     */
+    public function test_a_site_that_can_only_take_test_donations_is_told_so_and_not_called_ready(): void
+    {
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+
+        $check = $this->checks($this->registryWithTheTestDonationMethod())['gateway'];
+
+        $this->assertSame(ReadinessService::WARN, $check['status']);
+        $this->assertSame('Only test donations can be taken so far', $check['label']);
+        $this->assertArrayNotHasKey('blocker', $check);
+        $this->assertStringEndsWith('#gateways', (string) $check['action_url']);
+    }
+
+    public function test_in_test_mode_the_methods_named_are_the_ones_that_will_take_real_money(): void
+    {
+        update_option('gratora_gateway_config', [
+            'test_mode' => true,
+            'offline'   => ['instructions' => 'Transfer within 7 days.'],
+        ]);
+
+        $check = $this->checks($this->registryWithTheTestDonationMethod())['gateway'];
+
+        $this->assertSame(ReadinessService::PASS, $check['status']);
+        $this->assertStringContainsString('Offline donations', (string) $check['label']);
+        $this->assertStringNotContainsString('Test donation', (string) $check['label']);
+    }
+
+    public function test_test_mode_with_nothing_at_all_to_take_a_donation_is_still_blocked(): void
+    {
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+
+        $check = $this->checks()['gateway'];
+
+        $this->assertSame(ReadinessService::FAIL, $check['status']);
+        $this->assertTrue($check['blocker']);
+    }
+
+    public function test_the_report_says_when_the_site_is_in_test_mode(): void
+    {
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        $this->assertTrue($this->report()['test_mode']);
+
+        update_option('gratora_gateway_config', ['test_mode' => false]);
+        $this->assertFalse($this->report()['test_mode']);
+    }
+
+    /** @return array<string,mixed> */
+    private function report(): array
+    {
+        return (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/readiness'))->get_data();
+    }
+
+    private function registryWithTheTestDonationMethod(): GatewayManager
+    {
+        $gateways = $this->registry();
+        $gateways->register(new SandboxGateway(new SystemClock(), new RecurringPlanRepository()));
+
+        return $gateways;
     }
 
     public function test_test_mode_is_reported_as_a_warning_not_a_pass(): void
