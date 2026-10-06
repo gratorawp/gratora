@@ -672,6 +672,7 @@ function firstItem( facts, campaignsUrl ) {
         return facts.test_mode
             ? {
                 title: __( 'Make a test donation', 'gratora-donation-platform' ),
+                /* translators: "Test donation" is the payment method as the donation form names it. Word it as that string is worded. */
                 description: __( 'Open your page and give with the Test donation method. No card is charged.', 'gratora-donation-platform' ),
                 cta: __( 'Open the page', 'gratora-donation-platform' ),
                 href: facts.page_url,
@@ -684,10 +685,10 @@ function firstItem( facts, campaignsUrl ) {
             };
     }
 
-    if ( facts.page === 'unpublished' ) {
+    if ( facts.page === 'closed' ) {
         return {
-            title: __( 'Publish your campaign', 'gratora-donation-platform' ),
-            description: __( 'You have a campaign, but none is published, so no page is taking donations yet.', 'gratora-donation-platform' ),
+            title: __( 'Open a campaign for donations', 'gratora-donation-platform' ),
+            description: __( 'You have a campaign, but none of them is taking donations right now.', 'gratora-donation-platform' ),
             cta: __( 'Open campaigns', 'gratora-donation-platform' ),
             href: campaignsUrl,
         };

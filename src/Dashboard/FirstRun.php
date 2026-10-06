@@ -34,7 +34,7 @@ final class FirstRun
 
     /**
      * @return array{
-     *   page: 'none'|'unpublished'|'live',
+     *   page: 'none'|'closed'|'live',
      *   page_title: ?string,
      *   page_url: ?string,
      *   test_mode: bool,
@@ -47,13 +47,13 @@ final class FirstRun
      */
     public function facts(): array
     {
-        $page    = $this->live->first();
+        $page    = $this->live->firstOpen();
         $methods = $this->readiness->realMethods();
 
         return [
-            'page'            => $page ? 'live' : (Campaign::query()->count() > 0 ? 'unpublished' : 'none'),
+            'page'            => $page ? 'live' : (Campaign::query()->count() > 0 ? 'closed' : 'none'),
             'page_title'      => $page ? (string) $page->title : null,
-            'page_url'        => $page && $page->page_id ? (string) get_permalink((int) $page->page_id) : null,
+            'page_url'        => $page ? (string) get_permalink((int) $page->page_id) : null,
             'test_mode'       => TestMode::siteWide(),
             'test_donation'   => $this->testDonation(),
             'payments'        => $methods !== [],

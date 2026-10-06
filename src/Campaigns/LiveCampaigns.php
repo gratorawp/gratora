@@ -43,9 +43,21 @@ final class LiveCampaigns
         ));
     }
 
-    /** @unreleased */
-    public function first(): ?Campaign
+    /**
+     * The oldest one somebody can be sent to and give on today. A published
+     * campaign still turns a donor away before it opens, after it ends and
+     * once a goal that closes it is met.
+     *
+     * @unreleased
+     */
+    public function firstOpen(): ?Campaign
     {
-        return $this->all()[0] ?? null;
+        foreach ($this->all() as $campaign) {
+            if ($campaign->acceptsDonations() && get_post_status((int) ($campaign->page_id ?? 0)) === 'publish') {
+                return $campaign;
+            }
+        }
+
+        return null;
     }
 }

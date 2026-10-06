@@ -54,10 +54,12 @@ describe( 'the donation page', () => {
         } );
     } );
 
-    test( 'a site whose campaigns are not published is sent to them, not given another', () => {
-        expect( step( facts( { page: 'unpublished' } ), 'page' ) ).toMatchObject( {
+    // A draft, a draft form, an end date that has passed, a start date still to
+    // come: the sentence has to be true of all of them.
+    test( 'a site whose campaigns take no donations is sent to them, not given another', () => {
+        expect( step( facts( { page: 'closed' } ), 'page' ) ).toMatchObject( {
             done:   false,
-            text:   'You have a campaign, but none is published, so no page is taking donations yet.',
+            text:   'You have a campaign, but none of them is taking donations right now.',
             action: { kind: 'link', label: 'Open campaigns', href: HREFS.campaigns },
         } );
     } );
@@ -106,6 +108,12 @@ describe( 'the test donation', () => {
         } );
     } );
 
+    test( 'someone who may not open the donations screen is given no link to it', () => {
+        const given = withPage( { test_donation: { ...TEST_DONATION, url: null } } );
+
+        expect( step( given, 'test' ) ).toMatchObject( { done: true, action: null } );
+    } );
+
     test( 'the one that came in is shown, with who gave it', () => {
         expect( step( withPage( { test_donation: TEST_DONATION } ), 'test' ) ).toMatchObject( {
             done:   true,
@@ -121,7 +129,7 @@ describe( 'the test donation', () => {
     } );
 
     test( 'once it has come in it stays done, whatever happens to the page', () => {
-        expect( step( facts( { page: 'unpublished', test_donation: TEST_DONATION } ), 'test' ).done ).toBe( true );
+        expect( step( facts( { page: 'closed', test_donation: TEST_DONATION } ), 'test' ).done ).toBe( true );
     } );
 } );
 
@@ -129,7 +137,7 @@ describe( 'payments', () => {
     test( 'a site with nothing connected is sent to the payment settings', () => {
         expect( step( facts(), 'payments' ) ).toMatchObject( {
             done:   false,
-            text:   'Add your Stripe or PayPal keys to take cards, or write bank details to take transfers.',
+            text:   'Add your live Stripe or PayPal keys to take cards, or write bank details to take transfers.',
             action: { kind: 'link', label: 'Connect payments', href: HREFS.payments },
         } );
     } );
@@ -149,7 +157,7 @@ describe( 'going live', () => {
     test( 'with payments connected, test mode can be turned off', () => {
         expect( step( facts( { payments: true, payment_methods: [ 'Stripe' ] } ), 'live' ) ).toMatchObject( {
             done:   false,
-            text:   'Turn off test mode. From then on, every donation is real and counts in your figures.',
+            text:   'Turn off test mode. From then on, donations are real and count in your figures.',
             action: { kind: 'test-off', label: 'Turn off test mode' },
         } );
         expect( step( facts( { payments: true, payment_methods: [ 'Stripe' ] } ), 'live' ).action.disabled ).toBeFalsy();
@@ -163,18 +171,17 @@ describe( 'going live', () => {
         } );
     } );
 
-    test( 'with test mode already off and no payments, there is nothing to press', () => {
-        expect( step( facts( { test_mode: false } ), 'live' ) ).toMatchObject( {
+    // A site that is live sees no card, so while the card shows something
+    // before this step is still to do, whatever the switch says.
+    test( 'with test mode already off there is nothing to press, and it is not called done', () => {
+        const waiting = {
             done:   false,
-            text:   'Test mode is already off. The site is live as soon as payments are connected.',
+            text:   'Test mode is already off. The site is live once the steps before this one are done.',
             action: null,
-        } );
-    } );
+        };
 
-    test( 'it is done when test mode is off and something can take money', () => {
-        const given = facts( { test_mode: false, payments: true, payment_methods: [ 'Stripe' ] } );
-
-        expect( step( given, 'live' ) ).toMatchObject( { done: true, action: null } );
+        expect( step( facts( { test_mode: false } ), 'live' ) ).toMatchObject( waiting );
+        expect( step( facts( { test_mode: false, payments: true, payment_methods: [ 'Stripe' ] } ), 'live' ) ).toMatchObject( waiting );
     } );
 } );
 
@@ -199,7 +206,7 @@ describe( 'which step carries the button', () => {
         expect( primary( given ) ).toBe( 'live' );
     } );
 
-    test( 'a site whose campaigns are not published: still the page', () => {
-        expect( primary( facts( { page: 'unpublished', test_donation: TEST_DONATION } ) ) ).toBe( 'page' );
+    test( 'a site whose campaigns take no donations: still the page', () => {
+        expect( primary( facts( { page: 'closed', test_donation: TEST_DONATION } ) ) ).toBe( 'page' );
     } );
 } );

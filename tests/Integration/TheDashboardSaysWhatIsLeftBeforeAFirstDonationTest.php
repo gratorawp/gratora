@@ -39,14 +39,42 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         ], $this->card());
     }
 
-    public function test_a_campaign_no_donor_can_reach_is_told_apart_from_none(): void
+    /** @return array<string, array{0: array<string,mixed>}> */
+    public function campaignsNoDonorCanGiveTo(): array
     {
-        $this->campaign(['title' => 'Still a draft', 'status' => 'draft']);
+        return [
+            'a draft'                     => [['status' => 'draft']],
+            'one whose form is a draft'   => [['status' => 'published', 'skip_template' => true]],
+            'one that ended last year'    => [['status' => 'published', 'ends_at' => '2025-01-31']],
+        ];
+    }
+
+    /**
+     * @dataProvider campaignsNoDonorCanGiveTo
+     *
+     * @param array<string,mixed> $with
+     */
+    public function test_a_campaign_no_donor_can_give_to_is_told_apart_from_none(array $with): void
+    {
+        $this->campaign(['title' => 'Winter food drive'] + $with);
 
         $card = $this->card();
 
-        $this->assertSame('unpublished', $card['page']);
+        $this->assertSame('closed', $card['page']);
+        $this->assertNull($card['page_title']);
         $this->assertNull($card['page_url']);
+    }
+
+    public function test_the_page_offered_is_one_that_will_take_the_donation(): void
+    {
+        $this->campaign(['title' => 'Last year', 'status' => 'published', 'ends_at' => '2025-01-31']);
+        $open = $this->campaign(['title' => 'This year', 'status' => 'published']);
+
+        $card = $this->card();
+
+        $this->assertSame('live', $card['page']);
+        $this->assertSame('This year', $card['page_title']);
+        $this->assertSame(get_permalink((int) $open->page_id), $card['page_url']);
     }
 
     public function test_a_live_page_is_named_and_linked(): void

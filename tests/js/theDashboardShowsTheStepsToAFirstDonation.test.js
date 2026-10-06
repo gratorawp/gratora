@@ -184,7 +184,7 @@ test( 'the full check is one link away, on the Setup tab', () => {
 } );
 
 test( 'payments are connected on the Payment gateways tab, and campaigns published on their own screen', () => {
-    card( facts( { page: 'unpublished' } ) );
+    card( facts( { page: 'closed' } ) );
 
     expect( link( 'Connect payments' ).getAttribute( 'href' ) ).toBe( '/wp-admin/admin.php?page=gratora-settings#gateways' );
     expect( link( 'Open campaigns' ).getAttribute( 'href' ) ).toBe( '/wp-admin/admin.php?page=gratora-campaigns' );

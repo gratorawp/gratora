@@ -92,12 +92,12 @@ describe( 'the first thing it offers', () => {
         } );
     } );
 
-    test( 'a site whose campaigns are not published: the way to them, and no second campaign', () => {
-        lastScreen( facts( { page: 'unpublished' } ) );
+    test( 'a site whose campaigns take no donations: the way to them, and no second campaign', () => {
+        lastScreen( facts( { page: 'closed' } ) );
 
         expect( read( items()[ 0 ] ) ).toEqual( {
-            title: 'Publish your campaign',
-            text:  'You have a campaign, but none is published, so no page is taking donations yet.',
+            title: 'Open a campaign for donations',
+            text:  'You have a campaign, but none of them is taking donations right now.',
             cta:   'Open campaigns',
         } );
         expect( cta( items()[ 0 ] ).getAttribute( 'href' ) ).toBe( CAMPAIGNS );

@@ -27,11 +27,11 @@ function pageStep( facts, hrefs ) {
         };
     }
 
-    if ( facts.page === 'unpublished' ) {
+    if ( facts.page === 'closed' ) {
         return {
             ...step,
             done:   false,
-            text:   __( 'You have a campaign, but none is published, so no page is taking donations yet.', 'gratora-donation-platform' ),
+            text:   __( 'You have a campaign, but none of them is taking donations right now.', 'gratora-donation-platform' ),
             action: { kind: 'link', label: __( 'Open campaigns', 'gratora-donation-platform' ), href: hrefs.campaigns },
         };
     }
@@ -64,7 +64,7 @@ function testStep( facts ) {
             ...step,
             done:   true,
             text,
-            action: { kind: 'link', label: __( 'View it', 'gratora-donation-platform' ), href: given.url },
+            action: given.url ? { kind: 'link', label: __( 'View it', 'gratora-donation-platform' ), href: given.url } : null,
         };
     }
 
@@ -76,6 +76,7 @@ function testStep( facts ) {
         return {
             ...step,
             done:   false,
+            /* translators: "Test donation" is the payment method as the donation form names it. Word it as that string is worded. */
             text:   __( 'Give with the Test donation method. No card is charged.', 'gratora-donation-platform' ),
             action: { kind: 'link', label: __( 'Open your donation page', 'gratora-donation-platform' ), href: facts.page_url, newTab: true },
         };
@@ -111,18 +112,22 @@ function paymentsStep( facts, hrefs ) {
     return {
         ...step,
         done:   false,
-        text:   __( 'Add your Stripe or PayPal keys to take cards, or write bank details to take transfers.', 'gratora-donation-platform' ),
+        text:   __( 'Add your live Stripe or PayPal keys to take cards, or write bank details to take transfers.', 'gratora-donation-platform' ),
         action: { kind: 'link', label: __( 'Connect payments', 'gratora-donation-platform' ), href: hrefs.payments },
     };
 }
 
 function liveStep( facts ) {
-    const step = { key: 'live', title: __( 'Go live', 'gratora-donation-platform' ) };
+    const step = { key: 'live', title: __( 'Go live', 'gratora-donation-platform' ), done: false };
 
+    // A site that is live is shown no card, so while this is on screen
+    // something before it is still to do, whatever the switch says.
     if ( ! facts.test_mode ) {
-        return facts.payments
-            ? { ...step, done: true, text: __( 'Test mode is off and payments are connected.', 'gratora-donation-platform' ), action: null }
-            : { ...step, done: false, text: __( 'Test mode is already off. The site is live as soon as payments are connected.', 'gratora-donation-platform' ), action: null };
+        return {
+            ...step,
+            text:   __( 'Test mode is already off. The site is live once the steps before this one are done.', 'gratora-donation-platform' ),
+            action: null,
+        };
     }
 
     const turnOff = { kind: 'test-off', label: __( 'Turn off test mode', 'gratora-donation-platform' ) };
@@ -130,13 +135,11 @@ function liveStep( facts ) {
     return facts.payments
         ? {
             ...step,
-            done:   false,
-            text:   __( 'Turn off test mode. From then on, every donation is real and counts in your figures.', 'gratora-donation-platform' ),
+            text:   __( 'Turn off test mode. From then on, donations are real and count in your figures.', 'gratora-donation-platform' ),
             action: turnOff,
         }
         : {
             ...step,
-            done:   false,
             text:   __( 'Connect payments first. With test mode off and no payment method, the form could take nothing.', 'gratora-donation-platform' ),
             action: { ...turnOff, disabled: true },
         };
