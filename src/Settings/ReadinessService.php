@@ -8,8 +8,8 @@ use ActionScheduler;
 use ActionScheduler_Store;
 use Gratora\Async\AsyncDispatcher;
 use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\LiveCampaigns;
 use Gratora\Donors\Portal\PortalPage;
-use Gratora\Forms\Form;
 use Gratora\Forms\FormReadinessService;
 use Gratora\Foundation\License\LicenseRefusals;
 use Gratora\Foundation\License\LicenseService;
@@ -397,19 +397,7 @@ final class ReadinessService
      */
     private function donationPageCheck(): array
     {
-        $campaigns = Campaign::query()->where('status', 'published')->getAll();
-
-        $live = [];
-        foreach ($campaigns as $campaign) {
-            $formId = (int) ($campaign->default_form_id ?? 0);
-            if ($formId <= 0) {
-                continue;
-            }
-            $form = Form::query()->where('id', $formId)->get();
-            if ($form && (string) $form->status === 'published') {
-                $live[] = $campaign;
-            }
-        }
+        $live = (new LiveCampaigns())->all();
 
         if ($live !== []) {
             return $this->pass(
@@ -423,9 +411,7 @@ final class ReadinessService
             );
         }
 
-        // Publishing a campaign whose form is still a draft leaves its page as a
-        // draft too, so the operator sees "published" and the public sees a 404.
-        $detail = $campaigns === []
+        $detail = (int) Campaign::query()->where('status', 'published')->count() === 0
             ? __('Create a campaign, then publish it together with its donation form.', 'gratora-donation-platform')
             : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'gratora-donation-platform');
 

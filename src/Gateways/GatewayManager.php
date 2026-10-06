@@ -134,6 +134,26 @@ final class GatewayManager
     }
 
     /**
+     * Labels of the methods that can take a real donation. The rehearsal method
+     * is left out: it is on whenever test mode is, and charges nobody.
+     *
+     * @return list<string>
+     *
+     * @unreleased
+     */
+    public function realMethods(): array
+    {
+        $labels = [];
+        foreach ($this->gateways as $id => $gateway) {
+            if ($id !== 'sandbox' && $this->isOn($id, false)) {
+                $labels[] = $gateway->label();
+            }
+        }
+
+        return array_values(array_unique($labels));
+    }
+
+    /**
      * Full gateway metadata for a form, not context-filtered, so the donor
      * runtime can re-resolve visible options as currency or frequency changes
      * client-side without a round trip.
