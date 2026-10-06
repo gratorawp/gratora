@@ -339,7 +339,7 @@ final class Plugin
         (new Activator(
             new FundRepository(),
             new SystemClock()
-        ))->activate();
+        ))->activate($fresh);
 
         // The donor portal page hosts [gratora_donor_portal] and is what every
         // magic-link email points at - create or adopt it before any donor

@@ -36,22 +36,27 @@ final class OnboardingTest extends IntegrationTestCase
         $this->assertCount(0, Campaign::query()->getAll(), 'finishing setup must not publish anything');
     }
 
-    public function test_just_exploring_turns_on_global_test_mode(): void
+    /** @dataProvider answersAndModes */
+    public function test_finishing_changes_test_mode_for_no_answer(string $answer, bool $before): void
     {
-        $this->assertFalse($this->testModeOn(), 'test mode off by default');
+        Plugin::instance()->container->get(SettingsService::class)
+            ->update('gateways', ['test_mode' => $before]);
 
-        $res = $this->finalize(['user_type' => 'exploring']);
+        $res = $this->finalize(['user_type' => $answer]);
 
         $this->assertSame(200, $res->get_status());
-        $this->assertTrue($this->testModeOn(), 'exploring path enabled global test mode');
+        $this->assertSame($before, $this->testModeOn());
     }
 
-    public function test_non_exploring_does_not_touch_test_mode(): void
+    /** @return array<string,array{string,bool}> */
+    public static function answersAndModes(): array
     {
-        $res = $this->finalize(['user_type' => 'nonprofit']);
-
-        $this->assertSame(200, $res->get_status());
-        $this->assertFalse($this->testModeOn(), 'non-exploring left test mode off');
+        return [
+            'just exploring, test mode off' => ['exploring', false],
+            'just exploring, test mode on'  => ['exploring', true],
+            'a nonprofit, test mode off'    => ['nonprofit', false],
+            'a nonprofit, test mode on'     => ['nonprofit', true],
+        ];
     }
 
     /**
@@ -62,11 +67,9 @@ final class OnboardingTest extends IntegrationTestCase
     public function test_running_the_wizard_again_does_not_stop_a_live_site(): void
     {
         $this->finalize(['user_type' => 'exploring']);
-        $this->assertTrue($this->testModeOn());
 
         Plugin::instance()->container->get(SettingsService::class)
             ->update('gateways', ['test_mode' => false]);
-        $this->assertFalse($this->testModeOn(), 'the org went live');
 
         $res = $this->finalize(['user_type' => 'exploring']);
 

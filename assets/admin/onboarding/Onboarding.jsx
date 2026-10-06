@@ -231,12 +231,6 @@ export default function Onboarding() {
                 const r = await apiFetch( {
                     path:   '/gratora/v1/admin/onboarding/finalize',
                     method: 'POST',
-                    data:   {
-                        campaign_title: org.name
-                            ? `${ org.name } - ${ __( 'General donations', 'gratora-donation-platform' ) }`
-                            : __( 'General donations', 'gratora-donation-platform' ),
-                        user_type:      who.user_type,
-                    },
                 } );
                 if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'gratora-donation-platform' ) );
                 setFinalized( r );

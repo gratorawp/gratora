@@ -28,11 +28,14 @@ final class Activator
     }
 
     /** @since 1.0.0 */
-    public function activate(): void
+    public function activate(bool $fresh = false): void
     {
         $this->seedDefaultFund();
         $this->grantCapabilities();
         $this->seedReferenceSettings();
+        if ($fresh) {
+            $this->seedTestMode();
+        }
         $this->markActivated();
         // Switching Gratora back on withdraws a standing instruction to wipe. It
         // was given while removing the plugin, and it must not lie in wait to
@@ -47,6 +50,18 @@ final class Activator
     {
         if (get_option(ReferenceGenerator::OPTION_SETTINGS, false) !== false) return;
         add_option(ReferenceGenerator::OPTION_SETTINGS, ReferenceGenerator::DEFAULT_SETTINGS, '', false);
+    }
+
+    /**
+     * A new site can take a test donation before anyone has pasted a key, and
+     * cannot take a real one by accident. Added rather than updated: payment
+     * settings a restore brought with it stay as they are.
+     *
+     * @unreleased
+     */
+    private function seedTestMode(): void
+    {
+        add_option('gratora_gateway_config', ['test_mode' => true], '', false);
     }
 
     /** @since 1.0.0 */

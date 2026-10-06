@@ -1026,9 +1026,7 @@ final class CoreModule implements GratoraModule
                 $c->get(RevenueReportBuilder::class),
                 $c->get(DonationRepository::class),
             ),
-            new OnboardingController(
-                $c->get( SettingsService::class),
-            ),
+            new OnboardingController(),
             new StripeKeysController(
                 $c->get(StripeApi::class),
                 $c->get(StripeAccount::class),
