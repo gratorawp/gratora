@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Gratora\Rest\Admin;
 
+use Gratora\Campaigns\StarterCampaign;
+use Gratora\Campaigns\StarterCampaignRefused;
+use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Onboarding\Onboarding;
+use RuntimeException;
+use WP_Error;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -16,6 +21,11 @@ use WP_REST_Server;
 final class OnboardingController
 {
     private const NAMESPACE = 'gratora/v1';
+
+    /** @since 1.0.0 */
+    public function __construct(private StarterCampaign $starter)
+    {
+    }
 
     /** @since 1.0.0 */
     public function registerRoutes(): void
@@ -32,6 +42,11 @@ final class OnboardingController
             'permission_callback' => [$this, 'canAccess'],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/onboarding/starter-campaign', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [$this, 'starterCampaign'],
+            'permission_callback' => [$this, 'canCreateCampaigns'],
+        ]);
     }
 
 
@@ -55,6 +70,33 @@ final class OnboardingController
         return new WP_REST_Response(['ok' => true], 200);
     }
 
+
+    /** @unreleased */
+    public function canCreateCampaigns(): bool
+    {
+        return Capabilities::userCan('gratora_manage_campaigns');
+    }
+
+    /**
+     * The site's first donation page: made now, or the one made earlier.
+     *
+     * @unreleased
+     */
+    public function starterCampaign(): WP_REST_Response|WP_Error
+    {
+        try {
+            $campaign = $this->starter->ensure();
+        } catch (StarterCampaignRefused $e) {
+            return new WP_Error('gratora_starter_campaign_refused', $e->getMessage(), ['status' => 409]);
+        } catch (RuntimeException $e) {
+            return new WP_Error('gratora_campaign_create_failed', $e->getMessage(), ['status' => 500]);
+        }
+
+        return new WP_REST_Response([
+            'campaign_id' => (int) $campaign->id,
+            'page_url'    => (string) get_permalink((int) $campaign->page_id),
+        ], 200);
+    }
 
     /** @since 1.0.0 */
     public function dismiss(): WP_REST_Response

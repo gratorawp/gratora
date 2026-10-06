@@ -46,6 +46,7 @@ use Gratora\Campaigns\CampaignPageTemplate;
 use Gratora\Campaigns\CampaignPermalinks;
 use Gratora\Campaigns\CampaignRepository;
 use Gratora\Campaigns\CampaignService;
+use Gratora\Campaigns\StarterCampaign;
 use Gratora\Campaigns\CampaignStatMetrics;
 use Gratora\Campaigns\CampaignTypeRegistry;
 use Gratora\Campaigns\DefaultCampaignTypeHandler;
@@ -1026,7 +1027,7 @@ final class CoreModule implements GratoraModule
                 $c->get(RevenueReportBuilder::class),
                 $c->get(DonationRepository::class),
             ),
-            new OnboardingController(),
+            new OnboardingController(new StarterCampaign($c->get(CampaignService::class))),
             new StripeKeysController(
                 $c->get(StripeApi::class),
                 $c->get(StripeAccount::class),

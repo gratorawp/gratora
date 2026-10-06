@@ -79,6 +79,7 @@ final class DataEraser
         'gratora_retention_starts_at',
         'gratora_rewrite_rules_pending',
         'gratora_roles',
+        'gratora_starter_campaign',
         'gratora_upgrade_routines_done',
         'gratora_upgrade_routines_failed',
     ];
