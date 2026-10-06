@@ -1149,6 +1149,7 @@ final class CoreModule implements GratoraModule
             $c->get(AntiSpamGuard::class),
             $c->get(GatewayManager::class),
             $c->get(TestMode::class),
+            $c->get(FormReadinessService::class),
         ));
         $formShortcode = $c->get(DonationFormShortcode::class);
         $pageBlocks->add(new DonateButtonBlock(

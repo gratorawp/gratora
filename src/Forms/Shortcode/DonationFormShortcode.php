@@ -26,6 +26,7 @@ use Gratora\Forms\Blocks\RecurringToggleBlock;
 use Gratora\Forms\Blocks\SectionBlock;
 use Gratora\Forms\Blocks\TermsBlock;
 use Gratora\Forms\Form;
+use Gratora\Forms\FormReadinessService;
 use Gratora\Forms\FormRepository;
 use Gratora\Forms\Rendering\FormDocument;
 use Gratora\Forms\Rendering\FormMarkup;
@@ -63,6 +64,7 @@ final class DonationFormShortcode extends HookProvider
         private ?AntiSpamGuard $spam = null,
         private ?GatewayManager $gateways = null,
         private ?TestMode $testMode = null,
+        private ?FormReadinessService $readiness = null,
     ) {
     }
 
@@ -702,7 +704,7 @@ JS;
             'stripe'      => $this->stripePublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn),
             'paypal'      => $this->payPalPublicConfig($gatewaysCfg['options'] ?? [], $gateway, $testModeOn, (string) $currency),
             ...$this->browserAwareConfig($testModeOn, (string) $currency),
-            ...$this->ownerNotice($testModeOn),
+            ...$this->ownerNotice($form, $gatewaysCfg['options'] ?? []),
             'testMode'    => $testModeOn,
             'currency'    => $currency,
             'currencies'  => $currencies,
@@ -1827,25 +1829,49 @@ JS;
     /**
      * Why a form with no payment method cannot take a donation, for the people
      * who can do something about it. A donor is told only that it cannot, so
-     * this is sent to nobody else. The runtime shows it when the form has no
-     * method at all, never when a currency or a frequency rules the methods out.
+     * this is sent to nobody else.
      *
+     * The reason is the form's own setup check, which already tells a site with
+     * nothing switched on from a form that allows only what is off and from one
+     * left in its own test mode, and names the screen that puts each right.
+     *
+     * @param array<int,mixed> $offered the methods the form has for this visitor
      * @return array{ownerNotice?: array{text:string, linkLabel:string, linkUrl:string}}
      *
      * @unreleased
      */
-    private function ownerNotice(bool $testMode): array
+    private function ownerNotice(Form $form, array $offered): array
     {
+        // A preview has no id: it sits in a frame inside wp-admin, where the
+        // link would load the admin into itself.
+        if ($offered !== [] || (int) $form->id === 0 || $this->readiness === null) {
+            return [];
+        }
         if (! Capabilities::userCan('gratora_manage_settings')) {
             return [];
         }
 
+        $why = [
+            'label'        => __('This form has no payment method to offer', 'gratora-donation-platform'),
+            'detail'       => '',
+            'action_url'   => admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id),
+            'action_label' => __('Open this form', 'gratora-donation-platform'),
+        ];
+        foreach ($this->readiness->check($form) as $row) {
+            if (in_array($row['id'] ?? '', ['gateway', 'test-mode'], true) && ($row['status'] ?? '') === 'fail') {
+                $why = $row + $why;
+                break;
+            }
+        }
+
         return ['ownerNotice' => [
-            'text' => $testMode
-                ? __('Only you can see this. This form cannot take a donation, because none of the payment methods it allows is switched on.', 'gratora-donation-platform')
-                : __('Only you can see this. This form cannot take a donation, because no payment method is switched on. Connect payments, or turn on test mode.', 'gratora-donation-platform'),
-            'linkLabel' => __('Open payment settings', 'gratora-donation-platform'),
-            'linkUrl'   => esc_url_raw(admin_url('admin.php?page=gratora-settings#gateways')),
+            'text' => sprintf(
+                /* translators: %s: why the form cannot take a donation, in one or two sentences. */
+                __('Only you can see this. %s', 'gratora-donation-platform'),
+                trim($why['label'] . '. ' . $why['detail'])
+            ),
+            'linkLabel' => (string) $why['action_label'],
+            'linkUrl'   => esc_url_raw((string) $why['action_url']),
         ]];
     }
 
