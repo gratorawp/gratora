@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Gratora\Admin\Pages;
 
+use Gratora\Admin\Addons\AddonsCatalog;
 use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\License\LicenseService;
 
 /** @since 1.1.0 */
 final class AddonsPage extends HookProvider
@@ -13,7 +15,6 @@ final class AddonsPage extends HookProvider
     private const CAPABILITY = 'gratora_access_settings';
     private const HANDLE     = 'gratora-admin-addons';
     private const BUILD_DIR  = 'build/admin/addons';
-    private const SITE       = 'https://gratora.net/';
     private const MENU_STYLE = 'gratora-addons-menu-link';
 
     /**
@@ -26,6 +27,11 @@ final class AddonsPage extends HookProvider
         :is(.admin-color-modern, .admin-color-fresh, .admin-color-blue, .admin-color-midnight, .admin-color-sunrise, .admin-color-ectoplasm, .admin-color-ocean, .admin-color-coffee) #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #e89940; }
         .admin-color-light #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #b45309; }
         CSS;
+
+    /** @unreleased */
+    public function __construct(private AddonsCatalog $catalog, private LicenseService $license)
+    {
+    }
 
     /** @since 1.1.0 */
     protected function filters(): array
@@ -82,14 +88,62 @@ final class AddonsPage extends HookProvider
     }
 
     /**
-     * Every add-on, and whether this site has it. A plugin is recognised by its
-     * main file, whatever folder it was unpacked into.
+     * What the screen shows. An offer is for a site that has bought nothing yet.
      *
-     * @return list<array{slug:string,name:string,description:string,icon:string,url:string,free:bool,status:string,activateUrl:string}>
+     * @return array{
+     *   source:'remote'|'builtin',
+     *   addons:list<array{slug:string,name:string,description:string,icon:string,url:string,free:bool,status:string,activateUrl:string,plan:string}>,
+     *   plans:list<array{slug:string,name:string,summary:string,sites:int,count:int,url:string}>,
+     *   offer:array{text:string,url:string}|null,
+     * }
+     *
+     * @unreleased
+     */
+    public function screen(): array
+    {
+        $catalog = $this->catalog->get();
+
+        $plans = [];
+        foreach ($catalog['plans'] as $plan) {
+            $plans[] = [
+                'slug'    => $plan['slug'],
+                'name'    => $plan['name'],
+                'summary' => $plan['summary'],
+                'sites'   => $plan['sites'],
+                'count'   => count($plan['addons']),
+                'url'     => $plan['url'],
+            ];
+        }
+
+        return [
+            'source' => $catalog['source'],
+            'addons' => $this->onThisSite($catalog['addons'], $catalog['plans']),
+            'plans'  => $plans,
+            'offer'  => $this->license->isPro() ? null : $catalog['offer'],
+        ];
+    }
+
+    /**
+     * Every add-on, whether this site has it, and the smallest plan that
+     * includes it.
+     *
+     * @return list<array{slug:string,name:string,description:string,icon:string,url:string,free:bool,status:string,activateUrl:string,plan:string}>
      *
      * @since 1.1.0
      */
     public function addons(): array
+    {
+        return $this->screen()['addons'];
+    }
+
+    /**
+     * A plugin is recognised by its main file, whatever folder it was unpacked into.
+     *
+     * @param  list<array{slug:string,file:string,name:string,description:string,icon:string,url:string,free:bool}> $addons
+     * @param  list<array{name:string,addons:list<string>}> $plans
+     * @return list<array{slug:string,name:string,description:string,icon:string,url:string,free:bool,status:string,activateUrl:string,plan:string}>
+     */
+    private function onThisSite(array $addons, array $plans): array
     {
         if (! function_exists('get_plugins')) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -98,7 +152,7 @@ final class AddonsPage extends HookProvider
         $files = array_keys(get_plugins());
         $out   = [];
 
-        foreach (self::catalog() as $addon) {
+        foreach ($addons as $addon) {
             $found  = array_values(array_filter($files, static fn (string $file): bool => basename($file) === $addon['file']));
             $active = array_filter($found, 'is_plugin_active');
             $status = $active !== [] ? 'active' : ($found !== [] ? 'installed' : 'available');
@@ -115,52 +169,19 @@ final class AddonsPage extends HookProvider
                 );
             }
 
+            $plan = '';
+            foreach ($addon['free'] ? [] : $plans as $candidate) {
+                if (in_array($addon['slug'], $candidate['addons'], true)) {
+                    $plan = $candidate['name'];
+                    break;
+                }
+            }
+
             unset($addon['file']);
-            $out[] = $addon + ['status' => $status, 'activateUrl' => $activateUrl];
+            $out[] = $addon + ['status' => $status, 'activateUrl' => $activateUrl, 'plan' => $plan];
         }
 
         return $out;
-    }
-
-    /** @return list<array{slug:string,file:string,name:string,description:string,icon:string,url:string,free:bool}> */
-    private static function catalog(): array
-    {
-        $paid = [
-            ['peer-to-peer-fundraising', 'gratora-p2p.php', __('Peer-to-Peer', 'gratora-donation-platform'), __('Supporters raise money for you on their own pages, alone or in teams.', 'gratora-donation-platform'), 'users-round'],
-            ['events', 'gratora-events.php', __('Event Tickets', 'gratora-donation-platform'), __('Sell tickets to fundraising events, then check guests in by phone.', 'gratora-donation-platform'), 'ticket'],
-            ['ai-assistant', 'gratora-ai-assistant.php', __('AI Assistant', 'gratora-donation-platform'), __('Ask about your fundraising and make changes in plain language.', 'gratora-donation-platform'), 'sparkles'],
-            ['payment-gateways', 'gratora-payment-gateways.php', __('Payment Gateways', 'gratora-donation-platform'), __('Take donations through Authorize.Net, Square, GoCardless, Moneris or Razorpay.', 'gratora-donation-platform'), 'credit-card'],
-            ['conversion-tracking', 'gratora-conversion-tracking.php', __('Conversion Tracking', 'gratora-donation-platform'), __('Report completed donations to GA4, Google Ads and Meta, with amount and currency.', 'gratora-donation-platform'), 'chart-line'],
-            ['connect', 'gratora-connect.php', _x('Connect', 'add-on name', 'gratora-donation-platform'), __('Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp.', 'gratora-donation-platform'), 'webhook'],
-            ['tributes', 'gratora-tributes.php', __('Tributes', 'gratora-donation-platform'), __('Donors dedicate a donation in honor or in memory of someone.', 'gratora-donation-platform'), 'rose'],
-            ['gift-aid', 'gratora-gift-aid.php', __('Gift Aid', 'gratora-donation-platform'), __('Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC.', 'gratora-donation-platform'), 'landmark'],
-            ['donation-recovery', 'gratora-donation-recovery.php', __('Donation Recovery', 'gratora-donation-platform'), __('One reminder email to someone who started a donation and did not finish it.', 'gratora-donation-platform'), 'mail'],
-        ];
-
-        $catalog = [];
-        foreach ($paid as [$slug, $file, $name, $description, $icon]) {
-            $catalog[] = [
-                'slug'        => $slug,
-                'file'        => $file,
-                'name'        => $name,
-                'description' => $description,
-                'icon'        => $icon,
-                'url'         => self::SITE . 'add-ons/' . $slug . '/',
-                'free'        => false,
-            ];
-        }
-
-        $catalog[] = [
-            'slug'        => 'give-importer',
-            'file'        => 'gratora-give-importer.php',
-            'name'        => __('GiveWP Importer', 'gratora-donation-platform'),
-            'description' => __('Copy donors, donations, campaigns and recurring subscriptions from GiveWP into Gratora.', 'gratora-donation-platform'),
-            'icon'        => 'import',
-            'url'         => self::SITE . 'add-ons/#importer',
-            'free'        => true,
-        ];
-
-        return $catalog;
     }
 
     /** @since 1.1.0 */
@@ -182,7 +203,7 @@ final class AddonsPage extends HookProvider
         );
 
         wp_set_script_translations(self::HANDLE, 'gratora-donation-platform', GRATORA_DIR . 'languages');
-        wp_localize_script(self::HANDLE, 'gratoraAddons', ['addons' => $this->addons()]);
+        wp_localize_script(self::HANDLE, 'gratoraAddons', $this->screen());
 
         wp_enqueue_style(
             self::HANDLE,

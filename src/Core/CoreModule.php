@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Core;
 
+use Gratora\Admin\Addons\AddonsCatalog;
 use Gratora\Admin\AdminFooter;
 use Gratora\Admin\AdminGlobals;
 use Gratora\Admin\AdminMenu;
@@ -1253,7 +1254,7 @@ final class CoreModule implements GratoraModule
             (new FormsPage())->register();
             (new FundsPage())->register();
             (new ToolsPage())->register();
-            (new AddonsPage())->register();
+            (new AddonsPage(new AddonsCatalog($c->get(Clock::class)), $c->get(LicenseService::class)))->register();
             (new SettingsPage())->register();
             (new OnboardingPage())->register();
             (new Onboarding())->register();

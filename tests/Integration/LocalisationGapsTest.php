@@ -133,7 +133,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
      *
      * @dataProvider adminScreens
      */
-    public function test_an_admin_screen_registers_the_rtl_variant_of_its_stylesheet(string $page, string $handle): void
+    public function test_an_admin_screen_registers_the_rtl_variant_of_its_stylesheet(callable $screen, string $handle): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
@@ -142,7 +142,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
         wp_deregister_style($handle);
 
         ob_start();
-        (new $page())->render();
+        $screen()->render();
         ob_end_clean();
 
         $this->assertArrayHasKey($handle, wp_styles()->registered, 'fixture: the screen enqueues its stylesheet');
@@ -153,17 +153,23 @@ final class LocalisationGapsTest extends IntegrationTestCase
         );
     }
 
-    /** @return array<string, array{0:string, 1:string}> */
+    /** @return array<string, array{0:callable():object, 1:string}> */
     public static function adminScreens(): array
     {
         return [
-            'donations'     => [\Gratora\Admin\Pages\DonationsPage::class, 'gratora-admin-donations'],
-            'donors'        => [\Gratora\Admin\Pages\DonorsPage::class, 'gratora-admin-donors'],
-            'campaigns'     => [\Gratora\Admin\Pages\CampaignsPage::class, 'gratora-admin-campaigns'],
-            'funds'         => [\Gratora\Admin\Pages\FundsPage::class, 'gratora-admin-funds'],
-            'subscriptions' => [\Gratora\Admin\Pages\SubscriptionsPage::class, 'gratora-admin-subscriptions'],
-            'tools'         => [\Gratora\Admin\Pages\ToolsPage::class, 'gratora-admin-tools'],
-            'addons'        => [\Gratora\Admin\Pages\AddonsPage::class, 'gratora-admin-addons'],
+            'donations'     => [static fn () => new \Gratora\Admin\Pages\DonationsPage(), 'gratora-admin-donations'],
+            'donors'        => [static fn () => new \Gratora\Admin\Pages\DonorsPage(), 'gratora-admin-donors'],
+            'campaigns'     => [static fn () => new \Gratora\Admin\Pages\CampaignsPage(), 'gratora-admin-campaigns'],
+            'funds'         => [static fn () => new \Gratora\Admin\Pages\FundsPage(), 'gratora-admin-funds'],
+            'subscriptions' => [static fn () => new \Gratora\Admin\Pages\SubscriptionsPage(), 'gratora-admin-subscriptions'],
+            'tools'         => [static fn () => new \Gratora\Admin\Pages\ToolsPage(), 'gratora-admin-tools'],
+            'addons'        => [
+                static fn () => new \Gratora\Admin\Pages\AddonsPage(
+                    new \Gratora\Admin\Addons\AddonsCatalog(new \Gratora\Foundation\Time\SystemClock()),
+                    new \Gratora\Foundation\License\LicenseService()
+                ),
+                'gratora-admin-addons',
+            ],
         ];
     }
 }

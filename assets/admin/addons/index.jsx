@@ -5,5 +5,7 @@ import './addons.scss';
 
 const el = document.getElementById( 'gratora-admin-addons' );
 if ( el ) {
-    createRoot( el ).render( <Addons addons={ window.gratoraAddons?.addons || [] } /> );
+    const { addons = [], plans, offer, source } = window.gratoraAddons || {};
+
+    createRoot( el ).render( <Addons addons={ addons } plans={ plans } offer={ offer } source={ source } /> );
 }

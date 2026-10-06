@@ -59,6 +59,8 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         ], false);
         $this->makeOfflinePayable();
         $this->injectDonationFormToken();
+        // The Add-ons screen asks gratora.net for its lists. No test reaches the real one.
+        add_filter('gratora.addons.remote', '__return_false');
     }
 
     protected function tearDown(): void

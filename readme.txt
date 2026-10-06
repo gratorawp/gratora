@@ -130,8 +130,14 @@ Gratora needs nothing else to run. When you need more, add-ons are available at
 
 == External services ==
 
-Gratora contacts these services only after you set up the feature that uses
-them. A fresh install contacts none.
+Gratora contacts these services only when you use the feature that needs them.
+
+**Gratora** (gratora.net)
+Fetches the list of add-ons and plans when you open the Add-ons screen, and
+keeps it for a day, or for an hour when gratora.net does not answer. Sends no
+information about your site beyond the request itself, which carries the
+plugin's version.
+Terms: https://gratora.net/terms/ | Privacy: https://gratora.net/privacy/
 
 **Stripe** (api.stripe.com, js.stripe.com)
 Takes card and wallet payments once you connect Stripe. Receives the amount,

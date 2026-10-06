@@ -1,5 +1,8 @@
 {
 	"plugins": [ "." ],
+	"mappings": {
+		"wp-content/mu-plugins": "./tests-e2e/mu-plugins"
+	},
 	"config": {
 		"WP_DEBUG": true,
 		"WP_DEBUG_DISPLAY": false,

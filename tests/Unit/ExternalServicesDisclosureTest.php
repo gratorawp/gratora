@@ -11,9 +11,9 @@ use RecursiveIteratorIterator;
 /**
  * readme.txt's External services section is what a reviewer, and any admin
  * running a donation site under the GDPR, reads to learn who else sees donor
- * data. It opens by saying a fresh install talks to no one, which only holds
- * while every service the plugin can reach is listed with the switch that turns
- * it on.
+ * data. It opens by saying a service is contacted only when the feature that
+ * needs it is used, which only holds while every service the plugin can reach
+ * is listed with what sets it off.
  *
  * Gravatar is not listed: donor pictures go through core's get_avatar_url, so
  * the request is WordPress's own, as it is for comment avatars. The Gravatar
@@ -37,7 +37,6 @@ final class ExternalServicesDisclosureTest extends TestCase
         'www.w3.org'    => 'the SVG namespace identifier, which is never dereferenced',
         'wordpress.org' => 'a link an admin clicks, not a request this plugin makes',
         'example.org'   => 'placeholder copy in the email-token preview',
-        'gratora.net'   => 'links an admin follows from the Add-ons screen, not a request this plugin makes',
     ];
 
     private function root(): string

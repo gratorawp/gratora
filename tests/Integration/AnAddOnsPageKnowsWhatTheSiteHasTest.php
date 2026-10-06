@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Gratora\Tests\Integration;
 
+use Gratora\Admin\Addons\AddonsCatalog;
 use Gratora\Admin\Pages\AddonsPage;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Time\SystemClock;
 
 /**
  * The add-ons screen says which add-ons this site has from the plugins
@@ -33,7 +36,9 @@ final class AnAddOnsPageKnowsWhatTheSiteHasTest extends IntegrationTestCase
     /** @return array<string, array<string, mixed>> */
     private function addons(): array
     {
-        return array_column((new AddonsPage())->addons(), null, 'slug');
+        $page = new AddonsPage(new AddonsCatalog(new SystemClock()), new LicenseService());
+
+        return array_column($page->addons(), null, 'slug');
     }
 
     public function test_an_add_on_the_site_does_not_have_is_only_described(): void
@@ -44,7 +49,7 @@ final class AnAddOnsPageKnowsWhatTheSiteHasTest extends IntegrationTestCase
 
         $this->assertSame('available', $events['status']);
         $this->assertSame('', $events['activateUrl']);
-        $this->assertSame('https://gratora.net/add-ons/events/', $events['url']);
+        $this->assertSame('https://gratora.net/add-ons/events/?utm_source=plugin&utm_medium=add-ons', $events['url']);
     }
 
     public function test_an_installed_add_on_is_activated_through_wordpress(): void
@@ -100,7 +105,7 @@ final class AnAddOnsPageKnowsWhatTheSiteHasTest extends IntegrationTestCase
 
         $this->assertNotNull($recovery, 'Donation Recovery is not on the screen.');
         $this->assertSame('installed', $recovery['status']);
-        $this->assertSame('https://gratora.net/add-ons/donation-recovery/', $recovery['url']);
+        $this->assertSame('https://gratora.net/add-ons/donation-recovery/?utm_source=plugin&utm_medium=add-ons', $recovery['url']);
         $this->assertFalse($recovery['free']);
     }
 

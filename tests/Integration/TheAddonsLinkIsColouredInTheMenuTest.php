@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Gratora\Tests\Integration;
 
+use Gratora\Admin\Addons\AddonsCatalog;
 use Gratora\Admin\Pages\AddonsPage;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Time\SystemClock;
 use WP_Styles;
 
 /**
@@ -20,7 +23,7 @@ final class TheAddonsLinkIsColouredInTheMenuTest extends IntegrationTestCase
         parent::setUp();
         $this->stylesBefore   = $GLOBALS['wp_styles'] ?? null;
         $GLOBALS['wp_styles'] = new WP_Styles();
-        (new AddonsPage())->register();
+        (new AddonsPage(new AddonsCatalog(new SystemClock()), new LicenseService()))->register();
     }
 
     protected function tearDown(): void
