@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Donations;
 
+use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Config\SystemSetting;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Http\ClientIp;
@@ -85,7 +86,31 @@ final class AntiSpamGuard
      */
     private function relaxed(int $max): int
     {
-        return $this->inGlobalTestMode() ? $max * self::TEST_MODE_RELIEF : $max;
+        return $this->inGlobalTestMode() && $this->isRehearsing() ? $max * self::TEST_MODE_RELIEF : $max;
+    }
+
+    /**
+     * Whether the caller is the kind the relief is for: a test rig, or whoever
+     * is setting the site up. A new install starts in test mode with a page
+     * anyone can reach and may sit there for weeks, and a stranger who finds
+     * its form is the public, held to what the public is held to anywhere.
+     *
+     * @unreleased
+     */
+    private function isRehearsing(): bool
+    {
+        if (Capabilities::userCan('gratora_manage_settings')) {
+            return true;
+        }
+
+        /**
+         * Whether a visitor who is not signed in gets the test-mode relief too.
+         *
+         * @param bool $relieved Off on a site that reports itself as production.
+         *
+         * @unreleased
+         */
+        return (bool) apply_filters('gratora.spam.test_mode_relief_for_visitors', wp_get_environment_type() !== 'production');
     }
 
     /** @since 1.0.0 */

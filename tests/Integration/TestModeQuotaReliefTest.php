@@ -61,6 +61,72 @@ final class TestModeQuotaReliefTest extends IntegrationTestCase
         $this->assertSame(50, $allowed, 'but there is still a ceiling');
     }
 
+    /**
+     * A new install starts in test mode with a page anyone can reach, and may
+     * sit there for weeks. The relief is for whoever is rehearsing on it, not
+     * for a stranger who found the form.
+     */
+    public function test_on_a_live_site_a_visitor_is_held_to_the_production_cap_in_test_mode(): void
+    {
+        $this->testMode(true);
+        $this->asAVisitorToALiveSite();
+
+        $this->assertSame(5, $this->drain($this->guard(), 'gratora_relief_' . uniqid(), 5));
+    }
+
+    public function test_nor_can_a_visitor_there_mail_one_address_more_than_on_any_live_site(): void
+    {
+        $this->testMode(true);
+        $this->asAVisitorToALiveSite();
+        $guard = $this->guard();
+        $email = 'relief-' . uniqid() . '@example.test';
+
+        $allowed = 0;
+        for ($i = 0; $i < 100; $i++) {
+            if ($guard->consumeEmailQuota($email) instanceof WP_Error) {
+                break;
+            }
+            $allowed++;
+        }
+
+        $this->assertSame(3, $allowed);
+    }
+
+    public function test_whoever_manages_the_plugin_keeps_the_relief_on_a_live_site(): void
+    {
+        $this->testMode(true);
+        add_filter('gratora.spam.test_mode_relief_for_visitors', '__return_false');
+
+        $this->assertSame(50, $this->drain($this->guard(), 'gratora_relief_' . uniqid(), 5));
+    }
+
+    public function test_a_test_rig_keeps_it_for_visitors(): void
+    {
+        $this->testMode(true);
+        wp_set_current_user(0);
+        add_filter('gratora.spam.test_mode_relief_for_visitors', '__return_true');
+
+        $this->assertSame(50, $this->drain($this->guard(), 'gratora_relief_' . uniqid(), 5));
+    }
+
+    /** What the filter is given when nobody has spoken: the site's own word on what it is. */
+    public function test_a_site_that_calls_itself_production_gives_visitors_none_unasked(): void
+    {
+        if (wp_get_environment_type() !== 'production') {
+            $this->markTestSkipped('This run does not report itself as production.');
+        }
+        $this->testMode(true);
+        wp_set_current_user(0);
+
+        $this->assertSame(5, $this->drain($this->guard(), 'gratora_relief_' . uniqid(), 5));
+    }
+
+    private function asAVisitorToALiveSite(): void
+    {
+        wp_set_current_user(0);
+        add_filter('gratora.spam.test_mode_relief_for_visitors', '__return_false');
+    }
+
     public function test_the_email_quota_also_keeps_a_ceiling_in_test_mode(): void
     {
         $this->testMode(true);
