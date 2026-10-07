@@ -19,7 +19,7 @@ final class DeactivationDialog
     private const REASON = 'gratora_deactivation_reason';
 
     /**
-     * @unreleased
+     * @since 1.2.0
      *
      * @param Closure(): DeactivationSurvey $survey built only when an answer comes in
      */
@@ -112,7 +112,7 @@ final class DeactivationDialog
     /**
      * A request of its own, so that deactivation never waits on gratora.net.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function tell(): void
     {

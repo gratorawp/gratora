@@ -95,7 +95,7 @@ final class AntiSpamGuard
      * anyone can reach and may sit there for weeks, and a stranger who finds
      * its form is the public, held to what the public is held to anywhere.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     private function isRehearsing(): bool
     {
@@ -108,7 +108,7 @@ final class AntiSpamGuard
          *
          * @param bool $relieved Off on a site that reports itself as production.
          *
-         * @unreleased
+         * @since 1.2.0
          */
         return (bool) apply_filters('gratora.spam.test_mode_relief_for_visitors', wp_get_environment_type() !== 'production');
     }

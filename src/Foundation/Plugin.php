@@ -299,7 +299,7 @@ final class Plugin
      * is also how a test rig lays a site out before measuring the donations on
      * it as real ones.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     private static function startInTestMode(): void
     {

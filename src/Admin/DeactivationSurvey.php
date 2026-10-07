@@ -15,20 +15,20 @@ use Throwable;
  * Why someone is switching Gratora off, told to gratora.net when they choose
  * to say.
  *
- * @unreleased
+ * @since 1.2.0
  */
 final class DeactivationSurvey
 {
-    /** @unreleased */
+    /** @since 1.2.0 */
     public const ENDPOINT = 'https://gratora.net/wp-json/gratora-license/v1/deactivations';
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public const COMMENT_LENGTH = 500;
 
     private const VERSION  = 1;
     private const MAX_DAYS = 36500;
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function __construct(private FirstRun $firstRun, private Clock $clock)
     {
     }
@@ -37,14 +37,14 @@ final class DeactivationSurvey
      * Whether the dialog asks at all. The network's Plugins screen does not:
      * the setup and the days sent are one site's, and a network holds many.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public static function asks(): bool
     {
         /**
          * Whether the deactivation dialog asks why and may tell gratora.net.
          *
-         * @unreleased
+         * @since 1.2.0
          *
          * @param bool $asks
          */
@@ -54,7 +54,7 @@ final class DeactivationSurvey
     /**
      * A reason with no prompt asks for nothing more.
      *
-     * @unreleased
+     * @since 1.2.0
      *
      * @return array<string,array{label:string,prompt:string}>
      */
@@ -92,7 +92,7 @@ final class DeactivationSurvey
         ];
     }
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function send(string $reason, string $comment): void
     {
         $asked = self::reasons()[$reason] ?? null;
@@ -125,7 +125,7 @@ final class DeactivationSurvey
      * The words as typed. They are text for the store to escape where it
      * shows them, so nothing that reads like markup is taken out here.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     private static function words(string $typed): string
     {
@@ -139,7 +139,7 @@ final class DeactivationSurvey
      * A site with a broken table is the one whose answer matters most, so a
      * failure here leaves the steps unknown and the answer still goes.
      *
-     * @unreleased
+     * @since 1.2.0
      *
      * @return array{page:bool,test_donation:bool,payments:bool,donation:bool}|null
      */
@@ -156,7 +156,7 @@ final class DeactivationSurvey
      * Whole days since Gratora was first switched on, which is not the time
      * it spent on: the moment is written once and kept through later switches.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     private function daysSinceFirstOn(): int
     {

@@ -17,7 +17,7 @@ use Throwable;
  * Asked for, never automatic: a campaign published at the end of setup left
  * every install with one whether or not it was wanted.
  *
- * @unreleased
+ * @since 1.2.0
  */
 final class StarterCampaign
 {
@@ -33,7 +33,7 @@ final class StarterCampaign
     /** A claim older than this was left by a request that died. */
     private const CLAIM_SECONDS = 60;
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function __construct(
         private CampaignService $campaigns,
         private LiveCampaigns $live,
@@ -44,7 +44,7 @@ final class StarterCampaign
      * @throws StarterCampaignRefused when the site has campaigns and none takes donations, or another request is making this one
      * @throws RuntimeException when the campaign could not be written
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function ensure(): Campaign
     {

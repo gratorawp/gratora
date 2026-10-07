@@ -74,7 +74,7 @@ final class OnboardingController
     }
 
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function canCreateCampaigns(): bool
     {
         return Capabilities::userCan('gratora_manage_campaigns');
@@ -83,7 +83,7 @@ final class OnboardingController
     /**
      * The site's first donation page: made now, or the one made earlier.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function starterCampaign(): WP_REST_Response|WP_Error
     {

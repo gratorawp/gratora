@@ -6,7 +6,7 @@ namespace Gratora\Campaigns;
 
 use RuntimeException;
 
-/** @unreleased */
+/** @since 1.2.0 */
 final class StarterCampaignRefused extends RuntimeException
 {
 }

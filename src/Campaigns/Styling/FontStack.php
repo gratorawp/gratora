@@ -13,13 +13,13 @@ namespace Gratora\Campaigns\Styling;
  * that cannot be keeps its quotes where they survive and is left out where they
  * do not, so the rest of the stack still applies.
  *
- * @unreleased
+ * @since 1.2.0
  */
 final class FontStack
 {
     private const IDENTIFIERS = '/^-?[A-Za-z_][A-Za-z0-9_-]*(?: -?[A-Za-z_][A-Za-z0-9_-]*)*$/';
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public static function forAttribute(string $stack, bool $quotesSurvive): string
     {
         $families = [];

@@ -21,16 +21,16 @@ use Gratora\Settings\ReadinessService;
  * thing kept is that a test donation came in, because the donation itself can
  * be removed and nothing else would remember it.
  *
- * @unreleased
+ * @since 1.2.0
  */
 final class FirstRun
 {
     private const HIDDEN_META = 'gratora_first_run_hidden';
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public const TEST_DONATION_AT = 'gratora_first_test_donation_at';
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function __construct(
         private LiveCampaigns $live,
         private ReadinessService $readiness,
@@ -49,7 +49,7 @@ final class FirstRun
      *   payment_methods: list<string>,
      * }
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function facts(): array
     {
@@ -78,7 +78,7 @@ final class FirstRun
     /**
      * The steps towards a first donation the site has taken.
      *
-     * @unreleased
+     * @since 1.2.0
      *
      * @return array{page:bool,test_donation:bool,payments:bool,donation:bool}
      */
@@ -98,7 +98,7 @@ final class FirstRun
      * The step a test donation finishes stays finished once the donation has
      * been deleted, binned or refunded.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public static function noteCompleted(Donation $donation): void
     {
@@ -120,7 +120,7 @@ final class FirstRun
      *
      * @return ?array<string,mixed>
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function card(): ?array
     {
@@ -142,7 +142,7 @@ final class FirstRun
         return $live ? null : $facts;
     }
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public static function hide(int $userId): void
     {
         update_user_meta($userId, self::HIDDEN_META, '1');

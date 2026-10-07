@@ -11,14 +11,14 @@ use Gratora\Forms\Form;
  * A published campaign whose form is still a draft keeps a draft page, so the
  * operator sees "published" and the public sees a 404.
  *
- * @unreleased
+ * @since 1.2.0
  */
 final class LiveCampaigns
 {
     /**
      * @return list<Campaign> oldest first
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function all(): array
     {
@@ -48,7 +48,7 @@ final class LiveCampaigns
      * campaign still turns a donor away before it opens, after it ends and
      * once a goal that closes it is met.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function firstOpen(): ?Campaign
     {

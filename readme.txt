@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -268,10 +268,19 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.1.3 =
-* New: the Add-ons screen loads its add-ons and plans from gratora.net.
-* Fixed: recurring donation screens on MySQL 5.7.
-* Fixed: fields added by add-ons are saved when a form is shown on a fundraiser's page.
-* Fixed: a deprecation notice in the log when the form editor opens.
+= 1.2.0 =
+* New: Gratora now runs on WordPress 6.9.
+* New: a new site starts in test mode, and the dashboard shows the steps to your first donation.
+* New: the setup wizard can create your first donation page.
+* New: when you deactivate Gratora it asks why. Answering is optional, and nothing is sent unless you pick a reason.
+* Changed: the Fundraising menu carries the Gratora mark in place of the heart.
+* Changed: the Setup tab tells a site that takes only test donations from one that takes real ones.
+* Changed: in test mode on a live site, the looser form limits are for whoever manages the plugin, not for visitors.
+* Fixed: a form that cannot take a donation tells its owner why.
+* Fixed: the New campaign dialog no longer says a draft is live.
+* Fixed: a test donation can be deleted without refunding it first.
+* Fixed: on a classic theme the campaign page no longer shows its title twice.
+* Fixed: an empty About section no longer shows on some themes.
+* Fixed: the campaign menu no longer opens underneath the WordPress menu.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).

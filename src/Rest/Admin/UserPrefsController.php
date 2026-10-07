@@ -125,7 +125,7 @@ final class UserPrefsController
         ]);
     }
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function hideFirstRun(): WP_REST_Response
     {
         FirstRun::hide(get_current_user_id());

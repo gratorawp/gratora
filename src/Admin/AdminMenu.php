@@ -28,7 +28,7 @@ final class AdminMenu extends HookProvider
      * WordPress colours a menu icon to the admin's colour scheme only when it
      * is an SVG in a base64 data URI.
      *
-     * @unreleased
+     * @since 1.2.0
      */
     private static function icon(): string
     {

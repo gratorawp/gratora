@@ -1838,7 +1838,7 @@ JS;
      * @param array<int,mixed> $offered the methods the form has for this visitor
      * @return array{ownerNotice?: array{text:string, linkLabel:string, linkUrl:string}}
      *
-     * @unreleased
+     * @since 1.2.0
      */
     private function ownerNotice(Form $form, array $offered): array
     {

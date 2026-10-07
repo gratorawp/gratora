@@ -82,7 +82,7 @@ final class CampaignPageTemplate extends HookProvider
         return $templates;
     }
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function classicTemplate(string $template): string
     {
         return $this->isACampaignPageLeftToUs() ? __DIR__ . '/views/classic-chrome.php' : $template;

@@ -13,17 +13,17 @@ use Gratora\Foundation\Hooks\HookProvider;
  * copy throws and its screen never draws. On those versions a script printed
  * after WordPress's own gives the first answer again.
  *
- * @unreleased
+ * @since 1.2.0
  */
 final class RepeatedPackageRegistration extends HookProvider
 {
-    /** @unreleased */
+    /** @since 1.2.0 */
     protected function actions(): array
     {
         return ['admin_enqueue_scripts' => ['allow', 1]];
     }
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     public function allow(): void
     {
         if (is_wp_version_compatible('7.0') || ! CurrentPage::isGratora()) {

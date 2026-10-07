@@ -192,7 +192,7 @@ final class ReadinessService
      *
      * @return list<string>
      *
-     * @unreleased
+     * @since 1.2.0
      */
     public function realMethods(): array
     {
@@ -337,7 +337,7 @@ final class ReadinessService
         return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'gratora-donation-platform'));
     }
 
-    /** @unreleased */
+    /** @since 1.2.0 */
     private function somethingTakesATestDonation(): bool
     {
         foreach (array_keys($this->gateways->all()) as $id) {
