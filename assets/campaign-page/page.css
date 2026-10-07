@@ -191,9 +191,11 @@ body,
     padding-inline: 24px;
 }
 
-/* Hide empty bound sections only on the frontend so editors can still select them. */
+/* Hide empty bound sections only on the frontend so editors can still select them.
+   Some classic themes wrap a group's content in an inner container. */
 
-.dp-band--tight:has(> p.dp-body:empty) { display: none; }
+.dp-band--tight:has(> p.dp-body:empty),
+.dp-band--tight:has(> .wp-block-group__inner-container > p.dp-body:empty) { display: none; }
 
 .editor-styles-wrapper .dp-band--tight:has(> p.dp-body:empty) { display: revert; }
 
