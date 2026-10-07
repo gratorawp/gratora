@@ -45,6 +45,66 @@ body.gratora-deact-open { overflow: hidden; }
     color: #50575e;
 }
 
+.gratora-deact__why {
+    min-width: 0;
+    margin: 0 0 16px;
+    padding: 0;
+    border: 0;
+}
+
+.gratora-deact__why-title {
+    margin: 0 0 10px;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.gratora-deact__why-optional {
+    margin-inline-start: 6px;
+    font-weight: 400;
+    color: #646970;
+}
+
+.gratora-deact__why-clear {
+    margin-inline-start: 8px;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.gratora-deact__why-clear[hidden] { display: none; }
+
+.gratora-deact__reason {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 9px;
+    font-size: 13px;
+    color: #1d2327;
+    cursor: pointer;
+}
+
+.gratora-deact__reason input {
+    flex: none;
+    margin: 0;
+}
+
+.gratora-deact__comment {
+    display: block;
+    width: 100%;
+    margin: 2px 0 12px;
+    font-size: 13px;
+}
+
+.gratora-deact__comment[hidden] { display: none; }
+
+.gratora-deact__why-note {
+    margin: 12px 0 0;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #646970;
+}
+
 .gratora-deact__choice {
     padding: 12px 14px;
     border: 1px solid #dcdcde;

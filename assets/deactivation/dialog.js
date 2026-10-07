@@ -3,15 +3,47 @@
     let dialog = null;
     let deactivateUrl = null;
     let opener = null;
+    let sending = false;
 
     function rowLink() {
         const row = document.querySelector( 'tr[data-plugin="' + cfg.slug + '"]' );
         return row ? row.querySelector( 'a[href*="action=deactivate"]' ) : null;
     }
 
+    function picked() {
+        return dialog.querySelector( 'input[name="gratora-deact-reason"]:checked' );
+    }
+
+    /**
+     * The box sits under the reason it belongs to, and only a reason with a
+     * prompt has one.
+     */
+    function ask() {
+        const reason = picked();
+        const box = dialog.querySelector( '#gratora-deact-comment' );
+        const prompt = reason ? reason.dataset.prompt : '';
+
+        box.hidden = ! prompt;
+        if ( prompt ) {
+            box.placeholder = prompt;
+            reason.closest( 'label' ).after( box );
+        }
+        dialog.querySelector( '[data-gratora-deact-clear]' ).hidden = ! reason;
+    }
+
+    function clear() {
+        const reason = picked();
+        if ( reason ) reason.checked = false;
+        dialog.querySelector( '#gratora-deact-comment' ).value = '';
+        ask();
+        sync();
+    }
+
     function open( href ) {
         deactivateUrl = href;
         opener = dialog.ownerDocument.activeElement;
+        // An answer left from an earlier look is not one given now.
+        clear();
         dialog.hidden = false;
         document.body.classList.add( 'gratora-deact-open' );
         sync();
@@ -36,7 +68,11 @@
 
         dialog.classList.toggle( 'is-danger', wipe );
         dialog.querySelector( '#gratora-deact-consequence' ).hidden = ! wipe;
-        submit.textContent = wipe ? submit.dataset.labelWipe : submit.dataset.labelKeep;
+        if ( wipe ) {
+            submit.textContent = submit.dataset.labelWipe;
+        } else {
+            submit.textContent = picked() ? submit.dataset.labelSend : submit.dataset.labelKeep;
+        }
     }
 
     function leave() {
@@ -50,6 +86,12 @@
         body.set( 'action', cfg.action );
         body.set( '_wpnonce', cfg.nonce );
         if ( dialog.querySelector( '#gratora-deact-wipe' ).checked ) body.set( 'wipe', '1' );
+
+        const reason = picked();
+        if ( reason ) {
+            body.set( 'reason', reason.value );
+            if ( reason.dataset.prompt ) body.set( 'comment', dialog.querySelector( '#gratora-deact-comment' ).value );
+        }
 
         fetch( cfg.ajaxUrl, {
             method: 'POST',
@@ -76,8 +118,24 @@
                 close();
                 return;
             }
-            if ( e.target.closest( '[data-gratora-deact-submit]' ) ) {
+            if ( e.target.closest( '[data-gratora-deact-clear]' ) ) {
+                clear();
+                dialog.querySelector( 'input[name="gratora-deact-reason"]' ).focus();
+                return;
+            }
+            const submit = e.target.closest( '[data-gratora-deact-submit]' );
+            if ( submit && ! sending ) {
+                // The site tells gratora.net before it answers, which can take a moment.
+                sending = true;
+                submit.disabled = true;
                 send( leave );
+            }
+        } );
+
+        dialog.addEventListener( 'change', function ( e ) {
+            if ( e.target.name === 'gratora-deact-reason' ) {
+                ask();
+                sync();
             }
         } );
 

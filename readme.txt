@@ -134,9 +134,14 @@ Gratora contacts these services only when you use the feature that needs them.
 
 **Gratora** (gratora.net)
 Fetches the list of add-ons and plans when you open the Add-ons screen, and
-keeps it for a day, or for an hour when gratora.net does not answer. Sends no
-information about your site beyond the request itself, which carries the
+keeps it for a day, or for an hour when gratora.net does not answer. That sends
+no information about your site beyond the request itself, which carries the
 plugin's version.
+When you deactivate the plugin it asks why. If you pick a reason, and only then,
+the reason is sent with what you typed, the versions of Gratora, WordPress and
+PHP, how many days the plugin was active and which setup steps were done (a
+campaign made, a test donation, payments connected, a first donation). It does
+not include your site's address or name, or any email address.
 Terms: https://gratora.net/terms/ | Privacy: https://gratora.net/privacy/
 
 **Stripe** (api.stripe.com, js.stripe.com)

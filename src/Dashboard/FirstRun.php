@@ -76,6 +76,25 @@ final class FirstRun
     }
 
     /**
+     * The steps towards a first donation the site has taken.
+     *
+     * @unreleased
+     *
+     * @return array{page:bool,test_donation:bool,payments:bool,donation:bool}
+     */
+    public function progress(): array
+    {
+        $facts = $this->facts();
+
+        return [
+            'page'          => $facts['page'] !== 'none',
+            'test_donation' => $facts['test_donation_made'],
+            'payments'      => $facts['payments'],
+            'donation'      => $this->aDonorHasGiven(),
+        ];
+    }
+
+    /**
      * The step a test donation finishes stays finished once the donation has
      * been deleted, binned or refunded.
      *

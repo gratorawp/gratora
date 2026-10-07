@@ -7,6 +7,7 @@ namespace Gratora\Tests\Integration;
 use Gratora\Campaigns\Campaign;
 use Gratora\Campaigns\CampaignService;
 use Gratora\Cli\DemoSeeder;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Donations\AggregateSyncer;
 use Gratora\Donations\Donation;
 use Gratora\Donations\DonationDeleter;
@@ -458,6 +459,63 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         $finished = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/onboarding/finalize'))->get_data();
 
         $this->assertSame('none', $finished['first_run']['page']);
+    }
+
+    public function test_a_new_site_has_taken_none_of_the_steps(): void
+    {
+        $this->assertSame(
+            ['page' => false, 'test_donation' => false, 'payments' => false, 'donation' => false],
+            $this->progress()
+        );
+    }
+
+    public function test_a_campaign_counts_as_a_page_made_even_while_it_is_a_draft(): void
+    {
+        $this->campaign(['title' => 'Spring appeal', 'status' => 'draft']);
+
+        $this->assertSame(
+            ['page' => true, 'test_donation' => false, 'payments' => false, 'donation' => false],
+            $this->progress()
+        );
+    }
+
+    public function test_a_test_donation_counts_as_a_step_and_not_as_a_donor_giving(): void
+    {
+        $this->donation(['is_test' => true]);
+
+        $this->assertSame(
+            ['page' => false, 'test_donation' => true, 'payments' => false, 'donation' => false],
+            $this->progress()
+        );
+    }
+
+    public function test_a_way_to_take_real_money_counts_as_a_step(): void
+    {
+        update_option('gratora_gateway_config', [
+            'test_mode' => true,
+            'offline'   => ['bank_details' => 'IBAN HR12 1001 0051 8630 0016 0'],
+        ]);
+
+        $this->assertSame(
+            ['page' => false, 'test_donation' => false, 'payments' => true, 'donation' => false],
+            $this->progress()
+        );
+    }
+
+    public function test_a_donor_giving_on_the_site_counts_as_the_last_step(): void
+    {
+        $this->donation();
+
+        $this->assertSame(
+            ['page' => false, 'test_donation' => false, 'payments' => false, 'donation' => true],
+            $this->progress()
+        );
+    }
+
+    /** @return array{page:bool,test_donation:bool,payments:bool,donation:bool} */
+    private function progress(): array
+    {
+        return Plugin::instance()->container->get(FirstRun::class)->progress();
     }
 
     /** @return array<string, mixed> */

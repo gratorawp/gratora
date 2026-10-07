@@ -9,6 +9,7 @@ use Gratora\Admin\AdminFooter;
 use Gratora\Admin\AdminGlobals;
 use Gratora\Admin\AdminMenu;
 use Gratora\Admin\DeactivationDialog;
+use Gratora\Admin\DeactivationSurvey;
 use Gratora\Admin\ManagedPageStates;
 use Gratora\Admin\Pages\AddonsPage;
 use Gratora\Admin\Pages\CampaignsPage;
@@ -1260,7 +1261,9 @@ final class CoreModule implements GratoraModule
 
         if (is_admin()) {
             (new ManagedPageStates())->register();
-            (new DeactivationDialog())->register();
+            (new DeactivationDialog(
+                static fn (): DeactivationSurvey => new DeactivationSurvey($c->get(FirstRun::class), $c->get(Clock::class))
+            ))->register();
             (new AdminMenu())->register();
             (new CampaignsPage())->register();
             (new DonationsPage())->register();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gratora\Admin;
 
+use Closure;
 use Gratora\Foundation\Helpers\View;
 use Gratora\Foundation\Uninstall\DataEraser;
 
@@ -15,6 +16,15 @@ use Gratora\Foundation\Uninstall\DataEraser;
 final class DeactivationDialog
 {
     private const ACTION = 'gratora_deactivation_choice';
+
+    /**
+     * @unreleased
+     *
+     * @param Closure(): DeactivationSurvey $survey built only when an answer comes in
+     */
+    public function __construct(private Closure $survey)
+    {
+    }
 
     /** @since 1.0.0 */
     public function register(): void
@@ -70,6 +80,7 @@ final class DeactivationDialog
 
         View::printRelative(__DIR__, 'views/deactivation-dialog', [
             'wipeOptIn' => DataEraser::requested(),
+            'reasons'   => DeactivationSurvey::reasons(),
         ]);
     }
 
@@ -88,6 +99,11 @@ final class DeactivationDialog
             update_option(DataEraser::OPT_IN, time(), false);
         } else {
             delete_option(DataEraser::OPT_IN);
+        }
+
+        $reason = sanitize_key((string) wp_unslash($_POST['reason'] ?? ''));
+        if ($reason !== '') {
+            ($this->survey)()->send($reason, sanitize_textarea_field((string) wp_unslash($_POST['comment'] ?? '')));
         }
 
         wp_send_json_success(['wipe' => $wipe]);
