@@ -10,6 +10,15 @@ import { describeInk, expectReadable, inkOf, installInk } from '../helpers/contr
 
 const SCHEMES = ['modern', 'fresh', 'light', 'blue', 'midnight', 'sunrise', 'ectoplasm', 'ocean', 'coffee'];
 
+// Before WordPress 7.0 these paint the menu a paler ground the amber cannot be read on, so the link is left as WordPress draws it.
+const PALE_BEFORE_7 = ['blue', 'sunrise', 'ocean', 'coffee'];
+
+async function beforeWordPress7(page: Page): Promise<boolean> {
+    const branch = await page.locator('body').evaluate((body) => (body.className.match(/\bbranch-(\d+)-/) ?? [])[1] ?? '');
+
+    return branch !== '' && Number(branch) < 7;
+}
+
 const PROFILE = '/wp-admin/profile.php';
 const DASHBOARD = '/wp-admin/admin.php?page=gratora';
 const ADDONS = '/wp-admin/admin.php?page=gratora-addons';
@@ -64,6 +73,11 @@ test.describe('the add-ons link in the menu', () => {
 
             const addons = await inkOf(link(page, 'gratora-addons'));
             const neighbour = await inkOf(link(page, 'gratora-settings'));
+
+            if (PALE_BEFORE_7.includes(scheme) && (await beforeWordPress7(page))) {
+                expect(addons.color, `${scheme}: ${describeInk(addons)}`).toEqual(neighbour.color);
+                continue;
+            }
 
             expect(addons.color, `${scheme}: ${describeInk(addons)}`).not.toEqual(neighbour.color);
             expectReadable(addons, scheme);

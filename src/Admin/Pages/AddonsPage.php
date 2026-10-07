@@ -17,16 +17,13 @@ final class AddonsPage extends HookProvider
     private const BUILD_DIR  = 'build/admin/addons';
     private const MENU_STYLE = 'gratora-addons-menu-link';
 
-    /**
-     * Each admin colour scheme paints the menu its own ground, so the schemes
-     * are named: the light one takes the darker ink, and a scheme not listed
-     * keeps the link as WordPress draws it. Under the pointer, with focus and
-     * as the current page the link looks like every other.
-     */
-    private const MENU_LINK_CSS = <<<'CSS'
-        :is(.admin-color-modern, .admin-color-fresh, .admin-color-blue, .admin-color-midnight, .admin-color-sunrise, .admin-color-ectoplasm, .admin-color-ocean, .admin-color-coffee) #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #e89940; }
-        .admin-color-light #adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus) { color: #b45309; }
-        CSS;
+    private const MENU_LINK = '#adminmenu .wp-submenu a[href$="page=gratora-addons"]:not(.current, :hover, :focus)';
+
+    /** The schemes whose menu the amber reads on. */
+    private const AMBER_SCHEMES = ['modern', 'fresh', 'blue', 'midnight', 'sunrise', 'ectoplasm', 'ocean', 'coffee'];
+
+    /** Before WordPress 7.0 these paint the menu a paler ground: the amber reads at 1.4 to 4.4 to 1 on it. */
+    private const PALE_BEFORE_7 = ['blue', 'sunrise', 'ocean', 'coffee'];
 
     /** @since 1.1.3 */
     public function __construct(private AddonsCatalog $catalog, private LicenseService $license)
@@ -72,7 +69,25 @@ final class AddonsPage extends HookProvider
         // Use a registered handle for inline CSS.
         wp_register_style(self::MENU_STYLE, false, [], GRATORA_VERSION);
         wp_enqueue_style(self::MENU_STYLE);
-        wp_add_inline_style(self::MENU_STYLE, self::MENU_LINK_CSS);
+        wp_add_inline_style(self::MENU_STYLE, self::menuLinkCss());
+    }
+
+    /**
+     * Each admin colour scheme paints the menu its own ground, so the schemes
+     * are named: the light one takes the darker ink, and a scheme not listed
+     * keeps the link as WordPress draws it. Under the pointer, with focus and
+     * as the current page the link looks like every other.
+     */
+    private static function menuLinkCss(): string
+    {
+        $schemes = is_wp_version_compatible('7.0')
+            ? self::AMBER_SCHEMES
+            : array_diff(self::AMBER_SCHEMES, self::PALE_BEFORE_7);
+
+        $named = implode(', ', array_map(static fn (string $scheme): string => '.admin-color-' . $scheme, $schemes));
+
+        return ':is(' . $named . ') ' . self::MENU_LINK . " { color: #e89940; }\n"
+            . '.admin-color-light ' . self::MENU_LINK . ' { color: #b45309; }';
     }
 
     /** @since 1.1.0 */
