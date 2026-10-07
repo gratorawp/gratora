@@ -69,6 +69,11 @@ if (! defined('WP_TESTS_CONFIG_FILE_PATH')) {
 
 require_once $phpunit_dir . '/includes/functions.php';
 
+// A request no test has stubbed is answered here, so a run never reaches somebody else's server.
+tests_add_filter('pre_http_request', static function (mixed $preempt, array $args, string $url): mixed {
+    return $preempt !== false ? $preempt : new WP_Error('gratora_tests_offline', 'No test stubbed ' . $url);
+}, PHP_INT_MAX, 3);
+
 // Load the plugin inside WP's "must-use" phase so it is active for every test,
 // then immediately create the gratora_* tables. boot() runs on plugins_loaded
 // (which fires AFTER muplugins_loaded) and eagerly constructs services such as
