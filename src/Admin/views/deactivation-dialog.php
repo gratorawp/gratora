@@ -2,12 +2,13 @@
 defined('ABSPATH') || exit;
 /**
  * @var bool                                              $wipeOptIn
- * @var array<string,array{label:string,prompt:string}> $reasons
+ * @var array<string,array{label:string,prompt:string}> $reasons       none when the question is not asked
+ * @var int                                               $commentLength
  */
 ?>
 <div class="gratora-deact" id="gratora-deact" hidden>
     <div class="gratora-deact__backdrop" data-gratora-deact-cancel></div>
-    <div class="gratora-deact__panel" role="dialog" aria-modal="true"
+    <div class="gratora-deact__panel" role="dialog" aria-modal="true" tabindex="-1"
          aria-labelledby="gratora-deact-title" aria-describedby="gratora-deact-lede">
         <h2 class="gratora-deact__title" id="gratora-deact-title">
             <?php esc_html_e('Deactivate Gratora', 'gratora-donation-platform'); ?>
@@ -17,31 +18,38 @@ defined('ABSPATH') || exit;
             <?php esc_html_e('Your donations, donors, campaigns and settings stay as they are. Switching Gratora back on picks up where you left off.', 'gratora-donation-platform'); ?>
         </p>
 
-        <fieldset class="gratora-deact__why" aria-describedby="gratora-deact-why-note">
-            <legend class="gratora-deact__why-title">
-                <?php esc_html_e('Why are you switching it off?', 'gratora-donation-platform'); ?>
-                <span class="gratora-deact__why-optional"><?php esc_html_e('Optional', 'gratora-donation-platform'); ?></span>
-                <button type="button" class="button-link gratora-deact__why-clear" data-gratora-deact-clear hidden>
-                    <?php esc_html_e('Clear', 'gratora-donation-platform'); ?>
-                </button>
-            </legend>
+        <?php if ($reasons !== []) : ?>
+            <div class="gratora-deact__why" role="group"
+                 aria-labelledby="gratora-deact-why-title" aria-describedby="gratora-deact-why-note">
+                <p class="gratora-deact__why-head">
+                    <span class="gratora-deact__why-title" id="gratora-deact-why-title"><?php esc_html_e('Why are you switching it off?', 'gratora-donation-platform'); ?></span>
+                    <span class="gratora-deact__why-optional"><?php esc_html_e('Optional', 'gratora-donation-platform'); ?></span>
+                    <button type="button" class="button-link gratora-deact__why-clear" data-gratora-deact-clear hidden>
+                        <?php esc_html_e('Clear', 'gratora-donation-platform'); ?>
+                    </button>
+                </p>
 
-            <?php foreach ($reasons as $key => $reason) : ?>
-                <label class="gratora-deact__reason">
-                    <input type="radio" name="gratora-deact-reason" value="<?php echo esc_attr($key); ?>"
-                           data-prompt="<?php echo esc_attr($reason['prompt']); ?>">
-                    <span><?php echo esc_html($reason['label']); ?></span>
-                </label>
-            <?php endforeach; ?>
+                <?php foreach ($reasons as $key => $reason) : ?>
+                    <label class="gratora-deact__reason">
+                        <input type="radio" name="gratora-deact-reason" value="<?php echo esc_attr($key); ?>"
+                               data-prompt="<?php echo esc_attr($reason['prompt']); ?>">
+                        <span><?php echo esc_html($reason['label']); ?></span>
+                    </label>
+                <?php endforeach; ?>
 
-            <textarea class="gratora-deact__comment" id="gratora-deact-comment" rows="2" maxlength="500" hidden
-                      aria-label="<?php esc_attr_e('Tell us more', 'gratora-donation-platform'); ?>"></textarea>
+                <textarea class="gratora-deact__comment" id="gratora-deact-comment" rows="2" hidden
+                          maxlength="<?php echo esc_attr((string) $commentLength); ?>"></textarea>
 
-            <p class="gratora-deact__why-note" id="gratora-deact-why-note">
-                <?php esc_html_e('If you pick one, it is sent to gratora.net when you deactivate, with the versions of Gratora, WordPress and PHP, how long Gratora was switched on and how far setup got. Nothing that names you or this site.', 'gratora-donation-platform'); ?>
-                <a href="https://gratora.net/privacy/" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Privacy', 'gratora-donation-platform'); ?></a>
-            </p>
-        </fieldset>
+                <p class="gratora-deact__why-note" id="gratora-deact-why-note">
+                    <?php esc_html_e('If you pick one, it is sent to gratora.net when you deactivate, together with what you type, the versions of Gratora, WordPress and PHP, how long ago Gratora was first switched on and how far setup got. It does not include this site\'s address or name, or anyone\'s email address.', 'gratora-donation-platform'); ?>
+                    <a href="https://gratora.net/privacy/" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Privacy', 'gratora-donation-platform'); ?></a>
+                </p>
+
+                <p class="screen-reader-text" role="status" id="gratora-deact-why-status"
+                   data-sent="<?php esc_attr_e('Your answer will be sent when you deactivate.', 'gratora-donation-platform'); ?>"
+                   data-unsent="<?php esc_attr_e('No answer will be sent.', 'gratora-donation-platform'); ?>"></p>
+            </div>
+        <?php endif; ?>
 
         <div class="gratora-deact__choice">
             <label class="gratora-deact__check" for="gratora-deact-wipe">

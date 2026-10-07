@@ -9,13 +9,14 @@ use Gratora\Foundation\Helpers\View;
 use Gratora\Foundation\Uninstall\DataEraser;
 
 /**
- * Ask whether to retain data before deactivation removes the plugin’s UI.
+ * Ask whether to retain data, and why, before deactivation removes the plugin’s UI.
  *
  * @since 1.0.0
  */
 final class DeactivationDialog
 {
     private const ACTION = 'gratora_deactivation_choice';
+    private const REASON = 'gratora_deactivation_reason';
 
     /**
      * @unreleased
@@ -32,6 +33,7 @@ final class DeactivationDialog
         add_action('admin_footer-plugins.php', [$this, 'renderDialog']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue']);
         add_action('wp_ajax_' . self::ACTION, [$this, 'record']);
+        add_action('wp_ajax_' . self::REASON, [$this, 'tell']);
     }
 
     /** @since 1.0.0 */
@@ -56,10 +58,12 @@ final class DeactivationDialog
             true
         );
         wp_localize_script('gratora-deactivation', 'gratoraDeactivation', [
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'action'  => self::ACTION,
-            'nonce'   => wp_create_nonce(self::ACTION),
-            'slug'    => plugin_basename(GRATORA_FILE),
+            'ajaxUrl'      => admin_url('admin-ajax.php'),
+            'action'       => self::ACTION,
+            'nonce'        => wp_create_nonce(self::ACTION),
+            'reasonAction' => self::REASON,
+            'reasonNonce'  => wp_create_nonce(self::REASON),
+            'slug'         => plugin_basename(GRATORA_FILE),
         ]);
     }
 
@@ -79,8 +83,9 @@ final class DeactivationDialog
         }
 
         View::printRelative(__DIR__, 'views/deactivation-dialog', [
-            'wipeOptIn' => DataEraser::requested(),
-            'reasons'   => DeactivationSurvey::reasons(),
+            'wipeOptIn'     => DataEraser::requested(),
+            'reasons'       => DeactivationSurvey::asks() ? DeactivationSurvey::reasons() : [],
+            'commentLength' => DeactivationSurvey::COMMENT_LENGTH,
         ]);
     }
 
@@ -101,11 +106,31 @@ final class DeactivationDialog
             delete_option(DataEraser::OPT_IN);
         }
 
-        $reason = sanitize_key((string) wp_unslash($_POST['reason'] ?? ''));
-        if ($reason !== '') {
-            ($this->survey)()->send($reason, sanitize_textarea_field((string) wp_unslash($_POST['comment'] ?? '')));
+        wp_send_json_success(['wipe' => $wipe]);
+    }
+
+    /**
+     * A request of its own, so that deactivation never waits on gratora.net.
+     *
+     * @unreleased
+     */
+    public function tell(): void
+    {
+        check_ajax_referer(self::REASON);
+
+        if (! current_user_can('activate_plugins')) {
+            wp_send_json_error(null, 403);
         }
 
-        wp_send_json_success(['wipe' => $wipe]);
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- the reason is matched against the list, and the words are kept as typed and cleaned where they are sent.
+        $reason  = (string) wp_unslash($_POST['reason'] ?? '');
+        $comment = (string) wp_unslash($_POST['comment'] ?? '');
+        // phpcs:enable
+
+        if ($reason !== '') {
+            ($this->survey)()->send($reason, $comment);
+        }
+
+        wp_send_json_success();
     }
 }

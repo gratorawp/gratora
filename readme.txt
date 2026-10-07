@@ -139,9 +139,11 @@ no information about your site beyond the request itself, which carries the
 plugin's version.
 When you deactivate the plugin it asks why. If you pick a reason, and only then,
 the reason is sent with what you typed, the versions of Gratora, WordPress and
-PHP, how many days the plugin was active and which setup steps were done (a
-campaign made, a test donation, payments connected, a first donation). It does
-not include your site's address or name, or any email address.
+PHP, how many days ago the plugin was first activated and which setup steps were
+done (a campaign made, a test donation, payments connected, a first donation).
+The request does not include your site's address or name, or any email address.
+Like any request it reaches gratora.net from your server's IP address, which is
+not stored with the answer.
 Terms: https://gratora.net/terms/ | Privacy: https://gratora.net/privacy/
 
 **Stripe** (api.stripe.com, js.stripe.com)
