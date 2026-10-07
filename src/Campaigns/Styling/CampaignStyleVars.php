@@ -76,6 +76,9 @@ final class CampaignStyleVars
         $css = '';
         foreach ($tokens as $key => $value) {
             $value = trim((string) $value);
+            if ($key === 'gratora-typeface') {
+                $value = FontStack::forAttribute($value, is_wp_version_compatible('7.0'));
+            }
             if ($value === '') {
                 continue;
             }
