@@ -75,7 +75,8 @@ OUT="$OUT" php -r '
 
 # Retain assets enqueued directly without webpack.
 for runtime in assets/deactivation/dialog.css assets/deactivation/dialog.js \
-    assets/donate-button/modal.js assets/campaign-page/page.css
+    assets/donate-button/modal.js assets/campaign-page/page.css \
+    assets/compat/private-apis-before-7.js
 do
     test -f "$OUT/$runtime" || fail "$runtime is enqueued at runtime and is not in the zip"
 done

@@ -20,6 +20,7 @@ use Gratora\Admin\Pages\SettingsPage;
 use Gratora\Admin\Pages\SubscriptionsPage;
 use Gratora\Admin\Pages\ToolsPage;
 use Gratora\Admin\ProxyNotice;
+use Gratora\Admin\RepeatedPackageRegistration;
 use Gratora\Admin\TestModeBadge;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Analytics\Event;
@@ -1273,6 +1274,7 @@ final class CoreModule implements GratoraModule
             (new OnboardingPage())->register();
             (new Onboarding())->register();
             (new AdminGlobals($c->get(LicenseService::class)))->register();
+            (new RepeatedPackageRegistration())->register();
             (new AdminFooter())->register();
             (new LicenseNotice($c->get(LicenseService::class)))->register();
 

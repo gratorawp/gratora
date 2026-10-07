@@ -10,7 +10,7 @@
 /tests
 
 # The repository named in readme.txt answers Guideline 4 for build/, so the
-# webpack input does not have to travel with its output. The three assets/
+# webpack input does not have to travel with its output. The four assets/
 # directories absent from this list are enqueued straight from assets/ and
 # never reach build/.
 /package.json
