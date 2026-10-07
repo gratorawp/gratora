@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo, Fragment } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { DataViews } from '@wordpress/dataviews';
@@ -7,7 +7,7 @@ import Notice from '../_shared/components/Notice';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import Dialog from '../_shared/components/Dialog';
 import { notify } from '../_shared/notify';
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf, isRTL } from '@wordpress/i18n';
 
 import { useGratoraRecord } from '../_shared/useGratoraRecord';
 import { rowLinkProps, stopRowSelect } from '../_shared/rowLink';
@@ -536,10 +536,29 @@ function statusPillClass( status ) {
     }
 }
 
-function HeaderMenu( { campaign, onAction } ) {
+// The list hangs from the far edge of its button and runs back along the row.
+// A button that wrapped to the start of the row leaves it no room there.
+function runsOutOfTheRow( trigger, list, row ) {
+    return isRTL()
+        ? trigger.left + list.width > row.right
+        : trigger.right - list.width < row.left;
+}
+
+export function HeaderMenu( { campaign, onAction } ) {
     const [ open, setOpen ] = useState( false );
+    const [ fromStart, setFromStart ] = useState( false );
     const ref = useRef( null );
     const triggerRef = useRef( null );
+    const listRef = useRef( null );
+
+    useLayoutEffect( () => {
+        if ( ! open ) return;
+        setFromStart( runsOutOfTheRow(
+            triggerRef.current.getBoundingClientRect(),
+            listRef.current.getBoundingClientRect(),
+            ref.current.parentElement.getBoundingClientRect(),
+        ) );
+    }, [ open ] );
 
     useEffect( () => {
         if ( ! open ) return undefined;
@@ -586,7 +605,7 @@ function HeaderMenu( { campaign, onAction } ) {
                 ⋯
             </button>
             { open && (
-                <div className="gratora-menu__list" role="menu">
+                <div className={ `gratora-menu__list${ fromStart ? ' is-from-start' : '' }` } role="menu" ref={ listRef }>
                     { isDraft && (
                         <button type="button" role="menuitem" className="gratora-menu__item is-primary" onClick={ () => fire( 'publish' ) }>
                             { __( 'Publish campaign', 'gratora-donation-platform' ) }

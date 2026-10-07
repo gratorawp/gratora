@@ -2272,6 +2272,8 @@ $card-radius:   $radius-lg;
         box-shadow: $card-shadow;
         padding: 4px 0;
         z-index: 20;
+
+        &.is-from-start { right: auto; left: 0; }
     }
 
     &__item {
