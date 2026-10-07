@@ -970,6 +970,54 @@ msgstr "Recaudación de fondos"
 msgid "Dashboard"
 msgstr "Escritorio"
 
+#: src/Admin/DeactivationSurvey.php:65
+msgid "Only for a while, I am testing or fixing something"
+msgstr "Solo por un tiempo, estoy probando o arreglando algo"
+
+#: src/Admin/DeactivationSurvey.php:69
+msgid "I could not get it set up"
+msgstr "No he conseguido configurarlo"
+
+#: src/Admin/DeactivationSurvey.php:70
+msgid "Where did you get stuck?"
+msgstr "¿Dónde te has atascado?"
+
+#: src/Admin/DeactivationSurvey.php:73
+msgid "Something did not work"
+msgstr "Algo no ha funcionado"
+
+#: src/Admin/DeactivationSurvey.php:74
+msgid "What went wrong?"
+msgstr "¿Qué ha fallado?"
+
+#: src/Admin/DeactivationSurvey.php:77
+msgid "It is missing something I need"
+msgstr "Le falta algo que necesito"
+
+#: src/Admin/DeactivationSurvey.php:78
+msgid "What is missing?"
+msgstr "¿Qué falta?"
+
+#: src/Admin/DeactivationSurvey.php:81
+msgid "I am going with another plugin"
+msgstr "Me quedo con otro plugin"
+
+#: src/Admin/DeactivationSurvey.php:82
+msgid "Which one, and what does it do better?"
+msgstr "¿Cuál, y qué hace mejor?"
+
+#: src/Admin/DeactivationSurvey.php:85
+msgid "I no longer need it"
+msgstr "Ya no lo necesito"
+
+#: src/Admin/DeactivationSurvey.php:89
+msgid "Something else"
+msgstr "Otro motivo"
+
+#: src/Admin/DeactivationSurvey.php:90
+msgid "What is the reason?"
+msgstr "¿Cuál es el motivo?"
+
 #: src/Admin/ManagedPageStates.php:37
 msgid "Gratora Campaign"
 msgstr "Campaña de Gratora"
@@ -1384,6 +1432,14 @@ msgstr "Desactivar Gratora"
 msgid "Your donations, donors, campaigns and settings stay as they are. Switching Gratora back on picks up where you left off."
 msgstr "Tus donaciones, donantes, campañas y ajustes se quedan como están. Al volver a activar Gratora, continuarás donde lo dejaste."
 
+#: src/Admin/views/deactivation-dialog.php:25
+msgid "Why are you switching it off?"
+msgstr "¿Por qué lo desactivas?"
+
+#: src/Admin/views/deactivation-dialog.php:26
+msgid "Optional"
+msgstr "Opcional"
+
 #: src/Admin/views/deactivation-dialog.php:22
 msgid "Delete all Gratora data as well"
 msgstr "Borrar también todos los datos de Gratora"
@@ -1418,6 +1474,14 @@ msgstr "Reactivar el plugin no recuperará nada de esto. Exporta antes todo lo q
 #: assets/admin/funds/List.jsx:896
 msgid "Deactivate"
 msgstr "Desactivar"
+
+#: src/Admin/views/deactivation-dialog.php:82
+msgid "Send and deactivate"
+msgstr "Enviar y desactivar"
+
+#: src/Admin/views/deactivation-dialog.php:83
+msgid "Deactivating…"
+msgstr "Desactivando…"
 
 #: src/Admin/views/deactivation-dialog.php:47
 msgid "Delete everything and deactivate"
@@ -2112,6 +2176,22 @@ msgstr "Título, descripción y el formulario de donación. Sin cifras, sin list
 #: src/Campaigns/CampaignTemplates.php:155
 msgid "A page you will design yourself, and a campaign with no goal to show."
 msgstr "Para una página que vas a diseñar por tu cuenta y para una campaña sin objetivo que mostrar."
+
+#: src/Campaigns/StarterCampaign.php:60
+#: assets/admin/dashboard/firstRunSteps.js:35
+#: assets/admin/onboarding/Onboarding.jsx:689
+msgid "You have a campaign, but none of them is taking donations right now."
+msgstr "Tienes una campaña, pero ahora mismo ninguna acepta donaciones."
+
+#: src/Campaigns/StarterCampaign.php:65
+msgid "The page is being created. Try again in a moment."
+msgstr "La página se está creando. Inténtalo de nuevo en un momento."
+
+#. translators: %s: the organization's name. The title of its first donation page.
+#: src/Campaigns/StarterCampaign.php:93
+#, php-format
+msgid "Support %s"
+msgstr "Apoya a %s"
 
 #: src/Campaigns/Styling/StylePresets.php:36
 #: assets/admin/onboarding/Onboarding.jsx:507
@@ -4420,6 +4500,16 @@ msgstr "Esta campaña ha alcanzado su objetivo. Gracias a todas las personas que
 msgid "This campaign is not open for donations yet. Please check back soon."
 msgstr "Esta campaña aún no admite donaciones. Vuelve a consultarla pronto."
 
+#: src/Forms/Shortcode/DonationFormShortcode.php:1855
+msgid "This form has no payment method to offer"
+msgstr "Este formulario no tiene ningún método de pago que ofrecer"
+
+#. translators: %s: why the form cannot take a donation, in one or two sentences.
+#: src/Forms/Shortcode/DonationFormShortcode.php:1870
+#, php-format
+msgid "Only you can see this. %s"
+msgstr "Solo tú puedes ver esto. %s"
+
 #: src/Foundation/Auth/Capabilities.php:48
 msgid "View donors"
 msgstr "Ver donantes"
@@ -6172,6 +6262,14 @@ msgstr "La verificación de la firma ha fallado. El webhook se seguirá rechazan
 msgid "Webhook rejected."
 msgstr "Webhook rechazado."
 
+#: src/Settings/ReadinessService.php:142
+msgid "Only test donations can be taken so far"
+msgstr "Por ahora solo se pueden recibir donaciones de prueba"
+
+#: src/Settings/ReadinessService.php:143
+msgid "Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow, before you turn test mode off."
+msgstr "Añade las claves de una pasarela de pago, o activa las donaciones offline y escribe las instrucciones que seguirán los donantes, antes de desactivar el modo de prueba."
+
 #: src/Settings/ReadinessService.php:146
 msgid "No way to take a donation"
 msgstr "No hay forma de recibir una donación"
@@ -6208,6 +6306,10 @@ msgstr "Se pueden recibir donaciones a través de %s"
 #, php-format
 msgid "Test mode is on, but %s has no test keys"
 msgstr "El modo de prueba está activado, pero faltan las claves de prueba de %s"
+
+#: src/Settings/ReadinessService.php:276
+msgid "A gateway without test keys is not offered while test mode is on, so donations go through another method and no real payment is taken. Turn test mode off to go live, or add the test key pair to rehearse with it."
+msgstr "Una pasarela de pago sin claves de prueba no se ofrece mientras el modo de prueba está activado, así que las donaciones pasan por otro método y no se cobra ningún pago real. Desactiva el modo de prueba para pasar al modo real, o añade el par de claves de prueba para ensayar con ella."
 
 #: src/Settings/ReadinessService.php:234
 msgid "Every donation will fail while this is on. Add the test key pair, or turn test mode off."
@@ -7270,8 +7372,8 @@ msgid "New campaign"
 msgstr "Nueva campaña"
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:195
-msgid "A few quick details, then you are live. You can change everything later."
-msgstr "Unos pocos datos rápidos y estarás en marcha. Podrás cambiarlo todo más adelante."
+msgid "A few quick details to start. You can change everything later."
+msgstr "Unos pocos datos rápidos para empezar. Podrás cambiarlo todo más adelante."
 
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:204
 #: assets/admin/campaigns/Detail.jsx:1935
@@ -8498,6 +8600,10 @@ msgstr "Canales"
 msgid "Quick actions"
 msgstr "Acciones rápidas"
 
+#: assets/admin/dashboard/Dashboard.jsx:270
+msgid "Test mode is off. Donations are real from now on."
+msgstr "El modo de prueba está desactivado. A partir de ahora las donaciones son reales."
+
 #. translators: %d: number of test records not counted.
 #: assets/admin/dashboard/Dashboard.jsx:204
 #, js-format
@@ -8543,6 +8649,33 @@ msgstr "Algo ha ido mal al obtener tus métricas. Comprueba tu conexión e inté
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:43
 msgid "Retry"
 msgstr "Reintentar"
+
+#: assets/admin/dashboard/FirstRunCard.jsx:54
+#: assets/admin/dashboard/FirstRunCard.jsx:69
+msgid "That did not work. Please try again."
+msgstr "No ha funcionado. Inténtalo de nuevo."
+
+#: assets/admin/dashboard/FirstRunCard.jsx:76
+msgid "Hides these steps for you for good. The full check stays on Settings, Setup."
+msgstr "Oculta estos pasos para ti de forma definitiva. La comprobación completa sigue en Ajustes, Configuración."
+
+#: assets/admin/dashboard/FirstRunCard.jsx:83
+msgid "Take your first donation"
+msgstr "Recibir tu primera donación"
+
+#: assets/admin/dashboard/FirstRunCard.jsx:86
+msgid "Four steps from a new install to a real donation."
+msgstr "Cuatro pasos desde una instalación nueva hasta una donación real."
+
+#. translators: 1: steps done. 2: steps in all.
+#: assets/admin/dashboard/FirstRunCard.jsx:93
+#, js-format
+msgid "%1$d of %2$d done"
+msgstr "%1$d de %2$d completados"
+
+#: assets/admin/dashboard/FirstRunCard.jsx:131
+msgid "See the full setup check"
+msgstr "Ver la comprobación completa de la configuración"
 
 #: assets/admin/dashboard/ReviewPrompt.jsx:21
 msgid "Your first donations have come in through Gratora. If it is working for you, a review on WordPress.org helps other organizations find it."
@@ -9697,6 +9830,10 @@ msgstr "Filtrar donaciones hasta"
 #: assets/admin/donations/List.jsx:646
 msgid "Clear"
 msgstr "Limpiar"
+
+#: src/Admin/views/deactivation-dialog.php:44
+msgid "If you pick one, it is sent to gratora.net when you deactivate, together with what you type, the versions of Gratora, WordPress and PHP, how long ago Gratora was first switched on and how far setup got. It does not include this site's address or name, or anyone's email address."
+msgstr "Si eliges uno, se envía a gratora.net al desactivar, junto con lo que escribas, las versiones de Gratora, WordPress y PHP, cuánto tiempo hace que se activó Gratora por primera vez y hasta dónde llegó la configuración. No incluye la dirección ni el nombre de este sitio, ni la dirección de correo electrónico de nadie."
 
 #: assets/admin/donations/List.jsx:661
 #: assets/admin/donations/List.jsx:663
@@ -13122,8 +13259,8 @@ msgid "Just exploring"
 msgstr "Solo estoy explorando"
 
 #: assets/admin/onboarding/Onboarding.jsx:95
-msgid "Trying Gratora out. Starts in test mode, so nothing takes real money until you switch it off."
-msgstr "Para probar Gratora. Empieza en modo de prueba, así que no se cobra dinero real hasta que lo desactives."
+msgid "Trying Gratora out before deciding."
+msgstr "Para probar Gratora antes de decidir."
 
 #: assets/admin/onboarding/Onboarding.jsx:191
 msgid "Pick who is fundraising to continue."
@@ -13136,11 +13273,6 @@ msgstr "Elige un país para continuar."
 #: assets/admin/onboarding/Onboarding.jsx:203
 msgid "Pick a state or province to continue."
 msgstr "Elige un estado o provincia para continuar."
-
-#: assets/admin/onboarding/Onboarding.jsx:236
-#: assets/admin/onboarding/Onboarding.jsx:237
-msgid "General donations"
-msgstr "Donaciones generales"
 
 #: assets/admin/onboarding/Onboarding.jsx:241
 msgid "Could not finalize onboarding."
@@ -13265,41 +13397,59 @@ msgstr "Vista previa no disponible. Tu elección se guarda igualmente."
 msgid "Donation form preview"
 msgstr "Vista previa del formulario de donación"
 
+#. translators: "Test donation" is the payment method as the donation form names it. Word it as that string is worded.
+#: assets/admin/onboarding/Onboarding.jsx:674
+msgid "Open your page and give with the Test donation method. No card is charged."
+msgstr "Abre tu página y dona con el método «Donación de prueba». No se cobra a ninguna tarjeta."
+
+#: assets/admin/onboarding/Onboarding.jsx:675
+#: assets/admin/onboarding/Onboarding.jsx:681
+msgid "Open the page"
+msgstr "Abrir la página"
+
+#: assets/admin/onboarding/Onboarding.jsx:679
+msgid "Your donation page"
+msgstr "Tu página de donación"
+
+#: assets/admin/onboarding/Onboarding.jsx:680
+msgid "Your page is published."
+msgstr "Tu página está publicada."
+
+#: assets/admin/onboarding/Onboarding.jsx:688
+msgid "Open a campaign for donations"
+msgstr "Abrir una campaña para recibir donaciones"
+
+#: assets/admin/onboarding/Onboarding.jsx:698
+msgid "We will add one donation page to your site, named after your organization, and open it. Test mode is on, so no card is charged."
+msgstr "Añadiremos a tu sitio una página de donación, con el nombre de tu organización, y la abriremos. El modo de prueba está activado, así que no se cobra a ninguna tarjeta."
+
+#: assets/admin/onboarding/Onboarding.jsx:699
+msgid "Create the page and try it"
+msgstr "Crear la página y probarla"
+
+#: assets/admin/onboarding/Onboarding.jsx:703
+msgid "We will add one donation page to your site, named after your organization, and open it."
+msgstr "Añadiremos a tu sitio una página de donación, con el nombre de tu organización, y la abriremos."
+
+#: assets/admin/onboarding/Onboarding.jsx:724
+msgid "Could not create the page. Please try again."
+msgstr "No se ha podido crear la página. Inténtalo de nuevo."
+
 #: assets/admin/onboarding/Onboarding.jsx:682
 msgid "You're set up"
 msgstr "Ya está todo configurado"
 
-#: assets/admin/onboarding/Onboarding.jsx:684
-msgid "Your organization details are saved. Here is what is left before you can take a donation."
-msgstr "Los datos de tu organización se han guardado. Esto es lo que falta para que puedas recibir una donación."
+#: assets/admin/onboarding/Onboarding.jsx:733
+msgid "Your organization details are saved. Next, see a donation go through."
+msgstr "Los datos de tu organización se han guardado. Ahora, comprueba cómo se completa una donación."
 
-#: assets/admin/onboarding/Onboarding.jsx:689
-msgid "Connect a payment gateway"
-msgstr "Conectar una pasarela de pago"
+#: assets/admin/onboarding/Onboarding.jsx:750
+msgid "Creating the page."
+msgstr "Creando la página."
 
-#: assets/admin/onboarding/Onboarding.jsx:690
-msgid "Stripe, PayPal, or a manual bank-transfer flow. You can change this any time."
-msgstr "Stripe, PayPal o un proceso manual por transferencia bancaria. Puedes cambiarlo cuando quieras."
-
-#: assets/admin/onboarding/Onboarding.jsx:692
-msgid "Connect"
-msgstr "Conectar"
-
-#: assets/admin/onboarding/Onboarding.jsx:696
-msgid "Build your first form"
-msgstr "Crear tu primer formulario"
-
-#: assets/admin/onboarding/Onboarding.jsx:697
-msgid "Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live."
-msgstr "Elige un diseño, define los importes y aplica tu marca. Los donantes podrán donar en cuanto haya una pasarela de pago activa."
-
-#: assets/admin/onboarding/Onboarding.jsx:699
-msgid "Build"
-msgstr "Crear"
-
-#: assets/admin/onboarding/Onboarding.jsx:704
-msgid "A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later."
-msgstr "Una campaña agrupa tus formularios de donación y sus totales. Podemos crear una a partir de tus respuestas o puedes crear la tuya más adelante."
+#: assets/admin/onboarding/Onboarding.jsx:755
+msgid "Go to the dashboard"
+msgstr "Ir al escritorio"
 
 #: assets/admin/settings/panels/BrandPanel.jsx:69
 msgid "(copy)"
@@ -13726,6 +13876,122 @@ msgstr "(desactivado)"
 #: assets/admin/settings/panels/EmailPanel.jsx:247
 msgid "Done"
 msgstr "Hecho"
+
+#: assets/admin/dashboard/firstRunSteps.js:19
+#: assets/admin/onboarding/Onboarding.jsx:702
+msgid "Create your donation page"
+msgstr "Crear tu página de donación"
+
+#: assets/admin/dashboard/firstRunSteps.js:24
+msgid "Donation page created"
+msgstr "Página de donación creada"
+
+#: assets/admin/dashboard/firstRunSteps.js:27
+msgid "View the page"
+msgstr "Ver la página"
+
+#: assets/admin/dashboard/firstRunSteps.js:43
+msgid "One page with a donation form, named after your organization. You can rename it, and delete it if you never use it."
+msgstr "Una página con un formulario de donación, con el nombre de tu organización. Puedes cambiarle el nombre y borrarla si nunca la usas."
+
+#: assets/admin/dashboard/firstRunSteps.js:44
+#: assets/admin/onboarding/Onboarding.jsx:704
+msgid "Create the page"
+msgstr "Crear la página"
+
+#: assets/admin/dashboard/firstRunSteps.js:49
+#: assets/admin/onboarding/Onboarding.jsx:672
+#: assets/admin/onboarding/Onboarding.jsx:697
+msgid "Make a test donation"
+msgstr "Hacer una donación de prueba"
+
+#: assets/admin/dashboard/firstRunSteps.js:50
+msgid "Test donation made"
+msgstr "Donación de prueba hecha"
+
+#. translators: 1: an amount, e.g. $25.00. 2: the donor's name.
+#: assets/admin/dashboard/firstRunSteps.js:59
+#, js-format
+msgid "A %1$s test donation from %2$s came in."
+msgstr "%2$s ha hecho una donación de prueba de %1$s."
+
+#. translators: %s: an amount, e.g. $25.00.
+#: assets/admin/dashboard/firstRunSteps.js:62
+#, js-format
+msgid "A %s test donation came in."
+msgstr "Ha llegado una donación de prueba de %s."
+
+#: assets/admin/dashboard/firstRunSteps.js:70
+msgid "View it"
+msgstr "Verla"
+
+#: assets/admin/dashboard/firstRunSteps.js:80
+msgid "A test donation came in."
+msgstr "Ha llegado una donación de prueba."
+
+#: assets/admin/dashboard/firstRunSteps.js:86
+msgid "Needs a donation page first."
+msgstr "Primero hace falta una página de donación."
+
+#. translators: "Test donation" is the payment method as the donation form names it. Word it as that string is worded.
+#: assets/admin/dashboard/firstRunSteps.js:94
+msgid "Give with the Test donation method. No card is charged."
+msgstr "Dona con el método «Donación de prueba». No se cobra a ninguna tarjeta."
+
+#: assets/admin/dashboard/firstRunSteps.js:95
+msgid "Open your donation page"
+msgstr "Abrir tu página de donación"
+
+#: assets/admin/dashboard/firstRunSteps.js:102
+msgid "This site already takes real donations."
+msgstr "Este sitio ya recibe donaciones reales."
+
+#: assets/admin/dashboard/firstRunSteps.js:108
+msgid "Test mode lets you try a donation with no card. This site cannot take a real donation yet, so nothing is lost by turning it on."
+msgstr "El modo de prueba te permite probar una donación sin tarjeta. Este sitio todavía no puede recibir una donación real, así que no se pierde nada por activarlo."
+
+#: assets/admin/dashboard/firstRunSteps.js:109
+msgid "Turn on test mode"
+msgstr "Activar el modo de prueba"
+
+#: assets/admin/dashboard/firstRunSteps.js:114
+#: assets/admin/dashboard/firstRunSteps.js:131
+msgid "Connect payments"
+msgstr "Conectar los pagos"
+
+#: assets/admin/dashboard/firstRunSteps.js:119
+msgid "Payments connected"
+msgstr "Pagos conectados"
+
+#. translators: %s: a list of payment methods, e.g. "Stripe, Offline donations".
+#: assets/admin/dashboard/firstRunSteps.js:122
+#, js-format
+msgid "Ready: %s"
+msgstr "Listo: %s"
+
+#: assets/admin/dashboard/firstRunSteps.js:130
+msgid "Add your live Stripe or PayPal keys to take cards, or write bank details to take transfers."
+msgstr "Añade tus claves del modo real de Stripe o PayPal para aceptar tarjetas, o escribe tus datos bancarios para aceptar transferencias."
+
+#: assets/admin/dashboard/firstRunSteps.js:136
+msgid "Go live"
+msgstr "Pasar al modo real"
+
+#: assets/admin/dashboard/firstRunSteps.js:143
+msgid "Test mode is already off. The site is live once the steps before this one are done."
+msgstr "El modo de prueba ya está desactivado. El sitio estará en modo real en cuanto se completen los pasos anteriores."
+
+#: assets/admin/dashboard/firstRunSteps.js:148
+msgid "Turn off test mode"
+msgstr "Desactivar el modo de prueba"
+
+#: assets/admin/dashboard/firstRunSteps.js:153
+msgid "Turn off test mode. From then on, donations are real and count in your figures."
+msgstr "Desactiva el modo de prueba. A partir de entonces, las donaciones son reales y cuentan en tus cifras."
+
+#: assets/admin/dashboard/firstRunSteps.js:158
+msgid "Connect payments first. With test mode off and no payment method, the form could take nothing."
+msgstr "Conecta primero los pagos. Con el modo de prueba desactivado y sin ningún método de pago, el formulario no podría recibir nada."
 
 #: assets/admin/settings/panels/EmailPanel.jsx:285
 msgid "Subject:"
@@ -14546,6 +14812,18 @@ msgid_plural "Until they are fixed, a donor cannot complete a donation."
 msgstr[0] "Hasta que se solucione, ningún donante podrá completar una donación."
 msgstr[1] "Hasta que se solucionen, ningún donante podrá completar una donación."
 
+#: assets/admin/settings/panels/SetupPanel.jsx:107
+msgid "Ready to accept test donations"
+msgstr "Todo listo para aceptar donaciones de prueba"
+
+#. translators: %d: number of things to look at before going live.
+#: assets/admin/settings/panels/SetupPanel.jsx:110
+#, js-format
+msgid "%d thing is worth a look before you turn test mode off."
+msgid_plural "%d things are worth a look before you turn test mode off."
+msgstr[0] "%d cosa merece un vistazo antes de que desactives el modo de prueba."
+msgstr[1] "%d cosas merecen un vistazo antes de que desactives el modo de prueba."
+
 #. translators: %d: number of non-blocking issues.
 #: assets/admin/settings/panels/SetupPanel.jsx:107
 #, js-format
@@ -14806,6 +15084,14 @@ msgstr "Numeración"
 #: assets/donor-portal/index.jsx:2023
 msgid "Privacy"
 msgstr "Privacidad"
+
+#: src/Admin/views/deactivation-dialog.php:49
+msgid "Your answer will be sent when you deactivate."
+msgstr "Tu respuesta se enviará al desactivar."
+
+#: src/Admin/views/deactivation-dialog.php:50
+msgid "No answer will be sent."
+msgstr "No se enviará ninguna respuesta."
 
 #: assets/admin/settings/Settings.jsx:42
 msgid "Roles"
