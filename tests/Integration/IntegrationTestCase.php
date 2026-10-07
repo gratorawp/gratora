@@ -61,6 +61,12 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         $this->injectDonationFormToken();
         // The Add-ons screen asks gratora.net for its lists. No test reaches the real one.
         add_filter('gratora.addons.remote', '__return_false');
+        // Tests call a block's renderer on its own, outside a page. WordPress 7.0 answers that with
+        // no block supports; before it, the renderer reads a block nobody set. Naming no block gets
+        // the same answer from both.
+        if (\WP_Block_Supports::$block_to_render === null) {
+            \WP_Block_Supports::$block_to_render = ['blockName' => null, 'attrs' => []];
+        }
     }
 
     protected function tearDown(): void
