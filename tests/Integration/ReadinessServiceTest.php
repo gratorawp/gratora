@@ -313,6 +313,71 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::PASS, $this->checks()['donor-portal']['status']);
     }
 
+    /** @dataProvider hiddenStatuses */
+    public function test_a_donor_portal_page_the_owner_hid_is_a_warning_and_stops_no_donation(string $status): void
+    {
+        $this->hiddenPortalPage($status);
+
+        $check = $this->checks()['donor-portal'];
+
+        $this->assertSame(ReadinessService::WARN, $check['status']);
+        $this->assertArrayNotHasKey('blocker', $check);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function hiddenStatuses(): array
+    {
+        return [
+            'draft'   => ['draft'],
+            'private' => ['private'],
+            'pending' => ['pending'],
+            'binned'  => ['trash'],
+        ];
+    }
+
+    public function test_a_hidden_donor_portal_page_is_one_click_from_its_editor(): void
+    {
+        $id = $this->hiddenPortalPage('draft');
+
+        $this->assertSame(get_edit_post_link($id, 'raw'), $this->checks()['donor-portal']['action_url']);
+    }
+
+    public function test_a_binned_donor_portal_page_is_one_click_from_the_bin(): void
+    {
+        $this->hiddenPortalPage('trash');
+
+        $this->assertSame(
+            admin_url('edit.php?post_status=trash&post_type=page'),
+            $this->checks()['donor-portal']['action_url']
+        );
+    }
+
+    public function test_publishing_the_hidden_donor_portal_page_clears_the_warning(): void
+    {
+        $id = $this->hiddenPortalPage('draft');
+        $this->assertSame(ReadinessService::WARN, $this->checks()['donor-portal']['status']);
+
+        wp_publish_post($id);
+
+        $this->assertSame(ReadinessService::PASS, $this->checks()['donor-portal']['status']);
+    }
+
+    public function test_a_site_that_sets_its_own_portal_address_is_not_warned_about_the_hidden_page(): void
+    {
+        $this->hiddenPortalPage('draft');
+        add_filter('gratora.portal.url', static fn (): string => 'https://example.org/my-giving/');
+
+        $this->assertArrayNotHasKey('donor-portal', $this->checks());
+    }
+
+    private function hiddenPortalPage(string $status): int
+    {
+        $id = (new PortalPage())->ensure();
+        $status === 'trash' ? wp_trash_post($id) : wp_update_post(['ID' => $id, 'post_status' => $status]);
+
+        return $id;
+    }
+
     public function test_an_org_with_no_address_is_flagged_on_receipts(): void
     {
         update_option('gratora_org_profile', ['name' => 'Test Org', 'address_lines' => [], 'tax_id' => '']);
