@@ -7,7 +7,8 @@ on:
 
 jobs:
   test:
-    name: Unit + Integration (${{ matrix.db.name }})
+    # The runs on the newest WordPress keep the name they had, in case a branch rule waits on it.
+    name: Unit + Integration (${{ matrix.db.name }})${{ matrix.wp != 'latest' && format(' on WordPress {0}', matrix.wp) || '' }}
     runs-on: ubuntu-latest
 
     # Both engines, because they are not the same database. MariaDB has no JSON
@@ -23,6 +24,9 @@ jobs:
             image: mysql:8.0
           - name: MariaDB 10.11
             image: mariadb:10.11
+        # The newest WordPress and the oldest the plugin says it runs on. Only
+        # the newest was tested once, and a floor nothing runs on is a guess.
+        wp: [ latest, '6.9' ]
 
     services:
       mysql:
@@ -56,6 +60,12 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
 
+      # composer.lock pins the test library of the newest WordPress. The older
+      # one is tested with its own, so the library and the core under it agree.
+      - name: Match the test library to WordPress ${{ matrix.wp }}
+        if: matrix.wp != 'latest'
+        run: composer require --dev --no-interaction --no-progress --update-with-dependencies "wp-phpunit/wp-phpunit:~${{ matrix.wp }}.0"
+
       # @gratora/ui is a public git dependency, but npm locks it as
       # ssh://git@github.com, which a runner has no key for: the install
       # then dies on "Permission denied (publickey)" before anything runs.
@@ -72,7 +82,7 @@ jobs:
           npm run build
 
       - name: Provision WordPress test environment
-        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
+        run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Unit + integration suites
         run: composer test

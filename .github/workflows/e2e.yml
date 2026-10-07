@@ -10,7 +10,16 @@ on:
 # blocks local hermetic runs does not apply on the Linux runners.
 jobs:
   e2e:
+    # The run on the newest WordPress keeps the name it had, in case a branch rule waits on it.
+    name: e2e${{ matrix.wp != 'latest' && format(' on WordPress {0}', matrix.wp) || '' }}
     runs-on: ubuntu-latest
+    # The newest WordPress and the oldest the plugin says it runs on. The admin
+    # screens run on WordPress's own script packages, so the editor and the
+    # lists are where an older one differs.
+    strategy:
+      fail-fast: false
+      matrix:
+        wp: [ latest, '6.9' ]
     env:
       GRATORA_E2E_URL: http://localhost:8888
     steps:
@@ -70,6 +79,11 @@ jobs:
         run: |
           printf '{ "plugins": [ ".", "%s/gratora-p2p" ] }\n' "$GITHUB_WORKSPACE" > .wp-env.override.json
           cat .wp-env.override.json
+
+      # wp-env takes its WordPress from this when it is set, and the newest otherwise.
+      - name: Pin wp-env to WordPress ${{ matrix.wp }}
+        if: matrix.wp != 'latest'
+        run: echo "WP_ENV_CORE=WordPress/WordPress#${{ matrix.wp }}" >> "$GITHUB_ENV"
 
       - name: Start wp-env
         run: npx wp-env start
@@ -135,7 +149,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-wordpress-${{ matrix.wp }}
           path: |
             playwright-report/
             test-results/
