@@ -17,6 +17,9 @@ use WP_Post;
  * Registered before the add-on route filters on the same hook, so a route
  * template (e.g. a fundraiser page) unshifts later and keeps precedence.
  *
+ * A classic theme resolves page templates to PHP files, so it is handed one
+ * that does the same job.
+ *
  * @since 1.0.0
  */
 final class CampaignPageTemplate extends HookProvider
@@ -40,9 +43,12 @@ final class CampaignPageTemplate extends HookProvider
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        // Block themes only; a classic theme resolves page templates to PHP
-        // files, where this slug means nothing. Same gate as the P2P routes.
-        return wp_is_block_theme() ? ['page_template_hierarchy' => 'forceTemplate'] : [];
+        // The slug means nothing to a classic theme, which gets the file
+        // instead: ahead of the chrome filter (9) and the add-on routes (10),
+        // so each of them can still take the page. Same gate as the P2P routes.
+        return wp_is_block_theme()
+            ? ['page_template_hierarchy' => 'forceTemplate']
+            : ['template_include' => ['classicTemplate', 8, 1]];
     }
 
     /** @since 1.0.0 */
@@ -70,18 +76,30 @@ final class CampaignPageTemplate extends HookProvider
      */
     public function forceTemplate(array $templates): array
     {
+        if ($this->isACampaignPageLeftToUs()) {
+            array_unshift($templates, self::SLUG);
+        }
+        return $templates;
+    }
+
+    /** @unreleased */
+    public function classicTemplate(string $template): string
+    {
+        return $this->isACampaignPageLeftToUs() ? __DIR__ . '/views/classic-chrome.php' : $template;
+    }
+
+    /** A page template its owner picked for it is the owner opting out. */
+    private function isACampaignPageLeftToUs(): bool
+    {
         $post = get_post(get_queried_object_id());
         if (! $post instanceof WP_Post || $post->post_type !== 'page') {
-            return $templates;
+            return false;
         }
         if ((int) get_post_meta($post->ID, '_gratora_campaign_id', true) <= 0) {
-            return $templates;
+            return false;
         }
         $explicit = (string) get_post_meta($post->ID, '_wp_page_template', true);
-        if ($explicit !== '' && $explicit !== 'default') {
-            return $templates;
-        }
-        array_unshift($templates, self::SLUG);
-        return $templates;
+
+        return $explicit === '' || $explicit === 'default';
     }
 }

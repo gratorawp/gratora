@@ -1,8 +1,9 @@
 <?php
 /**
- * Classic-theme blank-canvas template for a campaign page whose Appearance
- * settings hide the theme header and/or footer. Renders the page content with a
- * minimal document shell so wp_head()/wp_footer() still run.
+ * Classic-theme template for a campaign page: the theme's header and footer
+ * around the page's own content, and nothing of the theme's page template. A
+ * header or footer the campaign's Appearance settings hide is replaced by a
+ * minimal document shell, so wp_head()/wp_footer() still run.
  *
  * @var array{header:bool,footer:bool} $gratora_chrome_flags (via $GLOBALS)
  */

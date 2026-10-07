@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignChrome;
 use Gratora\Campaigns\CampaignPageTemplate;
+use Gratora\Campaigns\CampaignRepository;
 use WP_Theme_JSON_Resolver;
 
 /**
@@ -16,7 +18,8 @@ use WP_Theme_JSON_Resolver;
  */
 final class CampaignPageTemplateTest extends IntegrationTestCase
 {
-    private function makeCampaignPage(): int
+    /** @param array<string,mixed> $campaign */
+    private function makeCampaignPage(string $title = 'Template page', string $content = '', array $campaign = []): int
     {
         $now = gmdate('Y-m-d H:i:s');
         $c = Campaign::make();
@@ -25,15 +28,80 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
         $c->status     = 'published';
         $c->created_at = $now;
         $c->updated_at = $now;
+        foreach ($campaign as $column => $value) {
+            $c->{$column} = $value;
+        }
         $c->save();
 
         return (int) wp_insert_post([
-            'post_type'   => 'page',
-            'post_status' => 'publish',
-            'post_title'  => 'Template page',
-            'meta_input'  => ['_gratora_campaign_id' => (int) $c->id],
+            'post_type'    => 'page',
+            'post_status'  => 'publish',
+            'post_title'   => $title,
+            'post_content' => $content,
+            'meta_input'   => ['_gratora_campaign_id' => (int) $c->id],
         ]);
     }
+
+    protected function tearDown(): void
+    {
+        if ($this->themeRoots !== null) {
+            switch_theme(WP_DEFAULT_THEME);
+            $GLOBALS['wp_theme_directories'] = $this->themeRoots;
+            $this->themeRoots = null;
+            wp_clean_themes_cache();
+        }
+
+        parent::tearDown();
+    }
+
+    /** @var ?array<int,string> */
+    private ?array $themeRoots = null;
+
+    /** A classic theme whose page template prints the page's title above its content, as most do. */
+    private function useAClassicThemeThatPrintsTheTitle(): void
+    {
+        $this->themeRoots = (array) ($GLOBALS['wp_theme_directories'] ?? []);
+        register_theme_directory(GRATORA_DIR . 'tests/fixtures/themes');
+        wp_clean_themes_cache();
+        switch_theme('classic-with-title');
+
+        $this->assertFalse(wp_is_block_theme(), 'the fixture has to be a classic theme');
+    }
+
+    /**
+     * The page as WordPress would send it: the template its loader settles on,
+     * run. The two filters are called in the order they are hooked, each on an
+     * object of its own, because the hooked ones remember the first page they
+     * were asked about for the rest of the process. WordPress loads a theme's
+     * header.php and footer.php once per process too, so whether each was
+     * asked for is counted rather than read off the page, and the head is left
+     * out of what is returned.
+     *
+     * @return array{html:string, header:int, footer:int}
+     */
+    private function served(int $pageId): array
+    {
+        $this->go_to('/?page_id=' . $pageId);
+
+        $template = (string) (get_page_template() ?: get_index_template());
+        $template = (new CampaignPageTemplate())->classicTemplate($template);
+        $template = (new CampaignChrome(new CampaignRepository()))->classicTemplate($template);
+        $header   = did_action('get_header');
+        $footer   = did_action('get_footer');
+
+        ob_start();
+        include $template;
+        $html = (string) ob_get_clean();
+        $head = strpos($html, '</head>');
+
+        return [
+            'html'   => $head === false ? $html : substr($html, $head),
+            'header' => did_action('get_header') - $header,
+            'footer' => did_action('get_footer') - $footer,
+        ];
+    }
+
+    private const HEADING = '<!-- wp:heading {"level":1} --><h1 class="wp-block-heading">Winter food drive</h1><!-- /wp:heading -->';
 
     /**
      * The front end wraps campaign content in the template's constrained group;
@@ -114,6 +182,83 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
         $templates = (new CampaignPageTemplate())->forceTemplate(['page.php']);
 
         $this->assertSame(['page.php'], $templates);
+    }
+
+    /**
+     * A classic theme resolves page templates to PHP files, so the slug above
+     * means nothing to it, and its own page template prints the page's title
+     * over a campaign page that already prints one. It is handed a file that
+     * does what the block template does: the site's header and footer around
+     * the page's own content.
+     */
+    public function test_on_a_classic_theme_the_title_is_printed_once(): void
+    {
+        $this->useAClassicThemeThatPrintsTheTitle();
+        $pageId = $this->makeCampaignPage('Winter food drive', self::HEADING);
+
+        $page = $this->served($pageId);
+
+        $this->assertSame(1, substr_count($page['html'], 'Winter food drive'), $page['html']);
+        $this->assertStringNotContainsString('entry-title', $page['html']);
+        $this->assertSame(1, $page['header'], 'the site header stays');
+        $this->assertSame(1, $page['footer'], 'and the footer');
+    }
+
+    public function test_on_a_classic_theme_an_ordinary_page_keeps_the_theme_s_template(): void
+    {
+        $this->useAClassicThemeThatPrintsTheTitle();
+        $pageId = (int) wp_insert_post([
+            'post_type'    => 'page',
+            'post_status'  => 'publish',
+            'post_title'   => 'About us',
+            'post_content' => '<!-- wp:paragraph --><p>Who we are.</p><!-- /wp:paragraph -->',
+        ]);
+
+        $this->assertStringContainsString('<h1 class="entry-title">About us</h1>', $this->served($pageId)['html']);
+    }
+
+    public function test_on_a_classic_theme_an_explicit_page_template_wins(): void
+    {
+        $pageId = $this->makeCampaignPage();
+        update_post_meta($pageId, '_wp_page_template', 'page-no-title.php');
+        $this->go_to('/?page_id=' . $pageId);
+
+        $this->assertSame('theme/page-no-title.php', (new CampaignPageTemplate())->classicTemplate('theme/page-no-title.php'));
+    }
+
+    // The rig's own theme is a classic one, so the plugin was switched on as on a classic site.
+    public function test_a_classic_theme_is_handed_the_file_before_the_chrome_and_the_add_on_routes(): void
+    {
+        $this->assertSame(8, $this->priorityOnTemplateInclude(CampaignPageTemplate::class));
+        $this->assertSame(9, $this->priorityOnTemplateInclude(CampaignChrome::class));
+    }
+
+    /** @param class-string $class */
+    private function priorityOnTemplateInclude(string $class): ?int
+    {
+        foreach (($GLOBALS['wp_filter']['template_include']->callbacks ?? []) as $priority => $callbacks) {
+            foreach ($callbacks as $callback) {
+                $function = $callback['function'];
+                if (is_array($function) && $function[0] instanceof $class) {
+                    return (int) $priority;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** The campaign's own choice to hide the site header is a second filter on the same page. */
+    public function test_on_a_classic_theme_a_hidden_header_stays_hidden(): void
+    {
+        $this->useAClassicThemeThatPrintsTheTitle();
+        $pageId = $this->makeCampaignPage('Winter food drive', self::HEADING, ['hide_header' => true]);
+
+        $page = $this->served($pageId);
+
+        $this->assertSame(0, $page['header'], 'the site header is left out');
+        $this->assertSame(1, $page['footer']);
+        $this->assertSame(1, substr_count($page['html'], 'Winter food drive'), $page['html']);
     }
 
     /**
