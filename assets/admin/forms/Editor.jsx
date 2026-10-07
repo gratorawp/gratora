@@ -675,6 +675,10 @@ export default function Editor( { formId } ) {
                                             // a ref nobody passes, and on a narrow screen it calls the second.
                                             shouldFocusBlock
                                             onClose={ () => setSecondaryView( null ) }
+                                            // WordPress before 7.0 does not call it, so the library would stay over the form.
+                                            onSelect={ () => {
+                                                if ( isNarrow ) setSecondaryView( null );
+                                            } }
                                         />
                                     </div>
                                 ) : shownSecondaryView === 'listview' ? (
