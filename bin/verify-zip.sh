@@ -73,12 +73,12 @@ OUT="$OUT" php -r '
     echo "autoloader describes the packaged tree\n";
 '
 
-# Retain assets enqueued directly without webpack.
+# Retain assets read straight from assets/ without webpack.
 for runtime in assets/deactivation/dialog.css assets/deactivation/dialog.js \
     assets/donate-button/modal.js assets/campaign-page/page.css \
-    assets/compat/private-apis-before-7.js
+    assets/compat/private-apis-before-7.js assets/menu/icon.svg
 do
-    test -f "$OUT/$runtime" || fail "$runtime is enqueued at runtime and is not in the zip"
+    test -f "$OUT/$runtime" || fail "$runtime is read at runtime and is not in the zip"
 done
 
 # Keep the source-repository link required for compiled assets.

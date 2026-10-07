@@ -13,6 +13,7 @@ final class AdminMenu extends HookProvider
     private const SLUG       = 'gratora';
     private const HANDLE     = 'gratora-admin-dashboard';
     private const BUILD_DIR  = 'build/admin/dashboard';
+    private const ICON       = 'assets/menu/icon.svg';
 
     /** @since 1.0.0 */
     protected function actions(): array
@@ -21,6 +22,17 @@ final class AdminMenu extends HookProvider
             'admin_menu'            => 'registerMenu',
             'admin_enqueue_scripts' => 'enqueueCommandPalette',
         ];
+    }
+
+    /**
+     * WordPress colours a menu icon to the admin's colour scheme only when it
+     * is an SVG in a base64 data URI.
+     *
+     * @unreleased
+     */
+    private static function icon(): string
+    {
+        return 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents(GRATORA_DIR . self::ICON));
     }
 
     /** @since 1.0.0 */
@@ -32,7 +44,7 @@ final class AdminMenu extends HookProvider
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
-            'dashicons-heart',
+            self::icon(),
             30
         );
 
