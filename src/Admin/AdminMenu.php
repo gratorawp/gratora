@@ -54,8 +54,10 @@ final class AdminMenu extends HookProvider
         foreach ($this->pages() as $page) {
             $hidden = ! empty($page['hidden']);
             $title  = (string) ($page['title'] ?? '');
+            // An empty parent keeps a page out of the menu as null does, and
+            // WordPress before 7.0 passes null on to a function that will not take it.
             $hook   = add_submenu_page(
-                $hidden ? null : self::SLUG,
+                $hidden ? '' : self::SLUG,
                 $title,
                 $title,
                 $page['capability'] ?? self::CAPABILITY,
