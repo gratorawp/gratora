@@ -4,7 +4,7 @@
 [![e2e](https://github.com/gratorawp/gratora/actions/workflows/e2e.yml/badge.svg)](https://github.com/gratorawp/gratora/actions/workflows/e2e.yml)
 [![License: GPL v2 or later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
 [![PHP 8.1+](https://img.shields.io/badge/php-8.1%2B-777bb4.svg)](https://www.php.net/)
-[![WordPress 7.0+](https://img.shields.io/badge/wordpress-7.0%2B-21759b.svg)](https://wordpress.org/)
+[![WordPress 6.9+](https://img.shields.io/badge/wordpress-6.9%2B-21759b.svg)](https://wordpress.org/)
 
 ### A fundraising platform for WordPress
 
@@ -17,7 +17,7 @@ receipts, and advanced reporting.
 
 | | |
 |---|---|
-| WordPress | 7.0 or later |
+| WordPress | 6.9 or later |
 | PHP | 8.1 or later |
 | Database | MySQL 5.7 or later, or MariaDB 10.3 or later |
 | Node | 18.12 or later |

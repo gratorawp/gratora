@@ -4,7 +4,7 @@
  * Plugin URI: https://gratora.net
  * Description: Donation forms, recurring donations, fundraising campaigns, donor management and receipts.
  * Version: 1.1.3
- * Requires at least: 7.0
+ * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author: Gratora
  * Author URI: https://gratora.net/

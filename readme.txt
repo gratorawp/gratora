@@ -1,7 +1,7 @@
 === Gratora - Donation and Fundraising Platform ===
 Contributors: donodp
 Tags: donation, donate, fundraising, recurring donations, nonprofit
-Requires at least: 7.0
+Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 1.1.3
