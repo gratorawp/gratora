@@ -49,7 +49,7 @@
         sync();
         // Cancel, not the checkbox: opening on a destructive control means a
         // stray space bar arms the wipe before anyone has read the dialog.
-        dialog.querySelector( '[data-gratora-deact-cancel]' ).focus();
+        dialog.querySelector( 'button[data-gratora-deact-cancel]' ).focus();
     }
 
     function close() {

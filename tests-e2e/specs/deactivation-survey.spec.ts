@@ -53,6 +53,13 @@ test('the dialog asks why with nothing picked', async ({ page }) => {
     await expect(submit(dialog)).toHaveText('Deactivate');
 });
 
+// The backdrop closes the dialog as well and comes first in the page; the keyboard belongs on the button.
+test('the dialog opens with the keyboard on Cancel', async ({ page }) => {
+    const dialog = await openDialog(page);
+
+    await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+});
+
 test('a picked reason opens its box under it and says the answer will be sent', async ({ page }) => {
     const dialog = await openDialog(page);
 
