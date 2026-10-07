@@ -640,14 +640,37 @@ final class ReadinessService
      * back to a pretty permalink whether or not the page exists, so a trashed
      * page turns every one of those links into a 404 silently.
      *
-     * @return array<string,mixed>
+     * @return array<string,mixed>|null
      *
      * @since 1.0.0
      */
-    private function donorPortalCheck(): array
+    private function donorPortalCheck(): ?array
     {
         if ($this->portal->resolve() !== 0) {
             return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'gratora-donation-platform'));
+        }
+
+        $hidden = $this->portal->hiddenPage();
+        if ($hidden !== null) {
+            if ($this->portal->filteredUrl() !== '') {
+                return null;
+            }
+
+            $binned = $hidden->post_status === 'trash';
+
+            return [
+                'id'           => 'donor-portal',
+                'group'        => 'portal',
+                'status'       => self::WARN,
+                'label'        => __('The donor portal page is not public', 'gratora-donation-platform'),
+                'detail'       => __('Sign-in and recurring donation emails link to it. Until it is published, those links lead to a 404.', 'gratora-donation-platform'),
+                'action_url'   => $binned
+                    ? admin_url('edit.php?post_status=trash&post_type=page')
+                    : admin_url('post.php?post=' . $hidden->ID . '&action=edit'),
+                'action_label' => $binned
+                    ? __('Open pages', 'gratora-donation-platform')
+                    : __('Open the page', 'gratora-donation-platform'),
+            ];
         }
 
         return [

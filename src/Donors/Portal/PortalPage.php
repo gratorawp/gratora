@@ -7,9 +7,10 @@ namespace Gratora\Donors\Portal;
 use WP_Post;
 
 /**
- * Guarantees the donor-portal WP page (hosts [gratora_donor_portal]) exists and is
- * published: magic-link emails point at its URL, so a missing page silently breaks
- * donor self-service. url() is the single source of truth unless gratora.portal.url is set.
+ * Keeps the donor-portal WP page (hosts [gratora_donor_portal]) published: magic-link
+ * emails point at its URL, so a missing page silently breaks donor self-service. A page
+ * its owner unpublished or binned is left as it is. url() is the single source of truth
+ * unless gratora.portal.url is set.
  *
  * @since 1.0.0
  */
@@ -23,7 +24,8 @@ final class PortalPage
 
     /**
      * Idempotent: keeps a stored id that still resolves to a published page, else
-     * adopts an existing page at the canonical slug, else inserts a fresh one.
+     * adopts an existing page at the canonical slug, else inserts a fresh one unless
+     * the stored page is only hidden.
      *
      * @since 1.0.0
      */
@@ -38,6 +40,10 @@ final class PortalPage
         if ($bySlug instanceof WP_Post && $bySlug->post_status === 'publish') {
             update_option(self::OPTION_PAGE_ID, (int) $bySlug->ID, false);
             return (int) $bySlug->ID;
+        }
+
+        if ($this->hiddenPage() !== null) {
+            return 0;
         }
 
         $id = wp_insert_post([
@@ -67,18 +73,31 @@ final class PortalPage
      */
     public function resolve(): int
     {
+        $page = $this->stored();
+
+        return $page !== null && $page->post_status === 'publish' ? (int) $page->ID : 0;
+    }
+
+    /**
+     * The stored page while its owner keeps it unpublished or in the bin.
+     *
+     * @unreleased
+     */
+    public function hiddenPage(): ?WP_Post
+    {
+        $page = $this->stored();
+
+        return $page !== null && $page->post_status !== 'publish' ? $page : null;
+    }
+
+    /** @unreleased */
+    private function stored(): ?WP_Post
+    {
         $id = (int) get_option(self::OPTION_PAGE_ID, 0);
-        if ($id <= 0) {
-            return 0;
-        }
-        $post = get_post($id);
-        if (! $post instanceof WP_Post) {
-            return 0;
-        }
-        if ($post->post_type !== 'page' || $post->post_status !== 'publish') {
-            return 0;
-        }
-        return $id;
+        // get_post(0) answers with the page being shown.
+        $post = $id > 0 ? get_post($id) : null;
+
+        return $post instanceof WP_Post && $post->post_type === 'page' ? $post : null;
     }
 
     /**
@@ -90,7 +109,7 @@ final class PortalPage
      */
     public function url(): string
     {
-        $filtered = (string) apply_filters('gratora.portal.url', '');
+        $filtered = $this->filteredUrl();
         if ($filtered !== '') {
             return $filtered;
         }
@@ -104,6 +123,16 @@ final class PortalPage
         }
 
         return home_url('/' . self::SLUG . '/');
+    }
+
+    /**
+     * The address a site supplies through `gratora.portal.url` in place of the page's own.
+     *
+     * @unreleased
+     */
+    public function filteredUrl(): string
+    {
+        return (string) apply_filters('gratora.portal.url', '');
     }
 
     /**

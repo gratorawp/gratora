@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Gratora\Tests\Integration;
 
+use Closure;
 use Gratora\Donors\Portal\PortalPage;
+use Gratora\Foundation\Plugin;
+use ReflectionFunction;
 
 /**
  * The donor portal page is the front door for every magic-link email - if
@@ -143,5 +146,175 @@ final class PortalPageTest extends IntegrationTestCase
         // Second heal with same version: no-op, same id.
         (new PortalPage())->maybeHeal();
         $this->assertSame($idAfterFirstHeal, (int) get_option(PortalPage::OPTION_PAGE_ID));
+    }
+
+    /** @dataProvider hiddenStatuses */
+    public function test_an_update_leaves_a_page_the_owner_hid_as_it_is(string $status): void
+    {
+        $id = $this->portalPageSetTo($status);
+
+        update_option(PortalPage::OPTION_VERSION, '0.0.0', false);
+        $this->fireCoreWpLoaded();
+
+        $this->assertSame(GRATORA_VERSION, get_option(PortalPage::OPTION_VERSION), 'precondition: the update ran its portal check');
+        $this->assertSame([$id], $this->everyPage());
+        $this->assertSame($status, get_post_status($id));
+    }
+
+    /** @return array<string, array{string}> */
+    public static function hiddenStatuses(): array
+    {
+        return [
+            'draft'     => ['draft'],
+            'private'   => ['private'],
+            'pending'   => ['pending'],
+            'scheduled' => ['future'],
+            'binned'    => ['trash'],
+        ];
+    }
+
+    public function test_switching_the_plugin_on_again_leaves_a_hidden_page_as_it_is(): void
+    {
+        $id = $this->portalPageSetTo('draft');
+
+        Plugin::onActivation();
+
+        $this->assertSame([$id], $this->everyPage());
+        $this->assertSame('draft', get_post_status($id));
+    }
+
+    public function test_a_hidden_page_published_again_is_the_portal_again(): void
+    {
+        $id = $this->portalPageSetTo('draft');
+        update_option(PortalPage::OPTION_VERSION, '0.0.0', false);
+        $this->fireCoreWpLoaded();
+
+        wp_publish_post($id);
+
+        $svc = new PortalPage();
+        $this->assertSame($id, $svc->resolve());
+        $this->assertSame(get_permalink($id), $svc->url());
+        $this->assertNull($svc->hiddenPage());
+    }
+
+    public function test_a_page_deleted_for_good_is_made_again_at_the_next_update(): void
+    {
+        $id = (new PortalPage())->ensure();
+        wp_delete_post($id, true);
+
+        update_option(PortalPage::OPTION_VERSION, '0.0.0', false);
+        $this->fireCoreWpLoaded();
+
+        $pages = $this->everyPage();
+        $this->assertCount(1, $pages);
+        $this->assertSame($pages[0], (new PortalPage())->resolve());
+    }
+
+    public function test_a_public_page_at_the_address_takes_over_from_a_binned_one(): void
+    {
+        $this->portalPageSetTo('trash');
+        $own = self::factory()->post->create([
+            'post_type'    => 'page',
+            'post_name'    => PortalPage::SLUG,
+            'post_status'  => 'publish',
+            'post_content' => PortalPage::SHORTCODE,
+        ]);
+
+        update_option(PortalPage::OPTION_VERSION, '0.0.0', false);
+        $this->fireCoreWpLoaded();
+
+        $this->assertSame($own, (new PortalPage())->resolve());
+    }
+
+    /** @dataProvider publishedAndDraft */
+    public function test_the_page_being_shown_is_not_taken_for_the_portal(string $status): void
+    {
+        $GLOBALS['post'] = get_post(self::factory()->post->create(['post_type' => 'page', 'post_status' => $status]));
+
+        $svc = new PortalPage();
+
+        $this->assertSame(0, $svc->resolve());
+        $this->assertNull($svc->hiddenPage());
+    }
+
+    /** @dataProvider publishedAndDraft */
+    public function test_a_stored_id_that_is_not_a_page_is_not_the_portal(string $status): void
+    {
+        update_option(PortalPage::OPTION_PAGE_ID, self::factory()->post->create(['post_status' => $status]), false);
+
+        $svc = new PortalPage();
+
+        $this->assertSame(0, $svc->resolve());
+        $this->assertNull($svc->hiddenPage());
+    }
+
+    /** @return array<string, array{string}> */
+    public static function publishedAndDraft(): array
+    {
+        return ['published' => ['publish'], 'draft' => ['draft']];
+    }
+
+    private function portalPageSetTo(string $status): int
+    {
+        $id = (new PortalPage())->ensure();
+
+        if ($status === 'trash') {
+            wp_trash_post($id);
+        } elseif ($status === 'future') {
+            $later = gmdate('Y-m-d H:i:s', time() + WEEK_IN_SECONDS);
+            wp_update_post(['ID' => $id, 'post_status' => $status, 'post_date' => $later, 'post_date_gmt' => $later, 'edit_date' => true]);
+        } else {
+            wp_update_post(['ID' => $id, 'post_status' => $status]);
+        }
+
+        $this->assertSame($status, get_post_status($id), 'precondition: the page took the status');
+
+        return $id;
+    }
+
+    /** @return list<int> */
+    private function everyPage(): array
+    {
+        return array_map('intval', get_posts([
+            'post_type'   => 'page',
+            'post_status' => array_keys(get_post_stati()),
+            'numberposts' => -1,
+            'orderby'     => 'ID',
+            'order'       => 'ASC',
+            'fields'      => 'ids',
+        ]));
+    }
+
+    /**
+     * The test bootstrap hangs a full activation on wp_loaded, and that calls
+     * ensure() whatever the version says, so only the callbacks Plugin declares
+     * are left standing.
+     */
+    private function fireCoreWpLoaded(): void
+    {
+        global $wp_filter;
+
+        $core    = realpath(dirname(__DIR__, 2) . '/src/Foundation/Plugin.php');
+        $removed = [];
+
+        foreach (($wp_filter['wp_loaded']->callbacks ?? []) as $priority => $callbacks) {
+            foreach ($callbacks as $callback) {
+                $fn = $callback['function'];
+                if ($fn instanceof Closure && realpath((string) (new ReflectionFunction($fn))->getFileName()) === $core) {
+                    continue;
+                }
+
+                $removed[] = [$fn, $priority, $callback['accepted_args']];
+                remove_action('wp_loaded', $fn, $priority);
+            }
+        }
+
+        try {
+            do_action('wp_loaded');
+        } finally {
+            foreach ($removed as [$fn, $priority, $args]) {
+                add_action('wp_loaded', $fn, $priority, $args);
+            }
+        }
     }
 }
