@@ -16,9 +16,16 @@ async function harmlessLink(page: Page): Promise<Locator> {
     return link;
 }
 
-async function openDialog(page: Page): Promise<Locator> {
+/** Whether the site refuses to call gratora.net, which only tests-e2e/mu-plugins makes it do. */
+async function refusesCalls(page: Page): Promise<boolean> {
+    const screen = await page.request.get('/wp-admin/plugins.php');
+
+    return screen.headers()['x-gratora-e2e'] === 'calls-to-gratora-refused';
+}
+
+async function openDialog(page: Page, screen = '/wp-admin/plugins.php'): Promise<Locator> {
     await new AdminPage(page).login();
-    await page.goto('/wp-admin/plugins.php');
+    await page.goto(screen);
     await (await harmlessLink(page)).click();
 
     const dialog = page.getByRole('dialog', { name: 'Deactivate Gratora' });
@@ -82,6 +89,14 @@ test('the dialog opens with the keyboard on the dialog itself, and Tab stays ins
 
     await page.keyboard.press('Tab');
     await expect(dialog.getByRole('radio').first()).toBeFocused();
+});
+
+test('the keyboard is brought back when it lands behind the dialog', async ({ page }) => {
+    const dialog = await openDialog(page);
+
+    await page.locator('#wpfooter a').first().focus();
+
+    await expect(dialog).toBeFocused();
 });
 
 test.describe('on a short screen', () => {
@@ -215,18 +230,25 @@ test('deactivation does not wait for the answer to be passed on', async ({ page 
     expect(bodies[REASON]).toHaveLength(1);
 });
 
-// By then the choice is with the site, and a dialog that closed would only look called off.
-test('once deactivation is under way the dialog stays and takes no second order', async ({ page }) => {
+// By then the choice is with the site, and a dialog that closed or changed would only look called off.
+test('once deactivation is under way the dialog stays, says so and takes nothing more', async ({ page }) => {
     let letGo = (): void => {};
     const bodies = await asked(page, { [CHOICE]: new Promise<void>((resolve) => { letGo = resolve; }) });
     const dialog = await openDialog(page);
     await reason(dialog, 'Something did not work').check();
 
     await submit(dialog).click();
+
     await expect(dialog).toHaveAttribute('aria-busy', 'true');
+    await expect(submit(dialog)).toHaveText('Deactivating…');
+    await expect(submit(dialog)).toBeDisabled();
+    await expect(dialog.getByRole('checkbox', { name: 'Delete all Gratora data as well' })).toBeDisabled();
+    await expect(reason(dialog, 'I no longer need it')).toBeDisabled();
+    await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    await expect(dialog).toBeFocused();
+
     await page.keyboard.press('Escape');
-    await dialog.getByRole('button', { name: 'Cancel' }).click();
-    await submit(dialog).click({ force: true });
+    await page.locator('.gratora-deact__backdrop').click({ position: { x: 5, y: 5 } });
 
     await expect(dialog).toBeVisible();
     expect(bodies[CHOICE]).toHaveLength(1);
@@ -236,9 +258,24 @@ test('once deactivation is under way the dialog stays and takes no second order'
     await page.waitForURL(/gratora_e2e_left=1/);
 });
 
-// Nothing answers in the site's place here: a field the script misnames is one the site refuses.
-test('the site accepts both requests as the dialog sends them', async ({ page }) => {
+test('a site that never answers does not hold the dialog shut for good', async ({ page }) => {
+    await page.clock.install();
+    await asked(page, { [CHOICE]: new Promise<void>(() => {}) });
     const dialog = await openDialog(page);
+
+    await submit(dialog).click();
+    await expect(dialog).toHaveAttribute('aria-busy', 'true');
+    await page.clock.fastForward(10_000);
+
+    await page.waitForURL(/gratora_e2e_left=1/);
+});
+
+// Nothing answers in the site's place here: a field the script misnames is one the site refuses or does not read.
+test('the site takes both requests as the dialog sends them and passes the answer on', async ({ page }) => {
+    // The page stays, so that both answers are read while it is still there.
+    await page.route(/gratora_e2e_left=1/, (route) => route.fulfill({ status: 204 }));
+    const dialog = await openDialog(page);
+    test.skip(! await refusesCalls(page), 'without tests-e2e/mu-plugins this site would pass the answer on to the real gratora.net');
     await reason(dialog, 'It is missing something I need').check();
     await box(dialog).fill('Direct debit');
 
@@ -249,6 +286,25 @@ test('the site accepts both requests as the dialog sends them', async ({ page })
     // WordPress answers a nonce or a person it does not accept with 403, and an action nobody handles with 400.
     expect(told.status()).toBe(200);
     expect(chosen.status()).toBe(200);
+    // Set by the test site as it refuses the call the plugin made to gratora.net.
+    expect(told.headers()['x-gratora-e2e-passed-on']).toBe('missing');
+});
+
+test('a site that asks nothing still opens the dialog and deactivates', async ({ page }) => {
+    const bodies = await asked(page);
+    const dialog = await openDialog(page, '/wp-admin/plugins.php?gratora_e2e_no_question=1');
+    test.skip(! await refusesCalls(page), 'only tests-e2e/mu-plugins switches the question off on request');
+
+    await expect(dialog.getByRole('radio')).toHaveCount(0);
+    await expect(dialog).not.toContainText('gratora.net');
+    await page.keyboard.press('Shift+Tab');
+    await expect(submit(dialog)).toBeFocused();
+
+    await submit(dialog).click();
+    await page.waitForURL(/gratora_e2e_left=1/);
+
+    expect(bodies[REASON]).toHaveLength(0);
+    expect(bodies[CHOICE]).toHaveLength(1);
 });
 
 // WordPress redraws the rows when the list is searched.

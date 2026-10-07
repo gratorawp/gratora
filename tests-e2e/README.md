@@ -273,9 +273,12 @@ npx wp-env run cli --env-cwd="wp-content/plugins/$(basename "$PWD")" wp --requir
 wp-env mounts the checkout under its own folder name, which `--env-cwd` reads
 from the current directory, so run these from the checkout.
 
-It also mounts `tests-e2e/mu-plugins`, which keeps the Add-ons screen on its
-built-in list. On any other site, copy that file into `wp-content/mu-plugins`,
-or each run asks gratora.net for the lists.
+It also mounts `tests-e2e/mu-plugins`, which keeps the site from calling
+gratora.net at all: the Add-ons screen stays on its built-in list, and an answer
+given to the deactivation dialog is refused on its way out. On any other site,
+copy that file into `wp-content/mu-plugins`. Without it each run asks gratora.net
+for the lists, and the two deactivation tests that let the site act skip
+themselves, since that site would send a made-up answer to the real store.
 
 An add-on suite needs its plugin mounted too. Add an override (gitignored) and
 run that suite from the add-on's own directory:

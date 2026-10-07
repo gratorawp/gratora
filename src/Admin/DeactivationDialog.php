@@ -123,12 +123,18 @@ final class DeactivationDialog
         }
 
         // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- the reason is matched against the list, and the words are kept as typed and cleaned where they are sent.
-        $reason  = (string) wp_unslash($_POST['reason'] ?? '');
-        $comment = (string) wp_unslash($_POST['comment'] ?? '');
+        $reason  = wp_unslash($_POST['reason'] ?? '');
+        $comment = wp_unslash($_POST['comment'] ?? '');
         // phpcs:enable
 
-        if ($reason !== '') {
-            ($this->survey)()->send($reason, $comment);
+        if (is_string($reason) && $reason !== '') {
+            // The choice about data is what deactivation waits for, and it would queue
+            // behind this request for as long as another plugin's session stayed open in it.
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            ($this->survey)()->send($reason, is_string($comment) ? $comment : '');
         }
 
         wp_send_json_success();

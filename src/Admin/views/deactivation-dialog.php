@@ -80,6 +80,7 @@ defined('ABSPATH') || exit;
             <button type="button" class="button button-primary" data-gratora-deact-submit
                     data-label-keep="<?php esc_attr_e('Deactivate', 'gratora-donation-platform'); ?>"
                     data-label-send="<?php esc_attr_e('Send and deactivate', 'gratora-donation-platform'); ?>"
+                    data-label-busy="<?php esc_attr_e('Deactivating…', 'gratora-donation-platform'); ?>"
                     data-label-wipe="<?php esc_attr_e('Delete everything and deactivate', 'gratora-donation-platform'); ?>">
                 <?php esc_html_e('Deactivate', 'gratora-donation-platform'); ?>
             </button>

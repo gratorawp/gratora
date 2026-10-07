@@ -9,7 +9,7 @@
     // WordPress redraws the rows when the list is searched, so the link is
     // looked for at each click and not once.
     function rowLink( target ) {
-        const link = target.closest( '.deactivate a' );
+        const link = target instanceof Element ? target.closest( '.deactivate a' ) : null;
         const row = link ? link.closest( 'tr[data-plugin]' ) : null;
         return row && row.dataset.plugin === cfg.slug ? link : null;
     }
@@ -43,7 +43,9 @@
     // Said aloud, because the button changes its wording where a screen reader is not looking.
     function say( which ) {
         const status = dialog.querySelector( '#gratora-deact-why-status' );
-        if ( status ) status.textContent = which ? status.dataset[ which ] : '';
+        const words = status && which ? status.dataset[ which ] : '';
+        // Written again it would be read again, at every arrow key through the reasons.
+        if ( status && status.textContent !== words ) status.textContent = words;
     }
 
     function clear() {
@@ -109,8 +111,6 @@
 
     function deactivate() {
         sending = true;
-        panel.setAttribute( 'aria-busy', 'true' );
-        dialog.querySelector( '[data-gratora-deact-submit]' ).setAttribute( 'aria-disabled', 'true' );
 
         const reason = picked();
         if ( reason ) {
@@ -123,10 +123,31 @@
 
         const choice = { action: cfg.action, _wpnonce: cfg.nonce };
         if ( dialog.querySelector( '#gratora-deact-wipe' ).checked ) choice.wipe = '1';
-        post( choice, false ).then( leave, leave );
+
+        // Nothing in the dialog can change what has gone to the site, so
+        // nothing in it is left looking as if it could.
+        const submit = dialog.querySelector( '[data-gratora-deact-submit]' );
+        submit.textContent = submit.dataset.labelBusy;
+        panel.setAttribute( 'aria-busy', 'true' );
+        panel.querySelectorAll( 'button, input, textarea' ).forEach( function ( control ) {
+            control.disabled = true;
+        } );
+        panel.focus( { preventScroll: true } );
+
+        let left = false;
+        const go = function () {
+            if ( ! left ) {
+                left = true;
+                leave();
+            }
+        };
+        // A site that never answers must not hold the dialog shut for good.
+        window.setTimeout( go, 10000 );
+        post( choice, false ).then( go, go );
     }
 
-    // The page behind is out of reach while the dialog is open.
+    // Tab turns round at either end. Focus that gets behind the dialog some
+    // other way is brought back by the listener in init().
     function keepInside( e ) {
         const stops = Array.from( panel.querySelectorAll( 'button, input, textarea, a[href]' ) ).filter( function ( el ) {
             return ! el.closest( '[hidden]' );
@@ -182,6 +203,11 @@
         } );
 
         dialog.querySelector( '#gratora-deact-wipe' ).addEventListener( 'change', sync );
+
+        // From the address bar, or after a click on the backdrop, Tab starts in the page behind.
+        document.addEventListener( 'focusin', function ( e ) {
+            if ( ! dialog.hidden && ! panel.contains( e.target ) ) panel.focus( { preventScroll: true } );
+        } );
 
         document.addEventListener( 'keydown', function ( e ) {
             if ( dialog.hidden ) return;

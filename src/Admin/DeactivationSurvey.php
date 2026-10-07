@@ -132,7 +132,7 @@ final class DeactivationSurvey
         $text = str_replace(["\r\n", "\r"], "\n", wp_scrub_utf8($typed));
         $text = (string) preg_replace('/[^\P{Cc}\n\t]/u', '', $text);
 
-        return mb_substr(trim($text), 0, self::COMMENT_LENGTH);
+        return mb_substr(trim($text), 0, self::COMMENT_LENGTH, 'UTF-8');
     }
 
     /**

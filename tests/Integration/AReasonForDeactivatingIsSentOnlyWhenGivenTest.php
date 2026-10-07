@@ -144,6 +144,21 @@ final class AReasonForDeactivatingIsSentOnlyWhenGivenTest extends IntegrationTes
         $this->assertSame([], $this->sent);
     }
 
+    public function test_an_answer_that_is_not_text_sends_nothing_and_complains_of_nothing(): void
+    {
+        $_POST = $_REQUEST = ['reason' => ['broken'], 'comment' => ['It broke'], '_wpnonce' => wp_create_nonce(self::REASON)];
+
+        ob_start();
+        try {
+            $this->dialog()->tell();
+        } catch (WPAjaxDieContinueException) {
+            // The handler answers and stops, as it does for the browser.
+        }
+
+        $this->assertTrue(json_decode((string) ob_get_clean(), true)['success']);
+        $this->assertSame([], $this->sent);
+    }
+
     public function test_a_picked_reason_goes_to_gratora_with_the_versions_the_days_and_the_setup_steps(): void
     {
         Plugin::instance()->container->get(CampaignService::class)->create(['title' => 'Spring appeal', 'status' => 'draft']);
