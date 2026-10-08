@@ -511,7 +511,6 @@ $bar-radius:    6px;
     }
 }
 .dp-sidebar { display: flex; flex-direction: column; gap: 16px; }
-.dp-sidebar > .dp-card { position: sticky; top: 16px; }
 .dp-main    { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
 
 .dp-card {
