@@ -1656,7 +1656,7 @@ final class PortalController
 
             return new WP_Error(
                 'gratora_export_failed',
-                __('Your data could not be put into a file. Please contact the organization and they will finish this for you.', 'gratora-donation-platform'),
+                __('Your data could not be put into a file. Please contact the organization.', 'gratora-donation-platform'),
                 ['status' => 500]
             );
         }
