@@ -1104,7 +1104,7 @@ final class DonorMetricsService
             }
         }
 
-        return [
+        $bundle = [
             'donor' => [
                 'id'                => (int) $donor->id,
                 'name'              => $this->donorName($donor),
@@ -1135,5 +1135,68 @@ final class DonorMetricsService
             // Staff notes are in DSAR scope; uncap (admin UI uses default-capped listForDonor()).
             'notes' => $this->notes->listForDonor($donorId, 100000),
         ];
+
+        $sections = $this->exportSections($donor);
+        if ($sections !== []) {
+            $bundle['sections'] = $sections;
+        }
+
+        return $bundle;
+    }
+
+    /**
+     * @return array<string,array{label:string,data:array<mixed>}>
+     *
+     * @unreleased
+     */
+    private function exportSections(Donor $donor): array
+    {
+        /**
+         * What an add-on holds that is the donor's own data, for the donor's
+         * export.
+         *
+         * A listener adds a section under a key of its own:
+         *
+         *     $sections['my-add-on'] = ['label' => 'What a person calls it', 'data' => [...]];
+         *
+         * A section reaches the admin's JSON export and the file the donor
+         * downloads in the portal, so it holds only what is the donor's own.
+         * What staff keep about a donor, such as notes and tags, does not
+         * belong here.
+         *
+         * A section is kept when its key is a non-empty string, its label a
+         * string and its data an array. Anything else is dropped. A listener
+         * that throws fails the export: a file with a section left out would
+         * still read as everything held.
+         *
+         * WordPress's own personal data exporter does not turn sections into
+         * groups. An add-on registers its own exporter with WordPress, and a
+         * value shown by both would appear there twice.
+         *
+         * An erased donor is asked about like any other, and the answer is
+         * what is still held.
+         *
+         * @unreleased
+         *
+         * @param array<string,array{label:string,data:array<mixed>}> $sections keyed by add-on
+         * @param Donor                                               $donor
+         */
+        $sections = apply_filters('gratora.donor.export_sections', [], $donor);
+        if (! is_array($sections)) {
+            return [];
+        }
+
+        $kept = [];
+        foreach ($sections as $key => $section) {
+            if (! is_string($key) || $key === '' || ! is_array($section)) {
+                continue;
+            }
+            if (! is_string($section['label'] ?? null) || ! is_array($section['data'] ?? null)) {
+                continue;
+            }
+            $kept[$key] = ['label' => $section['label'], 'data' => $section['data']];
+        }
+
+        return $kept;
     }
 }

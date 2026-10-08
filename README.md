@@ -62,6 +62,9 @@ Gratora is built to be extended by other plugins, and uses its own seams to do i
   gateways register through the same registries the built-in ones use.
 - **Commands.** `gratora.commands.register` adds a capability-gated, schema-checked
   action, which also becomes available to anything driving Gratora programmatically.
+- **Donor exports.** `gratora.donor.export_sections` adds what a plugin holds
+  that is the donor's own data to the admin's JSON export of a donor and to the
+  file the donor downloads in the portal. Staff-only data does not belong there.
 
 Persistence goes through [Queryable](https://github.com/gratorawp/queryable), a
 small first-party query builder and schema tool. Models declare their own schema

@@ -534,6 +534,9 @@ final class DonorsController
             'notes'       => $data['notes'],
             'events'      => $data['events'],
         ];
+        if (isset($data['sections'])) {
+            $bundle['sections'] = $data['sections'];
+        }
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $filename = sprintf('gratora-donor-%d-%s.json', $donor->id, gmdate('Y-m-d'));
