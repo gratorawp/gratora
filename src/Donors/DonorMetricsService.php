@@ -1061,11 +1061,44 @@ final class DonorMetricsService
     public function exportData(int $donorId): ?array
     {
         $donor = $this->donors->findById($donorId);
+
+        return $donor ? $this->exportBundle($donor) : null;
+    }
+
+    /**
+     * exportData() and the sections add-ons add to it, for the admin's JSON
+     * export and the file the donor downloads. WordPress's exporter is built
+     * from exportData() and asks no listener.
+     *
+     * @return array<string,mixed>|null
+     *
+     * @unreleased
+     */
+    public function exportDataWithSections(int $donorId): ?array
+    {
+        $donor = $this->donors->findById($donorId);
         if (! $donor) {
             return null;
         }
 
-        $live = $donor->redacted_at === null;
+        $bundle   = $this->exportBundle($donor);
+        $sections = $this->exportSections($donor);
+        if ($sections !== []) {
+            $bundle['sections'] = $sections;
+        }
+
+        return $bundle;
+    }
+
+    /**
+     * @return array<string,mixed>
+     *
+     * @unreleased
+     */
+    private function exportBundle(Donor $donor): array
+    {
+        $donorId = (int) $donor->id;
+        $live    = $donor->redacted_at === null;
 
         $recurringPlans = RecurringPlan::query()
             ->where('donor_id', $donorId)
@@ -1104,7 +1137,7 @@ final class DonorMetricsService
             }
         }
 
-        $bundle = [
+        return [
             'donor' => [
                 'id'                => (int) $donor->id,
                 'name'              => $this->donorName($donor),
@@ -1135,13 +1168,6 @@ final class DonorMetricsService
             // Staff notes are in DSAR scope; uncap (admin UI uses default-capped listForDonor()).
             'notes' => $this->notes->listForDonor($donorId, 100000),
         ];
-
-        $sections = $this->exportSections($donor);
-        if ($sections !== []) {
-            $bundle['sections'] = $sections;
-        }
-
-        return $bundle;
     }
 
     /**
@@ -1165,13 +1191,20 @@ final class DonorMetricsService
          * belong here.
          *
          * A section is kept when its key is a non-empty string, its label a
-         * string and its data an array. Anything else is dropped. A listener
-         * that throws fails the export: a file with a section left out would
-         * still read as everything held.
+         * string and its data an array the file can carry: strings, numbers,
+         * booleans, nulls and arrays of those, nested no deeper than JSON
+         * allows. An object, a resource, NAN or INF anywhere in it drops the
+         * section, as anything else malformed does. A listener that throws
+         * fails the export: a file with a section left out would still read as
+         * everything held.
          *
-         * WordPress's own personal data exporter does not turn sections into
-         * groups. An add-on registers its own exporter with WordPress, and a
-         * value shown by both would appear there twice.
+         * A listener is handed what the one before it returned, which is not
+         * an array when that one returned something else, and returns an
+         * array.
+         *
+         * WordPress's own personal data exporter is given no sections and asks
+         * no listener. An add-on registers its own exporter with WordPress, and
+         * a value shown by both would appear there twice.
          *
          * An erased donor is asked about like any other, and the answer is
          * what is still held.
@@ -1194,9 +1227,43 @@ final class DonorMetricsService
             if (! is_string($section['label'] ?? null) || ! is_array($section['data'] ?? null)) {
                 continue;
             }
+            if (! self::fileCanCarry($section['data'])) {
+                continue;
+            }
             $kept[$key] = ['label' => $section['label'], 'data' => $section['data']];
         }
 
         return $kept;
+    }
+
+    /**
+     * Encoded first, because that is what refuses an array that contains
+     * itself. The walk after it is for objects, which encode as their public
+     * properties and so would pass.
+     *
+     * @param array<mixed> $data
+     *
+     * @unreleased
+     */
+    private static function fileCanCarry(array $data): bool
+    {
+        // A section's data sits three levels down in a file encoded to 512.
+        return wp_json_encode($data, 0, 512 - 3) !== false && self::isPlain($data);
+    }
+
+    /**
+     * @param array<mixed> $data
+     *
+     * @unreleased
+     */
+    private static function isPlain(array $data): bool
+    {
+        foreach ($data as $value) {
+            if (is_array($value) ? ! self::isPlain($value) : ($value !== null && ! is_scalar($value))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

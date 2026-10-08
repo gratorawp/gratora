@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Gratora\Tests\Integration;
 
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRecorder;
 use Gratora\Donors\ConsentService;
 use Gratora\Donors\Donor;
 use Gratora\Donors\DonorMetricsService;
@@ -61,27 +64,86 @@ final class DonorExportSectionsTest extends IntegrationTestCase
         apply_filters('rest_pre_serve_request', false, $response, $request, rest_get_server());
         $body = (string) ob_get_clean();
 
-        $bundle = json_decode($body, true);
-        $this->assertIsArray($bundle, 'the export did not stream a JSON file: ' . $body);
+        $bundle = json_decode($body, true, 1024);
+        $this->assertIsArray($bundle, 'the export did not stream a JSON file: ' . substr($body, 0, 200));
 
         return $bundle;
     }
 
-    /** @return array<string,mixed> */
-    private function adminExport(int $donorId): array
+    /**
+     * What a route answers when it sends no file: the status, the error code,
+     * and whatever the server would have written to the browser.
+     *
+     * @return array{status:int, code:string, body:string, disposition:?string}
+     */
+    private function refused(WP_REST_Request $request): array
     {
-        return $this->served(new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$donorId}/export"));
+        remove_all_filters('rest_pre_serve_request');
+
+        $response = rest_do_request($request);
+
+        ob_start();
+        apply_filters('rest_pre_serve_request', false, $response, $request, rest_get_server());
+        $body = (string) ob_get_clean();
+
+        return [
+            'status'      => $response->get_status(),
+            'code'        => (string) (((array) $response->get_data())['code'] ?? ''),
+            'body'        => $body,
+            'disposition' => $response->get_headers()['Content-Disposition'] ?? null,
+        ];
     }
 
-    /** @return array<string,mixed> */
-    private function donorDownload(int $donorId): array
+    private function adminExportRequest(int $donorId): WP_REST_Request
+    {
+        return new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$donorId}/export");
+    }
+
+    private function donorDownloadRequest(int $donorId): WP_REST_Request
     {
         $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, 'tok');
 
         $request = new WP_REST_Request('POST', '/gratora/v1/portal/data-export');
         $request->set_header('X-Gratora-Csrf', 'tok');
 
-        return $this->served($request);
+        return $request;
+    }
+
+    /** @return array<string,mixed> an array nested this many levels */
+    private static function nested(int $levels): array
+    {
+        $data = ['leaf' => 1];
+        for ($i = 1; $i < $levels; $i++) {
+            $data = ['n' => $data];
+        }
+
+        return $data;
+    }
+
+    /**
+     * Something core itself holds that the file cannot carry, with no listener
+     * involved: a payload that is stored and read back, and is nested too deep
+     * once the file wraps it.
+     */
+    private function holdSomethingTheFileCannotCarry(int $donorId): void
+    {
+        Plugin::instance()->container->get(EventRecorder::class)
+            ->record('custom.recorded', ['donor_id' => $donorId, 'payload' => self::nested(510)]);
+
+        $stored = Event::query()->where('donor_id', $donorId)->where('type', 'custom.recorded')->get();
+        $this->assertSame(self::nested(510), $stored?->payload, 'the payload did not come back from storage');
+    }
+
+    /** @return array<string,mixed> */
+    private function adminExport(int $donorId): array
+    {
+        return $this->served($this->adminExportRequest($donorId));
+    }
+
+    /** @return array<string,mixed> */
+    private function donorDownload(int $donorId): array
+    {
+        return $this->served($this->donorDownloadRequest($donorId));
     }
 
     public function test_the_admin_export_carries_a_section_a_listener_adds(): void
@@ -130,6 +192,84 @@ final class DonorExportSectionsTest extends IntegrationTestCase
 
         $this->assertSame($expected, $this->adminExport($donorId)['sections'] ?? null);
         $this->assertSame($expected, $this->donorDownload($donorId)['sections'] ?? null);
+    }
+
+    public function test_data_the_file_cannot_carry_drops_its_section_and_the_rest_is_kept(): void
+    {
+        $kept     = ['label' => 'Volunteering', 'data' => ['shirt_size' => 'M', 'hours' => 12.5, 'active' => true, 'left' => null, 'shifts' => [['day' => 'Mon']]]];
+        $resource = fopen('php://memory', 'r');
+        $donor    = $this->donor();
+        $loop     = ['v' => 1];
+        $loop['itself'] = &$loop;
+
+        try {
+            $this->listen([
+                'volunteering'   => $kept,
+                'not-a-number'   => ['label' => 'NAN', 'data' => ['v' => NAN]],
+                'infinite'       => ['label' => 'INF', 'data' => ['v' => INF]],
+                'nested-nan'     => ['label' => 'NAN further down', 'data' => ['rows' => [['v' => 1], ['v' => NAN]]]],
+                'an-object'      => ['label' => 'Object', 'data' => ['v' => (object) ['a' => 1]]],
+                'a-model'        => ['label' => 'Model', 'data' => ['donor' => $donor]],
+                'nested-object'  => ['label' => 'Object further down', 'data' => ['rows' => [['v' => new \ArrayObject(['a' => 1])]]]],
+                'a-resource'     => ['label' => 'Resource', 'data' => ['v' => $resource]],
+                'holds-itself'   => ['label' => 'Array that contains itself', 'data' => $loop],
+            ]);
+
+            $donorId = (int) $donor->id;
+
+            $this->assertSame(['volunteering' => $kept], $this->adminExport($donorId)['sections'] ?? null);
+            $this->assertSame(['volunteering' => $kept], $this->donorDownload($donorId)['sections'] ?? null);
+        } finally {
+            fclose($resource);
+        }
+    }
+
+    public function test_data_is_kept_as_deep_as_the_file_can_carry_it_and_no_deeper(): void
+    {
+        $this->listen([
+            'deepest'  => ['label' => 'As deep as fits', 'data' => self::nested(509)],
+            'too-deep' => ['label' => 'One level more', 'data' => self::nested(510)],
+        ]);
+
+        $donorId  = (int) $this->donor()->id;
+        $expected = ['deepest' => ['label' => 'As deep as fits', 'data' => self::nested(509)]];
+
+        $this->assertSame($expected, $this->adminExport($donorId)['sections'] ?? null);
+        $this->assertSame($expected, $this->donorDownload($donorId)['sections'] ?? null);
+    }
+
+    public function test_the_admin_export_answers_an_error_and_sends_no_file_when_the_file_cannot_be_written(): void
+    {
+        $donorId = (int) $this->donor()->id;
+        $this->holdSomethingTheFileCannotCarry($donorId);
+
+        $answer = $this->refused($this->adminExportRequest($donorId));
+
+        $this->assertSame(
+            ['status' => 500, 'code' => 'gratora_export_failed', 'body' => '', 'disposition' => null],
+            $answer
+        );
+        $this->assertTrue(
+            Event::query()->where('donor_id', $donorId)->where('type', ErrorLog::PREFIX . 'admin.donor.export')->exists(),
+            'the log under Tools has no line for the failure the message points to'
+        );
+    }
+
+    public function test_the_donors_own_download_answers_an_error_and_sends_no_file_when_the_file_cannot_be_written(): void
+    {
+        $donorId = (int) $this->donor()->id;
+        $this->holdSomethingTheFileCannotCarry($donorId);
+
+        $answer = $this->refused($this->donorDownloadRequest($donorId));
+
+        $this->assertSame(
+            ['status' => 500, 'code' => 'gratora_export_failed', 'body' => '', 'disposition' => null],
+            $answer
+        );
+        $this->assertTrue(
+            Event::query()->where('donor_id', $donorId)->where('type', ErrorLog::PREFIX . 'portal.export')->exists(),
+            'the organization has no line in its log for the failure the donor is sent to it about'
+        );
     }
 
     public function test_with_no_listener_neither_export_has_the_key(): void
@@ -214,29 +354,44 @@ final class DonorExportSectionsTest extends IntegrationTestCase
         }
     }
 
-    public function test_wordpress_exporter_answers_the_same_with_and_without_a_listener(): void
+    private function wordPressExporter(): WordPressPrivacy
     {
-        $email = 'sections-wp-' . uniqid() . '@example.test';
-        $donor = $this->donor($email);
-        $c     = Plugin::instance()->container;
+        $c = Plugin::instance()->container;
 
-        $privacy = new WordPressPrivacy(
+        return new WordPressPrivacy(
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(IdentityHasher::class),
             $c->get(DonorMetricsService::class),
             $c->get(ConsentService::class),
         );
+    }
 
-        $without = $privacy->export($email);
+    public function test_wordpress_exporter_answers_the_same_with_and_without_a_listener(): void
+    {
+        $email = 'sections-wp-' . uniqid() . '@example.test';
+        $donor = $this->donor($email);
+
+        $without = $this->wordPressExporter()->export($email);
         $this->assertNotSame([], $without['data']);
 
         $this->listen(['volunteering' => ['label' => 'Volunteering', 'data' => ['shirt_size' => 'M']]]);
 
-        $this->assertArrayHasKey(
-            'volunteering',
-            $c->get(DonorMetricsService::class)->exportData((int) $donor->id)['sections'] ?? []
-        );
-        $this->assertSame($without, $privacy->export($email));
+        $this->assertArrayHasKey('volunteering', $this->adminExport((int) $donor->id)['sections'] ?? []);
+        $this->assertSame($without, $this->wordPressExporter()->export($email));
+    }
+
+    public function test_wordpress_exporter_asks_no_listener(): void
+    {
+        $email = 'sections-wp-' . uniqid() . '@example.test';
+        $this->donor($email);
+
+        $without = $this->wordPressExporter()->export($email);
+
+        add_filter('gratora.donor.export_sections', static function (): array {
+            throw new \DomainException('the add-on could not read what it holds');
+        });
+
+        $this->assertSame($without, $this->wordPressExporter()->export($email));
     }
 }

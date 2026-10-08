@@ -520,7 +520,7 @@ final class DonorsController
             return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
 
-        $data = $this->metrics->exportData($donor->id);
+        $data = $this->metrics->exportDataWithSections($donor->id);
         if ($data === null) {
             return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);
         }
@@ -538,7 +538,17 @@ final class DonorsController
             $bundle['sections'] = $data['sections'];
         }
 
-        $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $json = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            ErrorLog::record('admin.donor.export', json_last_error_msg(), ['donor_id' => (int) $donor->id]);
+
+            return new WP_Error(
+                'gratora_export_failed',
+                __('The donor\'s data was not exported. The reason is in the log under Tools.', 'gratora-donation-platform'),
+                ['status' => 500]
+            );
+        }
+
         $filename = sprintf('gratora-donor-%d-%s.json', $donor->id, gmdate('Y-m-d'));
         $route    = $request->get_route();
 

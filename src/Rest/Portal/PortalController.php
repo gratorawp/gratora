@@ -1641,7 +1641,7 @@ final class PortalController
         // this donor", and the donor's right of access is to that same set. Two
         // definitions of one legal obligation is one too many, so this asks for
         // the canonical one and only falls back when it cannot answer.
-        $bundle = $this->metrics->exportData((int) $donor->id) ?? [
+        $bundle = $this->metrics->exportDataWithSections((int) $donor->id) ?? [
             'donor'     => ['id' => (int) $donor->id, 'email' => $email],
             'donations' => $donationRows,
             'consents'  => $consentRows,
@@ -1650,7 +1650,17 @@ final class PortalController
         $bundle = self::forDonor($bundle);
         $bundle['exported_at'] = gmdate('c');
 
-        $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $json = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            ErrorLog::record('portal.export', json_last_error_msg(), ['donor_id' => (int) $donor->id]);
+
+            return new WP_Error(
+                'gratora_export_failed',
+                __('Your data could not be put into a file. Please contact the organization and they will finish this for you.', 'gratora-donation-platform'),
+                ['status' => 500]
+            );
+        }
+
         $filename = sprintf('gratora-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));
 
         // Streamed as an attachment, so the donor's browser saves a file
