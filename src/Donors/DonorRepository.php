@@ -265,25 +265,33 @@ final class DonorRepository
      * lifecycleKpi() cuts, so a list of a stage's donors and the count on the
      * insights screen are the same donors.
      *
-     * $today is a calendar day as `Y-m-d`, and core passes the UTC one. A cut
-     * is the start of the day a set number of days before it. A last donation
-     * on a cut's own day is in the nearer stage, and a donor who never gave is
-     * in none.
+     * $today is a calendar day written `Y-m-d` and nothing more, and core
+     * passes the UTC one. A cut is the start of the day a set number of days
+     * before it. A last donation on a cut's own day is in the nearer stage, and
+     * a donor who never gave is in none.
      *
      * It says nothing about a donor who was erased or has only test donations.
-     * The caller adds DonorQueries::notRedactedPredicate() and whatever else
-     * its list needs, such as mailableDonorPredicate(), joined with AND inside
-     * one whereRaw.
+     * The caller adds DonorQueries::notRedactedPredicate(), which takes the
+     * same alias, joined with AND inside one whereRaw. testOnlyDonorPredicate()
+     * and mailableDonorPredicate() are written against the donors table by its
+     * own name, so a caller who needs one of them queries that table without an
+     * alias.
      *
      * Pass the alias when the query names the donors table. It goes into the
      * SQL as given.
      *
-     * @throws InvalidArgumentException when the stage is not one of LIFECYCLE_STAGES
+     * @throws InvalidArgumentException when the stage is not one of LIFECYCLE_STAGES,
+     *                                  or $today is not a date written `Y-m-d`
      *
      * @unreleased
      */
     public static function lifecyclePredicate(string $stage, string $today, ?string $alias = null): string
     {
+        $day = DateTimeImmutable::createFromFormat('!Y-m-d', $today);
+        if ($day === false || $day->format('Y-m-d') !== $today) {
+            throw new InvalidArgumentException(esc_html("Not a date written Y-m-d: {$today}"));
+        }
+
         return self::stageCondition($stage, $today, $alias);
     }
 

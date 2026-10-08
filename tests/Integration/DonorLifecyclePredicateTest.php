@@ -120,6 +120,18 @@ final class DonorLifecyclePredicateTest extends IntegrationTestCase
         $this->assertSame(4, (int) $list['total']);
     }
 
+    public function test_the_at_risk_list_cuts_where_its_caller_says(): void
+    {
+        $byStage = $this->seedAroundEveryCut();
+
+        $list = $this->repo()->listAtRisk(self::TODAY, 1, 25, 100, 200);
+        $ids  = array_map(static fn (array $row): int => (int) $row['id'], $list['rows']);
+        sort($ids);
+
+        $this->assertSame([...array_slice($byStage['at_risk'], 1), $byStage['lapsed'][0]], $ids);
+        $this->assertSame(4, (int) $list['total']);
+    }
+
     public function test_each_stage_selects_exactly_the_donors_the_kpi_counts_for_it(): void
     {
         $byStage = $this->seedAroundEveryCut();
@@ -178,6 +190,31 @@ final class DonorLifecyclePredicateTest extends IntegrationTestCase
             'total'                                  => ['total'],
             'another case'                           => ['Active'],
             'empty'                                  => [''],
+        ];
+    }
+
+    /** @dataProvider notDays */
+    public function test_a_day_that_is_not_a_date_written_out_is_refused(string $today): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        DonorRepository::lifecyclePredicate('active', $today);
+    }
+
+    /** @return array<string,array{0:string}> */
+    public function notDays(): array
+    {
+        return [
+            'empty, which a date parser reads as now' => [''],
+            'now'                                     => ['now'],
+            'a relative day'                          => ['yesterday'],
+            'not a date at all'                       => ['soon enough'],
+            'a day the month does not have'           => ['2026-02-30'],
+            'no leading zeros'                        => ['2026-6-26'],
+            'another order'                           => ['26.06.2026'],
+            'a time after it'                         => ['2026-06-26 10:00:00'],
+            'an ISO stamp'                            => ['2026-06-26T00:00:00+00:00'],
+            'a space before it'                       => [' 2026-06-26'],
         ];
     }
 
