@@ -7,6 +7,7 @@ namespace Gratora\Donors;
 use DateTimeImmutable;
 use Gratora\Donations\DonationQueries;
 use Gratora\Vendor\Queryable\DB;
+use InvalidArgumentException;
 
 /** @since 1.0.0 */
 final class DonorRepository
@@ -18,6 +19,16 @@ final class DonorRepository
     private const ACTIVE_DAYS  = 90;
     private const AT_RISK_DAYS = 180;
     private const LAPSED_DAYS  = 365;
+
+    /**
+     * The stages of giving, nearest first. `new` is not one: it is counted on
+     * when the donor was first seen, and a new donor is in a stage as well.
+     *
+     * @unreleased
+     *
+     * @var list<string>
+     */
+    public const LIFECYCLE_STAGES = ['active', 'at_risk', 'lapsed', 'lost'];
 
     /** @since 1.0.0 */
     public function findById(int $id): ?Donor
@@ -250,6 +261,56 @@ final class DonorRepository
     }
 
     /**
+     * The SQL condition for the donors in a lifecycle stage on a day, cut where
+     * lifecycleKpi() cuts, so a list of a stage's donors and the count on the
+     * insights screen are the same donors.
+     *
+     * $today is a calendar day as `Y-m-d`, and core passes the UTC one. A cut
+     * is the start of the day a set number of days before it. A last donation
+     * on a cut's own day is in the nearer stage, and a donor who never gave is
+     * in none.
+     *
+     * It says nothing about a donor who was erased or has only test donations.
+     * The caller adds DonorQueries::notRedactedPredicate() and whatever else
+     * its list needs, such as mailableDonorPredicate(), joined with AND inside
+     * one whereRaw.
+     *
+     * Pass the alias when the query names the donors table. It goes into the
+     * SQL as given.
+     *
+     * @throws InvalidArgumentException when the stage is not one of LIFECYCLE_STAGES
+     *
+     * @unreleased
+     */
+    public static function lifecyclePredicate(string $stage, string $today, ?string $alias = null): string
+    {
+        return self::stageCondition($stage, $today, $alias);
+    }
+
+    /** @unreleased */
+    private static function stageCondition(
+        string $stage,
+        string $today,
+        ?string $alias,
+        int $activeDays = self::ACTIVE_DAYS,
+        int $atRiskDays = self::AT_RISK_DAYS,
+        int $lapsedDays = self::LAPSED_DAYS,
+    ): string {
+        $last      = ($alias !== null && $alias !== '' ? $alias . '.' : '') . 'last_donation_at';
+        $activeCut = esc_sql(self::daysAgo($today, $activeDays));
+        $atRiskCut = esc_sql(self::daysAgo($today, $atRiskDays));
+        $lapsedCut = esc_sql(self::daysAgo($today, $lapsedDays));
+
+        return match ($stage) {
+            'active'  => "({$last} >= '{$activeCut}')",
+            'at_risk' => "({$last} < '{$activeCut}' AND {$last} >= '{$atRiskCut}')",
+            'lapsed'  => "({$last} < '{$atRiskCut}' AND {$last} >= '{$lapsedCut}')",
+            'lost'    => "({$last} < '{$lapsedCut}')",
+            default   => throw new InvalidArgumentException(esc_html("Unknown lifecycle stage: {$stage}")),
+        };
+    }
+
+    /**
      * @return array{
      *   total:int,
      *   new:int,
@@ -266,20 +327,22 @@ final class DonorRepository
      */
     public function lifecycleKpi(string $today, int $newDays = self::NEW_DAYS, int $activeDays = self::ACTIVE_DAYS, int $atRiskDays = self::AT_RISK_DAYS, int $lapsedDays = self::LAPSED_DAYS): array
     {
-        $newCut    = esc_sql($this->daysAgo($today, $newDays));
-        $activeCut = esc_sql($this->daysAgo($today, $activeDays));
-        $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
-        $lapsedCut = esc_sql($this->daysAgo($today, $lapsedDays));
+        $newCut = esc_sql(self::daysAgo($today, $newDays));
+
+        $in = [];
+        foreach (self::LIFECYCLE_STAGES as $stage) {
+            $in[$stage] = self::stageCondition($stage, $today, null, $activeDays, $atRiskDays, $lapsedDays);
+        }
 
         $row = DB::table('gratora_donors')
             ->whereRaw(DonorQueries::notRedactedPredicate() . ' AND ' . $this->givingDonorPredicate())
             ->selectRaw("
                 COUNT(*) AS total,
                 SUM(CASE WHEN created_at >= '{$newCut}' THEN 1 ELSE 0 END) AS new_donors,
-                SUM(CASE WHEN last_donation_at >= '{$activeCut}' THEN 1 ELSE 0 END) AS active,
-                SUM(CASE WHEN last_donation_at <  '{$activeCut}' AND last_donation_at >= '{$atRiskCut}' THEN 1 ELSE 0 END) AS at_risk,
-                SUM(CASE WHEN last_donation_at <  '{$atRiskCut}' AND last_donation_at >= '{$lapsedCut}' THEN 1 ELSE 0 END) AS lapsed,
-                SUM(CASE WHEN last_donation_at <  '{$lapsedCut}' THEN 1 ELSE 0 END) AS lost,
+                SUM(CASE WHEN {$in['active']} THEN 1 ELSE 0 END) AS active,
+                SUM(CASE WHEN {$in['at_risk']} THEN 1 ELSE 0 END) AS at_risk,
+                SUM(CASE WHEN {$in['lapsed']} THEN 1 ELSE 0 END) AS lapsed,
+                SUM(CASE WHEN {$in['lost']} THEN 1 ELSE 0 END) AS lost,
                 COALESCE(SUM(total_donated_cents), 0) AS ltv_total,
                 SUM(CASE WHEN total_donated_cents > 0 THEN 1 ELSE 0 END) AS givers
             ")
@@ -314,12 +377,10 @@ final class DonorRepository
      */
     public function listAtRisk(string $today, int $page = 1, int $perPage = 25, int $activeDays = self::ACTIVE_DAYS, int $atRiskDays = self::AT_RISK_DAYS): array
     {
-        $activeCut = esc_sql($this->daysAgo($today, $activeDays));
-        $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
-        $offset    = max(0, ($page - 1) * $perPage);
+        $offset = max(0, ($page - 1) * $perPage);
 
         $where = DonorQueries::notRedactedPredicate()
-            . " AND last_donation_at < '{$activeCut}' AND last_donation_at >= '{$atRiskCut}'";
+            . ' AND ' . self::stageCondition('at_risk', $today, null, $activeDays, $atRiskDays);
 
         $total = (int) DB::table('gratora_donors')->whereRaw($where)->count();
 
@@ -442,10 +503,10 @@ final class DonorRepository
      */
     public function rfmSegments(string $today, int $activeDays = 90, int $atRiskDays = 180, int $lostDays = 365, int $newDays = 30): array
     {
-        $activeCut = esc_sql($this->daysAgo($today, $activeDays));
-        $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
-        $lostCut   = esc_sql($this->daysAgo($today, $lostDays));
-        $newCut    = esc_sql($this->daysAgo($today, $newDays));
+        $activeCut = esc_sql(self::daysAgo($today, $activeDays));
+        $atRiskCut = esc_sql(self::daysAgo($today, $atRiskDays));
+        $lostCut   = esc_sql(self::daysAgo($today, $lostDays));
+        $newCut    = esc_sql(self::daysAgo($today, $newDays));
 
         $segmentCase = "
             CASE
@@ -655,7 +716,7 @@ final class DonorRepository
     }
 
     /** @since 1.0.0 */
-    private function daysAgo(string $today, int $days): string
+    private static function daysAgo(string $today, int $days): string
     {
         return (new DateTimeImmutable($today))->modify("-{$days} days")->format('Y-m-d 00:00:00');
     }

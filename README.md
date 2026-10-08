@@ -65,6 +65,10 @@ Gratora is built to be extended by other plugins, and uses its own seams to do i
 - **Donor exports.** `gratora.donor.export_sections` adds what a plugin holds
   that is the donor's own data to the admin's JSON export of a donor and to the
   file the donor downloads in the portal. Staff-only data does not belong there.
+- **Donor lifecycle stages.** `DonorRepository::lifecyclePredicate()` answers the
+  SQL condition for the donors who are active, at risk, lapsed or lost on a day,
+  cut where the insights screen cuts, so a plugin's list of a stage is the donors
+  core counts in it.
 
 Persistence goes through [Queryable](https://github.com/gratorawp/queryable), a
 small first-party query builder and schema tool. Models declare their own schema
