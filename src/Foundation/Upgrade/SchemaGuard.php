@@ -311,7 +311,6 @@ final class SchemaGuard
                     $instance   = $reflection->newInstance();
 
                     $property = $reflection->getProperty('table');
-                    $property->setAccessible(true);
                     $name = (string) $property->getValue($instance);
 
                     if ($name === '') {
@@ -324,7 +323,6 @@ final class SchemaGuard
                     // A model that declares meta gets a second table from the same
                     // migration, named the way Table::compileMetaTable names it.
                     $meta = $reflection->getMethod('meta');
-                    $meta->setAccessible(true);
                     $config = (array) $meta->invoke($instance);
 
                     if ($config !== []) {
@@ -369,7 +367,6 @@ final class SchemaGuard
 
         try {
             $schemas = new ReflectionProperty(Model::class, 'schemas');
-            $schemas->setAccessible(true);
             $callback = ($schemas->getValue()[$model] ?? null);
 
             if (! $callback instanceof \Closure) {
@@ -377,7 +374,6 @@ final class SchemaGuard
             }
 
             $meta = $reflection->getMethod('meta');
-            $meta->setAccessible(true);
 
             $table = new Table(
                 $wpdb->charset ?: 'utf8mb4',

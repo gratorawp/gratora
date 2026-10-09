@@ -78,6 +78,26 @@ final class SchemaGuardTest extends IntegrationTestCase
         $this->assertContains(UncreatedCoreTable::TABLE, SchemaGuard::missingTables());
     }
 
+    public function test_reading_the_schema_raises_no_php_notice(): void
+    {
+        $raised = [];
+        set_error_handler(static function (int $level, string $message) use (&$raised): bool {
+            $raised[] = $message;
+
+            return true;
+        });
+
+        try {
+            SchemaGuard::missingTables();
+            SchemaGuard::missingAddOnTables();
+            SchemaGuard::missingColumns();
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $raised);
+    }
+
     public function test_the_missing_add_on_table_is_reported_against_its_plugin(): void
     {
         $this->registerAddOn();
@@ -159,7 +179,6 @@ final class SchemaGuardTest extends IntegrationTestCase
 
         foreach (['modules', 'booted'] as $name) {
             $property = new ReflectionProperty(ModuleManager::class, $name);
-            $property->setAccessible(true);
             $value = $property->getValue($modules);
             unset($value[AddOnTableProbeModule::ID]);
             $property->setValue($modules, $value);
@@ -198,7 +217,6 @@ final class SchemaGuardTest extends IntegrationTestCase
     private function registry(): array
     {
         $property = new ReflectionProperty(ModuleManager::class, 'modules');
-        $property->setAccessible(true);
 
         return $property->getValue(Plugin::instance()->modules);
     }
@@ -207,7 +225,6 @@ final class SchemaGuardTest extends IntegrationTestCase
     private function writeRegistry(array $registry): void
     {
         $property = new ReflectionProperty(ModuleManager::class, 'modules');
-        $property->setAccessible(true);
         $property->setValue(Plugin::instance()->modules, $registry);
     }
 }

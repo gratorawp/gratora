@@ -263,7 +263,6 @@ final class DataEraser
                 continue;
             }
             $property = (new ReflectionClass($model))->getProperty('table');
-            $property->setAccessible(true);
             $name = (string) $property->getValue(new $model());
             if ($name !== '') {
                 $tables[] = $name;

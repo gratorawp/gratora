@@ -218,6 +218,24 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $this->assertContains('gratora_view_donations', $caps);
     }
 
+    public function test_planning_raises_no_php_notice(): void
+    {
+        $raised = [];
+        set_error_handler(static function (int $level, string $message) use (&$raised): bool {
+            $raised[] = $message;
+
+            return true;
+        });
+
+        try {
+            (new DataEraser())->plan();
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $raised);
+    }
+
     public function test_planning_reads_nothing_destructive(): void
     {
         update_option('gratora_org_profile', ['name' => 'Acme Foundation'], false);
