@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 1.2.1 =
+* Fixed: PHP 8.5 no longer shows deprecation notices in the WordPress admin.
+
 = 1.2.0 =
 * New: Gratora now runs on WordPress 6.9.
 * New: a new site starts in test mode, and the dashboard shows the steps to your first donation.
