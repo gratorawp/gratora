@@ -95,7 +95,6 @@ final class BothSpellingsOfATagResolveTest extends IntegrationTestCase
     private function invoke(object $target, string $method, mixed ...$args): mixed
     {
         $ref = new ReflectionMethod($target, $method);
-        $ref->setAccessible(true);
 
         return $ref->invoke($target, ...$args);
     }

@@ -39,7 +39,6 @@ final class GatewayEnableTest extends IntegrationTestCase
     private function forgetGroupSchema(): void
     {
         $prop = new ReflectionProperty(SettingsService::class, 'groupsCache');
-        $prop->setAccessible(true);
         $prop->setValue($this->settings(), null);
     }
 

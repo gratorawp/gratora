@@ -11,7 +11,6 @@ final class ClosedCampaignFormMessageTest extends IntegrationTestCase
     private function render(?string $reason): string
     {
         $m = new \ReflectionMethod(DonationFormShortcode::class, 'renderNotAccepting');
-        $m->setAccessible(true);
 
         $shortcode = (new \ReflectionClass(DonationFormShortcode::class))->newInstanceWithoutConstructor();
 

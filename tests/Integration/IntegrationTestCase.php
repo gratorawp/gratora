@@ -115,7 +115,6 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
     {
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         $prop    = new ReflectionProperty($manager, 'gateways');
-        $prop->setAccessible(true);
 
         return (array) $prop->getValue($manager);
     }
@@ -125,7 +124,6 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
     {
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         $prop    = new ReflectionProperty($manager, 'gateways');
-        $prop->setAccessible(true);
         $prop->setValue($manager, $gateways);
     }
 
@@ -149,7 +147,6 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
     private function setQueryableTransactionDepth(int $depth): void
     {
         $prop = new ReflectionProperty(DB::class, 'transactionDepth');
-        $prop->setAccessible(true);
         $prop->setValue(null, $depth);
     }
 

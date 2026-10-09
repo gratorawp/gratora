@@ -34,7 +34,6 @@ final class ReadinessSeesAddonGatewaysTest extends IntegrationTestCase
         $manager = Plugin::instance()->container->get(GatewayManager::class);
 
         $property = new \ReflectionProperty($manager, 'gateways');
-        $property->setAccessible(true);
         $all = $property->getValue($manager);
         unset($all['acme-bank']);
         $property->setValue($manager, $all);

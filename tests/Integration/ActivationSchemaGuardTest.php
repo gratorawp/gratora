@@ -133,7 +133,6 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
     private function finishActivation(): void
     {
         $method = new ReflectionMethod(Plugin::class, 'finishActivation');
-        $method->setAccessible(true);
         $method->invoke(null, null);
     }
 
@@ -157,7 +156,6 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
 
         foreach (['modules', 'booted'] as $name) {
             $property = new ReflectionProperty(ModuleManager::class, $name);
-            $property->setAccessible(true);
             $value = $property->getValue($modules);
             unset($value[UnmigratedProbeModule::ID]);
             $property->setValue($modules, $value);

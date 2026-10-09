@@ -394,7 +394,6 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
     private function createReceiptRecord(ReceiptRenderer $renderer, ReceiptContext $ctx): array
     {
         $method = new \ReflectionMethod(ReceiptIssuer::class, 'createReceiptRecord');
-        $method->setAccessible(true);
 
         return $method->invoke(Plugin::instance()->container->get(ReceiptIssuer::class), $renderer, $ctx);
     }

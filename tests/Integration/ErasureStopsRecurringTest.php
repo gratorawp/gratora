@@ -54,7 +54,6 @@ final class ErasureStopsRecurringTest extends IntegrationTestCase
     {
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         $prop = new \ReflectionProperty($manager, 'gateways');
-        $prop->setAccessible(true);
         $all = $prop->getValue($manager);
         unset($all[$id]);
         $prop->setValue($manager, $all);

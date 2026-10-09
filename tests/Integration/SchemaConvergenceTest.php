@@ -24,7 +24,6 @@ final class SchemaConvergenceTest extends IntegrationTestCase
     private function registeredTables(): array
     {
         $prop = new ReflectionProperty(Model::class, 'schemas');
-        $prop->setAccessible(true);
         $schemas = (array) $prop->getValue();
 
         $charset = self::$wpdb->charset ?: 'utf8mb4';
@@ -39,10 +38,8 @@ final class SchemaConvergenceTest extends IntegrationTestCase
             $model = new $class();
 
             $name = new ReflectionProperty($model, 'table');
-            $name->setAccessible(true);
 
             $meta = new \ReflectionMethod($model, 'meta');
-            $meta->setAccessible(true);
 
             $t = new Table($charset, $collate, $meta->invoke($model));
             $schemas[$class]($t);

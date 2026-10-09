@@ -28,7 +28,6 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
     private static function declaredSchema(): string
     {
         $prop = new ReflectionProperty(Model::class, 'schemas');
-        $prop->setAccessible(true);
         /** @var array<class-string,callable> $schemas */
         $schemas = $prop->getValue();
 

@@ -39,7 +39,6 @@ final class SchemaIntegrityTest extends IntegrationTestCase
     private function tableFor(string $cls): string
     {
         $prop = new ReflectionProperty($cls, 'table');
-        $prop->setAccessible(true);
         return self::$prefix . (string) $prop->getValue($cls::make());
     }
 

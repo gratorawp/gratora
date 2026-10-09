@@ -118,7 +118,6 @@ final class CurrencyMoveTest extends IntegrationTestCase
 
         $updater = new FxRatesUpdater(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class));
         $needs   = new \ReflectionMethod($updater, 'needsRates');
-        $needs->setAccessible(true);
 
         $this->assertFalse($needs->invoke($updater), 'a single-currency site fetches nothing');
 
@@ -169,7 +168,6 @@ final class CurrencyMoveTest extends IntegrationTestCase
 
         $updater = new FxRatesUpdater(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class));
         $needs   = new \ReflectionMethod($updater, 'needsRates');
-        $needs->setAccessible(true);
 
         $this->assertTrue($needs->invoke($updater), 'a paused plan resumes');
     }
@@ -199,7 +197,6 @@ final class CurrencyMoveTest extends IntegrationTestCase
 
         $updater = new FxRatesUpdater(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class));
         $needs   = new \ReflectionMethod($updater, 'needsRates');
-        $needs->setAccessible(true);
 
         $this->assertFalse($needs->invoke($updater), 'nothing will renew in it');
     }

@@ -76,7 +76,6 @@ final class ReceiptOrgLegalNameTest extends IntegrationTestCase
         ], false);
 
         $ref = new \ReflectionMethod(\Gratora\Rest\ReceiptsController::class, 'loadOrgProfile');
-        $ref->setAccessible(true);
         $org = $ref->invoke(
             \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Rest\ReceiptsController::class)
         );

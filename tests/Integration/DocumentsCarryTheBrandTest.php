@@ -100,7 +100,6 @@ final class DocumentsCarryTheBrandTest extends IntegrationTestCase
 
         $renderer = Plugin::instance()->container->get(GenericReceiptRenderer::class);
         $ref      = new \ReflectionMethod($renderer, 'loadTemplate');
-        $ref->setAccessible(true);
         $template = (array) $ref->invoke($renderer);
 
         $this->assertSame('#10162a', $template['accent_ink']);
@@ -114,7 +113,6 @@ final class DocumentsCarryTheBrandTest extends IntegrationTestCase
 
         $renderer = Plugin::instance()->container->get(GenericReceiptRenderer::class);
         $ref      = new \ReflectionMethod($renderer, 'loadTemplate');
-        $ref->setAccessible(true);
 
         $this->assertSame('#10162a', ((array) $ref->invoke($renderer))['accent_ink']);
     }

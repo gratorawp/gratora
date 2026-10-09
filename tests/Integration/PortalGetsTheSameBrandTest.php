@@ -28,7 +28,6 @@ final class PortalGetsTheSameBrandTest extends IntegrationTestCase
             Plugin::instance()->container->get(\Gratora\Donations\AntiSpamGuard::class)
         );
         $method    = new \ReflectionMethod($shortcode, 'brandCss');
-        $method->setAccessible(true);
 
         return (string) $method->invoke($shortcode);
     }

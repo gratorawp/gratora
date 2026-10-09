@@ -24,7 +24,6 @@ final class AttributionKeyAllowListTest extends TestCase
     private function bound(?array $attribution): ?array
     {
         $method = new ReflectionMethod(DonationsController::class, 'boundAttribution');
-        $method->setAccessible(true);
 
         return $method->invoke(null, $attribution);
     }

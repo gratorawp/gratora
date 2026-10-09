@@ -118,7 +118,6 @@ final class DonationCreatingHookTest extends IntegrationTestCase
     private static function transactionDepth(): int
     {
         $prop = new ReflectionProperty(DB::class, 'transactionDepth');
-        $prop->setAccessible(true);
 
         return (int) $prop->getValue();
     }

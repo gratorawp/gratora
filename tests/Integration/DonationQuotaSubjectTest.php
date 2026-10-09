@@ -202,7 +202,6 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
     private function tokenForDay(AntiSpamGuard $guard, int $bucket, int $formId): string
     {
         $secret = (new \ReflectionMethod($guard, 'secret'));
-        $secret->setAccessible(true);
         $sig = hash_hmac('sha256', $formId . '|' . $bucket, $secret->invoke($guard));
 
         return $bucket . '.' . $sig;

@@ -31,7 +31,6 @@ final class PortalRestBaseTest extends IntegrationTestCase
 
         try {
             $method = new ReflectionMethod(PortalShortcode::class, 'restBase');
-            $method->setAccessible(true);
 
             return (string) $method->invoke($this->shortcode(), $restUrl);
         } finally {

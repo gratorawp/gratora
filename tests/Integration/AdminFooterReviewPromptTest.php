@@ -90,7 +90,6 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
         // has_filter() is the wrong probe here: core registers its own
         // core_update_footer. Read what this provider declares instead.
         $filters = (new ReflectionMethod(AdminFooter::class, 'filters'));
-        $filters->setAccessible(true);
 
         $this->assertSame(['admin_footer_text'], array_keys($filters->invoke(new AdminFooter())));
     }

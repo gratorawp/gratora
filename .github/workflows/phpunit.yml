@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     # The runs on the newest WordPress keep the name they had, in case a branch rule waits on it.
-    name: Unit + Integration (${{ matrix.db.name }})${{ matrix.wp != 'latest' && format(' on WordPress {0}', matrix.wp) || '' }}
+    name: Unit + Integration (${{ matrix.db.name }})${{ matrix.wp != 'latest' && format(' on WordPress {0}', matrix.wp) || '' }}${{ matrix.php != '8.1' && format(' on PHP {0}', matrix.php) || '' }}
     runs-on: ubuntu-latest
 
     # Both engines, because they are not the same database. MariaDB has no JSON
@@ -27,6 +27,16 @@ jobs:
         # The newest WordPress and the oldest the plugin says it runs on. Only
         # the newest was tested once, and a floor nothing runs on is a guess.
         wp: [ latest, '6.9' ]
+        # The oldest PHP the plugin says it runs on, and the newest once. A call
+        # PHP 8.5 deprecated printed on every admin screen of a site that shows
+        # notices, and a suite that only ever meets 8.1 cannot see that.
+        php: [ '8.1' ]
+        include:
+          - db:
+              name: MySQL 8.0
+              image: mysql:8.0
+            wp: latest
+            php: '8.5'
 
     services:
       mysql:
@@ -47,7 +57,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: ${{ matrix.php }}
           extensions: mysqli, gd, intl, zip, mbstring, dom, curl
           coverage: none
           tools: composer

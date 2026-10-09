@@ -27,7 +27,6 @@ final class StatementOrgAddressTest extends IntegrationTestCase
     private function addressLines(): array
     {
         $m = new ReflectionMethod(TaxStatementBuilder::class, 'orgAddressLines');
-        $m->setAccessible(true);
 
         return (array) $m->invoke(
             Plugin::instance()->container->get(TaxStatementBuilder::class),

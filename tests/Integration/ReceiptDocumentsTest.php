@@ -184,7 +184,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $builder = Plugin::instance()->container->get(\Gratora\Reports\TaxStatementBuilder::class);
 
         $ref = new \ReflectionMethod($builder, 'orgDisclaimer');
-        $ref->setAccessible(true);
 
         return (string) $ref->invoke($builder, 'Acme Foundation', 'Ada Lovelace');
     }
@@ -231,7 +230,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
     {
         $renderer = Plugin::instance()->container->get(\Gratora\Receipts\Renderers\GenericReceiptRenderer::class);
         $ref      = new \ReflectionMethod($renderer, 'loadTemplate');
-        $ref->setAccessible(true);
 
         return (array) $ref->invoke($renderer);
     }

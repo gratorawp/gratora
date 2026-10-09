@@ -40,7 +40,6 @@ final class DonationMinimumOrphanedTest extends IntegrationTestCase
     private function minShownToTheDonor(Form $form): int
     {
         $m = new ReflectionMethod(DonationFormShortcode::class, 'amountBlockMinCents');
-        $m->setAccessible(true);
 
         return (int) $m->invoke(null, $form);
     }
