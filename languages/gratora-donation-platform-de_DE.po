@@ -5759,6 +5759,10 @@ msgstr "Der Anmeldelink konnte nicht erstellt werden. Bitte versuche es erneut."
 msgid "This donor has been erased, so nothing further can be recorded against them."
 msgstr "Dieser Spender wurde anonymisiert, daher kann zu ihm nichts mehr erfasst werden."
 
+#: src/Rest/Admin/DonorsController.php:547
+msgid "The donor's data was not exported. The reason is in the log under Tools."
+msgstr "Die Daten des Spenders wurden nicht exportiert. Der Grund steht im Protokoll unter „Werkzeuge“."
+
 #: src/Rest/Admin/DonorsController.php:642
 msgid "The donor was not deleted. The reason is in the log under Tools."
 msgstr "Der Spender wurde nicht gelöscht. Der Grund steht im Protokoll unter „Werkzeuge“."
@@ -6213,6 +6217,10 @@ msgstr "Die neue Karte konnte nicht gespeichert werden. Bitte versuche es gleich
 #: src/Rest/Portal/PortalController.php:1582
 msgid "Data export is disabled by the organization."
 msgstr "Der Datenexport wurde von der Organisation deaktiviert."
+
+#: src/Rest/Portal/PortalController.php:1659
+msgid "Your data could not be put into a file. Please contact the organization."
+msgstr "Deine Daten konnten nicht in eine Datei geschrieben werden. Bitte wende dich an die Organisation."
 
 #: src/Rest/Portal/PortalController.php:1719
 msgid "Account deletion is disabled by the organization."
@@ -13864,6 +13872,14 @@ msgstr "Werden von Gratora automatisch an Spender gesendet"
 #: assets/admin/settings/panels/EmailPanel.jsx:129
 msgid "Click a row to edit"
 msgstr "Zum Bearbeiten auf eine Zeile klicken"
+
+#: assets/admin/settings/panels/EmailPanel.jsx:137
+msgid "Staff emails"
+msgstr "Team-E-Mails"
+
+#: assets/admin/settings/panels/EmailPanel.jsx:138
+msgid "Sent to people at your organization automatically by Gratora"
+msgstr "Werden von Gratora automatisch an Personen in deiner Organisation gesendet"
 
 #: assets/admin/settings/panels/EmailPanel.jsx:149
 msgid "(enabled)"
