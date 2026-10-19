@@ -1072,7 +1072,7 @@ final class DonorMetricsService
      *
      * @return array<string,mixed>|null
      *
-     * @unreleased
+     * @since 1.2.2
      */
     public function exportDataWithSections(int $donorId): ?array
     {
@@ -1093,7 +1093,7 @@ final class DonorMetricsService
     /**
      * @return array<string,mixed>
      *
-     * @unreleased
+     * @since 1.2.2
      */
     private function exportBundle(Donor $donor): array
     {
@@ -1173,7 +1173,7 @@ final class DonorMetricsService
     /**
      * @return array<string,array{label:string,data:array<mixed>}>
      *
-     * @unreleased
+     * @since 1.2.2
      */
     private function exportSections(Donor $donor): array
     {
@@ -1209,7 +1209,7 @@ final class DonorMetricsService
          * An erased donor is asked about like any other, and the answer is
          * what is still held.
          *
-         * @unreleased
+         * @since 1.2.2
          *
          * @param array<string,array{label:string,data:array<mixed>}> $sections keyed by add-on
          * @param Donor                                               $donor
@@ -1243,7 +1243,7 @@ final class DonorMetricsService
      *
      * @param array<mixed> $data
      *
-     * @unreleased
+     * @since 1.2.2
      */
     private static function fileCanCarry(array $data): bool
     {
@@ -1254,7 +1254,7 @@ final class DonorMetricsService
     /**
      * @param array<mixed> $data
      *
-     * @unreleased
+     * @since 1.2.2
      */
     private static function isPlain(array $data): bool
     {

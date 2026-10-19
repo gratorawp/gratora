@@ -24,7 +24,7 @@ final class DonorRepository
      * The stages of giving, nearest first. `new` is not one: it is counted on
      * when the donor was first seen, and a new donor is in a stage as well.
      *
-     * @unreleased
+     * @since 1.2.2
      *
      * @var list<string>
      */
@@ -283,7 +283,7 @@ final class DonorRepository
      * @throws InvalidArgumentException when the stage is not one of LIFECYCLE_STAGES,
      *                                  or $today is not a date written `Y-m-d`
      *
-     * @unreleased
+     * @since 1.2.2
      */
     public static function lifecyclePredicate(string $stage, string $today, ?string $alias = null): string
     {
@@ -295,7 +295,7 @@ final class DonorRepository
         return self::stageCondition($stage, $today, $alias);
     }
 
-    /** @unreleased */
+    /** @since 1.2.2 */
     private static function stageCondition(
         string $stage,
         string $today,
