@@ -435,7 +435,11 @@ final class SettingsService
      * invisible to the admin whose name is on it. Core describes its own in the
      * editor bundle, so this starts empty.
      *
-     * @return list<array{id:string,label:string,desc?:string,recipient?:string}>
+     * A template that goes to people at the organization says so with
+     * 'audience' => 'staff' and is listed under Staff emails. Without it, or
+     * with any other value, it is listed with the donor emails.
+     *
+     * @return list<array{id:string,label:string,desc?:string,recipient?:string,audience?:string}>
      *
      * @since 1.0.0
      */

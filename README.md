@@ -62,6 +62,10 @@ Gratora is built to be extended by other plugins, and uses its own seams to do i
   gateways register through the same registries the built-in ones use.
 - **Commands.** `gratora.commands.register` adds a capability-gated, schema-checked
   action, which also becomes available to anything driving Gratora programmatically.
+- **Emails.** `gratora.email.template_meta` lists a template a plugin sends on
+  Settings, Emails, with its label, description and recipient. One that goes to
+  people at the organization adds `'audience' => 'staff'` and is listed under
+  Staff emails; without it, it is listed with the donor emails.
 - **Donor exports.** `gratora.donor.export_sections` adds what a plugin holds
   that is the donor's own data to the admin's JSON export of a donor and to the
   file the donor downloads in the portal. Staff-only data does not belong there.

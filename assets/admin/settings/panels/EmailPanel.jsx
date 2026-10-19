@@ -8,7 +8,7 @@ import Dialog from '../../_shared/components/Dialog';
 import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
-import { getDonorTemplates } from '../../_shared/emailTemplates';
+import { getDonorTemplates, getStaffTemplates } from '../../_shared/emailTemplates';
 import { formatAmount } from '../../_shared/format';
 import { tablistKeyDown } from '../../_shared/tablistKeys';
 
@@ -18,6 +18,7 @@ export default function EmailPanel( { s } ) {
     const [ testing, setTesting ]     = useState( false );
     const [ testNotice, setTestNotice ] = useState( null );
     const templates = getDonorTemplates();
+    const staff     = getStaffTemplates();
 
     const sendTest = async () => {
         setTesting( true );
@@ -128,40 +129,56 @@ export default function EmailPanel( { s } ) {
                 sub={ __( 'Sent to donors automatically by Gratora', 'gratora-donation-platform' ) }
                 meta={ __( 'Click a row to edit', 'gratora-donation-platform' ) }
             >
-                <div className="gratora-email-list">
-                    { templates.map( ( t ) => {
-                        const enabled = !! s.value( `templates.${ t.id }.enabled`, true );
-                        return (
-                            <button
-                                key={ t.id }
-                                type="button"
-                                className="gratora-email-row"
-                                onClick={ () => setEditing( t ) }
-                            >
-                                <span
-                                    className={ `gratora-email-row__dot${ enabled ? ' is-on' : '' }` }
-                                    aria-hidden="true"
-                                />
-                                <span className="gratora-email-row__body">
-                                    <span className="gratora-email-row__title">
-                                        { t.label }
-                                        <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'gratora-donation-platform' ) : __( '(disabled)', 'gratora-donation-platform' ) }
-                                        </span>
-                                    </span>
-                                    <span className="gratora-email-row__desc">{ t.desc }</span>
-                                </span>
-                                <span className="gratora-email-row__recipient">{ t.recipient }</span>
-                                <span className="gratora-email-row__edit">{ __( 'Edit', 'gratora-donation-platform' ) }</span>
-                            </button>
-                        );
-                    } ) }
-                </div>
+                <TemplateList templates={ templates } s={ s } onEdit={ setEditing } />
             </Card>
+
+            { !! staff.length && (
+                <Card
+                    title={ __( 'Staff emails', 'gratora-donation-platform' ) }
+                    sub={ __( 'Sent to people at your organization automatically by Gratora', 'gratora-donation-platform' ) }
+                    meta={ __( 'Click a row to edit', 'gratora-donation-platform' ) }
+                >
+                    <TemplateList templates={ staff } s={ s } onEdit={ setEditing } />
+                </Card>
+            ) }
 
             { editing && (
                 <TemplateDialog t={ editing } s={ s } onClose={ () => setEditing( null ) } />
             ) }
+        </div>
+    );
+}
+
+function TemplateList( { templates, s, onEdit } ) {
+    return (
+        <div className="gratora-email-list">
+            { templates.map( ( t ) => {
+                const enabled = !! s.value( `templates.${ t.id }.enabled`, true );
+                return (
+                    <button
+                        key={ t.id }
+                        type="button"
+                        className="gratora-email-row"
+                        onClick={ () => onEdit( t ) }
+                    >
+                        <span
+                            className={ `gratora-email-row__dot${ enabled ? ' is-on' : '' }` }
+                            aria-hidden="true"
+                        />
+                        <span className="gratora-email-row__body">
+                            <span className="gratora-email-row__title">
+                                { t.label }
+                                <span className="screen-reader-text">
+                                    { enabled ? __( '(enabled)', 'gratora-donation-platform' ) : __( '(disabled)', 'gratora-donation-platform' ) }
+                                </span>
+                            </span>
+                            <span className="gratora-email-row__desc">{ t.desc }</span>
+                        </span>
+                        <span className="gratora-email-row__recipient">{ t.recipient }</span>
+                        <span className="gratora-email-row__edit">{ __( 'Edit', 'gratora-donation-platform' ) }</span>
+                    </button>
+                );
+            } ) }
         </div>
     );
 }

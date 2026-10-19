@@ -1,6 +1,7 @@
 /**
- * Static metadata (label, description, recipient, merge tags) for donor-facing
- * email templates. Stored values (enabled/subject/body) live in the option.
+ * Static metadata (label, description, recipient, merge tags) for the email
+ * templates Settings, Emails lists. Stored values (enabled/subject/body) live
+ * in the option.
  */
 
 import { __ } from '@wordpress/i18n';
@@ -47,12 +48,18 @@ function addonTemplates() {
             label:     String( t.label || t.id ),
             desc:      String( t.desc || '' ),
             recipient: String( t.recipient || '' ),
+            audience:  t.audience === 'staff' ? 'staff' : 'donor',
             tags:      tagsFor( t.id, [] ),
         } ) );
 }
 
 export function getDonorTemplates() {
-    return [ ...coreTemplates(), ...addonTemplates() ];
+    return [ ...coreTemplates(), ...addonTemplates().filter( ( t ) => t.audience === 'donor' ) ];
+}
+
+/** Templates an add-on says go to people at the organization. */
+export function getStaffTemplates() {
+    return addonTemplates().filter( ( t ) => t.audience === 'staff' );
 }
 
 // magic_link stays off this list until the editor can hide the "Send this
