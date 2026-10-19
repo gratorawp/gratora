@@ -98,7 +98,7 @@ function coreTemplates() {
         {
             id:        'donation_refunded',
             label:     __( 'Donation refunded', 'gratora-donation-platform' ),
-            desc:      __( 'Sent when an admin refunds a donation. Explains when funds will reappear on the donor card.', 'gratora-donation-platform' ),
+            desc:      __( 'Sent when a donation is refunded. When a payment provider returns the money, it says how long that can take.', 'gratora-donation-platform' ),
             recipient: __( 'Donor', 'gratora-donation-platform' ),
             tags:      tagsFor( 'donation_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{refund_timing}' ] ),
         },
