@@ -10,6 +10,8 @@ use Gratora\Donors\DonorService;
 use Gratora\Donors\Portal\PortalPage;
 use Gratora\Foundation\Helpers\Money;
 use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\SettlesOutOfBand;
 use Gratora\Mail\Mailer;
 use Gratora\Receipts\OrgProfile;
 use Gratora\Recurring\FrequencyMap;
@@ -33,6 +35,7 @@ final class DonationEmails extends HookProvider
         private DonorService $donorService,
         private SettingsService $settings,
         private CampaignRepository $campaigns,
+        private GatewayManager $gateways,
     ) {
     }
 
@@ -293,7 +296,27 @@ final class DonationEmails extends HookProvider
             'amount'            => Money::format((int) $refund->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
+            'refund_timing'     => $this->refundedThroughAProvider($donation)
+                ? __('It can take 5 to 10 business days for the money to reach the card or account you paid with.', 'gratora-donation-platform')
+                : '',
         ]));
+    }
+
+    /**
+     * Whether a payment provider is returning the money, so the donor waits on
+     * its timing. Money taken by hand goes back by hand, and a gateway nobody
+     * has registered could be either.
+     *
+     * Not the refund's gateway_refund_id: the offline gateway mints one for
+     * every refund too.
+     *
+     * @unreleased
+     */
+    private function refundedThroughAProvider(Donation $donation): bool
+    {
+        $gateway = $this->gateways->get((string) $donation->gateway);
+
+        return $gateway !== null && ! $gateway instanceof SettlesOutOfBand;
     }
 
     /**

@@ -193,6 +193,7 @@ const SAMPLE_VALUES = {
     '{reference}':         'DN-XYZ123',
     '{download_url}':      'https://example.org/receipt/download',
     '{bank_details}':      'IBAN: DE89 3704 0044 0532 0130 00\nBIC: COBADEFFXXX',
+    '{refund_timing}':     __( 'It can take 5 to 10 business days for the money to reach the card or account you paid with.', 'gratora-donation-platform' ),
 };
 
 /**

@@ -8,7 +8,12 @@ use Gratora\Donations\Donation;
 use Gratora\Donations\DonationRepository;
 use Gratora\Donations\DonationService;
 use Gratora\Donations\Refund;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Sandbox\SandboxGateway;
 use Gratora\Receipts\Receipt;
+use Gratora\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -18,6 +23,8 @@ use WP_REST_Request;
  * Offline covers the "no remote API" branch - confirms persistence, status
  * transitions, receipt voiding, and event emission without needing Stripe
  * fixtures. Stripe's refund path is exercised at the unit level via FakeGateway.
+ * The sandbox gateway stands in for a payment provider where the refund email
+ * has to tell the two apart.
  */
 final class RefundFlowTest extends IntegrationTestCase
 {
@@ -66,6 +73,33 @@ final class RefundFlowTest extends IntegrationTestCase
             static fn ($m) => stripos((string) ($m['subject'] ?? ''), 'refund') !== false,
         );
         $this->assertCount(1, $refundMails, 'the donor is emailed when their donation is refunded');
+    }
+
+    public function test_an_offline_refund_promises_no_card_and_no_wait(): void
+    {
+        $donation = $this->driveDonationToPaidAndIssueReceipt();
+
+        $mails = $this->captureMails();
+        $this->donationService()->refund($donation, $donation->amount_cents, 'handed back in cash');
+
+        $body = $this->onlyRefundMail($mails);
+        $this->assertStringNotContainsStringIgnoringCase('card', $body, 'the money goes back by hand, not to a card');
+        $this->assertStringNotContainsString('{refund_timing}', $body);
+        $this->assertStringNotContainsString(" \n", $body, 'no line ends in the space the empty tag stood after');
+        $this->assertStringNotContainsString("\n\n\n", $body, 'and no paragraph is left empty');
+    }
+
+    public function test_a_refund_through_a_payment_provider_says_how_long_the_money_takes(): void
+    {
+        $donation = $this->paidSandboxDonation();
+
+        $mails = $this->captureMails();
+        $this->donationService()->refund($donation, $donation->amount_cents, 'donor requested');
+
+        $this->assertStringContainsString(
+            'It can take 5 to 10 business days for the money to reach the card or account you paid with.',
+            $this->onlyRefundMail($mails)
+        );
     }
 
     public function test_partial_refund_keeps_donation_in_partial_refund_state(): void
@@ -167,6 +201,50 @@ final class RefundFlowTest extends IntegrationTestCase
         $this->runPendingAsyncJobs();
 
         return $this->donations()->findByReference($reference);
+    }
+
+    private function paidSandboxDonation(): Donation
+    {
+        $c       = \Gratora\Foundation\Plugin::instance()->container;
+        $manager = $c->get(GatewayManager::class);
+        if ($manager->get('sandbox') === null) {
+            $manager->register(new SandboxGateway($c->get(Clock::class), $c->get(RecurringPlanRepository::class)));
+        }
+
+        $donor = $c->get(DonorService::class)->findOrCreate('card@example.com', ['first_name' => 'Cara', 'last_name' => 'Lind']);
+        $now   = gmdate('Y-m-d H:i:s');
+
+        $d = Donation::make();
+        $d->reference         = 'SBX-' . strtoupper(bin2hex(random_bytes(4)));
+        $d->donor_id          = (int) $donor->id;
+        $d->amount_cents      = 5000;
+        $d->net_cents         = 5000;
+        $d->base_amount_cents = 5000;
+        $d->base_currency     = 'USD';
+        $d->currency          = 'USD';
+        $d->gateway           = 'sandbox';
+        $d->gateway_txn_id    = 'sandbox_txn_' . bin2hex(random_bytes(4));
+        $d->status            = 'paid';
+        $d->is_test           = true;
+        $d->paid_at           = $now;
+        $d->created_at        = $now;
+        $d->updated_at        = $now;
+        $d->save();
+
+        return $d;
+    }
+
+    private function onlyRefundMail(\ArrayObject $mails): string
+    {
+        $bodies = [];
+        foreach ($mails as $mail) {
+            if (stripos((string) ($mail['subject'] ?? ''), 'refund') !== false) {
+                $bodies[] = (string) $mail['message'];
+            }
+        }
+        $this->assertCount(1, $bodies, 'exactly one refund email');
+
+        return $bodies[0];
     }
 
     private function createPendingDonation(): Donation

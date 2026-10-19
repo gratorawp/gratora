@@ -183,6 +183,9 @@ final class Mailer
         $map = [];
         foreach (TemplateTokens::withSpellingsUnwrapped($tokens) as $k => $v) {
             $map['{' . $k . '}'] = (string) $v;
+            // An empty tag takes the space before it along, so the sentence
+            // it would have followed does not end in a stray space.
+            if ((string) $v === '') $map[' {' . $k . '}'] = '';
         }
         return strtr($source, $map);
     }

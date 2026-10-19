@@ -100,7 +100,7 @@ function coreTemplates() {
             label:     __( 'Donation refunded', 'gratora-donation-platform' ),
             desc:      __( 'Sent when an admin refunds a donation. Explains when funds will reappear on the donor card.', 'gratora-donation-platform' ),
             recipient: __( 'Donor', 'gratora-donation-platform' ),
-            tags:      tagsFor( 'donation_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
+            tags:      tagsFor( 'donation_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{refund_timing}' ] ),
         },
         {
             id:        'payment_instructions',
@@ -121,7 +121,7 @@ function coreTemplates() {
             label:     __( 'Payment refunded', 'gratora-donation-platform' ),
             desc:      __( 'The refund notice for a payment that is not a donation. Same facts as the donation one, without calling the money a donation.', 'gratora-donation-platform' ),
             recipient: __( 'Payer', 'gratora-donation-platform' ),
-            tags:      tagsFor( 'payment_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
+            tags:      tagsFor( 'payment_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{refund_timing}' ] ),
         },
         {
             id:        'recurring_renewal',

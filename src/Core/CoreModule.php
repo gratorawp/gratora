@@ -648,6 +648,9 @@ final class CoreModule implements GratoraModule
             $c->get( SettingsService::class),
         ));
 
+        // Before DonationEmails, which is built on the spot and asks for it.
+        $c->bind(GatewayManager::class, fn () => new GatewayManager());
+
         // Sends non-receipt donation emails (offline instructions, refund
         // notice, pending notice). Receipt emails are handled by ReceiptIssuer.
         $c->bind(DonationEmails::class, fn (Container $c) => new DonationEmails(
@@ -656,6 +659,7 @@ final class CoreModule implements GratoraModule
             $c->get(DonorService::class),
             $c->get(SettingsService::class),
             $c->get(CampaignRepository::class),
+            $c->get(GatewayManager::class),
         ));
         $c->get(DonationEmails::class)->register();
 
@@ -715,7 +719,6 @@ final class CoreModule implements GratoraModule
             $c->get( TestMode::class)
         ));
 
-        $c->bind(GatewayManager::class, fn () => new GatewayManager());
         $c->bind(StripeAccount::class, fn (Container $c) => new StripeAccount(
             $c->get(Crypto::class)
         ));

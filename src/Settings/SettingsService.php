@@ -314,7 +314,7 @@ final class SettingsService
             'donation_refunded' => [
                 'enabled' => true,
                 'subject' => __('Your donation has been refunded', 'gratora-donation-platform'),
-                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'gratora-donation-platform'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. {refund_timing}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'gratora-donation-platform'),
             ],
             // The neutral set. An add-on can move something through the
             // donation rails that is not a donation (a ticket order, say), and
@@ -333,7 +333,7 @@ final class SettingsService
             'payment_refunded' => [
                 'enabled' => true,
                 'subject' => __('Your payment has been refunded', 'gratora-donation-platform'),
-                'body'    => __("Hi {donor_name},\n\nWe have refunded your payment of {amount}. Funds should return to your card within 5 to 10 business days.\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'gratora-donation-platform'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your payment of {amount}. {refund_timing}\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'gratora-donation-platform'),
             ],
             'recurring_renewal' => [
                 'enabled' => true,
@@ -408,10 +408,10 @@ final class SettingsService
             'donation_receipt'            => array_merge($donation, ['receipt_number', 'reference', 'download_url']),
             'donation_first'              => $donor,
             'donation_pending'            => array_merge($donation, ['reference']),
-            'donation_refunded'           => array_merge($donation, ['reference']),
+            'donation_refunded'           => array_merge($donation, ['reference', 'refund_timing']),
             'offline_instructions'        => array_merge($donation, ['reference', 'bank_details', 'instructions']),
             'payment_pending'             => array_merge($donation, ['reference']),
-            'payment_refunded'            => array_merge($donation, ['reference']),
+            'payment_refunded'            => array_merge($donation, ['reference', 'refund_timing']),
             'payment_instructions'        => array_merge($donation, ['reference', 'bank_details', 'instructions']),
             // No receipt_number: the renewal notice goes out before the receipt
             // row is issued, so the tag could only ever resolve to nothing.
