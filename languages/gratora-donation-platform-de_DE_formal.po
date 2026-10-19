@@ -2620,6 +2620,11 @@ msgstr "Diese Spende hat sich geändert, während sie gelöscht wurde."
 msgid "Another admin is acting on this donation. Try again in a moment."
 msgstr "Ein anderer Administrator bearbeitet diese Spende gerade. Versuchen Sie es gleich noch einmal."
 
+#: src/Donations/DonationEmails.php:300
+#: assets/admin/settings/panels/EmailPanel.jsx:196
+msgid "It can take 5 to 10 business days for the money to reach the card or account you paid with."
+msgstr "Es kann 5 bis 10 Werktage dauern, bis das Geld auf Ihrer Karte oder Ihrem Konto eingeht, je nachdem, womit Sie bezahlt haben."
+
 #. translators: 1: donation reference, 2: the gateway's own message
 #: src/Donations/DonationService.php:807
 #, php-format
@@ -6588,8 +6593,8 @@ msgid "Your donation has been refunded"
 msgstr "Ihre Spende wurde erstattet"
 
 #: src/Settings/SettingsService.php:317
-msgid "Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}"
-msgstr "Hallo {donor_name},\n\nwir haben Ihre Spende über {amount} für {campaign_title} erstattet. Der Betrag sollte innerhalb von 5 bis 10 Werktagen wieder auf Ihrer Karte eingehen.\n\nFalls das ein Versehen war oder Sie Fragen haben, antworten Sie einfach auf diese E-Mail.\n\nVielen Dank\n{organisation_name}"
+msgid "Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. {refund_timing}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}"
+msgstr "Hallo {donor_name},\n\nwir haben Ihre Spende über {amount} für {campaign_title} erstattet. {refund_timing}\n\nFalls das ein Versehen war oder Sie Fragen haben, antworten Sie einfach auf diese E-Mail.\n\nVielen Dank\n{organisation_name}"
 
 #: src/Settings/SettingsService.php:325
 msgid "Payment instructions for {organisation_name}"
@@ -6612,8 +6617,8 @@ msgid "Your payment has been refunded"
 msgstr "Ihre Zahlung wurde erstattet"
 
 #: src/Settings/SettingsService.php:336
-msgid "Hi {donor_name},\n\nWe have refunded your payment of {amount}. Funds should return to your card within 5 to 10 business days.\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}"
-msgstr "Hallo {donor_name},\n\nwir haben Ihre Zahlung über {amount} erstattet. Der Betrag sollte innerhalb von 5 bis 10 Werktagen wieder auf Ihrer Karte eingehen.\n\nReferenz: {reference}\n\nFalls das ein Versehen war oder Sie Fragen haben, antworten Sie einfach auf diese E-Mail.\n\nVielen Dank\n{organisation_name}"
+msgid "Hi {donor_name},\n\nWe have refunded your payment of {amount}. {refund_timing}\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}"
+msgstr "Hallo {donor_name},\n\nwir haben Ihre Zahlung über {amount} erstattet. {refund_timing}\n\nReferenz: {reference}\n\nFalls das ein Versehen war oder Sie Fragen haben, antworten Sie einfach auf diese E-Mail.\n\nVielen Dank\n{organisation_name}"
 
 #: src/Settings/SettingsService.php:340
 msgid "Your recurring donation renewed"

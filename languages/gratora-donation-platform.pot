@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T03:42:23+00:00\n"
+"POT-Creation-Date: 2026-10-19T05:39:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -526,7 +526,7 @@ msgstr[1] ""
 #: assets/admin/forms/Editor.jsx:717
 #: assets/admin/funds/List.jsx:689
 #: assets/admin/funds/List.jsx:863
-#: assets/admin/settings/panels/EmailPanel.jsx:263
+#: assets/admin/settings/panels/EmailPanel.jsx:264
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:170
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:223
 #: assets/admin/settings/panels/StripeKeysCard.jsx:134
@@ -685,7 +685,7 @@ msgstr ""
 #: components/dataviews-view-config/index.js:411
 #: assets/admin/forms/Editor.jsx:821
 #: assets/admin/settings/panels/CurrencyPanel.jsx:358
-#: assets/admin/settings/panels/EmailPanel.jsx:294
+#: assets/admin/settings/panels/EmailPanel.jsx:295
 #: assets/admin/tools/tabs/CsvImportCard.jsx:220
 msgid "Preview"
 msgstr ""
@@ -2529,7 +2529,7 @@ msgid "Gratora Core"
 msgstr ""
 
 #. translators: %s: timestamp the key loss was detected
-#: src/Core/CoreModule.php:1297
+#: src/Core/CoreModule.php:1300
 #, php-format
 msgid "Encryption key missing since %s. What was encrypted before then cannot be decrypted: donor emails, addresses, phone numbers, tax IDs, notes and form answers, and saved gateway secret keys. Restore gratora_system_settings from a backup, or accept that those details are gone and enter your gateway keys again. New data is encrypted with a freshly generated key."
 msgstr ""
@@ -2644,6 +2644,11 @@ msgstr ""
 #: src/Donations/DonationDeleter.php:227
 #: src/Donations/TrashOutcome.php:53
 msgid "Another admin is acting on this donation. Try again in a moment."
+msgstr ""
+
+#: src/Donations/DonationEmails.php:300
+#: assets/admin/settings/panels/EmailPanel.jsx:196
+msgid "It can take 5 to 10 business days for the money to reach the card or account you paid with."
 msgstr ""
 
 #. translators: 1: donation reference, 2: the gateway's own message
@@ -6663,7 +6668,7 @@ msgstr ""
 msgid ""
 "Hi {donor_name},\n"
 "\n"
-"We have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n"
+"We have refunded your donation of {amount} to {campaign_title}. {refund_timing}\n"
 "\n"
 "If this was a mistake or you have any questions, just reply to this email.\n"
 "\n"
@@ -6717,7 +6722,7 @@ msgstr ""
 msgid ""
 "Hi {donor_name},\n"
 "\n"
-"We have refunded your payment of {amount}. Funds should return to your card within 5 to 10 business days.\n"
+"We have refunded your payment of {amount}. {refund_timing}\n"
 "\n"
 "Reference: {reference}\n"
 "\n"
@@ -7713,7 +7718,7 @@ msgstr ""
 #: assets/admin/campaigns/Detail.jsx:1392
 #: assets/admin/funds/List.jsx:410
 #: assets/admin/settings/panels/EmailPanel.jsx:178
-#: assets/admin/settings/panels/EmailPanel.jsx:284
+#: assets/admin/settings/panels/EmailPanel.jsx:285
 msgid "Edit"
 msgstr ""
 
@@ -8922,7 +8927,7 @@ msgid "Step %d"
 msgstr ""
 
 #: assets/admin/dashboard/FirstRunCard.jsx:154
-#: assets/admin/settings/panels/EmailPanel.jsx:264
+#: assets/admin/settings/panels/EmailPanel.jsx:265
 msgid "Done"
 msgstr ""
 
@@ -14232,35 +14237,35 @@ msgstr ""
 msgid "(disabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:302
+#: assets/admin/settings/panels/EmailPanel.jsx:303
 msgid "Subject:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:305
+#: assets/admin/settings/panels/EmailPanel.jsx:306
 msgid "(no subject)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:307
+#: assets/admin/settings/panels/EmailPanel.jsx:308
 msgid "To:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:314
+#: assets/admin/settings/panels/EmailPanel.jsx:315
 msgid "Send this email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:315
+#: assets/admin/settings/panels/EmailPanel.jsx:316
 msgid "Disable to skip this notification entirely."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:320
+#: assets/admin/settings/panels/EmailPanel.jsx:321
 msgid "Subject"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:330
+#: assets/admin/settings/panels/EmailPanel.jsx:331
 msgid "Body"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:331
+#: assets/admin/settings/panels/EmailPanel.jsx:332
 msgid "Plain text. Merge tags expand at send time."
 msgstr ""
 
