@@ -16405,9 +16405,9 @@ msgstr "Se envía cuando un pago está en proceso (liquidación SEPA, tarjetas c
 msgid "Donation refunded"
 msgstr "Donación reembolsada"
 
-#: assets/admin/_shared/emailTemplates.js:94
-msgid "Sent when an admin refunds a donation. Explains when funds will reappear on the donor card."
-msgstr "Se envía cuando se reembolsa una donación desde la administración. Explica cuándo volverá a aparecer el dinero en la tarjeta del donante."
+#: assets/admin/_shared/emailTemplates.js:101
+msgid "Sent when a donation is refunded. When a payment provider returns the money, it says how long that can take."
+msgstr "Se envía cuando se reembolsa una donación. Si un proveedor de pagos devuelve el dinero, indica cuánto puede tardar."
 
 #: assets/admin/_shared/emailTemplates.js:100
 msgid "Offline payment instructions"
