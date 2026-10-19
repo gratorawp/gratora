@@ -12,6 +12,7 @@ use Gratora\Donors\DonorService;
 use Gratora\Foundation\Time\Clock;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\Sandbox\SandboxGateway;
+use Gratora\Receipts\OrgProfile;
 use Gratora\Receipts\Receipt;
 use Gratora\Recurring\RecurringPlanRepository;
 use RuntimeException;
@@ -98,6 +99,20 @@ final class RefundFlowTest extends IntegrationTestCase
 
         $this->assertStringContainsString(
             'It can take 5 to 10 business days for the money to reach the card or account you paid with.',
+            $this->onlyRefundMail($mails)
+        );
+    }
+
+    public function test_a_refund_of_a_donation_to_no_campaign_names_the_organization(): void
+    {
+        $donation = $this->driveDonationToPaidAndIssueReceipt();
+        $this->assertEmpty($donation->campaign_id, 'the donation was given outside any campaign');
+
+        $mails = $this->captureMails();
+        $this->donationService()->refund($donation, $donation->amount_cents, 'donor requested');
+
+        $this->assertStringContainsString(
+            'We have refunded your donation of $50.00 to ' . OrgProfile::load()['name'] . '.',
             $this->onlyRefundMail($mails)
         );
     }

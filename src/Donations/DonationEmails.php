@@ -113,7 +113,7 @@ final class DonationEmails extends HookProvider
             // literal braces in the one email that tells them how to pay.
             'donor_first_name'  => $this->donorFirstName($donation),
             'organisation_name' => OrgProfile::load()['name'],
-            'campaign_title'    => $this->campaignTitle($donation),
+            'campaign_title'    => $this->campaignTitle((int) $donation->campaign_id),
             'amount'            => $amount,
             'reference'         => $reference,
             'instructions'      => $fill((string) ($offline['instructions'] ?? '')),
@@ -132,7 +132,7 @@ final class DonationEmails extends HookProvider
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
-            'campaign_title'    => $this->campaignTitle($donation),
+            'campaign_title'    => $this->campaignTitle((int) $donation->campaign_id),
             'reference'         => (string) $donation->reference,
         ]));
     }
@@ -151,7 +151,7 @@ final class DonationEmails extends HookProvider
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
-            'campaign_title'    => $this->campaignTitle($donation),
+            'campaign_title'    => $this->campaignTitle((int) $donation->campaign_id),
             'reference'         => (string) $donation->reference,
         ]));
     }
@@ -172,9 +172,7 @@ final class DonationEmails extends HookProvider
             'donor_name'        => $name,
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $plan->amount_cents, (string) $plan->currency),
-            'campaign_title'    => $plan->campaign_id
-                ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
-                : '',
+            'campaign_title'    => $this->campaignTitle((int) $plan->campaign_id),
         ]));
     }
 
@@ -225,9 +223,7 @@ final class DonationEmails extends HookProvider
             'resumes_at'        => $this->onDate($plan->resume_at),
             'next_payment_at'   => $this->onDate($plan->next_payment_at),
             'portal_url'        => (new PortalPage())->url(),
-            'campaign_title'    => $plan->campaign_id
-                ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
-                : '',
+            'campaign_title'    => $this->campaignTitle((int) $plan->campaign_id),
         ]));
     }
 
@@ -273,9 +269,7 @@ final class DonationEmails extends HookProvider
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $plan->amount_cents, (string) $plan->currency),
-            'campaign_title'    => $plan->campaign_id
-                ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
-                : '',
+            'campaign_title'    => $this->campaignTitle((int) $plan->campaign_id),
             // The portal page, not a signed link: a declined payment is not a
             // request to sign in, and mailing a working session key on an event
             // the donor did not trigger is a worse trade than one extra click.
@@ -294,7 +288,7 @@ final class DonationEmails extends HookProvider
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $refund->amount_cents, (string) $donation->currency),
-            'campaign_title'    => $this->campaignTitle($donation),
+            'campaign_title'    => $this->campaignTitle((int) $donation->campaign_id),
             'reference'         => (string) $donation->reference,
             'refund_timing'     => $this->refundedThroughAProvider($donation)
                 ? __('It can take 5 to 10 business days for the money to reach the card or account you paid with.', 'gratora-donation-platform')
@@ -434,11 +428,18 @@ final class DonationEmails extends HookProvider
         return $donor ? trim((string) ($donor->first_name ?? '')) : '';
     }
 
-    /** @since 1.0.0 */
-    private function campaignTitle(Donation $donation): string
+    /**
+     * The campaign the money went to. Money given outside any campaign goes to
+     * the organization, and every sentence this fills ("your donation of $50
+     * to ...") still needs a name, so that is the organization's.
+     *
+     * @since 1.0.0
+     */
+    private function campaignTitle(int $campaignId): string
     {
-        if (! $donation->campaign_id) return '';
-        $campaign = $this->campaigns->findById((int) $donation->campaign_id);
-        return $campaign ? (string) $campaign->title : '';
+        $campaign = $campaignId > 0 ? $this->campaigns->findById($campaignId) : null;
+        $title    = $campaign ? trim((string) $campaign->title) : '';
+
+        return $title !== '' ? $title : (string) OrgProfile::load()['name'];
     }
 }
