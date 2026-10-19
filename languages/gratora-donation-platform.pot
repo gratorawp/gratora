@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-09T03:48:57+00:00\n"
+"POT-Creation-Date: 2026-10-19T03:41:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -526,7 +526,7 @@ msgstr[1] ""
 #: assets/admin/forms/Editor.jsx:717
 #: assets/admin/funds/List.jsx:689
 #: assets/admin/funds/List.jsx:863
-#: assets/admin/settings/panels/EmailPanel.jsx:246
+#: assets/admin/settings/panels/EmailPanel.jsx:263
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:170
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:223
 #: assets/admin/settings/panels/StripeKeysCard.jsx:134
@@ -685,7 +685,7 @@ msgstr ""
 #: components/dataviews-view-config/index.js:411
 #: assets/admin/forms/Editor.jsx:821
 #: assets/admin/settings/panels/CurrencyPanel.jsx:358
-#: assets/admin/settings/panels/EmailPanel.jsx:277
+#: assets/admin/settings/panels/EmailPanel.jsx:294
 #: assets/admin/tools/tabs/CsvImportCard.jsx:220
 msgid "Preview"
 msgstr ""
@@ -1852,19 +1852,19 @@ msgstr ""
 #: assets/admin/donors/Insights.jsx:204
 #: assets/admin/forms/blocks/donation-summary/index.js:20
 #: assets/admin/subscriptions/List.jsx:603
-#: assets/admin/_shared/emailTemplates.js:67
 #: assets/admin/_shared/emailTemplates.js:74
 #: assets/admin/_shared/emailTemplates.js:81
 #: assets/admin/_shared/emailTemplates.js:88
 #: assets/admin/_shared/emailTemplates.js:95
-#: assets/admin/_shared/emailTemplates.js:123
+#: assets/admin/_shared/emailTemplates.js:102
 #: assets/admin/_shared/emailTemplates.js:130
-#: assets/admin/_shared/emailTemplates.js:140
+#: assets/admin/_shared/emailTemplates.js:137
 #: assets/admin/_shared/emailTemplates.js:147
 #: assets/admin/_shared/emailTemplates.js:154
 #: assets/admin/_shared/emailTemplates.js:161
 #: assets/admin/_shared/emailTemplates.js:168
 #: assets/admin/_shared/emailTemplates.js:175
+#: assets/admin/_shared/emailTemplates.js:182
 msgid "Donor"
 msgstr ""
 
@@ -2691,7 +2691,7 @@ msgid "Recurring payments failing"
 msgstr ""
 
 #: src/Donors/AtRiskReason.php:123
-#: assets/admin/_shared/emailTemplates.js:159
+#: assets/admin/_shared/emailTemplates.js:166
 msgid "Recurring donation paused"
 msgstr ""
 
@@ -2773,7 +2773,7 @@ msgstr ""
 
 #: src/Donors/DonorMetricsService.php:705
 #: src/Rest/Admin/DonationsController.php:2277
-#: src/Rest/Admin/DonorsController.php:861
+#: src/Rest/Admin/DonorsController.php:874
 #: src/Rest/Admin/RecurringController.php:435
 msgid "[redacted]"
 msgstr ""
@@ -5154,7 +5154,7 @@ msgstr ""
 #: src/Receipts/resources/views/generic.php:31
 #: src/Settings/SettingsService.php:273
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:137
-#: assets/admin/_shared/emailTemplates.js:65
+#: assets/admin/_shared/emailTemplates.js:72
 msgid "Donation receipt"
 msgstr ""
 
@@ -5642,8 +5642,8 @@ msgid "That refund is not waiting to settle, so there is nothing to release."
 msgstr ""
 
 #: src/Rest/Admin/DonationsController.php:1362
-#: src/Rest/Admin/DonorsController.php:610
-#: src/Rest/Portal/PortalController.php:1729
+#: src/Rest/Admin/DonorsController.php:623
+#: src/Rest/Portal/PortalController.php:1739
 msgid "Type DELETE to confirm."
 msgstr ""
 
@@ -5762,8 +5762,8 @@ msgstr ""
 #: src/Rest/Admin/DonorsController.php:476
 #: src/Rest/Admin/DonorsController.php:520
 #: src/Rest/Admin/DonorsController.php:525
-#: src/Rest/Admin/DonorsController.php:617
-#: src/Rest/Admin/DonorsController.php:660
+#: src/Rest/Admin/DonorsController.php:630
+#: src/Rest/Admin/DonorsController.php:673
 #: src/Rest/Admin/ReportsController.php:109
 msgid "Donor not found."
 msgstr ""
@@ -5786,31 +5786,35 @@ msgstr ""
 msgid "This donor has been erased, so nothing further can be recorded against them."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:642
+#: src/Rest/Admin/DonorsController.php:547
+msgid "The donor's data was not exported. The reason is in the log under Tools."
+msgstr ""
+
+#: src/Rest/Admin/DonorsController.php:655
 msgid "The donor was not deleted. The reason is in the log under Tools."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:663
+#: src/Rest/Admin/DonorsController.php:676
 msgid "This donor is already redacted."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:673
+#: src/Rest/Admin/DonorsController.php:686
 msgid "Confirmation does not match the donor email. Redact cancelled."
 msgstr ""
 
-#: src/Rest/Admin/DonorsController.php:693
+#: src/Rest/Admin/DonorsController.php:706
 msgid "The donor was not erased. The reason is in the log under Tools."
 msgstr ""
 
 #. translators: 1: how many recurring plans were stopped, 2: how many are still billing.
-#: src/Rest/Admin/DonorsController.php:703
+#: src/Rest/Admin/DonorsController.php:716
 #, php-format
 msgid "The donor was not erased. %1$d recurring plan was stopped first, and %2$d is still billing: cancel it at the gateway, then try again."
 msgid_plural "The donor was not erased. %1$d recurring plans were stopped first, and %2$d are still billing: cancel them at the gateway, then try again."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Rest/Admin/DonorsController.php:712
+#: src/Rest/Admin/DonorsController.php:725
 msgid "The donor was not erased: their recurring plans could not be stopped. Cancel them at the gateway, then try again."
 msgstr ""
 
@@ -6241,15 +6245,19 @@ msgstr ""
 msgid "Data export is disabled by the organization."
 msgstr ""
 
-#: src/Rest/Portal/PortalController.php:1719
+#: src/Rest/Portal/PortalController.php:1659
+msgid "Your data could not be put into a file. Please contact the organization."
+msgstr ""
+
+#: src/Rest/Portal/PortalController.php:1729
 msgid "Account deletion is disabled by the organization."
 msgstr ""
 
-#: src/Rest/Portal/PortalController.php:1759
+#: src/Rest/Portal/PortalController.php:1769
 msgid "We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you."
 msgstr ""
 
-#: src/Rest/Portal/PortalController.php:1766
+#: src/Rest/Portal/PortalController.php:1776
 msgid "Your recurring donations have been stopped, but we could not finish deleting your account. Please contact the organization and they will finish this for you."
 msgstr ""
 
@@ -6875,28 +6883,28 @@ msgid ""
 msgstr ""
 
 #. translators: %s: the entry as the admin typed it.
-#: src/Settings/SettingsService.php:624
+#: src/Settings/SettingsService.php:628
 #, php-format
 msgid "\"%s\" is not a network this site can recognise. Give one address or range per line, or a name such as cloudflare."
 msgstr ""
 
 #. translators: %s: the purpose's name as typed.
-#: src/Settings/SettingsService.php:643
+#: src/Settings/SettingsService.php:647
 #, php-format
 msgid "The consent purpose \"%s\" needs a key. It is the identifier the audit log records, so a purpose without one is never shown to a donor."
 msgstr ""
 
 #. translators: %s: the duplicated key.
-#: src/Settings/SettingsService.php:651
+#: src/Settings/SettingsService.php:655
 #, php-format
 msgid "Two consent purposes share the key \"%s\". Only the first would ever be read."
 msgstr ""
 
-#: src/Settings/SettingsService.php:670
+#: src/Settings/SettingsService.php:674
 msgid "A currency is a three-letter code, like USD or EUR."
 msgstr ""
 
-#: src/Settings/SettingsService.php:681
+#: src/Settings/SettingsService.php:685
 msgid "Every accepted currency is a three-letter code, like USD or EUR."
 msgstr ""
 
@@ -7704,8 +7712,8 @@ msgstr ""
 #: assets/admin/campaigns/CreateCampaignDrawer.jsx:382
 #: assets/admin/campaigns/Detail.jsx:1392
 #: assets/admin/funds/List.jsx:410
-#: assets/admin/settings/panels/EmailPanel.jsx:155
-#: assets/admin/settings/panels/EmailPanel.jsx:267
+#: assets/admin/settings/panels/EmailPanel.jsx:178
+#: assets/admin/settings/panels/EmailPanel.jsx:284
 msgid "Edit"
 msgstr ""
 
@@ -8914,7 +8922,7 @@ msgid "Step %d"
 msgstr ""
 
 #: assets/admin/dashboard/FirstRunCard.jsx:154
-#: assets/admin/settings/panels/EmailPanel.jsx:247
+#: assets/admin/settings/panels/EmailPanel.jsx:264
 msgid "Done"
 msgstr ""
 
@@ -11017,7 +11025,7 @@ msgid "Next payment skipped"
 msgstr ""
 
 #: assets/admin/donors/profile/helpers.js:83
-#: assets/admin/_shared/emailTemplates.js:145
+#: assets/admin/_shared/emailTemplates.js:152
 msgid "Recurring amount changed"
 msgstr ""
 
@@ -14109,141 +14117,150 @@ msgid "After amount (%s)"
 msgstr ""
 
 #. translators: %s: recipient address
-#: assets/admin/settings/panels/EmailPanel.jsx:40
+#: assets/admin/settings/panels/EmailPanel.jsx:41
 #, js-format
 msgid "Test email sent to %s. Check the inbox and the spam folder."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:41
+#: assets/admin/settings/panels/EmailPanel.jsx:42
 msgid "the recipient"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:43
+#: assets/admin/settings/panels/EmailPanel.jsx:44
 msgid "It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:49
+#: assets/admin/settings/panels/EmailPanel.jsx:50
 msgid "Send failed."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:59
+#: assets/admin/settings/panels/EmailPanel.jsx:60
 msgid "Sender identity"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:63
+#: assets/admin/settings/panels/EmailPanel.jsx:64
 msgid "From name"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:64
+#: assets/admin/settings/panels/EmailPanel.jsx:65
 msgid "Shown as the sender in the donor inbox."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:69
+#: assets/admin/settings/panels/EmailPanel.jsx:70
 msgid "From email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:70
+#: assets/admin/settings/panels/EmailPanel.jsx:71
 msgid "Use an address on a domain you control."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:75
+#: assets/admin/settings/panels/EmailPanel.jsx:76
 msgid "Reply-to"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:76
+#: assets/admin/settings/panels/EmailPanel.jsx:77
 msgid "Where donor replies arrive. Defaults to From email."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:81
+#: assets/admin/settings/panels/EmailPanel.jsx:82
 msgid "BCC me on every donor email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:82
+#: assets/admin/settings/panels/EmailPanel.jsx:83
 msgid "Sends the site admin address a copy of every message Gratora sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:89
+#: assets/admin/settings/panels/EmailPanel.jsx:90
 msgid "Send a test email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:90
+#: assets/admin/settings/panels/EmailPanel.jsx:91
 msgid "Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:92
+#: assets/admin/settings/panels/EmailPanel.jsx:93
 msgid "Recipient"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:98
+#: assets/admin/settings/panels/EmailPanel.jsx:99
 msgid "Leave blank to send to your WP user email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:103
+#: assets/admin/settings/panels/EmailPanel.jsx:104
 #: assets/donor-portal/index.jsx:663
 msgid "Sending…"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:103
+#: assets/admin/settings/panels/EmailPanel.jsx:104
 msgid "Send test email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:118
+#: assets/admin/settings/panels/EmailPanel.jsx:119
 msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than Gratora. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:121
+#: assets/admin/settings/panels/EmailPanel.jsx:122
 msgid "SMTP plugins on WordPress.org"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:127
+#: assets/admin/settings/panels/EmailPanel.jsx:128
 msgid "Donor emails"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:128
+#: assets/admin/settings/panels/EmailPanel.jsx:129
 msgid "Sent to donors automatically by Gratora"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:129
+#: assets/admin/settings/panels/EmailPanel.jsx:130
+#: assets/admin/settings/panels/EmailPanel.jsx:139
 msgid "Click a row to edit"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:149
+#: assets/admin/settings/panels/EmailPanel.jsx:137
+msgid "Staff emails"
+msgstr ""
+
+#: assets/admin/settings/panels/EmailPanel.jsx:138
+msgid "Sent to people at your organization automatically by Gratora"
+msgstr ""
+
+#: assets/admin/settings/panels/EmailPanel.jsx:172
 msgid "(enabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:149
+#: assets/admin/settings/panels/EmailPanel.jsx:172
 msgid "(disabled)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:285
+#: assets/admin/settings/panels/EmailPanel.jsx:302
 msgid "Subject:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:288
+#: assets/admin/settings/panels/EmailPanel.jsx:305
 msgid "(no subject)"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:290
+#: assets/admin/settings/panels/EmailPanel.jsx:307
 msgid "To:"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:297
+#: assets/admin/settings/panels/EmailPanel.jsx:314
 msgid "Send this email"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:298
+#: assets/admin/settings/panels/EmailPanel.jsx:315
 msgid "Disable to skip this notification entirely."
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:303
+#: assets/admin/settings/panels/EmailPanel.jsx:320
 msgid "Subject"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:313
+#: assets/admin/settings/panels/EmailPanel.jsx:330
 msgid "Body"
 msgstr ""
 
-#: assets/admin/settings/panels/EmailPanel.jsx:314
+#: assets/admin/settings/panels/EmailPanel.jsx:331
 msgid "Plain text. Merge tags expand at send time."
 msgstr ""
 
@@ -16561,125 +16578,125 @@ msgstr ""
 msgid "No end date"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:66
+#: assets/admin/_shared/emailTemplates.js:73
 msgid "Sent the moment a donation is successfully paid. This is the donor-facing thank you and tax receipt."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:72
+#: assets/admin/_shared/emailTemplates.js:79
 msgid "First donation welcome"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:73
+#: assets/admin/_shared/emailTemplates.js:80
 msgid "A one-off welcome sent when a donor gives for the first time, separate from the receipt. Warm and relational, not transactional."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:79
+#: assets/admin/_shared/emailTemplates.js:86
 msgid "Offline donation instructions"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:80
+#: assets/admin/_shared/emailTemplates.js:87
 msgid "Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:86
+#: assets/admin/_shared/emailTemplates.js:93
 msgid "Pending donation"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:87
+#: assets/admin/_shared/emailTemplates.js:94
 msgid "Sent when a payment is processing (SEPA settlement, delayed cards) before the receipt is issued."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:93
+#: assets/admin/_shared/emailTemplates.js:100
 msgid "Donation refunded"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:94
+#: assets/admin/_shared/emailTemplates.js:101
 msgid "Sent when an admin refunds a donation. Explains when funds will reappear on the donor card."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:100
+#: assets/admin/_shared/emailTemplates.js:107
 msgid "Offline payment instructions"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:101
+#: assets/admin/_shared/emailTemplates.js:108
 msgid "The bank-transfer instructions for a payment that is not a donation, such as an order an add-on takes through the same rails."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:102
 #: assets/admin/_shared/emailTemplates.js:109
 #: assets/admin/_shared/emailTemplates.js:116
+#: assets/admin/_shared/emailTemplates.js:123
 msgid "Payer"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:107
+#: assets/admin/_shared/emailTemplates.js:114
 msgid "Pending payment"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:108
+#: assets/admin/_shared/emailTemplates.js:115
 msgid "The processing notice for a payment that is not a donation, so the payer is not told their purchase was a contribution."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:114
+#: assets/admin/_shared/emailTemplates.js:121
 msgid "Payment refunded"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:115
+#: assets/admin/_shared/emailTemplates.js:122
 msgid "The refund notice for a payment that is not a donation. Same facts as the donation one, without calling the money a donation."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:121
+#: assets/admin/_shared/emailTemplates.js:128
 msgid "Recurring renewal"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:122
+#: assets/admin/_shared/emailTemplates.js:129
 msgid "Sent for each successful renewal of a recurring donation."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:128
+#: assets/admin/_shared/emailTemplates.js:135
 msgid "Recurring payment failed"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:129
+#: assets/admin/_shared/emailTemplates.js:136
 msgid "Sent the first time a renewal is declined, so the donor can update their card before the donation lapses. Retries do not re-send it."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:138
+#: assets/admin/_shared/emailTemplates.js:145
 msgid "Subscription cancelled"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:139
+#: assets/admin/_shared/emailTemplates.js:146
 msgid "Sent when a recurring donation is cancelled, either by the donor or by an admin."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:146
+#: assets/admin/_shared/emailTemplates.js:153
 msgid "Sent when someone at the organization changes the amount of a recurring donation. A donor who changes their own in the portal is not emailed."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:152
+#: assets/admin/_shared/emailTemplates.js:159
 msgid "Recurring schedule changed"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:153
+#: assets/admin/_shared/emailTemplates.js:160
 msgid "Sent when someone at the organization changes how often a recurring donation is taken. A donor who changes their own in the portal is not emailed."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:160
+#: assets/admin/_shared/emailTemplates.js:167
 msgid "Sent when someone at the organization pauses a recurring donation, with the date it restarts. A donor who pauses their own in the portal is not emailed."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:166
+#: assets/admin/_shared/emailTemplates.js:173
 msgid "Recurring donation restarted"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:167
+#: assets/admin/_shared/emailTemplates.js:174
 msgid "Sent when someone at the organization restarts a paused recurring donation, with the next payment date."
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:173
+#: assets/admin/_shared/emailTemplates.js:180
 msgid "Next donation skipped"
 msgstr ""
 
-#: assets/admin/_shared/emailTemplates.js:174
+#: assets/admin/_shared/emailTemplates.js:181
 msgid "Sent when someone at the organization skips one upcoming payment. The recurring donation itself continues."
 msgstr ""
 
