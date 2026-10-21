@@ -37,6 +37,7 @@ import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 import { useGratoraRecord } from '../_shared/useGratoraRecord';
+import { ExtensionSection, useExtensionPanels } from '../_shared/extensionTabs';
 import Btn from '../_shared/components/Btn';
 import LocalIcon from '../_shared/components/Icon';
 import Slider    from '../_shared/components/Slider';
@@ -642,6 +643,7 @@ export default function Editor( { formId } ) {
                                 ) : view === 'settings' ? (
                                     <SettingsView
                                         c={ c }
+                                        isDirty={ isDirty }
                                         campaigns={ campaigns }
                                         gateways={ gateways }
                                         funds={ funds }
@@ -1014,11 +1016,12 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
     );
 }
 
-function SettingsView( { c, campaigns, gateways, funds } ) {
+function SettingsView( { c, isDirty, campaigns, gateways, funds } ) {
     return (
         <div className="gratora-form-editor__settings">
             <FormSettingsPanel
                 c={ c }
+                isDirty={ isDirty }
                 campaigns={ campaigns }
                 gateways={ gateways }
                 funds={ funds }
@@ -1233,7 +1236,7 @@ const SETTINGS_TABS = [
     { id: 'embed',     label: __( 'Embed', 'gratora-donation-platform' ) },
 ];
 
-function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
+function FormSettingsPanel( { c, isDirty, campaigns, gateways, funds } ) {
     const settings = useMemo(
         () => mergeFormSettings( c.record.settings ),
         [ c.record.settings ]
@@ -1265,7 +1268,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'after'     && <AfterSection     settings={ settings } setSettings={ setSettings } /> }
-                { activeTab === 'embed'     && <EmbedSection     c={ c } /> }
+                { activeTab === 'embed'     && <EmbedSection     c={ c } dirty={ isDirty } /> }
             </main>
         </div>
     );
@@ -1602,7 +1605,7 @@ function AfterSection( { settings, setSettings } ) {
     );
 }
 
-export function EmbedSection( { c } ) {
+export function EmbedSection( { c, dirty = false } ) {
     // The saved slug, not the edited one: the server normalises it through
     // sanitize_title, so a shortcode built from raw input names a form that
     // will never exist. Read here rather than passed in, because which slug is
@@ -1610,18 +1613,36 @@ export function EmbedSection( { c } ) {
     const slug      = c.savedRecord?.slug || '';
     const pending   = !! c.isEdited?.( 'slug' );
     const shortcode = `[gratora_donation_form slug="${ slug }"]`;
+    const panels    = useExtensionPanels( 'form-embed' );
+
+    // The saved form for the same reason as the slug. A panel is remounted
+    // when any of it changes, so it never describes a form that is no longer
+    // there.
+    const context = {
+        formId:  Number( c.savedRecord?.id ) || 0,
+        slug,
+        status:  c.savedRecord?.status || 'draft',
+        isDirty: !! dirty,
+    };
+    const token = [ context.formId, slug, context.status, context.isDirty ? 1 : 0 ].join( '|' );
+
     return (
-        <SettingsRow
-            title={ __( 'Embed', 'gratora-donation-platform' ) }
-            description={ __( 'Paste this shortcode into any post or page to render the form.', 'gratora-donation-platform' ) }
-        >
-            <ShortcodeField value={ shortcode } />
-            { pending && (
-                <p className="gratora-field__help">
-                    { __( 'Save the form to update this shortcode: the slug you typed is not the one the server will store.', 'gratora-donation-platform' ) }
-                </p>
-            ) }
-        </SettingsRow>
+        <>
+            <SettingsRow
+                title={ __( 'Embed', 'gratora-donation-platform' ) }
+                description={ __( 'Paste this shortcode into any post or page to render the form.', 'gratora-donation-platform' ) }
+            >
+                <ShortcodeField value={ shortcode } />
+                { pending && (
+                    <p className="gratora-field__help">
+                        { __( 'Save the form to update this shortcode: the slug you typed is not the one the server will store.', 'gratora-donation-platform' ) }
+                    </p>
+                ) }
+            </SettingsRow>
+            { panels.map( ( panel ) => (
+                <ExtensionSection key={ panel.id } panel={ panel } context={ context } token={ token } />
+            ) ) }
+        </>
     );
 }
 

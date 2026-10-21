@@ -20,6 +20,15 @@ final class ExtensionAssets
     public const ACTION = 'gratora.extension_tabs';
 
     /**
+     * The panel surface inside a form's Embed tab, beside the shortcode. Each
+     * panel is mounted with the saved form's formId, slug and status, and
+     * isDirty.
+     *
+     * @unreleased
+     */
+    public const FORM_EMBED = 'form-embed';
+
+    /**
      * Add-on bundles must depend on self::HANDLE.
      *
      * @since 1.0.0
