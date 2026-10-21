@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 1.2.3 =
+* New: add-ons can add their own sections to a form's Settings, Embed, below the shortcode.
+* Fixed: the refund email mentions a card and the 5 to 10 day wait only when a payment provider returns the money.
+* Fixed: emails about a donation with no campaign name your organization instead of leaving a gap.
+* Fixed: a form's settings no longer run off the side of a phone screen.
+
 = 1.2.2 =
 * New: add-ons can add what they hold about a donor to the donor's data export, from the admin and from the donor portal.
 * New: add-ons can find your active, at risk, lapsed and lost donors, counted the same way as Donors, Insights.

@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -268,10 +268,10 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.2.2 =
-* New: add-ons can add what they hold about a donor to the donor's data export, from the admin and from the donor portal.
-* New: add-ons can find your active, at risk, lapsed and lost donors, counted the same way as Donors, Insights.
-* New: add-ons can list the emails they send to your staff under Staff emails in Settings, Emails.
-* Fixed: on a donor's profile, the donor's card no longer overlaps a panel an add-on puts below it.
+= 1.2.3 =
+* New: add-ons can add their own sections to a form's Settings, Embed, below the shortcode.
+* Fixed: the refund email mentions a card and the 5 to 10 day wait only when a payment provider returns the money.
+* Fixed: emails about a donation with no campaign name your organization instead of leaving a gap.
+* Fixed: a form's settings no longer run off the side of a phone screen.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).

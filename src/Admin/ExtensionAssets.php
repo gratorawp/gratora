@@ -22,7 +22,7 @@ final class ExtensionAssets
     /**
      * Panels mount with the saved form's formId, slug, status and isDirty.
      *
-     * @unreleased
+     * @since 1.2.3
      */
     public const FORM_EMBED = 'form-embed';
 

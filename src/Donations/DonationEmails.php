@@ -304,7 +304,7 @@ final class DonationEmails extends HookProvider
      * Not the refund's gateway_refund_id: the offline gateway mints one for
      * every refund too.
      *
-     * @unreleased
+     * @since 1.2.3
      */
     private function refundedThroughAProvider(Donation $donation): bool
     {
