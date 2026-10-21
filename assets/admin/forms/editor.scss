@@ -1132,6 +1132,38 @@ $sidebar-width: 300px;
         gap: 14px;
         min-width: 0;
     }
+
+    // Two fixed columns and a two-column row do not fit a phone: the sections
+    // become a scrolling row above the settings, and each row one column.
+    @media (max-width: 782px) {
+        grid-template-columns: minmax(0, 1fr);
+
+        &__nav {
+            flex-direction: row;
+            overflow-x: auto;
+            padding: 12px 16px;
+            border-right: 0;
+            border-bottom: 1px solid $border-soft;
+        }
+
+        &__nav-item {
+            width: auto;
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        &__main {
+            box-sizing: border-box;
+            padding: 20px 16px 48px;
+        }
+
+        &__row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 12px;
+        }
+
+        &__row-head { max-width: none; }
+    }
 }
 
 .gratora-sidebar-heading {
