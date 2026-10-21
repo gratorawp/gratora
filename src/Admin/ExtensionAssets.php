@@ -20,9 +20,7 @@ final class ExtensionAssets
     public const ACTION = 'gratora.extension_tabs';
 
     /**
-     * The panel surface inside a form's Embed tab, beside the shortcode. Each
-     * panel is mounted with the saved form's formId, slug and status, and
-     * isDirty.
+     * Panels mount with the saved form's formId, slug, status and isDirty.
      *
      * @unreleased
      */

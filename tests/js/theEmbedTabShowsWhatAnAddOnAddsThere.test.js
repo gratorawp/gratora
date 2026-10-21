@@ -1,10 +1,3 @@
-/**
- * Add-ons that put a form somewhere other than a page of this site belong in
- * the form's Embed tab, beside the shortcode. They register a panel on the
- * form-embed surface and are handed the form as it was last saved, and whether
- * the editor holds changes that are not saved yet.
- */
-
 import { render } from 'preact';
 import { act } from 'preact/test-utils';
 
@@ -14,8 +7,7 @@ jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 jest.mock( '@wordpress/api-fetch', () => jest.fn( () => new Promise( () => {} ) ) );
 
-// The editor's chrome is @wordpress/components on ariakit, which does not
-// render under preact/compat. None of it is what this measures.
+// @wordpress/components does not render under preact/compat.
 jest.mock( '@wordpress/components', () => new Proxy( {}, {
     get: ( _t, key ) => ( key === '__esModule' ? true : ( props ) => <div>{ props.children }</div> ),
 } ) );

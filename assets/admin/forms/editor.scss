@@ -1133,8 +1133,7 @@ $sidebar-width: 300px;
         min-width: 0;
     }
 
-    // Two fixed columns and a two-column row do not fit a phone: the sections
-    // become a scrolling row above the settings, and each row one column.
+    // Two fixed columns do not fit a phone.
     @media (max-width: 782px) {
         grid-template-columns: minmax(0, 1fr);
 

@@ -1615,9 +1615,7 @@ export function EmbedSection( { c, dirty = false } ) {
     const shortcode = `[gratora_donation_form slug="${ slug }"]`;
     const panels    = useExtensionPanels( 'form-embed' );
 
-    // The saved form for the same reason as the slug. A panel is remounted
-    // when any of it changes, so it never describes a form that is no longer
-    // there.
+    // Remounted when any of it changes, so a panel never describes a form that is gone.
     const context = {
         formId:  Number( c.savedRecord?.id ) || 0,
         slug,
