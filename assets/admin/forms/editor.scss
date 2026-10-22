@@ -1136,6 +1136,7 @@ $sidebar-width: 300px;
     // Two fixed columns do not fit a phone.
     @media (max-width: 782px) {
         grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
 
         &__nav {
             flex-direction: row;
