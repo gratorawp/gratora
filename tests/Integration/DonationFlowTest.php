@@ -5,8 +5,16 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
 use Gratora\Forms\Form;
+use Gratora\Foundation\Plugin;
 use Gratora\Funds\Fund;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 final class DonationFlowTest extends IntegrationTestCase
@@ -495,13 +503,58 @@ final class DonationFlowTest extends IntegrationTestCase
 
     public function test_fee_covered_cents_is_capped_at_amount(): void
     {
+        $this->registerCardGateway();
+
         $ref = $this->postDonation([
             'email' => 'fee@x.com', 'amount_cents' => 5000, 'currency' => 'EUR',
-            'gateway' => 'offline', 'fee_covered_cents' => 999999,
+            'gateway' => 'testcard', 'fee_covered_cents' => 999999,
         ])->get_data()['reference'];
 
         $this->assertSame(5000, $this->columnOf($ref, 'fee_covered_cents'),
             'fee_covered_cents is capped at the donation amount');
+    }
+
+    public function test_a_check_or_transfer_donation_keeps_no_fee_whatever_the_page_sent(): void
+    {
+        $ref = $this->postDonation([
+            'email' => 'check@x.com', 'amount_cents' => 5175, 'currency' => 'EUR',
+            'gateway' => 'offline', 'fee_covered_cents' => 175,
+        ])->get_data()['reference'];
+
+        $this->assertSame(5000, $this->columnOf($ref, 'amount_cents'));
+        $this->assertSame(0, $this->columnOf($ref, 'fee_covered_cents'));
+    }
+
+    private function registerCardGateway(): void
+    {
+        Plugin::instance()->container->get(GatewayManager::class)->register(
+            new class implements PaymentGateway {
+                public function id(): string { return 'testcard'; }
+                public function label(): string { return 'Test card'; }
+                public function description(): string { return ''; }
+                public function frequencies(): array { return ['one_time']; }
+                public function paymentMethods(): array { return ['card']; }
+                public function countries(): array { return ['*']; }
+                public function currencies(): array { return ['*']; }
+                public function canCharge(): bool { return true; }
+                public function createIntent(Donation $d): GatewayIntentResult
+                {
+                    return new GatewayIntentResult(intent_id: 'testcard_' . $d->reference);
+                }
+                public function confirm(Donation $d, array $p = []): GatewayConfirmResult
+                {
+                    return new GatewayConfirmResult(success: true);
+                }
+                public function handleWebhook(WP_REST_Request $r): WebhookOutcome
+                {
+                    return WebhookOutcome::notSupported('testcard');
+                }
+                public function refund(Donation $d, int $amountCents, ?string $reason = null): RefundResult
+                {
+                    return RefundResult::failure('not supported');
+                }
+            }
+        );
     }
 
     private function makeFund(string $code, string $name, bool $active, bool $default = false): Fund

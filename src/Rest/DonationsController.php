@@ -127,6 +127,13 @@ final class DonationsController
         $currency   = strtoupper((string) ($body['currency'] ?? ''));
         $gatewayId  = (string) ($body['gateway'] ?? '');
 
+        // A check, a transfer or a test donation carries no card fee, whatever page sent it.
+        if (in_array($gatewayId, ['offline', 'sandbox'], true) && (int) ($body['fee_covered_cents'] ?? 0) > 0) {
+            $amount -= min($amount, (int) $body['fee_covered_cents']);
+            $body['amount_cents']      = $amount;
+            $body['fee_covered_cents'] = 0;
+        }
+
         if ($email === '' || ! is_email($email)) {
             return new WP_Error('gratora_invalid_email', __('A valid email is required.', 'gratora-donation-platform'), ['status' => 400]);
         }
