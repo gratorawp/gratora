@@ -140,7 +140,7 @@ final class ReadinessService
                     'gateway',
                     'money',
                     __('Only test donations can be taken so far', 'gratora-donation-platform'),
-                    __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow, before you turn test mode off.', 'gratora-donation-platform'),
+                    __('Add keys for a payment gateway, or switch on check or bank transfer and write the instructions donors will follow, before you turn test mode off.', 'gratora-donation-platform'),
                     'gateways',
                     __('Set up payments', 'gratora-donation-platform')
                 );
@@ -150,7 +150,7 @@ final class ReadinessService
                 'gateway',
                 'money',
                 __('No way to take a donation', 'gratora-donation-platform'),
-                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'gratora-donation-platform'),
+                __('Add keys for a payment gateway, or switch on check or bank transfer and write the instructions donors will follow.', 'gratora-donation-platform'),
                 'gateways',
                 __('Set up payments', 'gratora-donation-platform'),
                 true

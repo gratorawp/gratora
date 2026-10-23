@@ -83,7 +83,7 @@ function coreTemplates() {
         },
         {
             id:        'offline_instructions',
-            label:     __( 'Offline donation instructions', 'gratora-donation-platform' ),
+            label:     __( 'Check or bank transfer instructions', 'gratora-donation-platform' ),
             desc:      __( 'Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer.', 'gratora-donation-platform' ),
             recipient: __( 'Donor', 'gratora-donation-platform' ),
             tags:      tagsFor( 'offline_instructions', [ '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{bank_details}', '{instructions}' ] ),

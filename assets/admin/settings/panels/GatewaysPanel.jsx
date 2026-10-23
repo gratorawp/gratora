@@ -118,7 +118,7 @@ export default function GatewaysPanel( { s, org } ) {
                 onToggle={ setOfflineOpen }
             >
                 <ToggleRow
-                    title={ __( 'Enable offline donations', 'gratora-donation-platform' ) }
+                    title={ __( 'Enable check or bank transfer', 'gratora-donation-platform' ) }
                     sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'gratora-donation-platform' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
