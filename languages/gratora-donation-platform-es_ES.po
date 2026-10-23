@@ -3903,10 +3903,6 @@ msgstr "Nivel estrella"
 msgid "Send {amount}"
 msgstr "Enviar {amount}"
 
-#: src/Forms/FormTemplates.php:121
-msgid "I'll cover the fees so 100% goes to the cause"
-msgstr "Cubriré las comisiones para que el 100 % llegue a la causa"
-
 #: src/Forms/FormTemplates.php:126
 msgid "Quick Give"
 msgstr "Donación rápida"
@@ -3964,10 +3960,6 @@ msgstr "Por qué te importa esta causa..."
 msgid "Hide my name from the donor wall"
 msgstr "Ocultar mi nombre en el muro de donantes"
 
-#: src/Forms/FormTemplates.php:176
-msgid "I'll cover the processing fee so 100% of my donation goes to the mission"
-msgstr "Cubriré la comisión de procesamiento para que el 100% de mi donación vaya a la misión"
-
 #: src/Forms/FormTemplates.php:181
 msgid "Give {amount}"
 msgstr "Donar {amount}"
@@ -3984,6 +3976,11 @@ msgstr "Página de campaña de desplazamiento largo en la que cada nivel de dona
 msgid "Thank you. Your donation is already at work. Here's what happens next, and how to tell a friend."
 msgstr "Gracias. Tu donación ya está en marcha. Esto es lo que ocurrirá a continuación y cómo puedes contárselo a tus amistades."
 
+#. translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written.
+#: src/Forms/FormTemplates.php:206
+msgid "Add {fee} to cover card fees"
+msgstr "Añadir {fee} para cubrir las comisiones de la tarjeta"
+
 #: src/Forms/FormTemplates.php:229
 msgid "Make a donation"
 msgstr "Haz una donación"
@@ -3999,11 +3996,6 @@ msgstr "Hacer recurrente esta donación"
 #: src/Forms/FormTemplates.php:457
 msgid "Donate {amount}"
 msgstr "Donar {amount}"
-
-#: src/Forms/FormTemplates.php:245
-#: src/Forms/FormTemplates.php:291
-msgid "Cover the processing fee so the full amount reaches us"
-msgstr "Cubrir la comisión de procesamiento para que nos llegue el importe íntegro"
 
 #: src/Forms/FormTemplates.php:250
 msgid "Everyday donation"
@@ -4066,10 +4058,6 @@ msgstr "Campeón"
 msgid "Guardian"
 msgstr "Protector"
 
-#: src/Forms/FormTemplates.php:333
-msgid "Cover the processing fee on each payment"
-msgstr "Cubrir la comisión de procesamiento en cada pago"
-
 #: src/Forms/FormTemplates.php:338
 msgid "Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal."
 msgstr "Tu primer pago se cobra hoy. Si has elegido una frecuencia recurrente, se cobrará el mismo importe en esta fecha con esa frecuencia, y puedes cambiarlo o detenerlo en cualquier momento desde tu portal del donante."
@@ -4097,10 +4085,6 @@ msgstr "Cuenta qué ha pasado, a quién afecta y qué se financia hoy con una do
 #: src/Forms/FormTemplates.php:375
 msgid "Give now"
 msgstr "Donar ahora"
-
-#: src/Forms/FormTemplates.php:376
-msgid "Cover the processing fee so the full amount reaches the response"
-msgstr "Cubrir la comisión de procesamiento para que el importe íntegro llegue a la respuesta de emergencia"
 
 #: src/Forms/FormTemplates.php:382
 msgid "For a crisis with a deadline. Leads with the goal and countdown, asks only for what a receipt needs, and offers no fund choice because the appeal is the fund."
@@ -4138,10 +4122,6 @@ msgstr "Donde más se necesite"
 msgid "We direct it to the most urgent work that month."
 msgstr "Destinamos tu donación a la labor más urgente de ese mes."
 
-#: src/Forms/FormTemplates.php:420
-msgid "Cover the processing fee so the full amount reaches this fund"
-msgstr "Cubrir la comisión de procesamiento para que el importe íntegro llegue a este fondo"
-
 #: src/Forms/FormTemplates.php:425
 msgid "Designated giving"
 msgstr "Donación con destino elegido"
@@ -4157,10 +4137,6 @@ msgstr "Se muestra en el muro de simpatizantes"
 #: src/Forms/FormTemplates.php:453
 msgid "Hide my name from the supporter wall"
 msgstr "Ocultar mi nombre en el muro de simpatizantes"
-
-#: src/Forms/FormTemplates.php:458
-msgid "Cover the processing fee so 100% reaches the campaign"
-msgstr "Cubrir la comisión de procesamiento para que el 100% llegue a la campaña"
 
 #: src/Forms/FormTemplates.php:464
 msgid "For a public campaign with a goal and a supporter wall. Carries a progress bar, a message field and a name-hiding toggle."
@@ -4883,9 +4859,9 @@ msgid "PayPal declined the payment."
 msgstr "PayPal ha rechazado el pago."
 
 #: src/Gateways/Offline/OfflineGateway.php:40
-#: assets/admin/settings/panels/GatewaysPanel.jsx:89
-msgid "Offline donations"
-msgstr "Donaciones offline"
+#: assets/admin/settings/panels/GatewaysPanel.jsx:112
+msgid "Check or bank transfer"
+msgstr "Cheque o transferencia bancaria"
 
 #: src/Gateways/Offline/OfflineGateway.php:46
 msgid "Pay by bank transfer, check or cash. We confirm it manually."
@@ -5098,6 +5074,20 @@ msgstr "no disponible"
 #: src/Gateways/Stripe/StripeWebhookNotice.php:92
 msgid "Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Gratora, Settings, Payment gateways."
 msgstr "Stripe está conectado, pero falta el secreto de firma de su webhook. Las renovaciones recurrentes, las confirmaciones de pago y las actualizaciones de la cuenta no se procesarán hasta que lo añadas en Gratora, Ajustes, Pasarelas de pago."
+
+#. translators: %s: the name of the plugin's admin menu, "Fundraising". Use the translation of that menu name.
+#: src/Onboarding/Onboarding.php:153
+#, php-format
+msgid "Gratora is on. Next, make your donation page and try a test donation. It takes about two minutes. You will find Gratora under %s in the menu."
+msgstr "Gratora está activo. Ahora crea tu página de donación y haz una donación de prueba. Se tarda unos dos minutos. Encontrarás Gratora en el menú, en %s."
+
+#: src/Onboarding/Onboarding.php:160
+msgid "Set up Gratora"
+msgstr "Configurar Gratora"
+
+#: src/Onboarding/Onboarding.php:188
+msgid "Set up"
+msgstr "Configurar"
 
 #: src/Onboarding/OnboardingPage.php:31
 msgid "Onboarding"
@@ -11463,6 +11453,11 @@ msgstr "Marcar por defecto"
 msgid "Best practice: leave off so donors opt in."
 msgstr "Buena práctica: déjalo desactivado para que sean los donantes quienes marquen la casilla."
 
+#. translators: Keep {fee} as written: it is replaced by the fee amount on the form.
+#: assets/admin/forms/blocks/cover-fees/index.js:68
+msgid "Use {fee} in the label to insert the fee at runtime, e.g. \"Add {fee} to cover card fees\"."
+msgstr "Usa {fee} en la etiqueta para insertar la comisión en tiempo real, p. ej., «Añadir {fee} para cubrir las comisiones de la tarjeta»."
+
 #: assets/admin/forms/blocks/cover-fees/index.js:99
 msgid "Lets the donor opt to cover the payment processing fee."
 msgstr "Permite al donante optar por cubrir la comisión de procesamiento del pago."
@@ -13464,6 +13459,18 @@ msgstr "Creando la página."
 msgid "Go to the dashboard"
 msgstr "Ir al escritorio"
 
+#: assets/admin/settings/panels/bankDetailsSample.js:7
+msgid "Account name: …"
+msgstr "Nombre de la cuenta: …"
+
+#: assets/admin/settings/panels/bankDetailsSample.js:8
+msgid "Routing number: …"
+msgstr "Número de ruta: …"
+
+#: assets/admin/settings/panels/bankDetailsSample.js:9
+msgid "Account number: …"
+msgstr "Número de cuenta: …"
+
 #: assets/admin/settings/panels/BrandPanel.jsx:69
 msgid "(copy)"
 msgstr "(copia)"
@@ -13994,6 +14001,10 @@ msgstr "Listo: %s"
 msgid "Add your live Stripe or PayPal keys to take cards, or write bank details to take transfers."
 msgstr "Añade tus claves del modo real de Stripe o PayPal para aceptar tarjetas, o escribe tus datos bancarios para aceptar transferencias."
 
+#: assets/admin/dashboard/firstRunSteps.js:132
+msgid "No Stripe yet? Take checks and transfers"
+msgstr "¿Aún no tienes Stripe? Acepta cheques y transferencias"
+
 #: assets/admin/dashboard/firstRunSteps.js:136
 msgid "Go live"
 msgstr "Pasar al modo real"
@@ -14055,9 +14066,9 @@ msgstr "Desactivado"
 msgid "Configured"
 msgstr "Configurado"
 
-#: assets/admin/settings/panels/GatewaysPanel.jsx:62
-msgid "Enabled, no way to pay"
-msgstr "Activado, sin forma de pago"
+#: assets/admin/settings/panels/GatewaysPanel.jsx:85
+msgid "Add how donors should pay"
+msgstr "Indica cómo deben pagar los donantes"
 
 #: assets/admin/settings/panels/GatewaysPanel.jsx:67
 msgid "Test mode"
@@ -14087,17 +14098,20 @@ msgstr "Activar las donaciones offline"
 msgid "For cash, check, or bank transfer donations marked paid by admin."
 msgstr "Para donaciones en efectivo, con cheque o por transferencia bancaria que un administrador marca como pagadas."
 
-#: assets/admin/settings/panels/GatewaysPanel.jsx:105
-msgid "Instructions"
-msgstr "Instrucciones"
+#: assets/admin/settings/panels/GatewaysPanel.jsx:128
+#: assets/admin/settings/panels/GatewaysPanel.jsx:140
+msgid "How should donors pay you?"
+msgstr "¿Cómo deben pagarte los donantes?"
 
-#: assets/admin/settings/panels/GatewaysPanel.jsx:106
-msgid "Emailed to donors who choose bank transfer, with their donation reference."
-msgstr "Se envían por correo electrónico a los donantes que eligen transferencia bancaria, junto con la referencia de su donación."
+#. translators: %s: the organization's name.
+#: assets/admin/settings/panels/GatewaysPanel.jsx:131
+#, js-format
+msgid "For example: make checks payable to %s and mail them to… Donors who choose this get it by email with their donation reference."
+msgstr "Por ejemplo: extiende los cheques a nombre de %s y envíalos a… Los donantes que elijan esta opción lo reciben por correo electrónico con la referencia de su donación."
 
-#: assets/admin/settings/panels/GatewaysPanel.jsx:112
-msgid "Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt."
-msgstr "Por favor, transfiere el importe de la donación en un plazo de 7 días. Usa el número de referencia para que podamos asociar tu donación con tu recibo."
+#: assets/admin/settings/panels/GatewaysPanel.jsx:132
+msgid "your organization"
+msgstr "tu organización"
 
 #: assets/admin/settings/panels/GatewaysPanel.jsx:118
 msgid "Bank details template"
@@ -14869,6 +14883,34 @@ msgstr[1] "%d requieren atención"
 msgid "Fix"
 msgstr "Solucionar"
 
+#: assets/admin/settings/panels/StripeKeysCard.jsx:34
+msgid "To take card donations you need a Stripe account. Opening one is free; Stripe charges a fee on each donation."
+msgstr "Para aceptar donaciones con tarjeta necesitas una cuenta de Stripe. Abrirla es gratis; Stripe cobra una comisión por cada donación."
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:39
+msgid "No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization's details and a bank account before it pays out. Allow about 20 minutes."
+msgstr "¿Aún no tienes cuenta de Stripe? <a>Abre una cuenta de Stripe</a>. Stripe pide los datos de tu organización y una cuenta bancaria antes de hacer pagos. Calcula unos 20 minutos."
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:45
+msgid "<a>Open your Stripe keys</a> and copy the Publishable key and the Secret key."
+msgstr "<a>Abre tus claves de Stripe</a> y copia la clave publicable y la clave secreta."
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:49
+msgid "Paste them below and press Save and verify. Gratora does the rest."
+msgstr "Pégalas abajo y pulsa «Guardar y verificar». Gratora hace el resto."
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:53
+msgid "No Stripe account yet? Take checks and bank transfers today, and add Stripe later."
+msgstr "¿Aún no tienes cuenta de Stripe? Acepta cheques y transferencias bancarias desde hoy y añade Stripe más adelante."
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:55
+msgid "Set up checks and bank transfers"
+msgstr "Configurar cheques y transferencias bancarias"
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:76
+msgid "Webhook settings (only needed if Stripe cannot reach your site)"
+msgstr "Ajustes del webhook (solo si Stripe no puede llegar a tu sitio)"
+
 #: assets/admin/settings/panels/StripeKeysCard.jsx:27
 msgid "Enabled"
 msgstr "Activado"
@@ -14896,6 +14938,10 @@ msgstr "Claves de prueba"
 #: assets/admin/settings/panels/StripeKeysCard.jsx:62
 msgid "Live keys"
 msgstr "Claves del modo real"
+
+#: assets/admin/settings/panels/StripeKeysCard.jsx:166
+msgid "Test keys (optional)"
+msgstr "Claves de prueba (opcional)"
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:67
 msgid "Enter both the publishable key and the secret key."
@@ -15033,14 +15079,6 @@ msgstr "No se ha podido comprobar tu configuración de Stripe."
 #: assets/admin/settings/panels/StripeKeysCard.jsx:364
 msgid "Action needed"
 msgstr "Acción necesaria"
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:381
-msgid "Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Gratora never takes a cut."
-msgstr "Añade las claves de API de tu propia cuenta de Stripe. Las donaciones se cobran directamente en tu cuenta y se transfieren a tu banco, y Gratora nunca se queda con una parte."
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:384
-msgid "Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely."
-msgstr "Las encontrarás en el escritorio de Stripe, en Desarrolladores, Claves de API. Añade primero tus claves de prueba para probar una donación sin riesgo."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:390
 msgid "Enable the Stripe gateway"
