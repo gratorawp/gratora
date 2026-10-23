@@ -280,7 +280,7 @@ Tools > Site Health > Info and look under Database.
 * New: after activating, the Plugins screen points to the setup, and the plugin's row links to the setup or to Settings.
 * New: the Stripe settings show how to open a Stripe account and where to find the keys.
 * New: offline donations are called "Check or bank transfer", with plainer settings and a US bank details example.
-* Changed: new forms leave "cover the fees" unticked and show the amount, e.g. "Add $1.75 to cover card fees".
+* Changed: the cover-the-fee box starts unticked, on new forms and on forms that kept the default wording, and reads like "Add $1.75 to cover processing fees".
 * Fixed: no fee is added to check, bank transfer or test-method donations.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).
