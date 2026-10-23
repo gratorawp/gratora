@@ -120,6 +120,31 @@ final class AfterActivatingTheWayIsShownTest extends IntegrationTestCase
         $this->assertFalse($this->anotherAdminScreen());
     }
 
+    public function test_switching_it_off_and_on_again_before_any_other_screen_greets_nobody(): void
+    {
+        $this->switchOnForTheFirstTime();
+        $this->pluginsScreen();
+
+        Plugin::onDeactivation();
+        $this->assertFalse(get_option(Onboarding::GREET), 'left behind on a site where the plugin is off');
+
+        Plugin::onPluginActivated();
+
+        $this->assertFalse($this->anotherAdminScreen());
+        $this->assertSame('', trim($this->pluginsScreen()));
+    }
+
+    public function test_a_setup_finished_or_skipped_some_other_way_is_not_greeted(): void
+    {
+        foreach (['completed', 'dismissed'] as $status) {
+            $this->switchOnForTheFirstTime();
+            update_option(Onboarding::OPTION, $status, false);
+
+            $this->assertSame('', trim($this->pluginsScreen()), $status);
+            $this->assertFalse(get_option(Onboarding::GREET), $status);
+        }
+    }
+
     public function test_the_setup_still_opens_on_the_first_other_screen_an_hour_later(): void
     {
         $this->switchOnForTheFirstTime();
@@ -141,7 +166,7 @@ final class AfterActivatingTheWayIsShownTest extends IntegrationTestCase
         $this->assertSame('', trim($this->pluginsScreen()));
     }
 
-    public function test_the_row_link_opens_the_setup_and_then_the_setup_check(): void
+    public function test_the_row_link_opens_the_setup_and_then_the_settings(): void
     {
         $this->switchOnForTheFirstTime();
 
@@ -150,7 +175,8 @@ final class AfterActivatingTheWayIsShownTest extends IntegrationTestCase
         $this->assertStringContainsString('page=' . OnboardingPage::PAGE_ID, $links['set-up']);
 
         update_option(Onboarding::OPTION, 'completed', false);
-        $this->assertStringContainsString('page=gratora-settings#setup', $this->rowLinks()['set-up']);
+        $this->assertStringContainsString('page=gratora-settings', $this->rowLinks()['set-up']);
+        $this->assertStringContainsString('>Settings<', $this->rowLinks()['set-up']);
 
         wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
         $this->assertArrayNotHasKey('set-up', $this->rowLinks());

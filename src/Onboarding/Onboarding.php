@@ -32,7 +32,7 @@ final class Onboarding extends HookProvider
      */
     public const NOTICE = 'gratora_onboarding_notice';
 
-    private const SETUP_CHECK = 'admin.php?page=gratora-settings#setup';
+    private const SETTINGS = 'admin.php?page=gratora-settings';
 
     /** @since 1.0.0 */
     protected function actions(): array
@@ -129,10 +129,25 @@ final class Onboarding extends HookProvider
         update_option(self::NOTICE, '1', true);
     }
 
-    private static function spendGreeting(): void
+    /**
+     * On deactivation, so a later activation is not greeted by an earlier one.
+     *
+     * @since unreleased
+     */
+    public static function spendGreeting(): void
     {
         delete_option(self::GREET);
         delete_option(self::NOTICE);
+    }
+
+    /**
+     * A setup finished or skipped, by the setup screen or anything else, is greeted no more.
+     *
+     * @since unreleased
+     */
+    public static function statusChanged(mixed $old, mixed $new): void
+    {
+        if ((string) $new !== 'pending') self::spendGreeting();
     }
 
     /**
@@ -145,6 +160,11 @@ final class Onboarding extends HookProvider
         if ((string) ($GLOBALS['pagenow'] ?? '') !== 'plugins.php' || is_network_admin()) return;
         if (! current_user_can('manage_options')) return;
         if (get_option(self::NOTICE, false) === false) return;
+
+        if ((string) get_option(self::OPTION, '') !== 'pending') {
+            self::spendGreeting();
+            return;
+        }
 
         delete_option(self::NOTICE);
 
@@ -168,7 +188,7 @@ final class Onboarding extends HookProvider
     }
 
     /**
-     * The setup while it is still to do, the setup check after it.
+     * The setup while it is still to do, the settings after it.
      *
      * @param  array<string,string> $links
      * @return array<string,string>
@@ -178,14 +198,15 @@ final class Onboarding extends HookProvider
     public function setUpLink(array $links): array
     {
         $pending = (string) get_option(self::OPTION, '') === 'pending';
-        $path    = $pending ? 'admin.php?page=' . OnboardingPage::PAGE_ID : self::SETUP_CHECK;
 
         if (! current_user_can($pending ? 'manage_options' : 'gratora_access_settings')) {
             return $links;
         }
 
-        return [
-            'set-up' => sprintf('<a href="%s">%s</a>', esc_url(admin_url($path)), esc_html__('Set up', 'gratora-donation-platform')),
-        ] + $links;
+        $link = $pending
+            ? sprintf('<a href="%s">%s</a>', esc_url(admin_url('admin.php?page=' . OnboardingPage::PAGE_ID)), esc_html__('Set up', 'gratora-donation-platform'))
+            : sprintf('<a href="%s">%s</a>', esc_url(admin_url(self::SETTINGS)), esc_html__('Settings', 'gratora-donation-platform'));
+
+        return ['set-up' => $link] + $links;
     }
 }

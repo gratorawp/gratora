@@ -1262,6 +1262,9 @@ final class CoreModule implements GratoraModule
         // where "this form takes no real money" needs saying.
         (new TestModeBadge())->register();
 
+        // The setup is finished over REST, from WP-CLI or by a demo's seed, none of them an admin screen.
+        add_action('update_option_' . Onboarding::OPTION, [Onboarding::class, 'statusChanged'], 10, 2);
+
         if (is_admin()) {
             (new ManagedPageStates())->register();
             (new DeactivationDialog(

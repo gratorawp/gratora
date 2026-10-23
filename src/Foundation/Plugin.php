@@ -396,6 +396,8 @@ final class Plugin
     {
         do_action('gratora.deactivated');
 
+        Onboarding::spendGreeting();
+
         // Deleted rather than flushed: a flush from a plugin that is still
         // loaded stores its own rules again, and CampaignPermalinks::addRule
         // has already run on init. WordPress rebuilds the option on the next
