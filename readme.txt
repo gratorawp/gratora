@@ -174,7 +174,7 @@ https://github.com/gratorawp/gratora
 1. Install Gratora from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
 2. Open **Fundraising** in the admin menu and follow the short onboarding.
 3. Under **Fundraising > Settings**, add your payment provider keys, or enable offline donations.
-4. Create a campaign, then add a donation form to any page.
+4. On the last setup screen press **Create the page and try it**. Gratora makes your donation page and you can make a test donation straight away.
 
 == Frequently Asked Questions ==
 
@@ -182,6 +182,12 @@ https://github.com/gratorawp/gratora
 
 Yes. Donation forms, recurring donations, campaigns, donor management, receipts
 and reports are all in the free plugin. The add-ons are optional.
+
+= What do I need to take card donations? =
+
+A Stripe account, free to open. Stripe asks for your organization's details and
+a bank account. Then paste two keys from Stripe into Gratora. Until then you can
+take checks and bank transfers, and test donations work with no account.
 
 = Does Gratora take a cut of donations? =
 
@@ -255,15 +261,15 @@ Tools > Site Health > Info and look under Database.
 
 == Screenshots ==
 
-1. The fundraising dashboard: what came in, where it came from, and what needs attention.
-2. Every donation, filterable by status, campaign, gateway and frequency.
-3. A donor record: lifetime giving, their whole history, receipts, consent and notes.
-4. Donor insights: lifecycle stages, segments, lifetime value and retention.
-5. Fundraising campaigns, each with its goal and progress.
-6. A campaign in detail, with its own figures and a report to download.
-7. The donation form builder. Fields and layout are blocks, so the editor is the one you already know.
-8. Recurring donations, with monthly recurring revenue and the renewals that need attention.
-9. Funds, so a donor can choose what their donation pays for.
+1. The donation page the setup makes, as a visitor sees it: the amount raised, recent donations, top donors and the form.
+2. The donation form as a donor fills it in.
+3. The fundraising dashboard: what came in, where it came from, and what needs attention.
+4. Every donation, filterable by status, campaign, gateway and frequency.
+5. A donor record: lifetime giving, their whole history, receipts, consent and notes.
+6. Donor insights: lifecycle stages, segments, lifetime value and retention.
+7. Fundraising campaigns, each with its goal and progress.
+8. The donation form builder. Fields and layout are blocks, so the editor is the one you already know.
+9. Recurring donations, with monthly recurring revenue and the renewals that need attention.
 10. Donation receipt settings: the template, your logo, and the merge tags it fills in.
 
 == Changelog ==
