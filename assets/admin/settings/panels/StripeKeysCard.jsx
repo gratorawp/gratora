@@ -31,12 +31,12 @@ function FirstSteps( { onOffline } ) {
     return (
         <div className="gratora-stripe-start">
             <p className="gratora-connect-p">
-                { __( 'To take card donations you need a Stripe account. Opening one is free; Stripe charges a fee on each donation.', 'gratora-donation-platform' ) }
+                { __( 'To take card donations through Stripe you need a Stripe account. Opening one is free; Stripe charges a fee on each donation.', 'gratora-donation-platform' ) }
             </p>
             <ol className="gratora-stripe-start__steps">
                 <li>
                     { createInterpolateElement(
-                        __( 'No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization\'s details and a bank account before it pays out. Allow about 20 minutes.', 'gratora-donation-platform' ),
+                        __( 'No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization\'s details and a bank account before it takes real payments.', 'gratora-donation-platform' ),
                         { a: <NewTabLink href={ STRIPE_REGISTER } /> }
                     ) }
                 </li>
@@ -60,8 +60,12 @@ function FirstSteps( { onOffline } ) {
     );
 }
 
-function WebhookSettings( { status, s, initialOpen } ) {
-    const [ open, setOpen ] = useState( initialOpen );
+function WebhookSettings( { status, s, needed } ) {
+    const [ open, setOpen ] = useState( needed );
+
+    useEffect( () => {
+        if ( needed ) setOpen( true );
+    }, [ needed ] );
 
     return (
         <div className="gratora-connect-options gratora-stripe-webhooks">
@@ -524,7 +528,7 @@ export default function StripeKeysCard( { s, onOffline = null } ) {
 
             { connected && <ApplePaySection status={ status } onDone={ load } /> }
 
-            <WebhookSettings status={ status } s={ s } initialOpen={ connected && ! status?.has_webhook_secret } />
+            <WebhookSettings status={ status } s={ s } needed={ connected && ! status?.has_webhook_secret } />
         </Card>
         <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </>
