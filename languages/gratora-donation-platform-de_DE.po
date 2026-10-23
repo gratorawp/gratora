@@ -6270,16 +6270,16 @@ msgid "Only test donations can be taken so far"
 msgstr "Bisher können nur Testspenden angenommen werden"
 
 #: src/Settings/ReadinessService.php:143
-msgid "Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow, before you turn test mode off."
-msgstr "Hinterlege Schlüssel für einen Zahlungsanbieter oder aktiviere Offline-Spenden und verfasse die Hinweise, denen Spender folgen sollen, bevor du den Testmodus ausschaltest."
+msgid "Add keys for a payment gateway, or switch on check or bank transfer and write the instructions donors will follow, before you turn test mode off."
+msgstr "Hinterlege Schlüssel für einen Zahlungsanbieter oder aktiviere „Scheck oder Banküberweisung“ und verfasse die Hinweise, denen Spender folgen sollen, bevor du den Testmodus ausschaltest."
 
 #: src/Settings/ReadinessService.php:146
 msgid "No way to take a donation"
 msgstr "Keine Möglichkeit, Spenden anzunehmen"
 
-#: src/Settings/ReadinessService.php:147
-msgid "Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow."
-msgstr "Hinterlege Schlüssel für einen Zahlungsanbieter oder aktiviere Offline-Spenden und verfasse die Hinweise, denen Spender folgen sollen."
+#: src/Settings/ReadinessService.php:153
+msgid "Add keys for a payment gateway, or switch on check or bank transfer and write the instructions donors will follow."
+msgstr "Hinterlege Schlüssel für einen Zahlungsanbieter oder aktiviere „Scheck oder Banküberweisung“ und verfasse die Hinweise, denen Spender folgen sollen."
 
 #: src/Settings/ReadinessService.php:149
 msgid "Set up payments"
@@ -14090,9 +14090,9 @@ msgstr "Es wird keine echte Zahlung eingezogen, und diese Spenden fließen nicht
 msgid "Donor sees your bank details and pays offline"
 msgstr "Spender sieht deine Bankverbindung und zahlt offline"
 
-#: assets/admin/settings/panels/GatewaysPanel.jsx:98
-msgid "Enable offline donations"
-msgstr "Offline-Spenden aktivieren"
+#: assets/admin/settings/panels/GatewaysPanel.jsx:121
+msgid "Enable check or bank transfer"
+msgstr "Scheck oder Banküberweisung aktivieren"
 
 #: assets/admin/settings/panels/GatewaysPanel.jsx:99
 msgid "For cash, check, or bank transfer donations marked paid by admin."
@@ -14884,12 +14884,12 @@ msgid "Fix"
 msgstr "Beheben"
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:34
-msgid "To take card donations you need a Stripe account. Opening one is free; Stripe charges a fee on each donation."
-msgstr "Für Kartenspenden brauchst du ein Stripe-Konto. Die Eröffnung ist kostenlos; Stripe berechnet für jede Spende eine Gebühr."
+msgid "To take card donations through Stripe you need a Stripe account. Opening one is free; Stripe charges a fee on each donation."
+msgstr "Für Kartenspenden über Stripe brauchst du ein Stripe-Konto. Die Eröffnung ist kostenlos; Stripe berechnet für jede Spende eine Gebühr."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:39
-msgid "No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization's details and a bank account before it pays out. Allow about 20 minutes."
-msgstr "Noch kein Stripe-Konto? <a>Stripe-Konto eröffnen</a>. Stripe fragt nach den Angaben deiner Organisation und einem Bankkonto, bevor es auszahlt. Plane etwa 20 Minuten ein."
+msgid "No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization's details and a bank account before it takes real payments."
+msgstr "Noch kein Stripe-Konto? <a>Stripe-Konto eröffnen</a>. Stripe fragt nach den Angaben deiner Organisation und einem Bankkonto, bevor es echte Zahlungen annimmt."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:45
 msgid "<a>Open your Stripe keys</a> and copy the Publishable key and the Secret key."
@@ -16423,9 +16423,9 @@ msgstr "Begrüßung zur ersten Spende"
 msgid "A one-off welcome sent when a donor gives for the first time, separate from the receipt. Warm and relational, not transactional."
 msgstr "Eine einmalige Begrüßung, die getrennt von der Quittung gesendet wird, wenn ein Spender zum ersten Mal spendet. Herzlich und persönlich, nicht geschäftsmäßig."
 
-#: assets/admin/_shared/emailTemplates.js:79
-msgid "Offline donation instructions"
-msgstr "Hinweise zur Offline-Spende"
+#: assets/admin/_shared/emailTemplates.js:86
+msgid "Check or bank transfer instructions"
+msgstr "Hinweise für Scheck oder Banküberweisung"
 
 #: assets/admin/_shared/emailTemplates.js:80
 msgid "Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer."

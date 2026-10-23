@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T09:51:47+00:00\n"
+"POT-Creation-Date: 2026-10-23T10:25:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -68,7 +68,7 @@ msgstr ""
 #: components/CoverImagePicker.js:66
 #: assets/admin/campaigns/CoverImageCard.jsx:32
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:149
-#: assets/admin/settings/panels/StripeKeysCard.jsx:209
+#: assets/admin/settings/panels/StripeKeysCard.jsx:213
 #: assets/donor-portal/index.jsx:1557
 msgid "Replace"
 msgstr ""
@@ -83,8 +83,8 @@ msgstr ""
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:185
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:257
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:122
-#: assets/admin/settings/panels/StripeKeysCard.jsx:212
-#: assets/admin/settings/panels/StripeKeysCard.jsx:415
+#: assets/admin/settings/panels/StripeKeysCard.jsx:216
+#: assets/admin/settings/panels/StripeKeysCard.jsx:419
 #: assets/donor-portal/index.jsx:1568
 msgid "Remove"
 msgstr ""
@@ -529,8 +529,8 @@ msgstr[1] ""
 #: assets/admin/settings/panels/EmailPanel.jsx:264
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:170
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:223
-#: assets/admin/settings/panels/StripeKeysCard.jsx:238
-#: assets/admin/settings/panels/StripeKeysCard.jsx:356
+#: assets/admin/settings/panels/StripeKeysCard.jsx:242
+#: assets/admin/settings/panels/StripeKeysCard.jsx:360
 #: assets/admin/tools/tabs/CsvImportCard.jsx:168
 #: assets/admin/_shared/components/ConfirmDialog.jsx:103
 #: assets/donor-portal/index.jsx:1739
@@ -952,7 +952,7 @@ msgid "Standard"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:43
-#: src/Onboarding/Onboarding.php:154
+#: src/Onboarding/Onboarding.php:174
 #: assets/admin/addons/Addons.jsx:164
 #: assets/admin/campaigns/List.jsx:374
 #: assets/admin/donations/detail/Header.jsx:21
@@ -1121,6 +1121,7 @@ msgid "Funds"
 msgstr ""
 
 #: src/Admin/Pages/SettingsPage.php:28
+#: src/Onboarding/Onboarding.php:208
 #: assets/admin/campaigns/Detail.jsx:487
 #: assets/admin/dashboard/widgets/QuickActions.jsx:69
 #: assets/admin/forms/Editor.jsx:827
@@ -2510,7 +2511,7 @@ msgstr ""
 #: src/Core/Commands/CoreCommandProvider.php:124
 #: src/Recurring/RecurringPlanActions.php:221
 #: src/Rest/Admin/DonationsController.php:542
-#: src/Rest/DonationsController.php:150
+#: src/Rest/DonationsController.php:157
 msgid "This currency does not support fractional amounts."
 msgstr ""
 
@@ -2530,7 +2531,7 @@ msgid "Gratora Core"
 msgstr ""
 
 #. translators: %s: timestamp the key loss was detected
-#: src/Core/CoreModule.php:1300
+#: src/Core/CoreModule.php:1303
 #, php-format
 msgid "Encryption key missing since %s. What was encrypted before then cannot be decrypted: donor emails, addresses, phone numbers, tax IDs, notes and form answers, and saved gateway secret keys. Restore gratora_system_settings from a backup, or accept that those details are gone and enter your gateway keys again. New data is encrypted with a freshly generated key."
 msgstr ""
@@ -4293,7 +4294,7 @@ msgid "We could not check on your payment, and your bank may still have taken it
 msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:818
-#: assets/admin/settings/panels/StripeKeysCard.jsx:373
+#: assets/admin/settings/panels/StripeKeysCard.jsx:377
 #: assets/admin/subscriptions/List.jsx:225
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:186
 msgid "Check again"
@@ -4863,7 +4864,7 @@ msgstr ""
 #: src/Gateways/GatewayLabels.php:34
 #: src/Gateways/Stripe/StripeGateway.php:110
 #: src/Settings/ReadinessService.php:222
-#: assets/admin/settings/panels/StripeKeysCard.jsx:435
+#: assets/admin/settings/panels/StripeKeysCard.jsx:439
 msgid "Stripe"
 msgstr ""
 
@@ -5104,16 +5105,16 @@ msgid "Stripe is connected but its webhook signing secret is missing. Recurring 
 msgstr ""
 
 #. translators: %s: the name of the plugin's admin menu, "Fundraising". Use the translation of that menu name.
-#: src/Onboarding/Onboarding.php:153
+#: src/Onboarding/Onboarding.php:173
 #, php-format
 msgid "Gratora is on. Next, make your donation page and try a test donation. It takes about two minutes. You will find Gratora under %s in the menu."
 msgstr ""
 
-#: src/Onboarding/Onboarding.php:160
+#: src/Onboarding/Onboarding.php:180
 msgid "Set up Gratora"
 msgstr ""
 
-#: src/Onboarding/Onboarding.php:188
+#: src/Onboarding/Onboarding.php:207
 msgid "Set up"
 msgstr ""
 
@@ -5569,8 +5570,8 @@ msgstr ""
 #: src/Rest/Admin/DonationsController.php:1593
 #: src/Rest/Admin/DonationsController.php:1717
 #: src/Rest/Admin/DonationsController.php:1761
-#: src/Rest/DonationsController.php:658
-#: src/Rest/DonationsController.php:689
+#: src/Rest/DonationsController.php:665
+#: src/Rest/DonationsController.php:696
 msgid "Donation not found."
 msgstr ""
 
@@ -6091,89 +6092,89 @@ msgstr ""
 msgid "Currency conversions"
 msgstr ""
 
-#: src/Rest/DonationsController.php:131
+#: src/Rest/DonationsController.php:138
 msgid "A valid email is required."
 msgstr ""
 
-#: src/Rest/DonationsController.php:134
+#: src/Rest/DonationsController.php:141
 msgid "Amount must be a positive integer (in cents)."
 msgstr ""
 
-#: src/Rest/DonationsController.php:138
+#: src/Rest/DonationsController.php:145
 msgid "Currency must be a 3-letter ISO code."
 msgstr ""
 
-#: src/Rest/DonationsController.php:144
+#: src/Rest/DonationsController.php:151
 msgid "This currency is not accepted."
 msgstr ""
 
 #. translators: %s: gateway identifier
-#: src/Rest/DonationsController.php:154
+#: src/Rest/DonationsController.php:161
 #: src/Rest/WebhookController.php:96
 #, php-format
 msgid "Unknown gateway: %s"
 msgstr ""
 
 #. translators: 1: gateway identifier, 2: currency code
-#: src/Rest/DonationsController.php:164
+#: src/Rest/DonationsController.php:171
 #, php-format
 msgid "%1$s cannot take payments in %2$s."
 msgstr ""
 
-#: src/Rest/DonationsController.php:185
-#: src/Rest/DonationsController.php:194
+#: src/Rest/DonationsController.php:192
+#: src/Rest/DonationsController.php:201
 msgid "This form is not accepting donations."
 msgstr ""
 
-#: src/Rest/DonationsController.php:207
+#: src/Rest/DonationsController.php:214
 msgid "This campaign is not accepting donations."
 msgstr ""
 
-#: src/Rest/DonationsController.php:268
+#: src/Rest/DonationsController.php:275
 msgid "That payment method is not available for this form."
 msgstr ""
 
-#: src/Rest/DonationsController.php:302
+#: src/Rest/DonationsController.php:309
 msgid "Submitted form data is too large."
 msgstr ""
 
-#: src/Rest/DonationsController.php:381
+#: src/Rest/DonationsController.php:388
 msgid "We could not process your donation just now. Please try again."
 msgstr ""
 
-#: src/Rest/DonationsController.php:467
+#: src/Rest/DonationsController.php:474
 msgid "We could not start your payment. Please try again in a moment."
 msgstr ""
 
-#: src/Rest/DonationsController.php:478
+#: src/Rest/DonationsController.php:485
 msgid "Something went wrong saving your donation. Please try again."
 msgstr ""
 
 #. translators: %s: current donation status.
-#: src/Rest/DonationsController.php:707
+#: src/Rest/DonationsController.php:714
 #, php-format
 msgid "Cannot confirm a %s donation."
 msgstr ""
 
 #. translators: %s: gateway identifier.
-#: src/Rest/DonationsController.php:717
+#: src/Rest/DonationsController.php:724
 #, php-format
 msgid "Gateway \"%s\" is no longer registered."
 msgstr ""
 
-#: src/Rest/DonationsController.php:726
+#: src/Rest/DonationsController.php:733
 msgid "We could not confirm your payment. Please try again in a moment."
 msgstr ""
 
-#: src/Rest/DonationsController.php:761
+#: src/Rest/DonationsController.php:768
 msgid "This payment has been returned to the donor, so it cannot be confirmed as paid."
 msgstr ""
 
-#: src/Rest/DonationsController.php:767
+#: src/Rest/DonationsController.php:774
 msgid "Gateway returned failure."
 msgstr ""
 
-#: src/Rest/DonationsController.php:768
+#: src/Rest/DonationsController.php:775
 msgid "Confirmation failed."
 msgstr ""
 
@@ -6298,7 +6299,7 @@ msgid "Only test donations can be taken so far"
 msgstr ""
 
 #: src/Settings/ReadinessService.php:143
-msgid "Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow, before you turn test mode off."
+msgid "Add keys for a payment gateway, or switch on check or bank transfer and write the instructions donors will follow, before you turn test mode off."
 msgstr ""
 
 #: src/Settings/ReadinessService.php:145
@@ -6311,7 +6312,7 @@ msgid "No way to take a donation"
 msgstr ""
 
 #: src/Settings/ReadinessService.php:153
-msgid "Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow."
+msgid "Add keys for a payment gateway, or switch on check or bank transfer and write the instructions donors will follow."
 msgstr ""
 
 #: src/Settings/ReadinessService.php:166
@@ -8876,7 +8877,7 @@ msgstr ""
 #: assets/admin/settings/panels/NumberingPanel.jsx:303
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:294
 #: assets/admin/settings/panels/RolesPanel.jsx:33
-#: assets/admin/settings/panels/StripeKeysCard.jsx:460
+#: assets/admin/settings/panels/StripeKeysCard.jsx:464
 #: assets/admin/settings/Settings.jsx:96
 #: assets/admin/subscriptions/List.jsx:869
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:43
@@ -9131,7 +9132,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:176
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:108
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:67
-#: assets/admin/settings/panels/StripeKeysCard.jsx:367
+#: assets/admin/settings/panels/StripeKeysCard.jsx:371
 msgid "Test"
 msgstr ""
 
@@ -10320,7 +10321,7 @@ msgstr ""
 
 #: assets/admin/donations/RecordDonationDrawer.jsx:266
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:288
-#: assets/admin/settings/panels/StripeKeysCard.jsx:454
+#: assets/admin/settings/panels/StripeKeysCard.jsx:458
 msgid "Unavailable"
 msgstr ""
 
@@ -10508,7 +10509,7 @@ msgstr ""
 #. translators: 1: donor email or name, 2: what the add-on warned about.
 #. translators: 1: Stripe mode, test or live. 2: verification state.
 #: assets/admin/donors/index.jsx:119
-#: assets/admin/settings/panels/StripeKeysCard.jsx:366
+#: assets/admin/settings/panels/StripeKeysCard.jsx:370
 #, js-format
 msgid "%1$s: %2$s"
 msgstr ""
@@ -12973,7 +12974,7 @@ msgstr ""
 
 #: assets/admin/forms/Editor.jsx:853
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:133
-#: assets/admin/settings/panels/StripeKeysCard.jsx:200
+#: assets/admin/settings/panels/StripeKeysCard.jsx:204
 msgid "Saved"
 msgstr ""
 
@@ -14305,7 +14306,7 @@ msgid "Plain text. Merge tags expand at send time."
 msgstr ""
 
 #: assets/admin/settings/panels/GatewaysPanel.jsx:82
-#: assets/admin/settings/panels/StripeKeysCard.jsx:131
+#: assets/admin/settings/panels/StripeKeysCard.jsx:135
 msgid "Disabled"
 msgstr ""
 
@@ -14338,7 +14339,7 @@ msgid "Donor sees your bank details and pays offline"
 msgstr ""
 
 #: assets/admin/settings/panels/GatewaysPanel.jsx:121
-msgid "Enable offline donations"
+msgid "Enable check or bank transfer"
 msgstr ""
 
 #: assets/admin/settings/panels/GatewaysPanel.jsx:122
@@ -14573,7 +14574,7 @@ msgid "Could not remove the webhook id."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:134
-#: assets/admin/settings/panels/StripeKeysCard.jsx:201
+#: assets/admin/settings/panels/StripeKeysCard.jsx:205
 msgid "Not set"
 msgstr ""
 
@@ -14631,7 +14632,7 @@ msgid "From the webhook you created in the PayPal dashboard. Without it PayPal c
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:219
-#: assets/admin/settings/panels/StripeKeysCard.jsx:234
+#: assets/admin/settings/panels/StripeKeysCard.jsx:238
 msgid "Save and verify"
 msgstr ""
 
@@ -14656,7 +14657,7 @@ msgid "PayPal, Venmo, Pay Later and cards"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:280
-#: assets/admin/settings/panels/StripeKeysCard.jsx:444
+#: assets/admin/settings/panels/StripeKeysCard.jsx:448
 msgid "Checking…"
 msgstr ""
 
@@ -14669,18 +14670,18 @@ msgid "Could not check your PayPal setup."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:291
-#: assets/admin/settings/panels/StripeKeysCard.jsx:457
+#: assets/admin/settings/panels/StripeKeysCard.jsx:461
 msgid "Something went wrong loading the status. Please try again."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:309
-#: assets/admin/settings/panels/StripeKeysCard.jsx:467
+#: assets/admin/settings/panels/StripeKeysCard.jsx:471
 msgid "Ready"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:310
-#: assets/admin/settings/panels/StripeKeysCard.jsx:312
-#: assets/admin/settings/panels/StripeKeysCard.jsx:466
+#: assets/admin/settings/panels/StripeKeysCard.jsx:316
+#: assets/admin/settings/panels/StripeKeysCard.jsx:470
 msgid "Not set up"
 msgstr ""
 
@@ -14705,7 +14706,7 @@ msgid "Available once your credentials are saved."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:335
-#: assets/admin/settings/panels/StripeKeysCard.jsx:506
+#: assets/admin/settings/panels/StripeKeysCard.jsx:510
 msgid "You are all set."
 msgstr ""
 
@@ -14718,7 +14719,7 @@ msgid "Add this URL as a webhook in your PayPal app, subscribe it to the payment
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:349
-#: assets/admin/settings/panels/StripeKeysCard.jsx:83
+#: assets/admin/settings/panels/StripeKeysCard.jsx:87
 msgid "Webhook endpoint"
 msgstr ""
 
@@ -15109,11 +15110,11 @@ msgid "Fix"
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:34
-msgid "To take card donations you need a Stripe account. Opening one is free; Stripe charges a fee on each donation."
+msgid "To take card donations through Stripe you need a Stripe account. Opening one is free; Stripe charges a fee on each donation."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:39
-msgid "No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization's details and a bank account before it pays out. Allow about 20 minutes."
+msgid "No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization's details and a bank account before it takes real payments."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:45
@@ -15132,220 +15133,220 @@ msgstr ""
 msgid "Set up checks and bank transfers"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:76
+#: assets/admin/settings/panels/StripeKeysCard.jsx:80
 msgid "Webhook settings (only needed if Stripe cannot reach your site)"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:81
+#: assets/admin/settings/panels/StripeKeysCard.jsx:85
 msgid "Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:90
+#: assets/admin/settings/panels/StripeKeysCard.jsx:94
 msgid "Webhook signing secret (test)"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:91
+#: assets/admin/settings/panels/StripeKeysCard.jsx:95
 msgid "From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:101
+#: assets/admin/settings/panels/StripeKeysCard.jsx:105
 msgid "Webhook signing secret (live)"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:102
+#: assets/admin/settings/panels/StripeKeysCard.jsx:106
 msgid "From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:130
+#: assets/admin/settings/panels/StripeKeysCard.jsx:134
 msgid "Enabled"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:135
+#: assets/admin/settings/panels/StripeKeysCard.jsx:139
 msgid "Account"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:139
+#: assets/admin/settings/panels/StripeKeysCard.jsx:143
 msgid "Charges"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:143
+#: assets/admin/settings/panels/StripeKeysCard.jsx:147
 msgid "Payouts"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:148
+#: assets/admin/settings/panels/StripeKeysCard.jsx:152
 msgid "Remove keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:165
+#: assets/admin/settings/panels/StripeKeysCard.jsx:169
 msgid "Test keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:165
+#: assets/admin/settings/panels/StripeKeysCard.jsx:169
 msgid "Live keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:166
+#: assets/admin/settings/panels/StripeKeysCard.jsx:170
 msgid "Test keys (optional)"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:171
+#: assets/admin/settings/panels/StripeKeysCard.jsx:175
 msgid "Enter both the publishable key and the secret key."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:186
+#: assets/admin/settings/panels/StripeKeysCard.jsx:190
 msgid "Test keys verified and saved."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:187
+#: assets/admin/settings/panels/StripeKeysCard.jsx:191
 msgid "Live keys verified and saved."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:191
+#: assets/admin/settings/panels/StripeKeysCard.jsx:195
 msgid "Could not verify those keys."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:221
+#: assets/admin/settings/panels/StripeKeysCard.jsx:225
 msgid "Publishable key"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:222
+#: assets/admin/settings/panels/StripeKeysCard.jsx:226
 msgid "Safe to expose. Used in the browser to show the payment fields."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:227
+#: assets/admin/settings/panels/StripeKeysCard.jsx:231
 msgid "Secret key"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:228
+#: assets/admin/settings/panels/StripeKeysCard.jsx:232
 msgid "Stored encrypted and never shown again. Gratora verifies it with Stripe before saving."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:269
+#: assets/admin/settings/panels/StripeKeysCard.jsx:273
 msgid "Paste the domain association file from Stripe first."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:273
+#: assets/admin/settings/panels/StripeKeysCard.jsx:277
 msgid "Save your Stripe keys first."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:293
+#: assets/admin/settings/panels/StripeKeysCard.jsx:297
 msgid "Stripe could not verify this domain yet. Check the file is reachable, then try again."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:298
+#: assets/admin/settings/panels/StripeKeysCard.jsx:302
 msgid "Apple Pay is verified for this domain."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:307
+#: assets/admin/settings/panels/StripeKeysCard.jsx:311
 msgid "verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:308
+#: assets/admin/settings/panels/StripeKeysCard.jsx:312
 msgid "not verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:309
+#: assets/admin/settings/panels/StripeKeysCard.jsx:313
 msgid "not checked yet"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:313
+#: assets/admin/settings/panels/StripeKeysCard.jsx:317
 msgid "Verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:314
+#: assets/admin/settings/panels/StripeKeysCard.jsx:318
 #: assets/admin/tools/tabs/LogsTab.jsx:41
 msgid "Not verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:322
+#: assets/admin/settings/panels/StripeKeysCard.jsx:326
 msgid "Apple Pay"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:327
+#: assets/admin/settings/panels/StripeKeysCard.jsx:331
 msgid "Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:330
+#: assets/admin/settings/panels/StripeKeysCard.jsx:334
 msgid "Domain"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:338
+#: assets/admin/settings/panels/StripeKeysCard.jsx:342
 msgid "Domain association file"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:339
+#: assets/admin/settings/panels/StripeKeysCard.jsx:343
 msgid "In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:352
+#: assets/admin/settings/panels/StripeKeysCard.jsx:356
 msgid "Enable Apple Pay"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:367
+#: assets/admin/settings/panels/StripeKeysCard.jsx:371
 msgid "Live"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:376
+#: assets/admin/settings/panels/StripeKeysCard.jsx:380
 msgid "Replace file"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:411
+#: assets/admin/settings/panels/StripeKeysCard.jsx:415
 msgid "Remove Stripe keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:411
+#: assets/admin/settings/panels/StripeKeysCard.jsx:415
 msgid "Remove these keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:413
+#: assets/admin/settings/panels/StripeKeysCard.jsx:417
 msgid "Remove both key pairs? Card donations will stop until you add keys again."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:414
+#: assets/admin/settings/panels/StripeKeysCard.jsx:418
 msgid "Remove this key pair? Donations in this mode will stop until you add keys again."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:421
+#: assets/admin/settings/panels/StripeKeysCard.jsx:425
 msgid "Could not remove the keys."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:440
+#: assets/admin/settings/panels/StripeKeysCard.jsx:444
 msgid "Cards, SEPA, Apple Pay, Google Pay"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:445
+#: assets/admin/settings/panels/StripeKeysCard.jsx:449
 msgid "Loading Stripe status…"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:456
+#: assets/admin/settings/panels/StripeKeysCard.jsx:460
 msgid "Could not check your Stripe setup."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:468
+#: assets/admin/settings/panels/StripeKeysCard.jsx:472
 msgid "Action needed"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:488
+#: assets/admin/settings/panels/StripeKeysCard.jsx:492
 msgid "Enable the Stripe gateway"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:490
+#: assets/admin/settings/panels/StripeKeysCard.jsx:494
 msgid "Your keys stay on file while it is off."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:491
+#: assets/admin/settings/panels/StripeKeysCard.jsx:495
 msgid "Available once your keys are saved."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:499
+#: assets/admin/settings/panels/StripeKeysCard.jsx:503
 msgid "Your Stripe account cannot take payments yet."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:500
+#: assets/admin/settings/panels/StripeKeysCard.jsx:504
 msgid "Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:507
+#: assets/admin/settings/panels/StripeKeysCard.jsx:511
 msgid "Donations are charged on your Stripe account and paid out to your bank."
 msgstr ""
 
@@ -16636,7 +16637,7 @@ msgid "A one-off welcome sent when a donor gives for the first time, separate fr
 msgstr ""
 
 #: assets/admin/_shared/emailTemplates.js:86
-msgid "Offline donation instructions"
+msgid "Check or bank transfer instructions"
 msgstr ""
 
 #: assets/admin/_shared/emailTemplates.js:87
