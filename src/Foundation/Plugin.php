@@ -11,6 +11,7 @@ use Gratora\Core\Activator;
 use Gratora\Core\CoreModule;
 use Gratora\Donors\DonorRetention;
 use Gratora\Donors\Portal\PortalPage;
+use Gratora\Forms\FeeBoxDefaults;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Commands\CommandRegistry;
 use Gratora\Foundation\Container\Container;
@@ -132,6 +133,9 @@ final class Plugin
         }, 99);
 
         SchemaGuard::registerNotice();
+
+        // After the schema gate, so the forms table is there to read.
+        add_action('wp_loaded', [FeeBoxDefaults::class, 'maybeRun'], 100);
 
         // The bump above is the only thing that queues a drain, so a release
         // adding a routine and no schema change would never run it, and a queue

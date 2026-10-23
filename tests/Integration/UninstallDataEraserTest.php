@@ -7,6 +7,7 @@ namespace Gratora\Tests\Integration;
 use Gratora\Core\Activator;
 use Gratora\Core\CoreModule;
 use Gratora\Dashboard\FirstRun;
+use Gratora\Forms\FeeBoxDefaults;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Uninstall\DataEraser;
@@ -151,6 +152,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
             FirstRun::TEST_DONATION_AT,
             Onboarding::GREET,
             Onboarding::NOTICE,
+            FeeBoxDefaults::DONE,
         ] as $option) {
             $this->assertContains(
                 $option,

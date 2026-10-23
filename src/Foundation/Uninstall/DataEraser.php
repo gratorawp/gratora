@@ -49,6 +49,7 @@ final class DataEraser
         'gratora_currency_locale',
         'gratora_db_version',
         'gratora_delete_data',
+        'gratora_fee_box_defaults_done',
         'gratora_donor_rehash_after_id',
         'gratora_donor_rehash_pending',
         'gratora_email_settings',
