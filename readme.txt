@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,10 +276,11 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.2.3 =
-* New: add-ons can add their own sections to a form's Settings, Embed, below the shortcode.
-* Fixed: the refund email mentions a card and the 5 to 10 day wait only when a payment provider returns the money.
-* Fixed: emails about a donation with no campaign name your organization instead of leaving a gap.
-* Fixed: a form's settings no longer run off the side of a phone screen.
+= 1.2.4 =
+* New: after activating, the Plugins screen points to the setup, and the plugin's row links to the setup or to Settings.
+* New: the Stripe settings show how to open a Stripe account and where to find the keys.
+* New: offline donations are called "Check or bank transfer", with plainer settings and a US bank details example.
+* Changed: new forms leave "cover the fees" unticked and show the amount, e.g. "Add $1.75 to cover card fees".
+* Fixed: no fee is added to check, bank transfer or test-method donations.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).

@@ -110,7 +110,7 @@ final class FirstRun
     /**
      * Also true once that donation has been deleted, binned or refunded.
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public static function testDonationMade(): bool
     {

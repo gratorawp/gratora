@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 1.2.4 =
+* New: after activating, the Plugins screen points to the setup, and the plugin's row links to the setup or to Settings.
+* New: the Stripe settings show how to open a Stripe account and where to find the keys.
+* New: offline donations are called "Check or bank transfer", with plainer settings and a US bank details example.
+* Changed: new forms leave "cover the fees" unticked and show the amount, e.g. "Add $1.75 to cover card fees".
+* Fixed: no fee is added to check, bank transfer or test-method donations.
+
 = 1.2.3 =
 * New: add-ons can add their own sections to a form's Settings, Embed, below the shortcode.
 * Fixed: the refund email mentions a card and the 5 to 10 day wait only when a payment provider returns the money.

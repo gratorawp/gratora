@@ -28,7 +28,7 @@ final class Onboarding extends HookProvider
     /**
      * Set with the greeting, spent when the Plugins screen has shown it once.
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public const NOTICE = 'gratora_onboarding_notice';
 
@@ -43,7 +43,7 @@ final class Onboarding extends HookProvider
         ];
     }
 
-    /** @since unreleased */
+    /** @since 1.2.4 */
     protected function filters(): array
     {
         return ['plugin_action_links_' . plugin_basename(GRATORA_FILE) => 'setUpLink'];
@@ -119,7 +119,7 @@ final class Onboarding extends HookProvider
     /**
      * Called where WordPress switches the plugin on for one site, the first time.
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public static function greetAfterActivation(): void
     {
@@ -132,7 +132,7 @@ final class Onboarding extends HookProvider
     /**
      * On deactivation, so a later activation is not greeted by an earlier one.
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public static function spendGreeting(): void
     {
@@ -143,7 +143,7 @@ final class Onboarding extends HookProvider
     /**
      * A setup finished or skipped, by the setup screen or anything else, is greeted no more.
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public static function statusChanged(mixed $old, mixed $new): void
     {
@@ -153,7 +153,7 @@ final class Onboarding extends HookProvider
     /**
      * Right after Activate, on the Plugins screen, once.
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public function activationNotice(): void
     {
@@ -193,7 +193,7 @@ final class Onboarding extends HookProvider
      * @param  array<string,string> $links
      * @return array<string,string>
      *
-     * @since unreleased
+     * @since 1.2.4
      */
     public function setUpLink(array $links): array
     {
