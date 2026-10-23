@@ -59,6 +59,8 @@ final class DataEraser
         'gratora_gateway_reconcile_cursor',
         'gratora_licensing_status',
         'gratora_onboarding_campaign_id',
+        'gratora_onboarding_greet',
+        'gratora_onboarding_notice',
         'gratora_onboarding_status',
         'gratora_org_brand',
         'gratora_org_profile',

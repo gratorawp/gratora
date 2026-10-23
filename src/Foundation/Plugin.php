@@ -287,6 +287,11 @@ final class Plugin
 
         if ($neverActivated) {
             self::startInTestMode();
+
+            // Each site's own admin decides when to set Gratora up on a network.
+            if (! $networkWide) {
+                Onboarding::greetAfterActivation();
+            }
         }
     }
 

@@ -29,7 +29,7 @@ final class OnboardingRedirectTest extends IntegrationTestCase
         $this->onboarding = new Onboarding();
 
         update_option(Onboarding::OPTION, 'pending', false);
-        set_transient('gratora_onboarding_greet', 1, 300);
+        Onboarding::greetAfterActivation();
 
         $GLOBALS['pagenow'] = 'index.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -40,7 +40,8 @@ final class OnboardingRedirectTest extends IntegrationTestCase
     {
         unset($GLOBALS['pagenow'], $GLOBALS['plugin_page']);
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        delete_transient('gratora_onboarding_greet');
+        delete_option(Onboarding::GREET);
+        delete_option(Onboarding::NOTICE);
 
         parent::tearDown();
     }
@@ -56,7 +57,7 @@ final class OnboardingRedirectTest extends IntegrationTestCase
 
         // What maybeRedirect() does before sending. The send itself is followed
         // by exit, so the greeting being spent is the observable half.
-        delete_transient('gratora_onboarding_greet');
+        delete_option(Onboarding::GREET);
 
         $this->assertFalse(
             $this->onboarding->shouldRedirect(),

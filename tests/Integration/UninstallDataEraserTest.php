@@ -10,6 +10,7 @@ use Gratora\Dashboard\FirstRun;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Foundation\Plugin;
 use Gratora\Foundation\Uninstall\DataEraser;
+use Gratora\Onboarding\Onboarding;
 
 /**
  * Inspect the wipe plan without calling erase(), which would destroy the shared test database.
@@ -148,6 +149,8 @@ final class UninstallDataEraserTest extends IntegrationTestCase
             'gratora_paypal_plans',
             Plugin::OPT_REWRITE_RULES_PENDING,
             FirstRun::TEST_DONATION_AT,
+            Onboarding::GREET,
+            Onboarding::NOTICE,
         ] as $option) {
             $this->assertContains(
                 $option,
