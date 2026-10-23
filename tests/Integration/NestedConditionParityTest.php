@@ -59,6 +59,31 @@ BLOCKS;
         );
     }
 
+    /**
+     * A check donation carries no fee, but the box keeps its tick, and the
+     * form hid the field on that tick.
+     */
+    public function test_a_field_shown_only_without_the_fee_tick_is_not_required_of_a_ticked_check_donation(): void
+    {
+        $form = Form::make();
+        $form->blocks = <<<BLOCKS
+<!-- wp:gratora/donation-amount {"presets":[{"cents":5000}]} /-->
+<!-- wp:gratora/cover-fees {"defaultOn":true} /-->
+<!-- wp:gratora/text-input {"label":"Why not cover the fee?","field":"why_not","required":true,"condition":{"field":"cover_fees","op":"=","value":"false"}} /-->
+<!-- wp:gratora/submit-button /-->
+BLOCKS;
+
+        $this->assertNull(
+            (new FormSubmissionValidator())->validate($form, [
+                'amount_cents'      => 5000,
+                'fee_covered_cents' => 0,
+                'cover_fees'        => true,
+                'gateway'           => 'offline',
+                'frequency'         => 'one_time',
+            ])
+        );
+    }
+
     public function test_the_organization_name_is_still_required_of_an_organization(): void
     {
         $base = ['amount_cents' => 2500, 'frequency' => 'monthly'];

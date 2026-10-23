@@ -4,10 +4,10 @@
  * box ticked.
  */
 
-import { initialState, buildPayload, coveredFeeCents, feeOffered } from '../../assets/donation-form/state/store';
+import { initialState, buildPayload, coveredFeeCents, feeOffered, validateStep } from '../../assets/donation-form/state/store';
 import { coverFeesLabel } from '../../assets/donation-form/util/interpolate';
 
-function state( gateway ) {
+function state( gateway, more = [] ) {
     const s = initialState( {
         slug:     'appeal',
         currency: 'USD',
@@ -17,7 +17,7 @@ function state( gateway ) {
             {
                 id:     'donor',
                 type:   'donor',
-                fields: [ { kind: 'cover_fees', percent: 2.9, fixed: 30, defaultOn: true, label: '' } ],
+                fields: [ { kind: 'cover_fees', percent: 2.9, fixed: 30, defaultOn: true, label: '' }, ...more ],
             },
             { id: 'submit', type: 'submit' },
         ],
@@ -34,7 +34,21 @@ it.each( [ 'offline', 'sandbox' ] )( 'adds no fee to a %s donation', ( gateway )
     const payload = buildPayload( s );
     expect( payload.amount_cents ).toBe( 5000 );
     expect( payload.fee_covered_cents ).toBe( 0 );
-    expect( payload.cover_fees ).toBe( false );
+} );
+
+// The server reads the tick for display conditions, so it has to see what the form saw.
+it( 'sends the tick as the form has it, so a field shown only without it agrees with the server', () => {
+    const field = {
+        kind:      'text',
+        field:     'why_not',
+        label:     'Why not cover the fee?',
+        required:  true,
+        condition: { field: 'cover_fees', op: '=', value: 'false' },
+    };
+    const s = state( 'offline', [ field ] );
+
+    expect( validateStep( s.steps[ 1 ], s ) ).toEqual( {} );
+    expect( buildPayload( s ).cover_fees ).toBe( true );
 } );
 
 it( 'still adds it to a card donation the donor chose to cover', () => {

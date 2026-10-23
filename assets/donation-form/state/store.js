@@ -687,7 +687,7 @@ export function buildPayload( state ) {
         // "Cover fees" is an authorable condition source and the server
         // evaluates conditions against this payload, so the flag must ride
         // along with the computed cents or it has nothing to compare.
-        cover_fees:        sup.fees || ! feeOffered( state ) ? false : !! v.cover_fees,
+        cover_fees:        sup.fees ? false : !! v.cover_fees,
         fund_id:           sup.fund ? undefined : ( ( v.fund_id || '' ).trim() || undefined ),
         consents:          buildConsents( v.consents, sup.consents ),
         frequency:         sup.frequency ? 'one_time' : normalizeFrequency( v.frequency ),
