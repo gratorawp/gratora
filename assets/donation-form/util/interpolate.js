@@ -1,5 +1,6 @@
 // Supported label tokens: {amount} (formatted currency),
-// {frequency} (recurring frequency, empty when not set).
+// {frequency} (recurring frequency, empty when not set), and {fee} in the
+// cover-fees label.
 
 import { formatAmount } from './format';
 import { decodeEntities } from '@gratora/ui/utils/text';
@@ -44,4 +45,8 @@ export function interpolateLabel( label, state, config ) {
         .replace( /\{frequency\}/g, freq )
         .replace( /\s+/g, ' ' )
         .trim();
+}
+
+export function coverFeesLabel( text, fee ) {
+    return text.replace( /\{fee\}/g, fee );
 }

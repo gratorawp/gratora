@@ -5,7 +5,8 @@ import { fieldEntry } from '../state/fields';
 import { formatAmount } from '../util/format';
 import { decodeEntities } from '@gratora/ui/utils/text';
 import { safeUrl } from '../util/url';
-import { computeFees } from '../state/store';
+import { computeFees, feeOffered } from '../state/store';
+import { coverFeesLabel } from '../util/interpolate';
 import ErrorBoundary from '../components/ErrorBoundary';
 import CountrySelect from '../components/CountrySelect';
 
@@ -217,7 +218,10 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             );
 
         case 'cover_fees': {
-            const fee = computeFees( state, v.amount_cents || 0 );
+            if ( ! feeOffered( state ) ) return null;
+            const fee    = computeFees( state, v.amount_cents || 0 );
+            const label  = decodeEntities( f.label || '' ) || config.i18n.coverFees;
+            const amount = formatAmount( fee, state.currency );
             return (
                 <label key={ key } class="gratora-form__check gratora-form__cover-fees">
                     <input
@@ -226,10 +230,10 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         onChange={ onCheck( 'cover_fees' ) }
                     />
                     <span>
-                        { decodeEntities( f.label || '' ) || config.i18n.coverFees }
-                        { fee > 0 && (
+                        { label.includes( '{fee}' ) ? coverFeesLabel( label, amount ) : label }
+                        { fee > 0 && ! label.includes( '{fee}' ) && (
                             <em class="gratora-form__cover-fees-math">
-                                { ` (${ formatAmount( fee, state.currency ) })` }
+                                { ` (${ amount })` }
                             </em>
                         ) }
                     </span>

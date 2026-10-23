@@ -29,10 +29,17 @@ final class CoverFeesBlock implements Block
     /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
+        $label = (string) ($attrs['label'] ?? '');
+
+        // The fee depends on the amount, which only the form's script knows.
+        if ($label === '' || str_contains($label, '{fee}')) {
+            $label = __('I\'d like to help cover the transaction fee', 'gratora-donation-platform');
+        }
+
         return View::loadRelative(__DIR__, 'views/cover-fees', [
             'percent'   => (float) ($attrs['percent'] ?? 2.9),
             'fixed'     => (int)   ($attrs['fixed']   ?? 30),
-            'label'     => (string) ($attrs['label']  ?? '') ?: __('I\'d like to help cover the transaction fee', 'gratora-donation-platform'),
+            'label'     => $label,
             'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
         ]);
     }

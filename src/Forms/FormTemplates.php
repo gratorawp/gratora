@@ -116,10 +116,7 @@ final class FormTemplates
                 ])
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => false])
                 . self::block('gratora/email', ['required' => true])
-                . self::checkout(
-                    __('Send {amount}', 'gratora-donation-platform'),
-                    __("I'll cover the fees so 100% goes to the cause", 'gratora-donation-platform')
-                );
+                . self::checkout(__('Send {amount}', 'gratora-donation-platform'));
 
         return [
             'id'             => 'quick-give',
@@ -171,11 +168,7 @@ final class FormTemplates
                     'label' => __('Hide my name from the donor wall', 'gratora-donation-platform'),
                     'defaultOn' => false,
                 ])
-                . self::block('gratora/cover-fees', [
-                    'percent' => 2.9, 'fixed' => 30,
-                    'label' => __("I'll cover the processing fee so 100% of my donation goes to the mission", 'gratora-donation-platform'),
-                    'defaultOn' => false,
-                ])
+                . self::coverFees()
                 . self::block('gratora/payment-gateways', ['style' => 'cards'])
                 . self::block('gratora/donation-summary')
                 . self::block('gratora/submit-button', ['label' => __('Give {amount}', 'gratora-donation-platform')]);
@@ -204,20 +197,21 @@ final class FormTemplates
      *
      * @since 1.0.0
      */
-    private static function coverFees(string $label): string
+    private static function coverFees(): string
     {
         return self::block('gratora/cover-fees', [
             'percent'   => 2.9,
             'fixed'     => 30,
-            'label'     => $label,
-            'defaultOn' => true,
+            /* translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written. */
+            'label'     => __('Add {fee} to cover card fees', 'gratora-donation-platform'),
+            'defaultOn' => false,
         ]);
     }
 
     /** @since 1.0.0 */
-    private static function checkout(string $submitLabel, string $feeLabel): string
+    private static function checkout(string $submitLabel): string
     {
-        return self::coverFees($feeLabel)
+        return self::coverFees()
             . self::block('gratora/payment-gateways', ['style' => 'cards'])
             . self::block('gratora/donation-summary')
             . self::block('gratora/submit-button', ['label' => $submitLabel]);
@@ -240,10 +234,7 @@ final class FormTemplates
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
                 . self::block('gratora/country', ['required' => false])
-                . self::checkout(
-                    __('Donate {amount}', 'gratora-donation-platform'),
-                    __('Cover the processing fee so the full amount reaches us', 'gratora-donation-platform')
-                );
+                . self::checkout(__('Donate {amount}', 'gratora-donation-platform'));
 
         return [
             'id'             => 'everyday',
@@ -286,10 +277,7 @@ final class FormTemplates
         $confirm = self::block(
             'gratora/step',
             ['title' => __('Confirm', 'gratora-donation-platform')],
-            self::checkout(
-                __('Donate {amount}', 'gratora-donation-platform'),
-                __('Cover the processing fee so the full amount reaches us', 'gratora-donation-platform')
-            )
+            self::checkout(__('Donate {amount}', 'gratora-donation-platform'))
         );
 
         return [
@@ -330,7 +318,7 @@ final class FormTemplates
                 ])
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
-                . self::coverFees(__('Cover the processing fee on each payment', 'gratora-donation-platform'))
+                . self::coverFees()
                 . self::block('gratora/payment-gateways', ['style' => 'cards'])
                 . self::block('gratora/donation-summary')
                 // Next to the button, not on a screen already passed: this is the
@@ -371,10 +359,7 @@ final class FormTemplates
                 // either, because every extra field costs donations while it matters.
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
-                . self::checkout(
-                    __('Give now', 'gratora-donation-platform'),
-                    __('Cover the processing fee so the full amount reaches the response', 'gratora-donation-platform')
-                );
+                . self::checkout(__('Give now', 'gratora-donation-platform'));
 
         return [
             'id'             => 'emergency-appeal',
@@ -415,10 +400,7 @@ final class FormTemplates
                 . self::block('gratora/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('gratora/email', ['required' => true])
                 . self::block('gratora/country', ['required' => false])
-                . self::checkout(
-                    __('Donate {amount}', 'gratora-donation-platform'),
-                    __('Cover the processing fee so the full amount reaches this fund', 'gratora-donation-platform')
-                );
+                . self::checkout(__('Donate {amount}', 'gratora-donation-platform'));
 
         return [
             'id'             => 'designated',
@@ -453,10 +435,7 @@ final class FormTemplates
                     'label'     => __('Hide my name from the supporter wall', 'gratora-donation-platform'),
                     'defaultOn' => false,
                 ])
-                . self::checkout(
-                    __('Donate {amount}', 'gratora-donation-platform'),
-                    __('Cover the processing fee so 100% reaches the campaign', 'gratora-donation-platform')
-                );
+                . self::checkout(__('Donate {amount}', 'gratora-donation-platform'));
 
         return [
             'id'             => 'campaign-page',

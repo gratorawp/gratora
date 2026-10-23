@@ -62,6 +62,12 @@ function Edit( { attributes, setAttributes } ) {
                         help={ __( 'Best practice: leave off so donors opt in.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
+                    <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
+                        {
+                            /* translators: Keep {fee} as written: it is replaced by the fee amount on the form. */
+                            __( 'Use {fee} in the label to insert the fee at runtime, e.g. "Add {fee} to cover card fees".', 'gratora-donation-platform' )
+                        }
+                    </p>
                 </PanelBody>
                 <ConditionPanel
                     condition={ condition }
