@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T10:28:22+00:00\n"
+"POT-Creation-Date: 2026-10-23T11:09:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -41,7 +41,7 @@ msgid "Clear color"
 msgstr ""
 
 #: components/CountrySelect.js:30
-#: src/Forms/Shortcode/DonationFormShortcode.php:849
+#: src/Forms/Shortcode/DonationFormShortcode.php:850
 #: assets/admin/donors/DonorProfile.jsx:174
 #: assets/admin/forms/blocks/country/index.js:32
 #: assets/admin/forms/blocks/country/index.js:53
@@ -118,7 +118,7 @@ msgstr ""
 #: components/Drawer.js:56
 #: dataforms-layouts/panel/index.js:31
 #: src/Campaigns/Blocks/views/donate-button.php:49
-#: src/Forms/Shortcode/DonationFormShortcode.php:841
+#: src/Forms/Shortcode/DonationFormShortcode.php:842
 #: assets/admin/campaigns/Detail.jsx:1566
 #: assets/admin/campaigns/List.jsx:476
 #: assets/admin/subscriptions/PlanDetailDialog.jsx:51
@@ -1764,8 +1764,8 @@ msgstr ""
 #: src/Campaigns/Blocks/DonateButtonBlock.php:87
 #: src/Forms/Blocks/SubmitButtonBlock.php:36
 #: src/Forms/Shortcode/DonationFormShortcode.php:788
-#: src/Forms/Shortcode/DonationFormShortcode.php:1402
-#: src/Forms/Shortcode/DonationFormShortcode.php:1559
+#: src/Forms/Shortcode/DonationFormShortcode.php:1403
+#: src/Forms/Shortcode/DonationFormShortcode.php:1560
 #: assets/admin/campaign-blocks/index.jsx:496
 #: assets/admin/forms/blocks/submit-button/index.js:56
 msgid "Donate now"
@@ -2625,7 +2625,7 @@ msgstr ""
 
 #. translators: %s: minimum donation amount formatted
 #: src/Donations/AntiSpamGuard.php:655
-#: src/Forms/Shortcode/DonationFormShortcode.php:861
+#: src/Forms/Shortcode/DonationFormShortcode.php:862
 #, php-format
 msgid "Minimum donation is %s."
 msgstr ""
@@ -3306,14 +3306,14 @@ msgstr ""
 
 #: src/Forms/Blocks/CommentBlock.php:32
 #: src/Forms/Shortcode/DonationFormShortcode.php:824
-#: src/Forms/Shortcode/DonationFormShortcode.php:1191
+#: src/Forms/Shortcode/DonationFormShortcode.php:1192
 #: assets/admin/forms/blocks/comment/index.js:19
 #: assets/admin/forms/blocks/comment/index.js:31
 msgid "Add a message"
 msgstr ""
 
 #: src/Forms/Blocks/CommentBlock.php:33
-#: src/Forms/Shortcode/DonationFormShortcode.php:1192
+#: src/Forms/Shortcode/DonationFormShortcode.php:1193
 #: assets/admin/forms/blocks/comment/index.js:20
 #: assets/admin/forms/blocks/comment/index.js:38
 msgid "Anything you want to share?"
@@ -3324,9 +3324,6 @@ msgid "Pick which consent purposes this form asks for, or add one in Settings, C
 msgstr ""
 
 #: src/Forms/Blocks/CoverFeesBlock.php:36
-#: src/Forms/Shortcode/DonationFormShortcode.php:838
-#: assets/admin/forms/blocks/cover-fees/index.js:35
-#: assets/admin/forms/blocks/cover-fees/index.js:92
 msgid "I'd like to help cover the transaction fee"
 msgstr ""
 
@@ -3414,7 +3411,7 @@ msgid "How can we stay in touch?"
 msgstr ""
 
 #: src/Forms/Blocks/views/consent.php:36
-#: src/Forms/Shortcode/DonationFormShortcode.php:842
+#: src/Forms/Shortcode/DonationFormShortcode.php:843
 #: assets/admin/forms/blocks/checkbox/index.js:53
 #: assets/admin/forms/blocks/comment/index.js:43
 #: assets/admin/forms/blocks/country/index.js:36
@@ -3506,14 +3503,14 @@ msgid "Make this recurring"
 msgstr ""
 
 #: src/Forms/Blocks/views/terms.php:10
-#: src/Forms/Shortcode/DonationFormShortcode.php:854
+#: src/Forms/Shortcode/DonationFormShortcode.php:855
 #: assets/admin/forms/blocks/terms/index.js:20
 #: assets/admin/forms/blocks/terms/index.js:30
 msgid "I agree to the terms"
 msgstr ""
 
 #: src/Forms/Blocks/views/terms.php:11
-#: src/Forms/Shortcode/DonationFormShortcode.php:855
+#: src/Forms/Shortcode/DonationFormShortcode.php:856
 #: assets/admin/forms/blocks/terms/index.js:53
 #: assets/admin/forms/blocks/terms/index.js:78
 msgid "Read the terms"
@@ -3625,7 +3622,7 @@ msgstr ""
 
 #: src/Forms/FormReadinessService.php:340
 #: src/Forms/FormReadinessService.php:356
-#: src/Forms/Shortcode/DonationFormShortcode.php:1858
+#: src/Forms/Shortcode/DonationFormShortcode.php:1859
 msgid "Open this form"
 msgstr ""
 
@@ -4007,7 +4004,11 @@ msgstr ""
 
 #. translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written.
 #: src/Forms/FormTemplates.php:206
-msgid "Add {fee} to cover card fees"
+#: src/Forms/Shortcode/DonationFormShortcode.php:839
+#: src/Forms/Shortcode/DonationFormShortcode.php:1211
+#: assets/admin/forms/blocks/cover-fees/index.js:36
+#: assets/admin/forms/blocks/cover-fees/index.js:93
+msgid "Add {fee} to cover processing fees"
 msgstr ""
 
 #: src/Forms/FormTemplates.php:223
@@ -4321,7 +4322,7 @@ msgid "Show my message publicly on the supporter wall"
 msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:826
-#: src/Forms/Shortcode/DonationFormShortcode.php:1202
+#: src/Forms/Shortcode/DonationFormShortcode.php:1203
 #: assets/admin/forms/blocks/anonymous-toggle/index.js:11
 #: assets/admin/forms/blocks/anonymous-toggle/index.js:50
 msgid "Make this donation anonymous"
@@ -4331,25 +4332,25 @@ msgstr ""
 msgid "Provides"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:839
+#: src/Forms/Shortcode/DonationFormShortcode.php:840
 msgid "Total with fees:"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:840
+#: src/Forms/Shortcode/DonationFormShortcode.php:841
 #: assets/admin/campaign-blocks/index.jsx:975
 #: assets/admin/campaign-blocks/index.jsx:997
 #: assets/admin/_shared/entities.js:25
 msgid "Donation form"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:843
+#: src/Forms/Shortcode/DonationFormShortcode.php:844
 #: assets/admin/dashboard/widgets/RecentActivity.jsx:33
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:138
 #: assets/admin/forms/blocks/recurring-toggle/index.js:12
 msgid "One-time"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:844
+#: src/Forms/Shortcode/DonationFormShortcode.php:845
 #: src/Receipts/resources/views/generic.php:47
 #: assets/admin/donations/fields.jsx:31
 #: assets/admin/donations/fields.jsx:47
@@ -4358,7 +4359,7 @@ msgstr ""
 msgid "Weekly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:845
+#: src/Forms/Shortcode/DonationFormShortcode.php:846
 #: src/Receipts/resources/views/generic.php:48
 #: assets/admin/donations/fields.jsx:32
 #: assets/admin/donations/fields.jsx:48
@@ -4369,7 +4370,7 @@ msgstr ""
 msgid "Every 2 weeks"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:846
+#: src/Forms/Shortcode/DonationFormShortcode.php:847
 #: src/Receipts/resources/views/generic.php:49
 #: assets/admin/donations/fields.jsx:33
 #: assets/admin/donations/fields.jsx:45
@@ -4378,7 +4379,7 @@ msgstr ""
 msgid "Monthly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:847
+#: src/Forms/Shortcode/DonationFormShortcode.php:848
 #: src/Receipts/resources/views/generic.php:50
 #: assets/admin/donations/fields.jsx:34
 #: assets/admin/donations/fields.jsx:49
@@ -4387,7 +4388,7 @@ msgstr ""
 msgid "Quarterly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:848
+#: src/Forms/Shortcode/DonationFormShortcode.php:849
 #: src/Receipts/resources/views/generic.php:51
 #: assets/admin/donations/fields.jsx:35
 #: assets/admin/donations/fields.jsx:46
@@ -4396,126 +4397,122 @@ msgstr ""
 msgid "Yearly"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:850
+#: src/Forms/Shortcode/DonationFormShortcode.php:851
 msgid "This donation form is being shown inside another website."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:851
+#: src/Forms/Shortcode/DonationFormShortcode.php:852
 msgid "Open the donation page"
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:857
+#: src/Forms/Shortcode/DonationFormShortcode.php:858
 msgid "Required."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:858
+#: src/Forms/Shortcode/DonationFormShortcode.php:859
 msgid "Please agree to continue."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:859
+#: src/Forms/Shortcode/DonationFormShortcode.php:860
 msgid "Pick or enter an amount."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:862
+#: src/Forms/Shortcode/DonationFormShortcode.php:863
 msgid "Enter a valid email."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:863
+#: src/Forms/Shortcode/DonationFormShortcode.php:864
 msgid "Enter a name."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:864
+#: src/Forms/Shortcode/DonationFormShortcode.php:865
 msgid "Enter a number."
 msgstr ""
 
 #. translators: %s: minimum value
-#: src/Forms/Shortcode/DonationFormShortcode.php:866
+#: src/Forms/Shortcode/DonationFormShortcode.php:867
 #, php-format
 msgid "Must be at least %s."
 msgstr ""
 
 #. translators: %s: maximum value
-#: src/Forms/Shortcode/DonationFormShortcode.php:868
+#: src/Forms/Shortcode/DonationFormShortcode.php:869
 #, php-format
 msgid "Must be at most %s."
 msgstr ""
 
 #. translators: %s: earliest allowed date
-#: src/Forms/Shortcode/DonationFormShortcode.php:870
+#: src/Forms/Shortcode/DonationFormShortcode.php:871
 #, php-format
 msgid "On or after %s."
 msgstr ""
 
 #. translators: %s: latest allowed date
-#: src/Forms/Shortcode/DonationFormShortcode.php:872
+#: src/Forms/Shortcode/DonationFormShortcode.php:873
 #, php-format
 msgid "On or before %s."
 msgstr ""
 
 #. translators: %s: maximum length
-#: src/Forms/Shortcode/DonationFormShortcode.php:874
+#: src/Forms/Shortcode/DonationFormShortcode.php:875
 #, php-format
 msgid "Too long (max %s)."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:875
+#: src/Forms/Shortcode/DonationFormShortcode.php:876
 msgid "Invalid format."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:876
+#: src/Forms/Shortcode/DonationFormShortcode.php:877
 msgid "Pick at least one."
 msgstr ""
 
 #. translators: %s: minimum number of selections
-#: src/Forms/Shortcode/DonationFormShortcode.php:878
+#: src/Forms/Shortcode/DonationFormShortcode.php:879
 #, php-format
 msgid "Pick at least %s."
 msgstr ""
 
 #. translators: %s: maximum number of selections
-#: src/Forms/Shortcode/DonationFormShortcode.php:880
+#: src/Forms/Shortcode/DonationFormShortcode.php:881
 #, php-format
 msgid "Pick no more than %s."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1210
-msgid "Cover the processing fee so 100% of my donation reaches you"
-msgstr ""
-
-#: src/Forms/Shortcode/DonationFormShortcode.php:1718
+#: src/Forms/Shortcode/DonationFormShortcode.php:1719
 msgid "This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1728
+#: src/Forms/Shortcode/DonationFormShortcode.php:1729
 msgid "The end date on this campaign has passed. Change the schedule to reopen it."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1729
+#: src/Forms/Shortcode/DonationFormShortcode.php:1730
 msgid "This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1730
+#: src/Forms/Shortcode/DonationFormShortcode.php:1731
 msgid "It opens on its start date. Only you can see this note."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1753
+#: src/Forms/Shortcode/DonationFormShortcode.php:1754
 msgid "This campaign has finished accepting donations. Thank you to everyone who gave."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1754
+#: src/Forms/Shortcode/DonationFormShortcode.php:1755
 msgid "This campaign has reached its goal. Thank you to everyone who gave."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1755
+#: src/Forms/Shortcode/DonationFormShortcode.php:1756
 msgid "This campaign is not open for donations yet. Please check back soon."
 msgstr ""
 
-#: src/Forms/Shortcode/DonationFormShortcode.php:1855
+#: src/Forms/Shortcode/DonationFormShortcode.php:1856
 msgid "This form has no payment method to offer"
 msgstr ""
 
 #. translators: %s: why the form cannot take a donation, in one or two sentences.
-#: src/Forms/Shortcode/DonationFormShortcode.php:1870
+#: src/Forms/Shortcode/DonationFormShortcode.php:1871
 #, php-format
 msgid "Only you can see this. %s"
 msgstr ""
@@ -11780,41 +11777,41 @@ msgstr ""
 msgid "Asks the donor to opt in to purposes your organization has defined in Settings."
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:45
-#: assets/admin/forms/blocks/cover-fees/index.js:104
+#: assets/admin/forms/blocks/cover-fees/index.js:46
+#: assets/admin/forms/blocks/cover-fees/index.js:105
 msgid "Cover the fees"
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:47
+#: assets/admin/forms/blocks/cover-fees/index.js:48
 msgid "Percent fee"
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:48
+#: assets/admin/forms/blocks/cover-fees/index.js:49
 msgid "e.g. 2.9 for Stripe"
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:53
+#: assets/admin/forms/blocks/cover-fees/index.js:54
 msgid "Fixed fee"
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:54
+#: assets/admin/forms/blocks/cover-fees/index.js:55
 msgid "e.g. 0.30 for Stripe"
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:59
+#: assets/admin/forms/blocks/cover-fees/index.js:60
 msgid "Default checked"
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:62
+#: assets/admin/forms/blocks/cover-fees/index.js:63
 msgid "Best practice: leave off so donors opt in."
 msgstr ""
 
 #. translators: Keep {fee} as written: it is replaced by the fee amount on the form.
-#: assets/admin/forms/blocks/cover-fees/index.js:68
-msgid "Use {fee} in the label to insert the fee at runtime, e.g. \"Add {fee} to cover card fees\"."
+#: assets/admin/forms/blocks/cover-fees/index.js:69
+msgid "Use {fee} in the label to insert the fee at runtime, e.g. \"Add {fee} to cover processing fees\"."
 msgstr ""
 
-#: assets/admin/forms/blocks/cover-fees/index.js:105
+#: assets/admin/forms/blocks/cover-fees/index.js:106
 msgid "Lets the donor opt to cover the payment processing fee."
 msgstr ""
 

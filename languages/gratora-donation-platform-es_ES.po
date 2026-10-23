@@ -3978,8 +3978,12 @@ msgstr "Gracias. Tu donación ya está en marcha. Esto es lo que ocurrirá a con
 
 #. translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written.
 #: src/Forms/FormTemplates.php:206
-msgid "Add {fee} to cover card fees"
-msgstr "Añadir {fee} para cubrir las comisiones de la tarjeta"
+#: src/Forms/Shortcode/DonationFormShortcode.php:839
+#: src/Forms/Shortcode/DonationFormShortcode.php:1211
+#: assets/admin/forms/blocks/cover-fees/index.js:36
+#: assets/admin/forms/blocks/cover-fees/index.js:93
+msgid "Add {fee} to cover processing fees"
+msgstr "Añadir {fee} para cubrir las comisiones de procesamiento"
 
 #: src/Forms/FormTemplates.php:229
 msgid "Make a donation"
@@ -4448,10 +4452,6 @@ msgstr "Elige al menos %s."
 #, php-format
 msgid "Pick no more than %s."
 msgstr "Elige como máximo %s."
-
-#: src/Forms/Shortcode/DonationFormShortcode.php:1206
-msgid "Cover the processing fee so 100% of my donation reaches you"
-msgstr "Cubrir la comisión de procesamiento para que la organización reciba el 100% de mi donación"
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:1714
 msgid "This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it."
@@ -11454,9 +11454,9 @@ msgid "Best practice: leave off so donors opt in."
 msgstr "Buena práctica: déjalo desactivado para que sean los donantes quienes marquen la casilla."
 
 #. translators: Keep {fee} as written: it is replaced by the fee amount on the form.
-#: assets/admin/forms/blocks/cover-fees/index.js:68
-msgid "Use {fee} in the label to insert the fee at runtime, e.g. \"Add {fee} to cover card fees\"."
-msgstr "Usa {fee} en la etiqueta para insertar la comisión en tiempo real, p. ej., «Añadir {fee} para cubrir las comisiones de la tarjeta»."
+#: assets/admin/forms/blocks/cover-fees/index.js:69
+msgid "Use {fee} in the label to insert the fee at runtime, e.g. \"Add {fee} to cover processing fees\"."
+msgstr "Usa {fee} en la etiqueta para insertar la comisión en tiempo real, p. ej., «Añadir {fee} para cubrir las comisiones de procesamiento»."
 
 #: assets/admin/forms/blocks/cover-fees/index.js:99
 msgid "Lets the donor opt to cover the payment processing fee."
