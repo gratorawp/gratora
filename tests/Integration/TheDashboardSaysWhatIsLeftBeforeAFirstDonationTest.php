@@ -253,7 +253,7 @@ final class TheDashboardSaysWhatIsLeftBeforeAFirstDonationTest extends Integrati
         $card = $this->card();
 
         $this->assertTrue($card['payments']);
-        $this->assertSame(['Offline donations'], $card['payment_methods']);
+        $this->assertSame(['Check or bank transfer'], $card['payment_methods']);
     }
 
     /** @return array<string, array{0: array<string,mixed>, 1: ?string}> */

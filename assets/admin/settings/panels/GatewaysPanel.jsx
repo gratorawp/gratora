@@ -1,5 +1,5 @@
-import { useRef } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useEffect, useRef, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 import { useExtensionPanels, ExtensionSection } from '../../_shared/extensionTabs';
 import Card from '../../_shared/components/Card';
@@ -9,12 +9,14 @@ import useCardOpen from '../../_shared/useCardOpen';
 import { ToggleRow } from '../../_shared/components/Switch';
 import StripeKeysCard from './StripeKeysCard';
 import PayPalKeysCard from './PayPalKeysCard';
+import { bankDetailsSample } from './bankDetailsSample';
 
 /** Placeholders the offline bank-details template expands at render time. */
 const BANK_PLACEHOLDERS = [ '{amount}', '{reference}', '{donor_name}' ];
 
-export default function GatewaysPanel( { s } ) {
-    const bankRef = useRef( null );
+export default function GatewaysPanel( { s, org } ) {
+    const bankRef         = useRef( null );
+    const instructionsRef = useRef( null );
 
     // At the caret, matching the email templates: a placeholder belongs where
     // the line needs it, and these sit inside a formatted block where appending
@@ -55,11 +57,32 @@ export default function GatewaysPanel( { s } ) {
 
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
+    const [ showOffline, setShowOffline ] = useState(
+        () => ( window.location.hash || '' ).replace( /^#/, '' ) === 'gateways/offline'
+    );
+
+    useEffect( () => {
+        if ( ! showOffline ) return;
+        if ( ! offlineOpen ) {
+            setOfflineOpen( true );
+            return;
+        }
+        const box = instructionsRef.current;
+        if ( box ) {
+            box.scrollIntoView( { block: 'center' } );
+            box.focus( { preventScroll: true } );
+        }
+        setShowOffline( false );
+    }, [ showOffline, offlineOpen, setOfflineOpen ] );
+
+    const country = org ? String( org.value( 'country', '' ) ) : '';
+    const orgName = org ? String( org.value( 'name', '' ) ).trim() : '';
+
     const offlinePill = ! offlineEnabled
         ? <span className="gratora-pill gratora-pill--gray"><span className="gratora-pill__dot gratora-pill__dot--soft" />{ __( 'Disabled', 'gratora-donation-platform' ) }</span>
         : offlineConfigured
             ? <span className="gratora-pill gratora-pill--green"><span className="gratora-pill__dot" />{ __( 'Configured', 'gratora-donation-platform' ) }</span>
-            : <span className="gratora-pill gratora-pill--amber"><span className="gratora-pill__dot" />{ __( 'Enabled, no way to pay', 'gratora-donation-platform' ) }</span>;
+            : <span className="gratora-pill gratora-pill--amber"><span className="gratora-pill__dot" />{ __( 'Add how donors should pay', 'gratora-donation-platform' ) }</span>;
 
     return (
         <div className="gratora-panel">
@@ -76,7 +99,7 @@ export default function GatewaysPanel( { s } ) {
                 />
             </Card>
 
-            <StripeKeysCard s={ s } />
+            <StripeKeysCard s={ s } onOffline={ offlineConfigured ? null : () => setShowOffline( true ) } />
             <PayPalKeysCard s={ s } />
 
             { gatewayPanels.map( ( panel ) => (
@@ -86,7 +109,7 @@ export default function GatewaysPanel( { s } ) {
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
-                title={ __( 'Offline donations', 'gratora-donation-platform' ) }
+                title={ __( 'Check or bank transfer', 'gratora-donation-platform' ) }
                 sub={ __( 'Donor sees your bank details and pays offline', 'gratora-donation-platform' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
@@ -102,14 +125,19 @@ export default function GatewaysPanel( { s } ) {
                 />
 
                 <FormRow
-                    label={ __( 'Instructions', 'gratora-donation-platform' ) }
-                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'gratora-donation-platform' ) }
+                    label={ __( 'How should donors pay you?', 'gratora-donation-platform' ) }
+                    help={ sprintf(
+                        /* translators: %s: the organization's name. */
+                        __( 'For example: make checks payable to %s and mail them to… Donors who choose this get it by email with their donation reference.', 'gratora-donation-platform' ),
+                        orgName || __( 'your organization', 'gratora-donation-platform' )
+                    ) }
                     wide
                 >
                     <textarea
+                        ref={ instructionsRef }
                         className="gratora-textarea"
                         rows={ 4 }
-                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'gratora-donation-platform' ) }
+                        aria-label={ __( 'How should donors pay you?', 'gratora-donation-platform' ) }
                         { ...s.bind( 'offline.instructions' ) }
                     />
                 </FormRow>
@@ -135,15 +163,7 @@ export default function GatewaysPanel( { s } ) {
                         ref={ bankRef }
                         className="gratora-textarea gratora-textarea--mono"
                         rows={ 5 }
-                        placeholder={ [
-                            __( 'Account holder: …', 'gratora-donation-platform' ),
-                            __( 'IBAN: …', 'gratora-donation-platform' ),
-                            __( 'BIC: …', 'gratora-donation-platform' ),
-                            /* translators: sample bank transfer line. Keep {reference} exactly as written: it is expanded when the donor is shown their transfer details. */
-                            __( 'Reference: {reference}', 'gratora-donation-platform' ),
-                            /* translators: sample bank transfer line. Keep {amount} exactly as written: it is expanded when the donor is shown their transfer details. */
-                            __( 'Amount: {amount}', 'gratora-donation-platform' ),
-                        ].join( '\n' ) }
+                        placeholder={ bankDetailsSample( country ) }
                         { ...s.bind( 'offline.bank_details' ) }
                     />
                 </FormRow>

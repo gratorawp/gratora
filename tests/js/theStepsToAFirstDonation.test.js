@@ -10,6 +10,7 @@ import { firstRunSteps, primaryStep } from '../../assets/admin/dashboard/firstRu
 const HREFS = {
     campaigns: '/wp-admin/admin.php?page=gratora-campaigns',
     payments:  '/wp-admin/admin.php?page=gratora-settings#gateways',
+    offline:   '/wp-admin/admin.php?page=gratora-settings#gateways/offline',
 };
 
 const PAGE = 'https://example.org/support-riverside-food-bank/';
@@ -163,6 +164,7 @@ describe( 'payments', () => {
             done:   false,
             text:   'Add your live Stripe or PayPal keys to take cards, or write bank details to take transfers.',
             action: { kind: 'link', label: 'Connect payments', href: HREFS.payments },
+            second: { kind: 'link', label: 'No Stripe yet? Take checks and transfers', href: HREFS.offline },
         } );
     } );
 
@@ -174,6 +176,7 @@ describe( 'payments', () => {
             text:   'Ready: Stripe, Offline donations',
             action: null,
         } );
+        expect( step( given, 'payments' ).second ).toBeUndefined();
     } );
 } );
 

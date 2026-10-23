@@ -118,7 +118,7 @@ function paymentsStep( facts, hrefs ) {
             ...step,
             title:  __( 'Payments connected', 'gratora-donation-platform' ),
             done:   true,
-            /* translators: %s: a list of payment methods, e.g. "Stripe, Offline donations". */
+            /* translators: %s: a list of payment methods, e.g. "Stripe, Check or bank transfer". */
             text:   sprintf( __( 'Ready: %s', 'gratora-donation-platform' ), facts.payment_methods.join( ', ' ) ),
             action: null,
         };
@@ -129,6 +129,7 @@ function paymentsStep( facts, hrefs ) {
         done:   false,
         text:   __( 'Add your live Stripe or PayPal keys to take cards, or write bank details to take transfers.', 'gratora-donation-platform' ),
         action: { kind: 'link', label: __( 'Connect payments', 'gratora-donation-platform' ), href: hrefs.payments },
+        second: { kind: 'link', label: __( 'No Stripe yet? Take checks and transfers', 'gratora-donation-platform' ), href: hrefs.offline },
     };
 }
 

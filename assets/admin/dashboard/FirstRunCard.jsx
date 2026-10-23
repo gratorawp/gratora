@@ -32,7 +32,11 @@ export default function FirstRunCard( { facts, onChanged, onModeSwitched, onHidd
         card.current?.querySelector( '.is-next .gratora-firstrun__act a, .is-next .gratora-firstrun__act button' )?.focus();
     }, [ facts ] );
 
-    const steps   = firstRunSteps( facts, { campaigns: listHref(), payments: settingsHref( 'gateways' ) } );
+    const steps   = firstRunSteps( facts, {
+        campaigns: listHref(),
+        payments:  settingsHref( 'gateways' ),
+        offline:   settingsHref( 'gateways/offline' ),
+    } );
     const primary = primaryStep( steps );
     const done    = steps.filter( ( step ) => step.done ).length;
 
@@ -158,6 +162,9 @@ function Step( { step, number, isPrimary, busy, onPress } ) {
             { step.action && (
                 <div className="gratora-firstrun__act">
                     <Action action={ step.action } isPrimary={ isPrimary } busy={ busy } onPress={ onPress } describedBy={ textId } />
+                    { step.second && (
+                        <Action action={ step.second } isPrimary={ false } busy={ busy } onPress={ onPress } describedBy={ textId } />
+                    ) }
                 </div>
             ) }
         </li>

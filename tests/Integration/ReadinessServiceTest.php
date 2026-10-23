@@ -137,7 +137,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $check = $this->checks($this->registryWithTheTestDonationMethod())['gateway'];
 
         $this->assertSame(ReadinessService::PASS, $check['status']);
-        $this->assertStringContainsString('Offline donations', (string) $check['label']);
+        $this->assertStringContainsString('Check or bank transfer', (string) $check['label']);
         $this->assertStringNotContainsString('Test donation', (string) $check['label']);
     }
 
@@ -419,8 +419,8 @@ final class ReadinessServiceTest extends IntegrationTestCase
     /**
      * The check named offline twice, once from the gateway's own label and once
      * from a literal beside it, in two different cases, so array_unique could
-     * not collapse them: "Donations can be taken through Offline donations,
-     * offline donations".
+     * not collapse them: "Donations can be taken through Check or bank transfer,
+     * check or bank transfer".
      */
     public function test_the_offline_gateway_is_named_once(): void
     {
@@ -428,7 +428,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
         $label = strtolower((string) $this->checks()['gateway']['label']);
 
-        $this->assertSame(1, substr_count($label, 'offline donations'));
+        $this->assertSame(1, substr_count($label, 'check or bank transfer'));
     }
 
     /**
@@ -445,6 +445,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $check = $this->checks()['gateway'];
 
         $this->assertSame(ReadinessService::PASS, $check['status']);
-        $this->assertStringContainsString('Offline donations', (string) $check['label']);
+        $this->assertStringContainsString('Check or bank transfer', (string) $check['label']);
     }
 }

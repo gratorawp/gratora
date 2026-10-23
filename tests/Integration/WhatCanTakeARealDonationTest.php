@@ -62,7 +62,7 @@ final class WhatCanTakeARealDonationTest extends IntegrationTestCase
     {
         update_option('gratora_gateway_config', ['offline' => ['bank_details' => 'IBAN HR12 1001 0051 8630 0016 0']]);
 
-        $this->assertSame(['Offline donations'], $this->readiness()->realMethods());
+        $this->assertSame(['Check or bank transfer'], $this->readiness()->realMethods());
     }
 
     public function test_it_counts_the_same_while_test_mode_is_on(): void
@@ -73,7 +73,7 @@ final class WhatCanTakeARealDonationTest extends IntegrationTestCase
         ]);
         $this->registerTestDonationMethod();
 
-        $this->assertSame(['Offline donations'], $this->readiness()->realMethods());
+        $this->assertSame(['Check or bank transfer'], $this->readiness()->realMethods());
     }
 
     public function test_a_method_that_is_switched_off_does_not_count(): void

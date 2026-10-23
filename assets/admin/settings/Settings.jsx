@@ -363,7 +363,7 @@ export default function Settings() {
                     <SettingsGroup of={ [ currency, fx ] }><CurrencyPanel s={ currency } fx={ fx } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'gateways' }>
-                    <SettingsGroup of={ gateways }><GatewaysPanel s={ gateways } /></SettingsGroup>
+                    <SettingsGroup of={ gateways }><GatewaysPanel s={ gateways } org={ org } /></SettingsGroup>
                 </div>
                 <div hidden={ tab !== 'email' }>
                     <SettingsGroup of={ email }><EmailPanel s={ email } /></SettingsGroup>
