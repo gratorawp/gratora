@@ -173,8 +173,8 @@ https://github.com/gratorawp/gratora
 
 1. Install Gratora from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
 2. Open **Fundraising** in the admin menu and follow the short onboarding.
-3. Under **Fundraising > Settings**, add your payment provider keys, or enable offline donations.
-4. On the last setup screen press **Create the page and try it**. Gratora makes your donation page and you can make a test donation straight away.
+3. On the last setup screen press **Create the page and try it**. Gratora makes your donation page and you can make a test donation straight away.
+4. Under **Fundraising > Settings**, add your payment provider keys, or set up check or bank transfer.
 
 == Frequently Asked Questions ==
 
@@ -185,9 +185,10 @@ and reports are all in the free plugin. The add-ons are optional.
 
 = What do I need to take card donations? =
 
-A Stripe account, free to open. Stripe asks for your organization's details and
-a bank account. Then paste two keys from Stripe into Gratora. Until then you can
-take checks and bank transfers, and test donations work with no account.
+A Stripe or PayPal account, both free to open. Each asks for your organization's
+details and a bank account before it takes real payments. Then paste your keys
+into Gratora under Settings, Payment gateways. Until then you can take checks and
+bank transfers, and test donations work with no account.
 
 = Does Gratora take a cut of donations? =
 
@@ -202,9 +203,10 @@ the donor portal.
 
 = Which payment methods can donors use? =
 
-Cards, Apple Pay, Google Pay and SEPA debit through Stripe, and PayPal. Cash,
-check and bank transfer are recorded as offline donations. The Payment Gateways
-add-on adds Authorize.Net, Square, GoCardless, Moneris and Razorpay.
+Cards, Apple Pay, Google Pay and SEPA debit through Stripe, and PayPal. Checks
+and bank transfers come in through Check or bank transfer, and you can record
+cash by hand. The Payment Gateways add-on adds Authorize.Net, Square,
+GoCardless, Moneris and Razorpay.
 
 = How do I add a donation form to my site? =
 
