@@ -420,6 +420,61 @@ $border: $border-mid;
     border-top: 1px solid $border-soft;
 }
 
+.gratora-stripe-start {
+    margin-bottom: 18px;
+
+    &__steps {
+        margin: 0 0 16px 20px;
+        padding: 0;
+        font-size: 13px;
+        line-height: 1.6;
+        color: $text;
+
+        li { margin: 0 0 8px; padding-left: 4px; }
+
+        a {
+            color: $accent-dark;
+            font-weight: 500;
+
+            svg { margin-left: 3px; vertical-align: -1px; }
+        }
+    }
+
+    &__offline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        padding: 12px 16px;
+        background: $bg-soft;
+        border-radius: 9px;
+
+        p { margin: 0; font-size: 13px; color: $text; }
+    }
+}
+
+.gratora-stripe-webhooks {
+    &__toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0;
+        border: 0;
+        background: none;
+        font-size: 13px;
+        font-weight: 500;
+        color: $text;
+        cursor: pointer;
+
+        svg { transform: rotate(-90deg); transition: transform .15s ease; }
+        &[aria-expanded="true"] svg { transform: none; }
+        &:hover { color: $accent-dark; }
+    }
+
+    #gratora-stripe-webhooks { margin-top: 14px; }
+}
+
 .gratora-stripe-modes {
     display: grid;
     gap: 14px;

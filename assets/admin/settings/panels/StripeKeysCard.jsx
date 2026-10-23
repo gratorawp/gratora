@@ -1,6 +1,7 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState, useCallback } from '@wordpress/element';
+import { createInterpolateElement, useEffect, useState, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 
 import Card from '../../_shared/components/Card';
 import { ToggleRow } from '../../_shared/components/Switch';
@@ -12,6 +13,108 @@ import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Notice from '../../_shared/components/Notice';
 import { notify } from '../../_shared/notify';
 import useCardOpen from '../../_shared/useCardOpen';
+
+const STRIPE_REGISTER = 'https://dashboard.stripe.com/register';
+const STRIPE_KEYS     = 'https://dashboard.stripe.com/apikeys';
+
+function NewTabLink( { href, children } ) {
+    return (
+        <a href={ href } target="_blank" rel="noopener noreferrer">
+            { children }
+            <ExternalLink size={ 12 } strokeWidth={ 2 } aria-hidden="true" />
+            <span className="screen-reader-text">{ __( '(opens in a new tab)', 'gratora-donation-platform' ) }</span>
+        </a>
+    );
+}
+
+function FirstSteps( { onOffline } ) {
+    return (
+        <div className="gratora-stripe-start">
+            <p className="gratora-connect-p">
+                { __( 'To take card donations you need a Stripe account. Opening one is free; Stripe charges a fee on each donation.', 'gratora-donation-platform' ) }
+            </p>
+            <ol className="gratora-stripe-start__steps">
+                <li>
+                    { createInterpolateElement(
+                        __( 'No Stripe account yet? <a>Open a Stripe account</a>. Stripe asks for your organization\'s details and a bank account before it pays out. Allow about 20 minutes.', 'gratora-donation-platform' ),
+                        { a: <NewTabLink href={ STRIPE_REGISTER } /> }
+                    ) }
+                </li>
+                <li>
+                    { createInterpolateElement(
+                        __( '<a>Open your Stripe keys</a> and copy the Publishable key and the Secret key.', 'gratora-donation-platform' ),
+                        { a: <NewTabLink href={ STRIPE_KEYS } /> }
+                    ) }
+                </li>
+                <li>{ __( 'Paste them below and press Save and verify. Gratora does the rest.', 'gratora-donation-platform' ) }</li>
+            </ol>
+            { onOffline && (
+                <div className="gratora-stripe-start__offline">
+                    <p>{ __( 'No Stripe account yet? Take checks and bank transfers today, and add Stripe later.', 'gratora-donation-platform' ) }</p>
+                    <Btn variant="secondary" size="sm" onClick={ onOffline }>
+                        { __( 'Set up checks and bank transfers', 'gratora-donation-platform' ) }
+                    </Btn>
+                </div>
+            ) }
+        </div>
+    );
+}
+
+function WebhookSettings( { status, s, initialOpen } ) {
+    const [ open, setOpen ] = useState( initialOpen );
+
+    return (
+        <div className="gratora-connect-options gratora-stripe-webhooks">
+            <button
+                type="button"
+                className="gratora-stripe-webhooks__toggle"
+                aria-expanded={ open }
+                aria-controls="gratora-stripe-webhooks"
+                onClick={ () => setOpen( ! open ) }
+            >
+                <ChevronDown size={ 16 } strokeWidth={ 2 } aria-hidden="true" />
+                { __( 'Webhook settings (only needed if Stripe cannot reach your site)', 'gratora-donation-platform' ) }
+            </button>
+            { open && (
+                <div id="gratora-stripe-webhooks">
+                    <p className="gratora-connect-p">
+                        { __( 'Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'gratora-donation-platform' ) }
+                    </p>
+                    <FormRow label={ __( 'Webhook endpoint', 'gratora-donation-platform' ) }>
+                        { /* No onChange: KeyField renders read-only with a Copy button. */ }
+                        <KeyField value={ status?.webhook_url || '' } />
+                    </FormRow>
+                    { s && (
+                        <>
+                            <FormRow
+                                label={ __( 'Webhook signing secret (test)', 'gratora-donation-platform' ) }
+                                help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'gratora-donation-platform' ) }
+                            >
+                                <KeyField
+                                    value={ s.value( 'stripe.webhook_secret_test', '' ) }
+                                    onChange={ s.setValue( 'stripe.webhook_secret_test' ) }
+                                    placeholder="whsec_…"
+                                    secret
+                                />
+                            </FormRow>
+                            <FormRow
+                                label={ __( 'Webhook signing secret (live)', 'gratora-donation-platform' ) }
+                                help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'gratora-donation-platform' ) }
+                            >
+                                <KeyField
+                                    value={ s.value( 'stripe.webhook_secret_live', '' ) }
+                                    onChange={ s.setValue( 'stripe.webhook_secret_live' ) }
+                                    placeholder="whsec_…"
+                                    secret
+                                />
+                            </FormRow>
+                        </>
+                    ) }
+                </div>
+            ) }
+        </div>
+    );
+}
 
 function Pill( { tone, children } ) {
     return (
@@ -52,14 +155,15 @@ function AccountFoot( { account, onRemove, removing } ) {
  * One mode's key pair. Saved keys collapse to a last-4 summary: the secret is
  * write-only, so there is nothing to show and nothing to accidentally leak.
  */
-function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
+function ModeKeys( { mode, saved, publishable, onSaved, onRemove, optional = false } ) {
     const isTest = mode === 'test';
     const [ open, setOpen ] = useState( ! saved );
     const [ sk, setSk ]     = useState( '' );
     const [ pk, setPk ]     = useState( '' );
     const [ busy, setBusy ] = useState( false );
 
-    const label = isTest ? __( 'Test keys', 'gratora-donation-platform' ) : __( 'Live keys', 'gratora-donation-platform' );
+    let label = isTest ? __( 'Test keys', 'gratora-donation-platform' ) : __( 'Live keys', 'gratora-donation-platform' );
+    if ( optional ) label = __( 'Test keys (optional)', 'gratora-donation-platform' );
     const prefix = isTest ? 'test' : 'live';
 
     const save = () => {
@@ -283,7 +387,7 @@ function ApplePaySection( { status, onDone } ) {
     );
 }
 
-export default function StripeKeysCard( { s } ) {
+export default function StripeKeysCard( { s, onOffline = null } ) {
     const [ status, setStatus ]       = useState( null );
     const [ loading, setLoading ]     = useState( true );
     const [ loadError, setLoadError ] = useState( false );
@@ -365,6 +469,9 @@ export default function StripeKeysCard( { s } ) {
 
     const bizName = account?.business_name || account?.email || '';
 
+    // A test donation has already worked, so the keys still missing are the ones that take real money.
+    const liveFirst = !! status?.test_donation_made;
+
     return (
         <>
         <Card
@@ -375,16 +482,7 @@ export default function StripeKeysCard( { s } ) {
                 ? <AccountFoot account={ account } onRemove={ () => removeKeys( 'all' ) } removing={ removing } />
                 : null }
         >
-            { ! connected && (
-                <>
-                    <p className="gratora-connect-p">
-                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Gratora never takes a cut.', 'gratora-donation-platform' ) }
-                    </p>
-                    <p className="gratora-connect-p">
-                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'gratora-donation-platform' ) }
-                    </p>
-                </>
-            ) }
+            { ! connected && <FirstSteps onOffline={ onOffline } /> }
 
             <ToggleRow
                 title={ __( 'Enable the Stripe gateway', 'gratora-donation-platform' ) }
@@ -411,59 +509,22 @@ export default function StripeKeysCard( { s } ) {
             ) }
 
             <div className="gratora-stripe-modes">
-                <ModeKeys
-                    mode="test"
-                    saved={ !! account?.has_test }
-                    publishable={ account?.publishable_test || '' }
-                    onSaved={ setStatus }
-                    onRemove={ removeKeys }
-                />
-                <ModeKeys
-                    mode="live"
-                    saved={ !! account?.has_live }
-                    publishable={ account?.publishable_live || '' }
-                    onSaved={ setStatus }
-                    onRemove={ removeKeys }
-                />
+                { ( liveFirst ? [ 'live', 'test' ] : [ 'test', 'live' ] ).map( ( mode ) => (
+                    <ModeKeys
+                        key={ mode }
+                        mode={ mode }
+                        optional={ liveFirst && mode === 'test' }
+                        saved={ !! account?.[ `has_${ mode }` ] }
+                        publishable={ account?.[ `publishable_${ mode }` ] || '' }
+                        onSaved={ setStatus }
+                        onRemove={ removeKeys }
+                    />
+                ) ) }
             </div>
 
             { connected && <ApplePaySection status={ status } onDone={ load } /> }
 
-            <div className="gratora-connect-options">
-                <p className="gratora-connect-p">
-                    { __( 'Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'gratora-donation-platform' ) }
-                </p>
-                <FormRow label={ __( 'Webhook endpoint', 'gratora-donation-platform' ) }>
-                    { /* No onChange: KeyField renders read-only with a Copy button. */ }
-                    <KeyField value={ status?.webhook_url || '' } />
-                </FormRow>
-                { s && (
-                    <>
-                        <FormRow
-                            label={ __( 'Webhook signing secret (test)', 'gratora-donation-platform' ) }
-                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'gratora-donation-platform' ) }
-                        >
-                            <KeyField
-                                value={ s.value( 'stripe.webhook_secret_test', '' ) }
-                                onChange={ s.setValue( 'stripe.webhook_secret_test' ) }
-                                placeholder="whsec_…"
-                                secret
-                            />
-                        </FormRow>
-                        <FormRow
-                            label={ __( 'Webhook signing secret (live)', 'gratora-donation-platform' ) }
-                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'gratora-donation-platform' ) }
-                        >
-                            <KeyField
-                                value={ s.value( 'stripe.webhook_secret_live', '' ) }
-                                onChange={ s.setValue( 'stripe.webhook_secret_live' ) }
-                                placeholder="whsec_…"
-                                secret
-                            />
-                        </FormRow>
-                    </>
-                ) }
-            </div>
+            <WebhookSettings status={ status } s={ s } initialOpen={ connected && ! status?.has_webhook_secret } />
         </Card>
         <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </>

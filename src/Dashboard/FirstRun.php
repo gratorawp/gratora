@@ -69,7 +69,7 @@ final class FirstRun
             'page_url'           => $page ? (string) get_permalink((int) $page->page_id) : null,
             'test_mode'          => TestMode::siteWide(),
             'test_donation'      => $given,
-            'test_donation_made' => get_option(self::TEST_DONATION_AT, false) !== false,
+            'test_donation_made' => self::testDonationMade(),
             'payments'           => $methods !== [],
             'payment_methods'    => $methods,
         ];
@@ -105,6 +105,16 @@ final class FirstRun
         if (! empty($donation->is_test) && (string) $donation->kind === 'donation') {
             self::rememberTestDonation();
         }
+    }
+
+    /**
+     * Also true once that donation has been deleted, binned or refunded.
+     *
+     * @since unreleased
+     */
+    public static function testDonationMade(): bool
+    {
+        return get_option(self::TEST_DONATION_AT, false) !== false;
     }
 
     private static function rememberTestDonation(): void

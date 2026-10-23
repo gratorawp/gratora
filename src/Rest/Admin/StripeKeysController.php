@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Rest\Admin;
 
 use Gratora\Analytics\ErrorLog;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Gateways\GatewayTransportException;
 use Gratora\Gateways\Stripe\ApplePayDomain;
@@ -137,6 +138,7 @@ final class StripeKeysController
             'account'     => $this->account->get(),
             'webhook_url' => rest_url('gratora/v1/webhooks/stripe'),
             'has_webhook_secret' => $this->api->hasWebhookSecret(),
+            'test_donation_made' => FirstRun::testDonationMade(),
             'apple_pay' => [
                 'domain'    => $this->applePay->domain(),
                 'has_file'  => $this->applePay->isFileReady(),
