@@ -59,5 +59,5 @@ it( 'still adds it to a card donation the donor chose to cover', () => {
 } );
 
 it( 'puts the amount where the label asks for it', () => {
-    expect( coverFeesLabel( 'Add {fee} to cover card fees', '$1.75' ) ).toBe( 'Add $1.75 to cover card fees' );
+    expect( coverFeesLabel( 'Add {fee} to cover processing fees', '$1.75' ) ).toBe( 'Add $1.75 to cover processing fees' );
 } );

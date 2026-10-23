@@ -203,7 +203,7 @@ final class FormTemplates
             'percent'   => 2.9,
             'fixed'     => 30,
             /* translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written. */
-            'label'     => __('Add {fee} to cover card fees', 'gratora-donation-platform'),
+            'label'     => __('Add {fee} to cover processing fees', 'gratora-donation-platform'),
             'defaultOn' => false,
         ]);
     }

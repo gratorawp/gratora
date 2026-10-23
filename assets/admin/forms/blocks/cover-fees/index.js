@@ -32,7 +32,8 @@ function Edit( { attributes, setAttributes } ) {
     const {
         percent   = 2.9,
         fixed     = 30,
-        label     = __( 'I\'d like to help cover the transaction fee', 'gratora-donation-platform' ),
+        /* translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written. */
+        label     = __( 'Add {fee} to cover processing fees', 'gratora-donation-platform' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
@@ -65,7 +66,7 @@ function Edit( { attributes, setAttributes } ) {
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
                         {
                             /* translators: Keep {fee} as written: it is replaced by the fee amount on the form. */
-                            __( 'Use {fee} in the label to insert the fee at runtime, e.g. "Add {fee} to cover card fees".', 'gratora-donation-platform' )
+                            __( 'Use {fee} in the label to insert the fee at runtime, e.g. "Add {fee} to cover processing fees".', 'gratora-donation-platform' )
                         }
                     </p>
                 </PanelBody>
@@ -89,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'gratora-donation-platform' ) }
+                    placeholder={ __( 'Add {fee} to cover processing fees', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />

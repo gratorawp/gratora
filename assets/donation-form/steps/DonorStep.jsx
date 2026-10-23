@@ -220,7 +220,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
         case 'cover_fees': {
             if ( ! feeOffered( state ) ) return null;
             const fee    = computeFees( state, v.amount_cents || 0 );
-            const label  = decodeEntities( f.label || '' ) || config.i18n.coverFees;
+            const label  = decodeEntities( f.label || '' ) || config.i18n.coverFees || '';
             const amount = formatAmount( fee, state.currency );
             return (
                 <label key={ key } class="gratora-form__check gratora-form__cover-fees">

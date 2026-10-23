@@ -835,7 +835,8 @@ JS;
                 'number'         => __('Number', 'gratora-donation-platform'),
                 'impact'         => __('Provides', 'gratora-donation-platform'),
                 'currency'       => __('Currency', 'gratora-donation-platform'),
-                'coverFees'      => __('I\'d like to help cover the transaction fee', 'gratora-donation-platform'),
+                /* translators: {fee} becomes the fee in the donor's currency, e.g. $1.75. Keep {fee} as written. */
+                'coverFees'      => __('Add {fee} to cover processing fees', 'gratora-donation-platform'),
                 'feesTotal'      => __('Total with fees:', 'gratora-donation-platform'),
                 'formTitle'      => __('Donation form', 'gratora-donation-platform'),
                 'close'          => __('Close', 'gratora-donation-platform'),
@@ -1207,7 +1208,7 @@ JS;
                 case 'gratora/cover-fees':
                     $items[] = $tagRow([
                         'kind'      => 'cover_fees',
-                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'gratora-donation-platform')),
+                        'label'     => (string) ($attrs['label']     ?? __('Add {fee} to cover processing fees', 'gratora-donation-platform')),
                         'percent'   => (float)  ($attrs['percent']   ?? 2.9),
                         'fixed'     => (int)    ($attrs['fixed']     ?? 30),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
