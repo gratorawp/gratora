@@ -14479,6 +14479,10 @@ msgstr "Bereit"
 msgid "Not set up"
 msgstr "Nicht eingerichtet"
 
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:383
+msgid "PayPal takes Chinese yuan (CNY) only for PayPal accounts registered in China."
+msgstr "PayPal akzeptiert Chinesische Yuan (CNY) nur für PayPal-Konten, die in China registriert sind."
+
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:324
 msgid "Enable the PayPal gateway"
 msgstr "PayPal als Zahlungsanbieter aktivieren"

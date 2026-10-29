@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-29T06:09:16+00:00\n"
+"POT-Creation-Date: 2026-10-29T06:26:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -5831,68 +5831,68 @@ msgstr ""
 msgid "The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again."
 msgstr ""
 
-#: src/Rest/Admin/PayPalKeysController.php:158
+#: src/Rest/Admin/PayPalKeysController.php:178
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:138
 msgid "Enter both the client id and the secret."
 msgstr ""
 
 #. translators: 1: sandbox or live, 2: transport error, e.g. a DNS failure
-#: src/Rest/Admin/PayPalKeysController.php:187
+#: src/Rest/Admin/PayPalKeysController.php:207
 #, php-format
 msgid "This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials."
 msgstr ""
 
 #. translators: 1: sandbox or live, 2: error from PayPal
-#: src/Rest/Admin/PayPalKeysController.php:199
+#: src/Rest/Admin/PayPalKeysController.php:219
 #, php-format
 msgid "PayPal rejected those %1$s credentials: %2$s"
 msgstr ""
 
 #. translators: %s: sandbox or live
-#: src/Rest/Admin/PayPalKeysController.php:253
+#: src/Rest/Admin/PayPalKeysController.php:273
 #, php-format
 msgid "Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to."
 msgstr ""
 
 #. translators: %s: reason PayPal could not be asked
-#: src/Rest/Admin/PayPalKeysController.php:280
+#: src/Rest/Admin/PayPalKeysController.php:300
 #, php-format
 msgid "PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment."
 msgstr ""
 
-#: src/Rest/Admin/PayPalKeysController.php:396
+#: src/Rest/Admin/PayPalKeysController.php:416
 msgid "PayPal did not return that webhook."
 msgstr ""
 
 #. translators: %s: comma-separated PayPal event names
-#: src/Rest/Admin/PayPalKeysController.php:411
+#: src/Rest/Admin/PayPalKeysController.php:431
 #, php-format
 msgid "That webhook does not send: %s"
 msgstr ""
 
 #. translators: 1: the webhook id that was entered, 2: sandbox or live, 3: error from PayPal
-#: src/Rest/Admin/PayPalKeysController.php:450
+#: src/Rest/Admin/PayPalKeysController.php:470
 #, php-format
 msgid "The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s"
 msgstr ""
 
 #. translators: 1: the webhook id that was entered, 2: reason PayPal could not be asked
-#: src/Rest/Admin/PayPalKeysController.php:457
+#: src/Rest/Admin/PayPalKeysController.php:477
 #, php-format
 msgid "The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers."
 msgstr ""
 
 #. translators: 1: sandbox or live, 2: error from PayPal
-#: src/Rest/Admin/PayPalKeysController.php:476
+#: src/Rest/Admin/PayPalKeysController.php:496
 #, php-format
 msgid "Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s"
 msgstr ""
 
-#: src/Rest/Admin/PayPalKeysController.php:506
+#: src/Rest/Admin/PayPalKeysController.php:526
 msgid "sandbox"
 msgstr ""
 
-#: src/Rest/Admin/PayPalKeysController.php:506
+#: src/Rest/Admin/PayPalKeysController.php:526
 msgid "live"
 msgstr ""
 
@@ -14720,35 +14720,39 @@ msgstr ""
 msgid "Something went wrong loading the status. Please try again."
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:374
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:376
 #: assets/admin/settings/panels/StripeKeysCard.jsx:462
 msgid "Ready"
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:375
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:377
 #: assets/admin/settings/panels/StripeKeysCard.jsx:307
 #: assets/admin/settings/panels/StripeKeysCard.jsx:461
 msgid "Not set up"
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:380
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:383
+msgid "PayPal takes Chinese yuan (CNY) only for PayPal accounts registered in China."
+msgstr ""
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:388
 msgid "Enable the PayPal gateway"
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:382
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:390
 msgid "Your credentials stay on file while it is off."
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:383
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:391
 msgid "Available once your credentials are saved."
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:391
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:399
 #: assets/admin/settings/panels/StripeKeysCard.jsx:501
 msgid "You are all set."
 msgstr ""
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:392
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:400
 msgid "PayPal buttons will appear on your donation forms."
 msgstr ""
 
