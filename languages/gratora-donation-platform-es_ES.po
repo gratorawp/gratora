@@ -14299,6 +14299,26 @@ msgstr "Número fiscal"
 msgid "EU VAT ID"
 msgstr "Número de IVA de la UE"
 
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:25
+msgid "To take donations through PayPal you need a PayPal Business account."
+msgstr "Para aceptar donaciones a través de PayPal necesitas una cuenta PayPal Business."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:30
+msgid "No PayPal Business account yet? <a>Open a PayPal Business account</a>. PayPal asks you to verify it before it gives you live credentials."
+msgstr "¿Aún no tienes una cuenta PayPal Business? <a>Abre una cuenta PayPal Business</a>. PayPal te pide verificarla antes de darte las credenciales del modo real."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:36
+msgid "<a>Open PayPal's developer dashboard</a>, log in with your Business account and choose Apps & Credentials. Switch to Live and press Create App."
+msgstr "<a>Abre el panel para desarrolladores de PayPal</a>, inicia sesión con tu cuenta Business y elige «Apps & Credentials». Cambia a «Live» y pulsa «Create App»."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:40
+msgid "Copy the app's Client ID and secret, paste them under Live credentials below and press Save and verify."
+msgstr "Copia el ID de cliente y el secreto de la aplicación, pégalos abajo en «Credenciales del modo real» y pulsa «Guardar y verificar»."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:44
+msgid "No PayPal account yet? Take checks and bank transfers today, and add PayPal later."
+msgstr "¿Aún no tienes cuenta de PayPal? Acepta cheques y transferencias bancarias desde hoy y añade PayPal más adelante."
+
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:42
 msgid "Sandbox credentials"
 msgstr "Credenciales de sandbox"
@@ -14306,6 +14326,10 @@ msgstr "Credenciales de sandbox"
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:42
 msgid "Live credentials"
 msgstr "Credenciales del modo real"
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:120
+msgid "Sandbox credentials (optional)"
+msgstr "Credenciales de sandbox (opcional)"
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:74
 msgid "Sandbox credentials verified and saved."
@@ -14385,8 +14409,8 @@ msgstr "Reemplazar ID de webhook"
 msgid "Add webhook id"
 msgstr "Añadir ID de webhook"
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:197
-msgid "Client id"
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:266
+msgid "Client ID"
 msgstr "ID de cliente"
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:198
@@ -14400,10 +14424,6 @@ msgstr "Secreto"
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:204
 msgid "Stored encrypted and never shown again. Gratora verifies it with PayPal before saving."
 msgstr "Se guarda cifrado y no se vuelve a mostrar nunca. Gratora lo verifica con PayPal antes de guardarlo."
-
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:210
-msgid "From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. Gratora checks it against your app and only saves an id PayPal confirms."
-msgstr "Del webhook que creaste en el escritorio de PayPal. Sin él, PayPal no puede demostrar que un evento procede de PayPal, así que todas las notificaciones se rechazan y las donaciones que PayPal liquida después del pago se quedan sin pagar. Puedes añadirlo después de estas credenciales, pero PayPal no funcionará bien hasta que lo hagas. Gratora lo comprueba con tu aplicación y solo guarda un ID que PayPal confirme."
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:219
 #: assets/admin/settings/panels/StripeKeysCard.jsx:130
@@ -14459,14 +14479,6 @@ msgstr "Listo"
 msgid "Not set up"
 msgstr "Sin configurar"
 
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:315
-msgid "Add the credentials from your own PayPal REST app. Donations are paid straight into your PayPal account, and Gratora never takes a cut."
-msgstr "Añade las credenciales de tu propia aplicación REST de PayPal. Las donaciones se ingresan directamente en tu cuenta de PayPal, y Gratora nunca se queda con una parte."
-
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:318
-msgid "Create an app at developer.paypal.com under Apps and Credentials. Sandbox and live are separate apps, so each needs its own credentials here."
-msgstr "Crea una aplicación en developer.paypal.com, en «Apps and Credentials». La de sandbox y la del modo real son aplicaciones distintas, así que cada una necesita aquí sus propias credenciales."
-
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:324
 msgid "Enable the PayPal gateway"
 msgstr "Activar la pasarela de pago de PayPal"
@@ -14487,10 +14499,6 @@ msgstr "Todo listo."
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:336
 msgid "PayPal buttons will appear on your donation forms."
 msgstr "Los botones de PayPal aparecerán en tus formularios de donación."
-
-#: assets/admin/settings/panels/PayPalKeysCard.jsx:347
-msgid "Add this URL as a webhook in your PayPal app, subscribe it to the payment and subscription events, then paste the webhook id above. PayPal verifies every event against that id."
-msgstr "Añade esta URL como webhook en tu aplicación de PayPal, suscríbela a los eventos de pago y de suscripción, y después pega arriba el ID de webhook. PayPal verifica cada evento con ese ID."
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:349
 #: assets/admin/settings/panels/StripeKeysCard.jsx:436
@@ -14906,6 +14914,26 @@ msgstr "¿Aún no tienes cuenta de Stripe? Acepta cheques y transferencias banca
 #: assets/admin/settings/panels/StripeKeysCard.jsx:55
 msgid "Set up checks and bank transfers"
 msgstr "Configurar cheques y transferencias bancarias"
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:71
+msgid "Webhook settings (needed for recurring donations and refunds made in PayPal)"
+msgstr "Ajustes del webhook (necesarios para donaciones recurrentes y reembolsos hechos en PayPal)"
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:76
+msgid "One-time donations work without a webhook. With one, Gratora also offers recurring donations through PayPal, and hears when a payment PayPal held is cleared or a donation is refunded in PayPal. Sandbox and live apps each need their own."
+msgstr "Las donaciones únicas funcionan sin webhook. Con uno, Gratora también ofrece donaciones recurrentes con PayPal y se entera cuando PayPal libera un pago que tenía retenido o cuando se reembolsa una donación en PayPal. Las aplicaciones de sandbox y del modo real necesitan cada una el suyo."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:79
+msgid "In PayPal's developer dashboard, under Apps & Credentials, open the app whose Client ID you saved and press Add Webhook."
+msgstr "En el panel para desarrolladores de PayPal, en «Apps & Credentials», abre la aplicación cuyo ID de cliente guardaste y pulsa «Add Webhook»."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:80
+msgid "Paste the webhook endpoint below as its URL, select all events in the Event types list and press Save."
+msgstr "Pega como URL el punto de conexión del webhook que aparece abajo, selecciona todos los eventos en la lista «Event types» y pulsa «Save»."
+
+#: assets/admin/settings/panels/PayPalKeysCard.jsx:81
+msgid "Copy the webhook's ID, press Add webhook id under the saved credentials above and paste it."
+msgstr "Copia el ID del webhook, pulsa «Añadir ID de webhook» en las credenciales guardadas de arriba y pégalo."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:76
 msgid "Webhook settings (only needed if Stripe cannot reach your site)"
