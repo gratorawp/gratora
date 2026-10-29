@@ -37,6 +37,7 @@ final class ExternalServicesDisclosureTest extends TestCase
         'www.w3.org'    => 'the SVG namespace identifier, which is never dereferenced',
         'wordpress.org' => 'a link an admin clicks, not a request this plugin makes',
         'dashboard.stripe.com' => 'links an admin clicks to open a Stripe account and find its keys',
+        'developer.paypal.com' => 'a link an admin clicks to open the PayPal developer dashboard',
         'example.org'   => 'placeholder copy in the email-token preview',
     ];
 

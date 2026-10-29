@@ -472,7 +472,8 @@ $border: $border-mid;
         &:hover { color: $accent-dark; }
     }
 
-    #gratora-stripe-webhooks { margin-top: 14px; }
+    #gratora-stripe-webhooks,
+    #gratora-paypal-webhooks { margin-top: 14px; }
 }
 
 .gratora-stripe-modes {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Rest\Admin;
 
 use Gratora\Analytics\ErrorLog;
+use Gratora\Dashboard\FirstRun;
 use Gratora\Foundation\Auth\Capabilities;
 use Gratora\Gateways\GatewayTransportException;
 use Gratora\Gateways\PayPal\PayPalAccount;
@@ -131,6 +132,7 @@ final class PayPalKeysController
             'can_charge'  => $this->account->isConnected(),
             'account'     => $this->account->get(),
             'webhook_url' => rest_url('gratora/v1/webhooks/paypal'),
+            'test_donation_made' => FirstRun::testDonationMade(),
         ], 200);
     }
 

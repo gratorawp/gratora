@@ -1,6 +1,7 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState, useCallback } from '@wordpress/element';
+import { createInterpolateElement, useEffect, useState, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { ChevronDown } from 'lucide-react';
 
 import Card from '../../_shared/components/Card';
 import { ToggleRow } from '../../_shared/components/Switch';
@@ -8,10 +9,86 @@ import Btn from '../../_shared/components/Btn';
 import BrandMark from '../../_shared/components/BrandMark';
 import FormRow from '../../_shared/components/FormRow';
 import KeyField from '../../_shared/components/KeyField';
+import NewTabLink from '../../_shared/components/NewTabLink';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Notice from '../../_shared/components/Notice';
 import { notify } from '../../_shared/notify';
 import useCardOpen from '../../_shared/useCardOpen';
+
+const PAYPAL_BUSINESS  = 'https://www.paypal.com/business/open-business-account';
+const PAYPAL_DASHBOARD = 'https://developer.paypal.com/dashboard/';
+
+function FirstSteps( { onOffline } ) {
+    return (
+        <div className="gratora-stripe-start">
+            <p className="gratora-connect-p">
+                { __( 'To take donations through PayPal you need a PayPal Business account.', 'gratora-donation-platform' ) }
+            </p>
+            <ol className="gratora-stripe-start__steps">
+                <li>
+                    { createInterpolateElement(
+                        __( 'No PayPal Business account yet? <a>Open a PayPal Business account</a>. PayPal asks you to verify it before it gives you live credentials.', 'gratora-donation-platform' ),
+                        { a: <NewTabLink href={ PAYPAL_BUSINESS } /> }
+                    ) }
+                </li>
+                <li>
+                    { createInterpolateElement(
+                        __( '<a>Open PayPal\'s developer dashboard</a>, log in with your Business account and choose Apps & Credentials. Switch to Live and press Create App.', 'gratora-donation-platform' ),
+                        { a: <NewTabLink href={ PAYPAL_DASHBOARD } /> }
+                    ) }
+                </li>
+                <li>{ __( 'Copy the app\'s Client ID and secret, paste them under Live credentials below and press Save and verify.', 'gratora-donation-platform' ) }</li>
+            </ol>
+            { onOffline && (
+                <div className="gratora-stripe-start__offline">
+                    <p>{ __( 'No PayPal account yet? Take checks and bank transfers today, and add PayPal later.', 'gratora-donation-platform' ) }</p>
+                    <Btn variant="secondary" size="sm" onClick={ onOffline }>
+                        { __( 'Set up checks and bank transfers', 'gratora-donation-platform' ) }
+                    </Btn>
+                </div>
+            ) }
+        </div>
+    );
+}
+
+function WebhookSettings( { url, needed } ) {
+    const [ open, setOpen ] = useState( needed );
+
+    useEffect( () => {
+        if ( needed ) setOpen( true );
+    }, [ needed ] );
+
+    return (
+        <div className="gratora-connect-options gratora-stripe-webhooks">
+            <button
+                type="button"
+                className="gratora-stripe-webhooks__toggle"
+                aria-expanded={ open }
+                aria-controls="gratora-paypal-webhooks"
+                onClick={ () => setOpen( ! open ) }
+            >
+                <ChevronDown size={ 16 } strokeWidth={ 2 } aria-hidden="true" />
+                { __( 'Webhook settings (needed for recurring donations and refunds made in PayPal)', 'gratora-donation-platform' ) }
+            </button>
+            { open && (
+                <div id="gratora-paypal-webhooks">
+                    <p className="gratora-connect-p">
+                        { __( 'One-time donations work without a webhook. With one, Gratora also offers recurring donations through PayPal, and hears when a payment PayPal held is cleared or a donation is refunded in PayPal. Sandbox and live apps each need their own.', 'gratora-donation-platform' ) }
+                    </p>
+                    <ol className="gratora-stripe-start__steps">
+                        <li>{ __( 'In PayPal\'s developer dashboard, under Apps & Credentials, open the app whose Client ID you saved and press Add Webhook.', 'gratora-donation-platform' ) }</li>
+                        <li>{ __( 'Paste the webhook endpoint below as its URL, select all events in the Event types list and press Save.', 'gratora-donation-platform' ) }</li>
+                        <li>{ __( 'Copy the webhook\'s ID, press Add webhook id under the saved credentials above and paste it.', 'gratora-donation-platform' ) }</li>
+                    </ol>
+                    <FormRow label={ __( 'Webhook endpoint', 'gratora-donation-platform' ) }>
+                        { /* No onChange: KeyField renders read-only with a Copy button. */ }
+                        <KeyField value={ url } />
+                    </FormRow>
+                </div>
+            ) }
+        </div>
+    );
+}
 
 function Pill( { tone, children } ) {
     return (
@@ -26,7 +103,7 @@ function Pill( { tone, children } ) {
  * One mode's PayPal REST app credentials. The webhook id sits here too because
  * PayPal cannot verify a webhook signature without it.
  */
-function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
+function ModeKeys( { mode, account, onSaved, onRemove, askConfirm, optional = false } ) {
     const isTest = mode === 'test';
     const saved  = isTest ? !! account?.has_test : !! account?.has_live;
     const clientId = ( isTest ? account?.client_id_test : account?.client_id_live ) || '';
@@ -39,7 +116,8 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
     const [ hook, setHook ] = useState( '' );
     const [ busy, setBusy ] = useState( false );
 
-    const label = isTest ? __( 'Sandbox credentials', 'gratora-donation-platform' ) : __( 'Live credentials', 'gratora-donation-platform' );
+    let label = isTest ? __( 'Sandbox credentials', 'gratora-donation-platform' ) : __( 'Live credentials', 'gratora-donation-platform' );
+    if ( optional ) label = __( 'Sandbox credentials (optional)', 'gratora-donation-platform' );
 
     const post = ( data ) => {
         setBusy( true );
@@ -63,9 +141,8 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
         post( {
             client_id:     id.trim(),
             client_secret: secret.trim(),
-            webhook_id:    hook.trim(),
         } )
-            .then( ( res ) => {
+            .then( () => {
                 setId( '' );
                 setSecret( '' );
                 setOpen( false );
@@ -74,17 +151,6 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
                         ? __( 'Sandbox credentials verified and saved.', 'gratora-donation-platform' )
                         : __( 'Live credentials verified and saved.', 'gratora-donation-platform' )
                 );
-
-                /* The credentials went in without the webhook id. Hold the
-                   toast open and keep the typed id in the field so it can go
-                   straight back once the reason is dealt with. */
-                if ( res?.webhook_warning ) {
-                    setHookOpen( true );
-                    notify.warning( res.webhook_warning, { duration: 0 } );
-                    return;
-                }
-                setHook( '' );
-                setHookOpen( false );
             } )
             .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those credentials.', 'gratora-donation-platform' ) ) );
     };
@@ -160,6 +226,9 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
                                 label={ __( 'Webhook id', 'gratora-donation-platform' ) }
                                 help={ __( 'From the webhook you created in the PayPal dashboard. Gratora checks it against this app, and the credentials on file stay as they are.', 'gratora-donation-platform' ) }
                             >
+                                { /* WH-... is the format of a PayPal event id, not of a
+                                     webhook id, and the two sit next to each other in
+                                     PayPal's dashboard. */ }
                                 <KeyField value={ hook } onChange={ setHook } placeholder="5ML12345AB678901C" />
                             </FormRow>
                             <div className="gratora-stripe-mode__actions">
@@ -194,7 +263,7 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
             { open && (
                 <>
                     <FormRow
-                        label={ __( 'Client id', 'gratora-donation-platform' ) }
+                        label={ __( 'Client ID', 'gratora-donation-platform' ) }
                         help={ __( 'Public. Used in the browser to show the PayPal buttons.', 'gratora-donation-platform' ) }
                     >
                         <KeyField value={ id } onChange={ setId } placeholder="AeA1QIZ..." />
@@ -205,21 +274,12 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
                     >
                         <KeyField value={ secret } onChange={ setSecret } placeholder="EO422dn3..." secret />
                     </FormRow>
-                    <FormRow
-                        label={ __( 'Webhook id', 'gratora-donation-platform' ) }
-                        help={ __( 'From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. Gratora checks it against your app and only saves an id PayPal confirms.', 'gratora-donation-platform' ) }
-                    >
-                        { /* WH-... is the format of a PayPal event id, not of a
-                             webhook id, and the two sit next to each other in
-                             PayPal's dashboard. */ }
-                        <KeyField value={ hook } onChange={ setHook } placeholder="5ML12345AB678901C" />
-                    </FormRow>
                     <div className="gratora-stripe-mode__actions">
                         <Btn variant="primary" size="sm" onClick={ save } isBusy={ busy } disabled={ busy }>
                             { __( 'Save and verify', 'gratora-donation-platform' ) }
                         </Btn>
                         { saved && (
-                            <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setId( '' ); setSecret( '' ); setHook( '' ); } }>
+                            <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setId( '' ); setSecret( '' ); } }>
                                 { __( 'Cancel', 'gratora-donation-platform' ) }
                             </Btn>
                         ) }
@@ -230,7 +290,7 @@ function ModeKeys( { mode, account, onSaved, onRemove, askConfirm } ) {
     );
 }
 
-export default function PayPalKeysCard( { s } ) {
+export default function PayPalKeysCard( { s, onOffline = null } ) {
     const [ status, setStatus ]       = useState( null );
     const [ loading, setLoading ]     = useState( true );
     const [ loadError, setLoadError ] = useState( false );
@@ -300,6 +360,11 @@ export default function PayPalKeysCard( { s } ) {
     const account   = status?.account || null;
     const connected = !! status?.connected;
 
+    // A test donation has already worked, so the credentials still missing are the ones that take real money.
+    const liveFirst = !! status?.test_donation_made;
+
+    const hookMissing = [ 'test', 'live' ].some( ( mode ) => !! account?.[ `has_${ mode }` ] && ! account?.[ `webhook_${ mode }` ] );
+
     return (
         <>
         <Card
@@ -309,16 +374,7 @@ export default function PayPalKeysCard( { s } ) {
                 ? <Pill tone="green">{ __( 'Ready', 'gratora-donation-platform' ) }</Pill>
                 : <Pill tone="gray">{ __( 'Not set up', 'gratora-donation-platform' ) }</Pill> }
         >
-            { ! connected && (
-                <>
-                    <p className="gratora-connect-p">
-                        { __( 'Add the credentials from your own PayPal REST app. Donations are paid straight into your PayPal account, and Gratora never takes a cut.', 'gratora-donation-platform' ) }
-                    </p>
-                    <p className="gratora-connect-p">
-                        { __( 'Create an app at developer.paypal.com under Apps and Credentials. Sandbox and live are separate apps, so each needs its own credentials here.', 'gratora-donation-platform' ) }
-                    </p>
-                </>
-            ) }
+            { ! connected && <FirstSteps onOffline={ onOffline } /> }
 
             <ToggleRow
                 title={ __( 'Enable the PayPal gateway', 'gratora-donation-platform' ) }
@@ -338,19 +394,20 @@ export default function PayPalKeysCard( { s } ) {
             ) }
 
             <div className="gratora-stripe-modes">
-                <ModeKeys mode="test" account={ account } onSaved={ setStatus } onRemove={ removeKeys } askConfirm={ setConfirm } />
-                <ModeKeys mode="live" account={ account } onSaved={ setStatus } onRemove={ removeKeys } askConfirm={ setConfirm } />
+                { ( liveFirst ? [ 'live', 'test' ] : [ 'test', 'live' ] ).map( ( mode ) => (
+                    <ModeKeys
+                        key={ mode }
+                        mode={ mode }
+                        optional={ liveFirst && mode === 'test' }
+                        account={ account }
+                        onSaved={ setStatus }
+                        onRemove={ removeKeys }
+                        askConfirm={ setConfirm }
+                    />
+                ) ) }
             </div>
 
-            <div className="gratora-connect-options">
-                <p className="gratora-connect-p">
-                    { __( 'Add this URL as a webhook in your PayPal app, subscribe it to the payment and subscription events, then paste the webhook id above. PayPal verifies every event against that id.', 'gratora-donation-platform' ) }
-                </p>
-                <FormRow label={ __( 'Webhook endpoint', 'gratora-donation-platform' ) }>
-                    { /* No onChange: KeyField renders read-only with a Copy button. */ }
-                    <KeyField value={ status?.webhook_url || '' } />
-                </FormRow>
-            </div>
+            <WebhookSettings url={ status?.webhook_url || '' } needed={ hookMissing } />
         </Card>
         <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </>

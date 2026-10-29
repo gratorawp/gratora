@@ -1,7 +1,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import { createInterpolateElement, useEffect, useState, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { ChevronDown, ExternalLink } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 import Card from '../../_shared/components/Card';
 import { ToggleRow } from '../../_shared/components/Switch';
@@ -9,6 +9,7 @@ import Btn from '../../_shared/components/Btn';
 import BrandMark from '../../_shared/components/BrandMark';
 import FormRow from '../../_shared/components/FormRow';
 import KeyField from '../../_shared/components/KeyField';
+import NewTabLink from '../../_shared/components/NewTabLink';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Notice from '../../_shared/components/Notice';
 import { notify } from '../../_shared/notify';
@@ -16,16 +17,6 @@ import useCardOpen from '../../_shared/useCardOpen';
 
 const STRIPE_REGISTER = 'https://dashboard.stripe.com/register';
 const STRIPE_KEYS     = 'https://dashboard.stripe.com/apikeys';
-
-function NewTabLink( { href, children } ) {
-    return (
-        <a href={ href } target="_blank" rel="noopener noreferrer">
-            { children }
-            <ExternalLink size={ 12 } strokeWidth={ 2 } aria-hidden="true" />
-            <span className="screen-reader-text">{ __( '(opens in a new tab)', 'gratora-donation-platform' ) }</span>
-        </a>
-    );
-}
 
 function FirstSteps( { onOffline } ) {
     return (

@@ -75,6 +75,8 @@ export default function GatewaysPanel( { s, org } ) {
         setShowOffline( false );
     }, [ showOffline, offlineOpen, setOfflineOpen ] );
 
+    const toOffline = offlineConfigured ? null : () => setShowOffline( true );
+
     const country = org ? String( org.value( 'country', '' ) ) : '';
     const orgName = org ? String( org.value( 'name', '' ) ).trim() : '';
 
@@ -99,8 +101,8 @@ export default function GatewaysPanel( { s, org } ) {
                 />
             </Card>
 
-            <StripeKeysCard s={ s } onOffline={ offlineConfigured ? null : () => setShowOffline( true ) } />
-            <PayPalKeysCard s={ s } />
+            <StripeKeysCard s={ s } onOffline={ toOffline } />
+            <PayPalKeysCard s={ s } onOffline={ toOffline } />
 
             { gatewayPanels.map( ( panel ) => (
                 <ExtensionSection key={ panel.id } panel={ panel } />
