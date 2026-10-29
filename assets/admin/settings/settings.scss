@@ -465,15 +465,26 @@ $border: $border-mid;
         font-size: 13px;
         font-weight: 500;
         color: $text;
+        text-align: left;
         cursor: pointer;
 
-        svg { transform: rotate(-90deg); transition: transform .15s ease; }
+        svg { flex: none; transform: rotate(-90deg); transition: transform .15s ease; }
         &[aria-expanded="true"] svg { transform: none; }
         &:hover { color: $accent-dark; }
     }
 
     #gratora-stripe-webhooks,
     #gratora-paypal-webhooks { margin-top: 14px; }
+}
+
+.gratora-stripe-mode,
+.gratora-stripe-webhooks {
+    @media (max-width: 600px) {
+        .gratora-form-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+    }
 }
 
 .gratora-stripe-modes {
