@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,11 +276,8 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.2.4 =
-* New: after activating, the Plugins screen points to the setup, and the plugin's row links to the setup or to Settings.
-* New: the Stripe settings show how to open a Stripe account and where to find the keys.
-* New: offline donations are called "Check or bank transfer", with plainer settings and a US bank details example.
-* Changed: the cover-the-fee box starts unticked, on new forms and on forms that kept the default wording, and reads like "Add $1.75 to cover processing fees".
-* Fixed: no fee is added to check, bank transfer or test-method donations.
+= 1.2.5 =
+* New: the PayPal settings show how to open a PayPal Business account and where to find the Client ID and secret.
+* Fixed: on a phone, the Stripe and PayPal key fields are wide enough to paste into.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).
