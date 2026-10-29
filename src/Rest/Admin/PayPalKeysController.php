@@ -7,6 +7,7 @@ namespace Gratora\Rest\Admin;
 use Gratora\Analytics\ErrorLog;
 use Gratora\Dashboard\FirstRun;
 use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Helpers\Money;
 use Gratora\Gateways\GatewayTransportException;
 use Gratora\Gateways\PayPal\PayPalAccount;
 use Gratora\Gateways\PayPal\PayPalApi;
@@ -133,7 +134,26 @@ final class PayPalKeysController
             'account'     => $this->account->get(),
             'webhook_url' => rest_url('gratora/v1/webhooks/paypal'),
             'test_donation_made' => FirstRun::testDonationMade(),
+            'site_currencies' => $this->siteCurrencies(),
         ], 200);
+    }
+
+    /**
+     * The base currency and every other one the site accepts.
+     *
+     * @return list<string>
+     *
+     * @since 1.2.5
+     */
+    private function siteCurrencies(): array
+    {
+        $opt      = get_option('gratora_currency_locale', []);
+        $accepted = is_array($opt) && is_array($opt['supported_currencies'] ?? null) ? $opt['supported_currencies'] : [];
+
+        return array_values(array_unique(array_map(
+            static fn ($code): string => strtoupper((string) $code),
+            [Money::defaultCurrency(), ...$accepted]
+        )));
     }
 
     /** @since 1.0.0 */

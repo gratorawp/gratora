@@ -212,7 +212,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             // Stripe decision that must not be changed here. Until PayPalMoney
             // carries its own zero-decimal set, offering them would only fail
             // at the boundary.
-            'AUD', 'BRL', 'CAD', 'CHF', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
+            'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'DKK', 'EUR', 'GBP', 'HKD',
             'ILS', 'JPY', 'MXN', 'MYR', 'NOK', 'NZD', 'PHP', 'PLN', 'SEK', 'SGD',
             'THB', 'USD',
         ];

@@ -363,6 +363,8 @@ export default function PayPalKeysCard( { s, onOffline = null } ) {
     // A test donation has already worked, so the credentials still missing are the ones that take real money.
     const liveFirst = !! status?.test_donation_made;
 
+    const takesCny = ( status?.site_currencies || [] ).includes( 'CNY' );
+
     const hookMissing = [ 'test', 'live' ].some( ( mode ) => !! account?.[ `has_${ mode }` ] && ! account?.[ `webhook_${ mode }` ] );
 
     return (
@@ -375,6 +377,12 @@ export default function PayPalKeysCard( { s, onOffline = null } ) {
                 : <Pill tone="gray">{ __( 'Not set up', 'gratora-donation-platform' ) }</Pill> }
         >
             { ! connected && <FirstSteps onOffline={ onOffline } /> }
+
+            { takesCny && (
+                <p className="gratora-connect-p">
+                    { __( 'PayPal takes Chinese yuan (CNY) only for PayPal accounts registered in China.', 'gratora-donation-platform' ) }
+                </p>
+            ) }
 
             <ToggleRow
                 title={ __( 'Enable the PayPal gateway', 'gratora-donation-platform' ) }

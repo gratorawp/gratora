@@ -218,6 +218,24 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $this->assertSame('JPY', $order['body']['purchase_units'][0]['amount']['currency_code'] ?? null);
     }
 
+    /** A form in Chinese yuan offers PayPal, and the order carries yuan with two decimals. */
+    public function test_a_cny_form_offers_paypal_and_orders_in_yuan(): void
+    {
+        update_option('gratora_currency_locale', [
+            'default_currency'     => 'CNY',
+            'supported_currencies' => ['CNY'],
+        ]);
+
+        $manager = Plugin::instance()->container->get(GatewayManager::class);
+        $this->assertContains('paypal', $manager->optionsFor([], null, 'CNY', 'one_time', true));
+
+        $this->createDonation('CNY', 68800, 'cny@example.test');
+
+        $order = $this->findCall('/v2/checkout/orders');
+        $this->assertSame('688.00', $order['body']['purchase_units'][0]['amount']['value'] ?? null);
+        $this->assertSame('CNY', $order['body']['purchase_units'][0]['amount']['currency_code'] ?? null);
+    }
+
     public function test_capture_route_confirms_the_donation(): void
     {
         $reference = $this->createDonation();

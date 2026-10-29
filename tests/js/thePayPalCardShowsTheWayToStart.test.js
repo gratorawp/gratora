@@ -1,6 +1,7 @@
 /**
  * Until PayPal credentials are saved the card says how to get them and offers
- * checks meanwhile; after a test donation the live credentials come first.
+ * checks meanwhile; after a test donation the live credentials come first; a
+ * site that takes CNY is told PayPal takes it only for accounts in China.
  */
 
 jest.mock( 'react', () => require( 'preact/compat' ) );
@@ -29,6 +30,7 @@ const NOTHING_SAVED = {
     account:            null,
     webhook_url:        'https://example.test/wp-json/gratora/v1/webhooks/paypal',
     test_donation_made: false,
+    site_currencies:    [ 'USD' ],
 };
 
 const LIVE_SAVED = {
@@ -70,6 +72,7 @@ it( 'shows the steps and the checks offer while no credentials are saved', async
     expect( text() ).toContain( 'Switch to Live and press Create App.' );
     expect( modes() ).toEqual( [ 'Sandbox credentials', 'Live credentials' ] );
     expect( hookFold().getAttribute( 'aria-expanded' ) ).toBe( 'false' );
+    expect( text() ).not.toContain( 'Chinese yuan' );
 
     button( 'Set up checks and bank transfers' ).click();
     expect( onOffline ).toHaveBeenCalledTimes( 1 );
@@ -93,4 +96,10 @@ it( 'drops the steps once credentials are saved and opens the webhook settings u
     await show( { ...LIVE_SAVED, account: { ...LIVE_SAVED.account, webhook_live: true } } );
 
     expect( hookFold().getAttribute( 'aria-expanded' ) ).toBe( 'false' );
+} );
+
+it( 'says where PayPal takes yuan when the site takes CNY', async () => {
+    await show( { ...NOTHING_SAVED, site_currencies: [ 'USD', 'CNY' ] } );
+
+    expect( text() ).toContain( 'PayPal takes Chinese yuan (CNY) only for PayPal accounts registered in China.' );
 } );
