@@ -2,6 +2,7 @@
 
 = 1.2.5 =
 * New: the PayPal settings show how to open a PayPal Business account and where to find the Client ID and secret.
+* New: PayPal can take donations in Chinese yuan (CNY) for PayPal accounts registered in China.
 * Fixed: on a phone, the Stripe and PayPal key fields are wide enough to paste into.
 
 = 1.2.4 =

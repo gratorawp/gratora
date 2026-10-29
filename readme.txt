@@ -278,6 +278,7 @@ Tools > Site Health > Info and look under Database.
 
 = 1.2.5 =
 * New: the PayPal settings show how to open a PayPal Business account and where to find the Client ID and secret.
+* New: PayPal can take donations in Chinese yuan (CNY) for PayPal accounts registered in China.
 * Fixed: on a phone, the Stripe and PayPal key fields are wide enough to paste into.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).
