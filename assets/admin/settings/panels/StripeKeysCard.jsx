@@ -249,21 +249,14 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove, optional = fal
 function ApplePaySection( { status, onDone } ) {
     const account = status?.account || null;
     const apple   = status?.apple_pay || {};
-    const hasFile = !! apple.has_file;
 
-    const [ file, setFile ] = useState( '' );
     const [ busy, setBusy ] = useState( false );
-    const [ open, setOpen ] = useState( ! hasFile );
 
     const modes = [ 'test', 'live' ].filter( ( m ) => !! account?.[ `has_${ m }` ] );
     const active = modes.length > 0 && modes.every( ( m ) => apple?.[ m ]?.status === 'active' );
+    const checked = modes.some( ( m ) => [ 'active', 'inactive' ].includes( apple?.[ m ]?.status ) );
 
     const enable = () => {
-        const pasted = file.trim();
-        if ( ! hasFile && ! pasted ) {
-            notify.error( __( 'Paste the domain association file from Stripe first.', 'gratora-donation-platform' ) );
-            return;
-        }
         if ( ! modes.length ) {
             notify.error( __( 'Save your Stripe keys first.', 'gratora-donation-platform' ) );
             return;
@@ -275,7 +268,7 @@ function ApplePaySection( { status, onDone } ) {
         Promise.all( modes.map( ( mode ) => apiFetch( {
             path:   '/gratora/v1/gateways/stripe/apple-pay',
             method: 'POST',
-            data:   { mode, association_file: pasted },
+            data:   { mode },
         } ).then(
             ( r ) => ( { ok: r?.apple_pay?.status === 'active', message: r?.apple_pay?.message || '' } ),
             ( e ) => ( { ok: false, message: e?.message || '' } )
@@ -285,11 +278,9 @@ function ApplePaySection( { status, onDone } ) {
                 if ( bad ) {
                     notify.error(
                         bad.message ||
-                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'gratora-donation-platform' )
+                        __( 'Stripe could not verify this domain yet. Try again in a few minutes.', 'gratora-donation-platform' )
                     );
                 } else {
-                    setFile( '' );
-                    setOpen( false );
                     notify.success( __( 'Apple Pay is verified for this domain.', 'gratora-donation-platform' ) );
                 }
                 onDone();
@@ -305,8 +296,8 @@ function ApplePaySection( { status, onDone } ) {
     };
 
     let pill = <Pill tone="gray">{ __( 'Not set up', 'gratora-donation-platform' ) }</Pill>;
-    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'gratora-donation-platform' ) }</Pill>;
-    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'gratora-donation-platform' ) }</Pill>;
+    if ( active )       pill = <Pill tone="green">{ __( 'Verified', 'gratora-donation-platform' ) }</Pill>;
+    else if ( checked ) pill = <Pill tone="amber">{ __( 'Not verified', 'gratora-donation-platform' ) }</Pill>;
 
     const firstMessage = modes.map( ( m ) => apple?.[ m ]?.message ).find( Boolean );
 
@@ -319,7 +310,7 @@ function ApplePaySection( { status, onDone } ) {
                 </div>
 
                 <p className="gratora-connect-p">
-                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'gratora-donation-platform' ) }
+                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple Pay needs this domain registered with Stripe, and until it verifies, the Apple Pay button just never shows.', 'gratora-donation-platform' ) }
                 </p>
 
                 <FormRow label={ __( 'Domain', 'gratora-donation-platform' ) }>
@@ -327,32 +318,12 @@ function ApplePaySection( { status, onDone } ) {
                     <KeyField value={ apple.domain || '' } />
                 </FormRow>
 
-                { open ? (
-                    <>
-                        <FormRow
-                            label={ __( 'Domain association file', 'gratora-donation-platform' ) }
-                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'gratora-donation-platform' ) }
-                            wide
-                        >
-                            <textarea
-                                className="gratora-textarea gratora-textarea--mono"
-                                rows={ 4 }
-                                value={ file }
-                                onChange={ ( e ) => setFile( e.target.value ) }
-                                placeholder="7B227073704964223A…"
-                            />
-                        </FormRow>
-                        <div className="gratora-stripe-mode__actions">
-                            <Btn variant="primary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Enable Apple Pay', 'gratora-donation-platform' ) }
-                            </Btn>
-                            { hasFile && (
-                                <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setFile( '' ); } }>
-                                    { __( 'Cancel', 'gratora-donation-platform' ) }
-                                </Btn>
-                            ) }
-                        </div>
-                    </>
+                { ! checked ? (
+                    <div className="gratora-stripe-mode__actions">
+                        <Btn variant="primary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
+                            { __( 'Enable Apple Pay', 'gratora-donation-platform' ) }
+                        </Btn>
+                    </div>
                 ) : (
                     <div className="gratora-stripe-mode__saved">
                         <span className="is-muted">
@@ -366,9 +337,6 @@ function ApplePaySection( { status, onDone } ) {
                         <div className="gratora-stripe-mode__actions">
                             <Btn variant="secondary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
                                 { __( 'Check again', 'gratora-donation-platform' ) }
-                            </Btn>
-                            <Btn variant="ghost" size="sm" onClick={ () => setOpen( true ) }>
-                                { __( 'Replace file', 'gratora-donation-platform' ) }
                             </Btn>
                         </div>
                     </div>

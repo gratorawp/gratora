@@ -77,34 +77,19 @@ final class StripeKeysController
             'permission_callback' => [$this, 'canManage'],
             'args'                => [
                 'mode' => ['type' => 'string', 'enum' => ['test', 'live'], 'default' => 'live'],
-                'association_file' => ['type' => 'string'],
             ],
         ]);
     }
 
     /**
-     * Store Apple's association file, then ask Stripe to register and verify
-     * the domain. Both halves have to be true before Apple Pay renders, so this
-     * does them together and reports whichever one is missing.
+     * Ask Stripe to register and verify this site's domain, which Apple Pay
+     * needs before its button renders.
      *
      * @since 1.0.0
      */
     public function enableApplePay(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $test = $request->get_param('mode') === 'test';
-        $file = trim((string) ($request->get_param('association_file') ?? ''));
-
-        if ($file !== '') {
-            $this->applePay->storeAssociationFile($file);
-        }
-
-        if (! $this->applePay->isFileReady()) {
-            return new WP_Error(
-                'gratora_apple_pay_no_file',
-                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'gratora-donation-platform'),
-                ['status' => 400]
-            );
-        }
 
         try {
             $result = $this->applePay->registerDomain($test);
@@ -141,7 +126,6 @@ final class StripeKeysController
             'test_donation_made' => FirstRun::testDonationMade(),
             'apple_pay' => [
                 'domain'    => $this->applePay->domain(),
-                'has_file'  => $this->applePay->isFileReady(),
                 'test'      => $this->applePay->status(true),
                 'live'      => $this->applePay->status(false),
             ],

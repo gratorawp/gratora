@@ -438,7 +438,7 @@ final class ReadinessService
         if (! $this->switchedOn('stripe') || ! $this->stripe->isConnected()) {
             return null;
         }
-        if ($this->applePay->isFileReady()) {
+        if ($this->applePay->status($this->testMode())['status'] === 'active') {
             return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'gratora-donation-platform'));
         }
 
@@ -446,7 +446,7 @@ final class ReadinessService
             'apple-pay',
             'money',
             __('Apple Pay is not verified for this domain', 'gratora-donation-platform'),
-            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'gratora-donation-platform'),
+            __('The Apple Pay button simply does not appear until Stripe verifies this domain. Everything else keeps working.', 'gratora-donation-platform'),
             'gateways',
             __('Verify the domain', 'gratora-donation-platform')
         );

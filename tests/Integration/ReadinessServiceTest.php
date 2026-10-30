@@ -11,6 +11,7 @@ use Gratora\Forms\FormReadinessService;
 use Gratora\Foundation\Crypto\Crypto;
 use Gratora\Foundation\License\LicenseService;
 use Gratora\Foundation\Time\SystemClock;
+use Gratora\Foundation\Config\SystemSetting;
 use Gratora\Gateways\GatewayManager;
 use Gratora\Gateways\Offline\OfflineGateway;
 use Gratora\Gateways\PayPal\PayPalAccount;
@@ -229,6 +230,22 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
         $this->assertArrayNotHasKey('stripe-webhook', $checks);
         $this->assertArrayNotHasKey('apple-pay', $checks);
+    }
+
+    /** Stripe's answer for the mode in use is the only thing that makes it verified. */
+    public function test_apple_pay_is_verified_only_when_stripe_says_so_for_the_mode_in_use(): void
+    {
+        (new StripeAccount(new Crypto()))->saveKeys(false, 'sk_live_x', 'pk_live_x');
+        SystemSetting::forget('apple_pay_domain_status');
+        SystemSetting::write('apple_pay_domain_file', 'anything at all');
+
+        $this->assertSame(ReadinessService::WARN, $this->checks()['apple-pay']['status'], 'saved text proves nothing');
+
+        SystemSetting::write('apple_pay_domain_status', (string) wp_json_encode(['live' => ['status' => 'active', 'message' => '']]));
+        $this->assertSame(ReadinessService::PASS, $this->checks()['apple-pay']['status']);
+
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        $this->assertSame(ReadinessService::WARN, $this->checks()['apple-pay']['status'], 'live says nothing about test');
     }
 
     public function test_stripe_without_a_webhook_secret_is_flagged(): void

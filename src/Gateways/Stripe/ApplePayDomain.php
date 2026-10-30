@@ -12,16 +12,10 @@ use RuntimeException;
  * Apple Pay domain verification for the Stripe Payment Element.
  *
  * Google Pay needs nothing beyond being enabled on the Stripe account, but
- * Apple requires the domain to be verified before its button will render. That
- * means two things must both be true:
+ * Apple Pay's button only renders once Stripe reports the domain as verified,
+ * so this registers the domain and records what Stripe answers.
  *
- *   1. the site serves Apple's association file at
- *      /.well-known/apple-developer-merchantid-domain-association, and
- *   2. the domain is registered with Stripe, which fetches that file to verify.
- *
- * The file contents come from the Stripe dashboard and are pasted in by the
- * admin: they are not secret, but they do change, so Gratora stores whatever the
- * admin provides rather than shipping a copy that would silently go stale.
+ * An association file a site has saved is still served at WELL_KNOWN_PATH.
  *
  * @since 1.0.0
  */
@@ -57,29 +51,6 @@ final class ApplePayDomain extends HookProvider
     {
         $stored = SystemSetting::read(self::FILE_KEY);
         return is_string($stored) ? $stored : '';
-    }
-
-    /** @since 1.0.0 */
-    public function storeAssociationFile(string $contents): void
-    {
-        SystemSetting::write(self::FILE_KEY, trim($contents));
-    }
-
-    /** @since 1.0.0 */
-    public function forgetAssociationFile(): void
-    {
-        SystemSetting::forget(self::FILE_KEY);
-        SystemSetting::forget(self::STATUS_KEY);
-    }
-
-    /**
-     * True when the file is in place, which is the precondition for Stripe's check.
-     *
-     * @since 1.0.0
-     */
-    public function isFileReady(): bool
-    {
-        return $this->associationFile() !== '';
     }
 
     /**
