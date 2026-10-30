@@ -220,6 +220,29 @@ test( 'the country list reaches the last country', async () => {
     expect( document.querySelectorAll( '.dp-country__list [role="option"]' ) ).toHaveLength( localizedCountries().length );
 } );
 
+test( 'arrow keys bring the highlighted country into view', async () => {
+    const scrolled = [];
+    Element.prototype.scrollIntoView = function () { scrolled.push( this.id ); };
+    routes.profile = () => jsonResponse( 200, { first_name: 'Alice', last_name: 'Okafor', country: '' } );
+    await mount( { country: '' } );
+
+    button( 'Profile' ).click();
+    await until( () => document.querySelector( '.dp-country input' ), 'the account form to render' );
+
+    const input = document.querySelector( '.dp-country input' );
+    input.focus();
+    input.dispatchEvent( new window.Event( 'focus', { bubbles: true } ) );
+    await settle();
+
+    input.dispatchEvent( new window.KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } ) );
+    await settle();
+
+    expect( scrolled ).toHaveLength( 1 );
+    expect( scrolled[ 0 ] ).toContain( localizedCountries()[ 1 ].code );
+
+    delete Element.prototype.scrollIntoView;
+} );
+
 test( 'and a donor with no country saved is left with an empty field', async () => {
     routes.profile = () => jsonResponse( 200, { first_name: 'Alice', last_name: 'Okafor', country: '' } );
     await mount( { country: '' } );

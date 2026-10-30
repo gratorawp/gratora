@@ -1768,6 +1768,8 @@ function CountryPicker( { value, onChange } ) {
     const [ open, setOpen ]   = useState( false );
     const [ active, setActive ] = useState( 0 );
     const [ id ] = useState( () => `dp-country-${ ++countryPickerSeq }` );
+    const listRef = useRef( null );
+    const byKey   = useRef( false );
 
     useEffect( () => {
         const c = byCode( value );
@@ -1782,7 +1784,14 @@ function CountryPicker( { value, onChange } ) {
             || c.name.toLowerCase().includes( q )
             || c.code.toLowerCase().startsWith( q ) );
 
-    useEffect( () => { setActive( 0 ); }, [ query ] );
+    useEffect( () => { setActive( 0 ); }, [ query, open ] );
+
+    useEffect( () => {
+        if ( byKey.current ) {
+            byKey.current = false;
+            listRef.current?.children[ active ]?.scrollIntoView( { block: 'nearest' } );
+        }
+    }, [ active ] );
 
     const pick = ( c ) => {
         onChange( c.code );
@@ -1797,6 +1806,7 @@ function CountryPicker( { value, onChange } ) {
         if ( e.key === 'ArrowDown' || e.key === 'ArrowUp' ) {
             e.preventDefault();
             if ( ! open ) { setOpen( true ); return; }
+            byKey.current = true;
             setActive( ( i ) => e.key === 'ArrowDown'
                 ? Math.min( matches.length - 1, i + 1 )
                 : Math.max( 0, i - 1 ) );
@@ -1836,7 +1846,7 @@ function CountryPicker( { value, onChange } ) {
                     onKeyDown={ onKeyDown }
                 />
                 { open && matches.length > 0 && (
-                    <ul id={ `${ id }-list` } class="dp-country__list" role="listbox">
+                    <ul ref={ listRef } id={ `${ id }-list` } class="dp-country__list" role="listbox">
                         { matches.map( ( c, i ) => (
                             <li
                                 key={ c.code }

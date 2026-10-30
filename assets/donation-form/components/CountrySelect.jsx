@@ -30,6 +30,8 @@ export default function CountrySelect( {
 
     const wrapRef  = useRef( null );
     const inputRef = useRef( null );
+    const listRef  = useRef( null );
+    const byKey    = useRef( false );
 
     useEffect( () => {
         if ( ! open ) return undefined;
@@ -58,7 +60,14 @@ export default function CountrySelect( {
         ) );
     }, [ query, countries ] );
 
-    useEffect( () => { setActive( 0 ); }, [ query ] );
+    useEffect( () => { setActive( 0 ); }, [ query, open ] );
+
+    useEffect( () => {
+        if ( byKey.current ) {
+            byKey.current = false;
+            listRef.current?.children[ active ]?.scrollIntoView( { block: 'nearest' } );
+        }
+    }, [ active ] );
 
     const pick = ( c ) => {
         onChange && onChange( c.code );
@@ -78,9 +87,11 @@ export default function CountrySelect( {
         }
         if ( e.key === 'ArrowDown' ) {
             e.preventDefault();
+            byKey.current = true;
             setActive( ( i ) => Math.min( matches.length - 1, i + 1 ) );
         } else if ( e.key === 'ArrowUp' ) {
             e.preventDefault();
+            byKey.current = true;
             setActive( ( i ) => Math.max( 0, i - 1 ) );
         } else if ( e.key === 'Enter' ) {
             e.preventDefault();
@@ -138,7 +149,7 @@ export default function CountrySelect( {
             </span>
 
             { open && matches.length > 0 && (
-                <ul id={ listId } class="gratora-form__country-select-list" role="listbox">
+                <ul ref={ listRef } id={ listId } class="gratora-form__country-select-list" role="listbox">
                     { matches.map( ( c, i ) => (
                         // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- option selection is keyboard-driven through the combobox input's onKeyDown; the option is mouse-activated only.
                         <li

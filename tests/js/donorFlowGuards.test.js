@@ -14,6 +14,8 @@ import CountrySelect from '../../assets/donation-form/components/CountrySelect';
 import { countryName, localizedCountries } from '../../assets/_shared/countries';
 import { keepGatewayValid } from '../../assets/donation-form/util/gateways';
 
+const { waitFor } = require( './support/waitFor' );
+
 const tick = () => new Promise( ( r ) => setTimeout( r, 0 ) );
 
 function mount( node ) {
@@ -164,6 +166,22 @@ describe( 'a donor can find their own country', () => {
 		expect( options() ).toHaveLength( all.filter( ( c ) => (
 			c.label.toLowerCase().includes( 'a' ) || c.name.toLowerCase().includes( 'a' ) || c.code.toLowerCase().includes( 'a' )
 		) ).length );
+	} );
+
+	test( 'arrow keys bring the highlighted country into view', async () => {
+		const scrolled = [];
+		Element.prototype.scrollIntoView = function () { scrolled.push( this.querySelector( '.gratora-form__country-select-label' ).textContent ); };
+		mount( <CountrySelect value="" onChange={ () => {} } id="c" /> );
+
+		input().click();
+		await waitFor( list, { what: 'the open list' } );
+		await new Promise( ( r ) => setTimeout( r, 150 ) );
+		input().dispatchEvent( new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } ) );
+		await waitFor( () => scrolled.length > 0, { what: 'the highlighted row to come into view' } );
+
+		expect( scrolled ).toEqual( [ localizedCountries()[ 1 ].label ] );
+
+		delete Element.prototype.scrollIntoView;
 	} );
 
 	test( 'every country still has a label', () => {
