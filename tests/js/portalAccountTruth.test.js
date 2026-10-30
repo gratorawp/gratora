@@ -2,6 +2,8 @@
  * Four ways the portal showed the donor something other than what it held.
  */
 
+import { localizedCountries } from '../../assets/_shared/countries';
+
 let routes = {};
 let posted = [];
 
@@ -201,6 +203,21 @@ test( 'text the donor typed but never picked does not survive leaving the field'
     await settle();
 
     expect( document.querySelector( '.dp-country input' ).value ).toBe( 'Germany' );
+} );
+
+test( 'the country list reaches the last country', async () => {
+    routes.profile = () => jsonResponse( 200, { first_name: 'Alice', last_name: 'Okafor', country: '' } );
+    await mount( { country: '' } );
+
+    button( 'Profile' ).click();
+    await until( () => document.querySelector( '.dp-country input' ), 'the account form to render' );
+
+    const input = document.querySelector( '.dp-country input' );
+    input.focus();
+    input.dispatchEvent( new window.Event( 'focus', { bubbles: true } ) );
+    await settle();
+
+    expect( document.querySelectorAll( '.dp-country__list [role="option"]' ) ).toHaveLength( localizedCountries().length );
 } );
 
 test( 'and a donor with no country saved is left with an empty field', async () => {

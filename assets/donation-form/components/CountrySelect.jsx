@@ -46,7 +46,7 @@ export default function CountrySelect( {
 
     const matches = useMemo( () => {
         const q = query.trim().toLowerCase();
-        if ( q === '' ) return countries.slice( 0, 50 );
+        if ( q === '' ) return countries;
 
         // Their own language first, then English and the code, so a donor who
         // knows the form as a translation and one who knows the ISO list both
@@ -55,7 +55,7 @@ export default function CountrySelect( {
             c.label.toLowerCase().includes( q )
             || c.name.toLowerCase().includes( q )
             || c.code.toLowerCase().includes( q )
-        ) ).slice( 0, 50 );
+        ) );
     }, [ query, countries ] );
 
     useEffect( () => { setActive( 0 ); }, [ query ] );

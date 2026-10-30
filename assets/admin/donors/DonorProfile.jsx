@@ -178,7 +178,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             />
                             { countryOpen && countryMatches.length > 0 && (
                                 <ul className="dp-edit-form__country-list">
-                                    { countryMatches.slice( 0, 50 ).map( ( c ) => (
+                                    { countryMatches.map( ( c ) => (
                                         <li key={ c.code }>
                                             <button type="button" onMouseDown={ ( e ) => { e.preventDefault(); pickCountry( c ); } }>
                                                 <span>{ c.label }</span>

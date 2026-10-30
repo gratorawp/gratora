@@ -7,6 +7,7 @@
 import { render } from 'preact';
 
 import DonorProfile from '../../assets/admin/donors/DonorProfile';
+import { localizedCountries } from '../../assets/_shared/countries';
 
 const { waitFor } = require( './support/waitFor' );
 
@@ -117,4 +118,15 @@ it( 'still matches the English name', async () => {
     await search( input, 'Germany' );
 
     expect( options().join( ' ' ) ).toContain( 'Deutschland' );
+} );
+
+test( 'the open list reaches the last country', async () => {
+    const input = await openEditor();
+
+    input.focus();
+    input.value = '';
+    input.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
+
+    await waitFor( () => options().length > 0, { what: 'the open list' } );
+    expect( options() ).toHaveLength( localizedCountries().length );
 } );

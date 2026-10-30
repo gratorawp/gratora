@@ -152,6 +152,20 @@ describe( 'a donor can find their own country', () => {
 		expect( options().length ).toBeGreaterThan( 0 );
 	} );
 
+	test( 'the open list reaches the last country, before and during a search', async () => {
+		const all = localizedCountries();
+		mount( <CountrySelect value="" onChange={ () => {} } id="c" /> );
+
+		input().click();
+		await tick();
+		expect( options() ).toHaveLength( all.length );
+
+		await type( 'a' );
+		expect( options() ).toHaveLength( all.filter( ( c ) => (
+			c.label.toLowerCase().includes( 'a' ) || c.name.toLowerCase().includes( 'a' ) || c.code.toLowerCase().includes( 'a' )
+		) ).length );
+	} );
+
 	test( 'every country still has a label', () => {
 		const all = localizedCountries();
 

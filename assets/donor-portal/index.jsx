@@ -1781,7 +1781,6 @@ function CountryPicker( { value, onChange } ) {
             c.label.toLowerCase().includes( q )
             || c.name.toLowerCase().includes( q )
             || c.code.toLowerCase().startsWith( q ) );
-    const visible = matches.slice( 0, 50 );
 
     useEffect( () => { setActive( 0 ); }, [ query ] );
 
@@ -1799,12 +1798,12 @@ function CountryPicker( { value, onChange } ) {
             e.preventDefault();
             if ( ! open ) { setOpen( true ); return; }
             setActive( ( i ) => e.key === 'ArrowDown'
-                ? Math.min( visible.length - 1, i + 1 )
+                ? Math.min( matches.length - 1, i + 1 )
                 : Math.max( 0, i - 1 ) );
         } else if ( e.key === 'Enter' ) {
-            if ( ! open || ! visible[ active ] ) return;
+            if ( ! open || ! matches[ active ] ) return;
             e.preventDefault();
-            pick( visible[ active ] );
+            pick( matches[ active ] );
         } else if ( e.key === 'Escape' ) {
             setOpen( false );
         }
@@ -1821,7 +1820,7 @@ function CountryPicker( { value, onChange } ) {
                     aria-expanded={ open }
                     aria-autocomplete="list"
                     aria-controls={ open ? `${ id }-list` : undefined }
-                    aria-activedescendant={ open && visible[ active ] ? `${ id }-opt-${ visible[ active ].code }` : undefined }
+                    aria-activedescendant={ open && matches[ active ] ? `${ id }-opt-${ matches[ active ].code }` : undefined }
                     value={ query }
                     placeholder={ __( 'Search country…', 'gratora-donation-platform' ) }
                     onFocus={ () => setOpen( true ) }
@@ -1836,9 +1835,9 @@ function CountryPicker( { value, onChange } ) {
                     onInput={ ( e ) => { setQuery( e.target.value ); setOpen( true ); } }
                     onKeyDown={ onKeyDown }
                 />
-                { open && visible.length > 0 && (
+                { open && matches.length > 0 && (
                     <ul id={ `${ id }-list` } class="dp-country__list" role="listbox">
-                        { visible.map( ( c, i ) => (
+                        { matches.map( ( c, i ) => (
                             <li
                                 key={ c.code }
                                 id={ `${ id }-opt-${ c.code }` }
