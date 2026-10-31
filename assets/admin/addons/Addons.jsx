@@ -1,6 +1,7 @@
 import { createInterpolateElement } from '@wordpress/element';
 import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import {
+    AppWindow,
     ChartLine,
     CreditCard,
     ExternalLink,
@@ -11,6 +12,7 @@ import {
     Rose,
     Sparkles,
     Tag,
+    Tags,
     Ticket,
     UsersRound,
     Webhook,
@@ -28,12 +30,14 @@ const ICONS = {
     'users-round': UsersRound,
     ticket:        Ticket,
     sparkles:      Sparkles,
+    tags:          Tags,
     'credit-card': CreditCard,
     'chart-line':  ChartLine,
     webhook:       Webhook,
     rose:          Rose,
     landmark:      Landmark,
     mail:          Mail,
+    'app-window':  AppWindow,
     import:        Import,
 };
 

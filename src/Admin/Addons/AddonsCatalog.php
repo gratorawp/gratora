@@ -298,12 +298,14 @@ final class AddonsCatalog
             ['peer-to-peer-fundraising', 'gratora-p2p.php', 'Peer-to-Peer', 'Supporters raise money for you on their own pages, alone or in teams.', 'users-round'],
             ['events', 'gratora-events.php', 'Event Tickets', 'Sell tickets to fundraising events, then check guests in by phone.', 'ticket'],
             ['ai-assistant', 'gratora-ai-assistant.php', 'AI Assistant', 'Ask about your fundraising and make changes in plain language.', 'sparkles'],
+            ['donor-crm', 'gratora-donor-crm.php', 'Donor CRM', 'Tags, fields and segments for your donors, and follow-up tasks for your team.', 'tags'],
             ['payment-gateways', 'gratora-payment-gateways.php', 'Payment Gateways', 'Take donations through Authorize.Net, Square, GoCardless, Moneris or Razorpay.', 'credit-card'],
             ['conversion-tracking', 'gratora-conversion-tracking.php', 'Conversion Tracking', 'Report completed donations to GA4, Google Ads and Meta, with amount and currency.', 'chart-line'],
             ['connect', 'gratora-connect.php', 'Connect', 'Send donation, donor and recurring events to signed webhooks, Slack and Mailchimp.', 'webhook'],
             ['tributes', 'gratora-tributes.php', 'Tributes', 'Donors dedicate a donation in honor or in memory of someone.', 'rose'],
             ['gift-aid', 'gratora-gift-aid.php', 'Gift Aid', 'Collect UK Gift Aid declarations on your forms and prepare your claim for HMRC.', 'landmark'],
             ['donation-recovery', 'gratora-donation-recovery.php', 'Donation Recovery', 'One reminder email to someone who started a donation and did not finish it.', 'mail'],
+            ['embedded-forms', 'gratora-embedded-forms.php', 'Embedded Forms', 'Show your donation form on websites you do not run, with one code to paste.', 'app-window'],
         ];
 
         $cards = [];

@@ -246,9 +246,11 @@ final class TheAddOnsScreenReadsItsListsFromGratoraNetTest extends IntegrationTe
         $this->assertSame('builtin', $screen['source']);
         $this->assertSame([], $screen['plans']);
         $this->assertNull($screen['offer']);
-        $this->assertCount(10, $screen['addons']);
-        $this->assertContains('donation-recovery', array_column($screen['addons'], 'slug'));
-        $this->assertSame(['', ''], [$screen['addons'][0]['plan'], $screen['addons'][9]['plan']]);
+        $this->assertSame(
+            ['peer-to-peer-fundraising', 'events', 'ai-assistant', 'donor-crm', 'payment-gateways', 'conversion-tracking', 'connect', 'tributes', 'gift-aid', 'donation-recovery', 'embedded-forms', 'give-importer'],
+            array_column($screen['addons'], 'slug')
+        );
+        $this->assertSame([''], array_values(array_unique(array_column($screen['addons'], 'plan'))));
 
         $this->screen();
 
@@ -408,7 +410,7 @@ final class TheAddOnsScreenReadsItsListsFromGratoraNetTest extends IntegrationTe
 
         $this->assertSame([], $this->requests);
         $this->assertSame('builtin', $screen['source']);
-        $this->assertCount(10, $screen['addons']);
+        $this->assertCount(12, $screen['addons']);
     }
 
     public function test_a_plan_comes_ready_to_show_and_counts_the_cards_on_the_screen(): void
