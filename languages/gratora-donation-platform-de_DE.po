@@ -5933,10 +5933,6 @@ msgstr "Zum Verwalten von Rollen ist voller Administratorzugriff erforderlich."
 msgid "Automatic donor erasure can only be changed by someone who may redact donors."
 msgstr "Die automatische Anonymisierung von Spendern kann nur ändern, wer Spender anonymisieren darf."
 
-#: src/Rest/Admin/StripeKeysController.php:103
-msgid "Paste the domain association file from Stripe first. Apple checks for it before the button can appear."
-msgstr "Füge zuerst die Domain-Zuordnungsdatei von Stripe ein. Apple prüft, ob sie vorhanden ist, bevor der Button erscheinen kann."
-
 #. translators: %s: transport error, e.g. a DNS failure
 #: src/Rest/Admin/StripeKeysController.php:189
 #, php-format
@@ -6409,9 +6405,9 @@ msgstr "Apple Pay ist für diese Domain verifiziert"
 msgid "Apple Pay is not verified for this domain"
 msgstr "Apple Pay ist für diese Domain nicht verifiziert"
 
-#: src/Settings/ReadinessService.php:385
-msgid "The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working."
-msgstr "Der Apple-Pay-Button erscheint einfach nicht, solange die Domain-Zuordnungsdatei nicht hinterlegt ist. Alles andere funktioniert weiterhin."
+#: src/Settings/ReadinessService.php:449
+msgid "The Apple Pay button simply does not appear until Stripe verifies this domain. Everything else keeps working."
+msgstr "Der Apple-Pay-Button erscheint einfach nicht, solange Stripe diese Domain nicht verifiziert hat. Alles andere funktioniert weiterhin."
 
 #: src/Settings/ReadinessService.php:387
 msgid "Verify the domain"
@@ -6502,6 +6498,14 @@ msgstr "Quittungen und E-Mails in der Warteschlange werden nicht versendet. Meis
 #: src/Settings/ReadinessService.php:600
 msgid "The donor portal page is published"
 msgstr "Die Spenderportal-Seite ist veröffentlicht"
+
+#: src/Settings/ReadinessService.php:665
+msgid "The donor portal page is not public"
+msgstr "Die Spenderportal-Seite ist nicht öffentlich"
+
+#: src/Settings/ReadinessService.php:666
+msgid "Sign-in and recurring donation emails link to it. Until it is published, those links lead to a 404."
+msgstr "Anmelde-E-Mails und E-Mails zu wiederkehrenden Spenden verlinken auf diese Seite. Solange sie nicht veröffentlicht ist, führen diese Links zu einem 404-Fehler."
 
 #: src/Settings/ReadinessService.php:607
 msgid "The donor portal page is missing"
@@ -15007,17 +15011,13 @@ msgstr "Geheimschlüssel"
 msgid "Stored encrypted and never shown again. Gratora verifies it with Stripe before saving."
 msgstr "Wird verschlüsselt gespeichert und nie wieder angezeigt. Gratora verifiziert ihn vor dem Speichern bei Stripe."
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:165
-msgid "Paste the domain association file from Stripe first."
-msgstr "Füge zuerst die Domain-Zuordnungsdatei von Stripe ein."
-
 #: assets/admin/settings/panels/StripeKeysCard.jsx:169
 msgid "Save your Stripe keys first."
 msgstr "Speichere zuerst deine Stripe-Schlüssel."
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:189
-msgid "Stripe could not verify this domain yet. Check the file is reachable, then try again."
-msgstr "Stripe konnte diese Domain noch nicht verifizieren. Prüfe, ob die Datei erreichbar ist, und versuche es dann erneut."
+#: assets/admin/settings/panels/StripeKeysCard.jsx:281
+msgid "Stripe could not verify this domain yet. Try again in a few minutes."
+msgstr "Stripe konnte diese Domain noch nicht verifizieren. Versuche es in ein paar Minuten erneut."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:194
 msgid "Apple Pay is verified for this domain."
@@ -15048,21 +15048,13 @@ msgstr "Nicht verifiziert"
 msgid "Apple Pay"
 msgstr "Apple Pay"
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:223
-msgid "Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows."
-msgstr "Google Pay braucht hier nichts: Es erscheint, sobald dein Stripe-Konto es unterstützt. Apple prüft zuerst, ob dir diese Domain gehört, und solange das nicht verifiziert ist, erscheint der Apple-Pay-Button einfach nicht."
+#: assets/admin/settings/panels/StripeKeysCard.jsx:313
+msgid "Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple Pay needs this domain registered with Stripe, and until it verifies, the Apple Pay button just never shows."
+msgstr "Google Pay braucht hier nichts: Es erscheint, sobald dein Stripe-Konto es unterstützt. Für Apple Pay muss diese Domain bei Stripe registriert sein, und solange sie nicht verifiziert ist, erscheint der Apple-Pay-Button einfach nicht."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:226
 msgid "Domain"
 msgstr "Domain"
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:234
-msgid "Domain association file"
-msgstr "Domain-Zuordnungsdatei"
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:235
-msgid "In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here."
-msgstr "Gehe in Stripe zu „Einstellungen“, „Zahlungsmethoden-Domains“ und füge die obige Domain hinzu. Stripe verlinkt eine Datei zum Herunterladen; füge deren gesamten Inhalt hier ein."
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:248
 msgid "Enable Apple Pay"
@@ -15071,10 +15063,6 @@ msgstr "Apple Pay aktivieren"
 #: assets/admin/settings/panels/StripeKeysCard.jsx:263
 msgid "Live"
 msgstr "Live"
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:272
-msgid "Replace file"
-msgstr "Datei ersetzen"
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:307
 msgid "Remove Stripe keys"

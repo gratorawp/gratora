@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Gratora - Donation and Fundraising Platform 1.2.5\n"
+"Project-Id-Version: Gratora - Donation and Fundraising Platform 1.2.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/gratora-donation-platform\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-29T06:26:47+00:00\n"
+"POT-Creation-Date: 2026-10-31T07:49:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: gratora-donation-platform\n"
@@ -45,7 +45,7 @@ msgstr ""
 #: assets/admin/donors/DonorProfile.jsx:174
 #: assets/admin/forms/blocks/country/index.js:32
 #: assets/admin/forms/blocks/country/index.js:53
-#: assets/donor-portal/index.jsx:1826
+#: assets/donor-portal/index.jsx:1835
 msgid "Search country…"
 msgstr ""
 
@@ -84,7 +84,7 @@ msgstr ""
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:317
 #: assets/admin/settings/panels/ReceiptsPanel.jsx:122
 #: assets/admin/settings/panels/StripeKeysCard.jsx:207
-#: assets/admin/settings/panels/StripeKeysCard.jsx:410
+#: assets/admin/settings/panels/StripeKeysCard.jsx:378
 #: assets/donor-portal/index.jsx:1568
 msgid "Remove"
 msgstr ""
@@ -530,7 +530,6 @@ msgstr[1] ""
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:239
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:283
 #: assets/admin/settings/panels/StripeKeysCard.jsx:233
-#: assets/admin/settings/panels/StripeKeysCard.jsx:351
 #: assets/admin/tools/tabs/CsvImportCard.jsx:168
 #: assets/admin/_shared/components/ConfirmDialog.jsx:103
 #: assets/donor-portal/index.jsx:1739
@@ -1456,7 +1455,7 @@ msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:45
 #: assets/admin/settings/Settings.jsx:41
-#: assets/donor-portal/index.jsx:2023
+#: assets/donor-portal/index.jsx:2032
 msgid "Privacy"
 msgstr ""
 
@@ -2862,7 +2861,7 @@ msgstr ""
 msgid "Annual donation statement"
 msgstr ""
 
-#: src/Donors/Portal/PortalPage.php:45
+#: src/Donors/Portal/PortalPage.php:51
 #: src/Recurring/PlanRow.php:297
 #: assets/admin/settings/panels/SetupPanel.jsx:17
 #: assets/donor-portal/index.jsx:623
@@ -3083,7 +3082,7 @@ msgstr ""
 #: assets/admin/forms/blocks/country/index.js:63
 #: assets/admin/onboarding/Onboarding.jsx:457
 #: assets/admin/settings/panels/OrganizationPanel.jsx:98
-#: assets/donor-portal/index.jsx:1815
+#: assets/donor-portal/index.jsx:1824
 msgid "Country"
 msgstr ""
 
@@ -3300,7 +3299,7 @@ msgstr ""
 
 #: src/Forms/Blocks/AnonymousToggleBlock.php:35
 #: assets/donor-portal/index.jsx:859
-#: assets/donor-portal/index.jsx:2027
+#: assets/donor-portal/index.jsx:2036
 msgid "Hide my name from the public list of donors"
 msgstr ""
 
@@ -3584,7 +3583,7 @@ msgstr ""
 #: src/Forms/FormReadinessService.php:254
 #: src/Forms/FormReadinessService.php:341
 #: src/Forms/FormReadinessService.php:357
-#: src/Settings/ReadinessService.php:858
+#: src/Settings/ReadinessService.php:881
 msgid "Open settings"
 msgstr ""
 
@@ -4295,7 +4294,7 @@ msgid "We could not check on your payment, and your bank may still have taken it
 msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:818
-#: assets/admin/settings/panels/StripeKeysCard.jsx:368
+#: assets/admin/settings/panels/StripeKeysCard.jsx:339
 #: assets/admin/subscriptions/List.jsx:225
 #: assets/admin/tools/tabs/MaintenanceTab.jsx:186
 msgid "Check again"
@@ -4366,7 +4365,7 @@ msgstr ""
 #: assets/admin/forms/blocks/recurring-toggle/index.js:14
 #: assets/admin/_shared/recurring/PlanActions.jsx:151
 #: assets/admin/_shared/recurring/planColumns.jsx:21
-#: assets/donor-portal/index.jsx:2059
+#: assets/donor-portal/index.jsx:2068
 msgid "Every 2 weeks"
 msgstr ""
 
@@ -4588,18 +4587,18 @@ msgid "The license for %s has lapsed. Renew to keep receiving updates and securi
 msgstr ""
 
 #: src/Foundation/License/LicenseNotice.php:70
-#: src/Settings/ReadinessService.php:722
+#: src/Settings/ReadinessService.php:745
 msgid "Your add-ons are not linked to a license key"
 msgstr ""
 
 #: src/Foundation/License/LicenseNotice.php:71
-#: src/Settings/ReadinessService.php:723
+#: src/Settings/ReadinessService.php:746
 msgid "They keep running, but they will not receive updates or security fixes."
 msgstr ""
 
 #: src/Foundation/License/LicenseNotice.php:129
-#: src/Settings/ReadinessService.php:690
-#: src/Settings/ReadinessService.php:710
+#: src/Settings/ReadinessService.php:713
+#: src/Settings/ReadinessService.php:733
 msgid "Manage licenses"
 msgstr ""
 
@@ -4861,7 +4860,7 @@ msgstr ""
 #: src/Gateways/GatewayLabels.php:34
 #: src/Gateways/Stripe/StripeGateway.php:110
 #: src/Settings/ReadinessService.php:222
-#: assets/admin/settings/panels/StripeKeysCard.jsx:430
+#: assets/admin/settings/panels/StripeKeysCard.jsx:398
 msgid "Stripe"
 msgstr ""
 
@@ -5019,7 +5018,7 @@ msgstr ""
 msgid "Sandbox rehearsal completed after %d cycles."
 msgstr ""
 
-#: src/Gateways/Stripe/ApplePayDomain.php:164
+#: src/Gateways/Stripe/ApplePayDomain.php:135
 msgid "This domain is not registered with Stripe yet."
 msgstr ""
 
@@ -5959,39 +5958,35 @@ msgstr ""
 msgid "Automatic donor erasure can only be changed by someone who may redact donors."
 msgstr ""
 
-#: src/Rest/Admin/StripeKeysController.php:104
-msgid "Paste the domain association file from Stripe first. Apple checks for it before the button can appear."
-msgstr ""
-
 #. translators: %s: transport error, e.g. a DNS failure
-#: src/Rest/Admin/StripeKeysController.php:191
+#: src/Rest/Admin/StripeKeysController.php:175
 #, php-format
 msgid "This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved."
 msgstr ""
 
 #. translators: %s: error message from Stripe
-#: src/Rest/Admin/StripeKeysController.php:202
+#: src/Rest/Admin/StripeKeysController.php:186
 #, php-format
 msgid "Stripe rejected that secret key: %s"
 msgstr ""
 
-#: src/Rest/Admin/StripeKeysController.php:257
+#: src/Rest/Admin/StripeKeysController.php:241
 msgid "That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_."
 msgstr ""
 
-#: src/Rest/Admin/StripeKeysController.php:260
+#: src/Rest/Admin/StripeKeysController.php:244
 msgid "That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_."
 msgstr ""
 
-#: src/Rest/Admin/StripeKeysController.php:267
+#: src/Rest/Admin/StripeKeysController.php:251
 msgid "The secret and publishable keys are from different modes. Use the pair from the same Stripe mode."
 msgstr ""
 
-#: src/Rest/Admin/StripeKeysController.php:272
+#: src/Rest/Admin/StripeKeysController.php:256
 msgid "Those are live keys. Paste your test keys here, or save them under Live."
 msgstr ""
 
-#: src/Rest/Admin/StripeKeysController.php:273
+#: src/Rest/Admin/StripeKeysController.php:257
 msgid "Those are test keys. Paste your live keys here, or save them under Test."
 msgstr ""
 
@@ -6438,7 +6433,7 @@ msgid "Apple Pay is not verified for this domain"
 msgstr ""
 
 #: src/Settings/ReadinessService.php:449
-msgid "The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working."
+msgid "The Apple Pay button simply does not appear until Stripe verifies this domain. Everything else keeps working."
 msgstr ""
 
 #: src/Settings/ReadinessService.php:451
@@ -6533,34 +6528,49 @@ msgstr ""
 msgid "The donor portal page is published"
 msgstr ""
 
-#: src/Settings/ReadinessService.php:657
-msgid "The donor portal page is missing"
+#: src/Settings/ReadinessService.php:665
+msgid "The donor portal page is not public"
 msgstr ""
 
-#: src/Settings/ReadinessService.php:658
-msgid "Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404."
+#: src/Settings/ReadinessService.php:666
+msgid "Sign-in and recurring donation emails link to it. Until it is published, those links lead to a 404."
 msgstr ""
 
-#: src/Settings/ReadinessService.php:660
+#: src/Settings/ReadinessService.php:671
+#: src/Settings/ReadinessService.php:683
 msgid "Open pages"
 msgstr ""
 
+#: src/Settings/ReadinessService.php:672
+#: assets/admin/onboarding/Onboarding.jsx:675
+#: assets/admin/onboarding/Onboarding.jsx:681
+msgid "Open the page"
+msgstr ""
+
+#: src/Settings/ReadinessService.php:680
+msgid "The donor portal page is missing"
+msgstr ""
+
+#: src/Settings/ReadinessService.php:681
+msgid "Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404."
+msgstr ""
+
 #. translators: %s: comma-separated add-on names.
-#: src/Settings/ReadinessService.php:705
+#: src/Settings/ReadinessService.php:728
 #, php-format
 msgid "The license for %s has lapsed"
 msgstr ""
 
-#: src/Settings/ReadinessService.php:708
+#: src/Settings/ReadinessService.php:731
 msgid "Renew to keep receiving updates and security fixes."
 msgstr ""
 
-#: src/Settings/ReadinessService.php:725
+#: src/Settings/ReadinessService.php:748
 msgid "Add a key"
 msgstr ""
 
 #. translators: %d: number of licensed add-ons.
-#: src/Settings/ReadinessService.php:734
+#: src/Settings/ReadinessService.php:757
 #, php-format
 msgid "%d add-on is licensed"
 msgid_plural "%d add-ons are licensed"
@@ -8106,7 +8116,7 @@ msgstr ""
 
 #: assets/admin/campaigns/Detail.jsx:1351
 #: assets/admin/campaigns/List.jsx:249
-#: assets/donor-portal/index.jsx:1964
+#: assets/donor-portal/index.jsx:1973
 msgid "Updated"
 msgstr ""
 
@@ -8874,7 +8884,7 @@ msgstr ""
 #: assets/admin/settings/panels/NumberingPanel.jsx:303
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:354
 #: assets/admin/settings/panels/RolesPanel.jsx:33
-#: assets/admin/settings/panels/StripeKeysCard.jsx:455
+#: assets/admin/settings/panels/StripeKeysCard.jsx:423
 #: assets/admin/settings/Settings.jsx:96
 #: assets/admin/subscriptions/List.jsx:869
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:43
@@ -9129,7 +9139,7 @@ msgstr ""
 #: assets/admin/donors/profile/tabs/ActivityTab.jsx:176
 #: assets/admin/donors/profile/tabs/DonationsTab.jsx:108
 #: assets/admin/donors/profile/tabs/RecurringTab.jsx:67
-#: assets/admin/settings/panels/StripeKeysCard.jsx:362
+#: assets/admin/settings/panels/StripeKeysCard.jsx:333
 msgid "Test"
 msgstr ""
 
@@ -9538,8 +9548,8 @@ msgstr ""
 #: assets/admin/onboarding/Onboarding.jsx:340
 #: assets/donor-portal/index.jsx:1202
 #: assets/donor-portal/index.jsx:1588
-#: assets/donor-portal/index.jsx:1981
-#: assets/donor-portal/index.jsx:2032
+#: assets/donor-portal/index.jsx:1990
+#: assets/donor-portal/index.jsx:2041
 msgid "Saving…"
 msgstr ""
 
@@ -10318,7 +10328,7 @@ msgstr ""
 
 #: assets/admin/donations/RecordDonationDrawer.jsx:266
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:348
-#: assets/admin/settings/panels/StripeKeysCard.jsx:449
+#: assets/admin/settings/panels/StripeKeysCard.jsx:417
 msgid "Unavailable"
 msgstr ""
 
@@ -10506,7 +10516,7 @@ msgstr ""
 #. translators: 1: donor email or name, 2: what the add-on warned about.
 #. translators: 1: Stripe mode, test or live. 2: verification state.
 #: assets/admin/donors/index.jsx:119
-#: assets/admin/settings/panels/StripeKeysCard.jsx:361
+#: assets/admin/settings/panels/StripeKeysCard.jsx:332
 #, js-format
 msgid "%1$s: %2$s"
 msgstr ""
@@ -10880,8 +10890,8 @@ msgstr[1] ""
 #: assets/donor-portal/index.jsx:893
 #: assets/donor-portal/index.jsx:1426
 #: assets/donor-portal/index.jsx:1472
-#: assets/donor-portal/index.jsx:1889
-#: assets/donor-portal/index.jsx:2008
+#: assets/donor-portal/index.jsx:1898
+#: assets/donor-portal/index.jsx:2017
 msgid "Loading…"
 msgstr ""
 
@@ -11769,7 +11779,7 @@ msgid "Pick which purposes this form asks for."
 msgstr ""
 
 #: assets/admin/forms/blocks/consent/index.js:127
-#: assets/donor-portal/index.jsx:1963
+#: assets/donor-portal/index.jsx:1972
 msgid "required"
 msgstr ""
 
@@ -13756,11 +13766,6 @@ msgstr ""
 msgid "Open your page and give with the Test donation method. No card is charged."
 msgstr ""
 
-#: assets/admin/onboarding/Onboarding.jsx:675
-#: assets/admin/onboarding/Onboarding.jsx:681
-msgid "Open the page"
-msgstr ""
-
 #: assets/admin/onboarding/Onboarding.jsx:679
 msgid "Your donation page"
 msgstr ""
@@ -14703,7 +14708,7 @@ msgid "PayPal, Venmo, Pay Later and cards"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:340
-#: assets/admin/settings/panels/StripeKeysCard.jsx:439
+#: assets/admin/settings/panels/StripeKeysCard.jsx:407
 msgid "Checking…"
 msgstr ""
 
@@ -14716,18 +14721,18 @@ msgid "Could not check your PayPal setup."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:351
-#: assets/admin/settings/panels/StripeKeysCard.jsx:452
+#: assets/admin/settings/panels/StripeKeysCard.jsx:420
 msgid "Something went wrong loading the status. Please try again."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:376
-#: assets/admin/settings/panels/StripeKeysCard.jsx:462
+#: assets/admin/settings/panels/StripeKeysCard.jsx:430
 msgid "Ready"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:377
-#: assets/admin/settings/panels/StripeKeysCard.jsx:307
-#: assets/admin/settings/panels/StripeKeysCard.jsx:461
+#: assets/admin/settings/panels/StripeKeysCard.jsx:298
+#: assets/admin/settings/panels/StripeKeysCard.jsx:429
 msgid "Not set up"
 msgstr ""
 
@@ -14748,7 +14753,7 @@ msgid "Available once your credentials are saved."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:399
-#: assets/admin/settings/panels/StripeKeysCard.jsx:501
+#: assets/admin/settings/panels/StripeKeysCard.jsx:469
 msgid "You are all set."
 msgstr ""
 
@@ -15250,132 +15255,116 @@ msgstr ""
 msgid "Stored encrypted and never shown again. Gratora verifies it with Stripe before saving."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:264
-msgid "Paste the domain association file from Stripe first."
-msgstr ""
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:268
+#: assets/admin/settings/panels/StripeKeysCard.jsx:261
 msgid "Save your Stripe keys first."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:288
-msgid "Stripe could not verify this domain yet. Check the file is reachable, then try again."
+#: assets/admin/settings/panels/StripeKeysCard.jsx:281
+msgid "Stripe could not verify this domain yet. Try again in a few minutes."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:293
+#: assets/admin/settings/panels/StripeKeysCard.jsx:284
 msgid "Apple Pay is verified for this domain."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:302
+#: assets/admin/settings/panels/StripeKeysCard.jsx:293
 msgid "verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:303
+#: assets/admin/settings/panels/StripeKeysCard.jsx:294
 msgid "not verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:304
+#: assets/admin/settings/panels/StripeKeysCard.jsx:295
 msgid "not checked yet"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:308
+#: assets/admin/settings/panels/StripeKeysCard.jsx:299
 msgid "Verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:309
+#: assets/admin/settings/panels/StripeKeysCard.jsx:300
 #: assets/admin/tools/tabs/LogsTab.jsx:41
 msgid "Not verified"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:317
+#: assets/admin/settings/panels/StripeKeysCard.jsx:308
 msgid "Apple Pay"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:322
-msgid "Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows."
+#: assets/admin/settings/panels/StripeKeysCard.jsx:313
+msgid "Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple Pay needs this domain registered with Stripe, and until it verifies, the Apple Pay button just never shows."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:325
+#: assets/admin/settings/panels/StripeKeysCard.jsx:316
 msgid "Domain"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:333
-msgid "Domain association file"
-msgstr ""
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:334
-msgid "In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here."
-msgstr ""
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:347
+#: assets/admin/settings/panels/StripeKeysCard.jsx:324
 msgid "Enable Apple Pay"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:362
+#: assets/admin/settings/panels/StripeKeysCard.jsx:333
 msgid "Live"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:371
-msgid "Replace file"
-msgstr ""
-
-#: assets/admin/settings/panels/StripeKeysCard.jsx:406
+#: assets/admin/settings/panels/StripeKeysCard.jsx:374
 msgid "Remove Stripe keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:406
+#: assets/admin/settings/panels/StripeKeysCard.jsx:374
 msgid "Remove these keys"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:408
+#: assets/admin/settings/panels/StripeKeysCard.jsx:376
 msgid "Remove both key pairs? Card donations will stop until you add keys again."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:409
+#: assets/admin/settings/panels/StripeKeysCard.jsx:377
 msgid "Remove this key pair? Donations in this mode will stop until you add keys again."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:416
+#: assets/admin/settings/panels/StripeKeysCard.jsx:384
 msgid "Could not remove the keys."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:435
+#: assets/admin/settings/panels/StripeKeysCard.jsx:403
 msgid "Cards, SEPA, Apple Pay, Google Pay"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:440
+#: assets/admin/settings/panels/StripeKeysCard.jsx:408
 msgid "Loading Stripe status…"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:451
+#: assets/admin/settings/panels/StripeKeysCard.jsx:419
 msgid "Could not check your Stripe setup."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:463
+#: assets/admin/settings/panels/StripeKeysCard.jsx:431
 msgid "Action needed"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:483
+#: assets/admin/settings/panels/StripeKeysCard.jsx:451
 msgid "Enable the Stripe gateway"
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:485
+#: assets/admin/settings/panels/StripeKeysCard.jsx:453
 msgid "Your keys stay on file while it is off."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:486
+#: assets/admin/settings/panels/StripeKeysCard.jsx:454
 msgid "Available once your keys are saved."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:494
+#: assets/admin/settings/panels/StripeKeysCard.jsx:462
 msgid "Your Stripe account cannot take payments yet."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:495
+#: assets/admin/settings/panels/StripeKeysCard.jsx:463
 msgid "Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do."
 msgstr ""
 
-#: assets/admin/settings/panels/StripeKeysCard.jsx:502
+#: assets/admin/settings/panels/StripeKeysCard.jsx:470
 msgid "Donations are charged on your Stripe account and paid out to your bank."
 msgstr ""
 
@@ -16805,22 +16794,22 @@ msgid "Change schedule"
 msgstr ""
 
 #: assets/admin/_shared/recurring/PlanActions.jsx:150
-#: assets/donor-portal/index.jsx:2058
+#: assets/donor-portal/index.jsx:2067
 msgid "Every week"
 msgstr ""
 
 #: assets/admin/_shared/recurring/PlanActions.jsx:152
-#: assets/donor-portal/index.jsx:2060
+#: assets/donor-portal/index.jsx:2069
 msgid "Every month"
 msgstr ""
 
 #: assets/admin/_shared/recurring/PlanActions.jsx:153
-#: assets/donor-portal/index.jsx:2061
+#: assets/donor-portal/index.jsx:2070
 msgid "Every 3 months"
 msgstr ""
 
 #: assets/admin/_shared/recurring/PlanActions.jsx:154
-#: assets/donor-portal/index.jsx:2062
+#: assets/donor-portal/index.jsx:2071
 msgid "Every year"
 msgstr ""
 
@@ -17531,7 +17520,7 @@ msgid "Could not load your profile."
 msgstr ""
 
 #: assets/donor-portal/index.jsx:1488
-#: assets/donor-portal/index.jsx:2016
+#: assets/donor-portal/index.jsx:2025
 msgid "Could not save."
 msgstr ""
 
@@ -17570,8 +17559,8 @@ msgid "To change your email, contact the organization."
 msgstr ""
 
 #: assets/donor-portal/index.jsx:1590
-#: assets/donor-portal/index.jsx:1982
-#: assets/donor-portal/index.jsx:2033
+#: assets/donor-portal/index.jsx:1991
+#: assets/donor-portal/index.jsx:2042
 msgid "Saved."
 msgstr ""
 
@@ -17610,80 +17599,80 @@ msgstr ""
 msgid "Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1872
+#: assets/donor-portal/index.jsx:1881
 msgid "Could not load your consents."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1893
+#: assets/donor-portal/index.jsx:1902
 msgid "No consent purposes are defined yet."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1894
+#: assets/donor-portal/index.jsx:1903
 msgid "The organization has not configured any subscriptions or consents."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1917
+#: assets/donor-portal/index.jsx:1926
 msgid "Could not save your choice."
 msgstr ""
 
 #. translators: %d: number of consent items that were updated
-#: assets/donor-portal/index.jsx:1943
+#: assets/donor-portal/index.jsx:1952
 #, js-format
 msgid "%d updated."
 msgid_plural "%d updated."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/donor-portal/index.jsx:1944
+#: assets/donor-portal/index.jsx:1953
 msgid "The items marked below have new terms since you last reviewed them. Confirm or change each one."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1948
+#: assets/donor-portal/index.jsx:1957
 msgid "Toggle each subscription below. Every change is logged for your records."
 msgstr ""
 
 #. translators: %s: date the consent was last confirmed
-#: assets/donor-portal/index.jsx:1967
+#: assets/donor-portal/index.jsx:1976
 #, js-format
 msgid "Last confirmed %s"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1975
+#: assets/donor-portal/index.jsx:1984
 msgid "Keep as is"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:1996
+#: assets/donor-portal/index.jsx:2005
 msgid "Could not load your preferences."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:2028
+#: assets/donor-portal/index.jsx:2037
 msgid "Applies to every future donation. The organization still sees your name, and your receipts are unchanged."
 msgstr ""
 
-#: assets/donor-portal/index.jsx:2032
+#: assets/donor-portal/index.jsx:2041
 msgid "Save preferences"
 msgstr ""
 
-#: assets/donor-portal/index.jsx:2073
+#: assets/donor-portal/index.jsx:2082
 msgid "year"
 msgid_plural "years"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/donor-portal/index.jsx:2074
+#: assets/donor-portal/index.jsx:2083
 msgid "week"
 msgid_plural "weeks"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/donor-portal/index.jsx:2075
+#: assets/donor-portal/index.jsx:2084
 msgid "month"
 msgid_plural "months"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: count, 2: interval unit (e.g. months)
-#: assets/donor-portal/index.jsx:2077
+#: assets/donor-portal/index.jsx:2086
 #, js-format
 msgid "Every %1$d %2$s"
 msgstr ""
