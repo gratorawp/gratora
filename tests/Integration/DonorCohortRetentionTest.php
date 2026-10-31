@@ -14,8 +14,8 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
 {
     public function test_cohort_size_includes_partial_refund_first_gifts(): void
     {
-        $m0 = gmdate('Y-m-15 12:00:00', strtotime('-3 months'));
-        $m2 = gmdate('Y-m-15 12:00:00', strtotime('-1 month'));
+        $m0 = gmdate('Y-m-15 12:00:00', strtotime('first day of -3 months'));
+        $m2 = gmdate('Y-m-15 12:00:00', strtotime('first day of -1 month'));
 
         $a = $this->donor('a@example.com');
         $b = $this->donor('b@example.com');
@@ -26,7 +26,7 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
         $this->donation($a, 5000, $m2, 'paid');
         $this->donation($b, 3000, $m0, 'paid');
 
-        $cohortMonth = gmdate('Y-m', strtotime('-3 months'));
+        $cohortMonth = gmdate('Y-m', strtotime('first day of -3 months'));
         $cohort      = null;
         foreach ($this->repo()->donorCohortRetention()['cohorts'] as $c) {
             if ($c['month'] === $cohortMonth) {
@@ -52,14 +52,14 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
      */
     public function test_a_redacted_donor_leaves_the_cohort(): void
     {
-        $m0 = gmdate('Y-m-15 12:00:00', strtotime('-3 months'));
+        $m0 = gmdate('Y-m-15 12:00:00', strtotime('first day of -3 months'));
 
         $live     = $this->donor('cohort-live@example.com');
         $redacted = $this->donor('cohort-redacted@example.com');
         $this->donation($live, 5000, $m0, 'paid');
         $this->donation($redacted, 3000, $m0, 'paid');
 
-        $month = gmdate('Y-m', strtotime('-3 months'));
+        $month = gmdate('Y-m', strtotime('first day of -3 months'));
         $this->assertSame(2, $this->cohortSize($month), 'both anchor here before the redaction');
 
         Donor::query()->where('id', $redacted)->update(['redacted_at' => gmdate('Y-m-d H:i:s')]);

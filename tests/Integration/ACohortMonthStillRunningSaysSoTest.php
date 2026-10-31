@@ -90,10 +90,10 @@ final class ACohortMonthStillRunningSaysSoTest extends IntegrationTestCase
 
     public function test_the_month_now_running_is_marked(): void
     {
-        $cohortMonth = gmdate('Y-m', strtotime('-2 months'));
+        $cohortMonth = gmdate('Y-m', strtotime('first day of -2 months'));
         $donor       = $this->donor('running@example.test');
 
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-2 months')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -2 months')));
         $this->donation($donor, gmdate('Y-m-05 12:00:00'));
 
         $cells = $this->cellsFor($cohortMonth);
@@ -104,11 +104,11 @@ final class ACohortMonthStillRunningSaysSoTest extends IntegrationTestCase
 
     public function test_a_month_that_is_over_is_not_marked(): void
     {
-        $cohortMonth = gmdate('Y-m', strtotime('-2 months'));
+        $cohortMonth = gmdate('Y-m', strtotime('first day of -2 months'));
         $donor       = $this->donor('finished@example.test');
 
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-2 months')));
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-1 month')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -2 months')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -1 month')));
 
         $cells = $this->cellsFor($cohortMonth);
 
@@ -119,10 +119,10 @@ final class ACohortMonthStillRunningSaysSoTest extends IntegrationTestCase
     /** The figure is real and still reported: only its standing changes. */
     public function test_the_count_is_unchanged(): void
     {
-        $cohortMonth = gmdate('Y-m', strtotime('-2 months'));
+        $cohortMonth = gmdate('Y-m', strtotime('first day of -2 months'));
         $donor       = $this->donor('counted@example.test');
 
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-2 months')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -2 months')));
         $this->donation($donor, gmdate('Y-m-05 12:00:00'));
 
         $cells = $this->cellsFor($cohortMonth);
@@ -137,15 +137,15 @@ final class ACohortMonthStillRunningSaysSoTest extends IntegrationTestCase
      */
     public function test_it_follows_the_date_it_is_asked_about(): void
     {
-        $cohortMonth = gmdate('Y-m', strtotime('-2 months'));
+        $cohortMonth = gmdate('Y-m', strtotime('first day of -2 months'));
         $donor       = $this->donor('asked@example.test');
 
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-2 months')));
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-1 month')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -2 months')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -1 month')));
 
         // Reported as though it were still last month: offset 1 is then the
         // month running and offset 2 is in the future.
-        $cells = $this->cellsFor($cohortMonth, gmdate('Y-m-10', strtotime('-1 month')));
+        $cells = $this->cellsFor($cohortMonth, gmdate('Y-m-10', strtotime('first day of -1 month')));
 
         $this->assertTrue($cells[1]['partial']);
         $this->assertFalse($cells[2]['partial']);
@@ -159,10 +159,10 @@ final class ACohortMonthStillRunningSaysSoTest extends IntegrationTestCase
     public function test_the_screen_is_served_the_mark_on_its_own_clock(): void
     {
         $donor = $this->donor('served@example.test');
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-2 months')));
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-1 month')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -2 months')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -1 month')));
 
-        $asOf = gmdate('Y-m-10', strtotime('-1 month'));
+        $asOf = gmdate('Y-m-10', strtotime('first day of -1 month'));
 
         $container = Plugin::instance()->container;
         $container->instance(Clock::class, new FrozenClock(new DateTimeImmutable($asOf . ' 12:00:00')));
@@ -204,14 +204,14 @@ final class ACohortMonthStillRunningSaysSoTest extends IntegrationTestCase
     /** Every cell says which month it covers, marked or not. */
     public function test_each_cell_names_its_month(): void
     {
-        $cohortMonth = gmdate('Y-m', strtotime('-2 months'));
+        $cohortMonth = gmdate('Y-m', strtotime('first day of -2 months'));
         $donor       = $this->donor('named@example.test');
 
-        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('-2 months')));
+        $this->donation($donor, gmdate('Y-m-05 12:00:00', strtotime('first day of -2 months')));
 
         $cells = $this->cellsFor($cohortMonth);
 
         $this->assertSame($cohortMonth, $cells[0]['month']);
-        $this->assertSame(gmdate('Y-m', strtotime('-1 month')), $cells[1]['month']);
+        $this->assertSame(gmdate('Y-m', strtotime('first day of -1 month')), $cells[1]['month']);
     }
 }
