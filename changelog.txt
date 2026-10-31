@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 1.2.6 =
+* Fixed: the country lists show every country, not only the first fifty, and arrow keys keep the highlighted one in view.
+* Fixed: Apple Pay setup no longer asks for a file, and setup calls Apple Pay verified only when Stripe has verified the domain.
+* Fixed: a donor portal page you unpublished or binned stays that way, no second page appears at each update, and setup warns that it is not public.
+
 = 1.2.5 =
 * New: the PayPal settings show how to open a PayPal Business account and where to find the Client ID and secret.
 * New: PayPal can take donations in Chinese yuan (CNY) for PayPal accounts registered in China.

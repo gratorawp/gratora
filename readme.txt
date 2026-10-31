@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,9 +276,9 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.2.5 =
-* New: the PayPal settings show how to open a PayPal Business account and where to find the Client ID and secret.
-* New: PayPal can take donations in Chinese yuan (CNY) for PayPal accounts registered in China.
-* Fixed: on a phone, the Stripe and PayPal key fields are wide enough to paste into.
+= 1.2.6 =
+* Fixed: the country lists show every country, not only the first fifty, and arrow keys keep the highlighted one in view.
+* Fixed: Apple Pay setup no longer asks for a file, and setup calls Apple Pay verified only when Stripe has verified the domain.
+* Fixed: a donor portal page you unpublished or binned stays that way, no second page appears at each update, and setup warns that it is not public.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).
