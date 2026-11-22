@@ -12,7 +12,8 @@ jobs:
   e2e:
     # The run on the newest WordPress keeps the name it had, in case a branch rule waits on it.
     name: e2e${{ matrix.wp != 'latest' && format(' on WordPress {0}', matrix.wp) || '' }}
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.60 cannot install its browser on Ubuntu 26.04, which ubuntu-latest became in November 2026.
+    runs-on: ubuntu-24.04
     # The newest WordPress and the oldest the plugin says it runs on. The admin
     # screens run on WordPress's own script packages, so the editor and the
     # lists are where an older one differs.
