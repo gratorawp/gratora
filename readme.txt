@@ -4,7 +4,7 @@ Tags: donation, donate, fundraising, recurring donations, nonprofit
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -276,9 +276,8 @@ Tools > Site Health > Info and look under Database.
 
 == Changelog ==
 
-= 1.2.6 =
-* Fixed: the country lists show every country, not only the first fifty, and arrow keys keep the highlighted one in view.
-* Fixed: Apple Pay setup no longer asks for a file, and setup calls Apple Pay verified only when Stripe has verified the domain.
-* Fixed: a donor portal page you unpublished or binned stays that way, no second page appears at each update, and setup warns that it is not public.
+= 1.2.7 =
+* Fixed: a donor who types 20.000 as an amount is asked for 20.00, not 20,000. The amount box takes no third digit after the decimal separator.
+* Fixed: on a site that cannot reach gratora.net, the Add-ons screen lists Donor CRM and Embedded Forms too.
 
 Earlier releases are in [changelog.txt](https://plugins.svn.wordpress.org/gratora-donation-platform/trunk/changelog.txt).

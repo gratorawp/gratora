@@ -81,7 +81,7 @@ final class PortalPage
     /**
      * The stored page while its owner keeps it unpublished or in the bin.
      *
-     * @unreleased
+     * @since 1.2.6
      */
     public function hiddenPage(): ?WP_Post
     {
@@ -90,7 +90,7 @@ final class PortalPage
         return $page !== null && $page->post_status !== 'publish' ? $page : null;
     }
 
-    /** @unreleased */
+    /** @since 1.2.6 */
     private function stored(): ?WP_Post
     {
         $id = (int) get_option(self::OPTION_PAGE_ID, 0);
@@ -128,7 +128,7 @@ final class PortalPage
     /**
      * The address a site supplies through `gratora.portal.url` in place of the page's own.
      *
-     * @unreleased
+     * @since 1.2.6
      */
     public function filteredUrl(): string
     {

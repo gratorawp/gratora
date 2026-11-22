@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.2.7 =
+* Fixed: a donor who types 20.000 as an amount is asked for 20.00, not 20,000. The amount box takes no third digit after the decimal separator.
+* Fixed: on a site that cannot reach gratora.net, the Add-ons screen lists Donor CRM and Embedded Forms too.
+
 = 1.2.6 =
 * Fixed: the country lists show every country, not only the first fifty, and arrow keys keep the highlighted one in view.
 * Fixed: Apple Pay setup no longer asks for a file, and setup calls Apple Pay verified only when Stripe has verified the domain.
