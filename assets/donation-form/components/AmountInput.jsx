@@ -4,11 +4,17 @@ import { useEffect, useState } from 'preact/hooks';
 import { numberFormat, groupDigits } from '../util/format';
 import { isZeroDecimal } from '../util/fx';
 
+// Where the site's own decimal separator is the point: written once, with no separator after it.
+function sitePoint( text, decimalSep ) {
+    const at = text.indexOf( decimalSep );
+    return at !== -1 && at === text.lastIndexOf( decimalSep ) && ! /[.,]/.test( text.slice( at + 1 ) ) ? at : -1;
+}
+
 /**
- * Accept either decimal separator: one or two trailing digits indicate decimals, otherwise
- * grouping.
+ * Accept either decimal separator. The site's own, written once and last, is the point, so 20.000 on a site that
+ * writes 20.00 is twenty. Otherwise one or two trailing digits indicate decimals and more indicate grouping.
  */
-export function typedAmountToNumber( raw, dp ) {
+export function typedAmountToNumber( raw, dp, decimalSep = '.' ) {
     const cleaned = String( raw ?? '' ).replace( /[^\d.,]/g, '' );
     if ( cleaned === '' ) return 0;
 
@@ -17,14 +23,20 @@ export function typedAmountToNumber( raw, dp ) {
     // A zero-decimal currency has no fractional part to protect.
     if ( ! dp ) return ungrouped();
 
-    const lastSep = Math.max( cleaned.lastIndexOf( '.' ), cleaned.lastIndexOf( ',' ) );
+    const point   = sitePoint( cleaned, decimalSep );
+    const lastSep = point !== -1 ? point : Math.max( cleaned.lastIndexOf( '.' ), cleaned.lastIndexOf( ',' ) );
     if ( lastSep === -1 ) return Number( cleaned ) || 0;
 
     const decimals = cleaned.length - lastSep - 1;
-    if ( decimals < 1 || decimals > 2 ) return ungrouped();
+    if ( point === -1 && ( decimals < 1 || decimals > 2 ) ) return ungrouped();
 
     const whole = cleaned.slice( 0, lastSep ).replace( /[.,]/g, '' );
-    return Number( `${ whole || '0' }.${ cleaned.slice( lastSep + 1 ) }` ) || 0;
+    return Number( `${ whole || '0' }.${ cleaned.slice( lastSep + 1, lastSep + 1 + dp ) }` ) || 0;
+}
+
+function capDecimals( text, dp, decimalSep ) {
+    const point = sitePoint( text, decimalSep );
+    return dp && point !== -1 ? text.slice( 0, point + 1 + dp ) : text;
 }
 
 // `value` is in major units (50 = €50.00). Separators come from the runtime's
@@ -65,7 +77,7 @@ export default function AmountInput( {
     // typed figure to the ceiling while the box still showed what the donor
     // entered, and the amount step has a message for that.
     const emit = ( raw ) => {
-        let n = typedAmountToNumber( raw, dp );
+        let n = typedAmountToNumber( raw, dp, fmt.decimalSep );
         if ( typeof min === 'number' && n < min ) n = min;
         onChange && onChange( n );
     };
@@ -74,7 +86,9 @@ export default function AmountInput( {
         // Allow both separators since donors may type either by habit.
         const allowedSeps = dp > 0 ? ',.' : '';
         const allowed = new RegExp( `[^\\d${ allowedSeps.replace( /[.\-]/g, '\\$&' ) }]`, 'g' );
-        const cleaned = e.target.value.replace( allowed, '' );
+        const cleaned = capDecimals( e.target.value.replace( allowed, '' ), dp, fmt.decimalSep );
+        // Preact leaves the field alone when the text in state has not changed, so a refused key would stay on screen.
+        if ( e.target.value !== cleaned ) e.target.value = cleaned;
         setText( cleaned );
         emit( cleaned );
     };
